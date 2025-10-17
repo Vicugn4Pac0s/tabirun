@@ -10,7 +10,11 @@ const meta = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-  args: { onClick: fn() },
+  args: {
+    onClick: fn(),
+    onMouseOver: fn(),
+    onMouseOut: fn(),
+  },
 } satisfies Meta<typeof MainActionButton>;
 
 export default meta;
