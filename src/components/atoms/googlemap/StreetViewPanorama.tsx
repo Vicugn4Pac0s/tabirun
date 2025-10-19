@@ -27,7 +27,6 @@ const StreetViewPanorama = ({ map, options, onPositionChanged, onPovChanged }: S
       });
       panorama.addListener("pov_changed", () => {
         const pov = panorama.getPov();
-        console.log("Pov changed:", pov);
         if (pov && onPovChanged) {
           onPovChanged(pov);
         }
