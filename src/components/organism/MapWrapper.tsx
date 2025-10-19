@@ -71,7 +71,7 @@ function MapWrapper({ currentLocation, children }: MapWrapperProps) {
           zoom: GOOGLE_MAP_DEFAULT_ZOOM,
           maxZoom: GOOGLE_MAP_MAX_ZOOM,
           minZoom: GOOGLE_MAP_MIN_ZOOM,
-          streetViewControl: true,
+          streetViewControl: false,
           mapTypeControl: false,
           fullscreenControl: false
         }}>
