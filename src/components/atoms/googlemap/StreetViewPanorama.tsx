@@ -4,9 +4,11 @@ import useStreetViewPanorama from "~/app/hooks/googlemap/useStreetViewPanorama";
 interface StreetViewPanoramaProps {
   map: google.maps.Map | null;
   options: google.maps.StreetViewPanoramaOptions;
+  onPositionChanged?: (position: google.maps.LatLng) => void;
+  onPovChanged?: (position: google.maps.StreetViewPov) => void;
 }
 
-const StreetViewPanorama = ({ map, options }: StreetViewPanoramaProps) => {
+const StreetViewPanorama = ({ map, options, onPositionChanged, onPovChanged }: StreetViewPanoramaProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { initStreetViewPanorama } = useStreetViewPanorama();
 
@@ -17,6 +19,19 @@ const StreetViewPanorama = ({ map, options }: StreetViewPanoramaProps) => {
         options
       );
       initStreetViewPanorama(map, panorama);
+      panorama.addListener("position_changed", () => {
+        const position = panorama.getPosition();
+        if (position && onPositionChanged) {
+          onPositionChanged(position);
+        }
+      });
+      panorama.addListener("pov_changed", () => {
+        const pov = panorama.getPov();
+        console.log("Pov changed:", pov);
+        if (pov && onPovChanged) {
+          onPovChanged(pov);
+        }
+      });
     }
   }, [ref, map]);
 
