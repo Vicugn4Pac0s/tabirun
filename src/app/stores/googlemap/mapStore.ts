@@ -1,15 +1,12 @@
 import { create } from "zustand";
-import { GOOGLE_MAP_DEFAULT_CENTER, GOOGLE_MAP_DEFAULT_ZOOM } from "../config";
 
 interface MapStore {
   map: google.maps.Map | null;
   setMap: (map: google.maps.Map) => void;
-  center: google.maps.LatLngLiteral;
-  setCenter: (center: google.maps.LatLngLiteral) => void;
-  zoom: number;
-  setZoom: (zoom: number) => void;
-  streetViewPanorama: google.maps.StreetViewPanorama | null;
-  setStreetViewPanorama: (streetViewPanorama: google.maps.StreetViewPanorama) => void;
+  center: google.maps.LatLngLiteral | null;
+  setCenter: (center: google.maps.LatLngLiteral | null) => void;
+  zoom: number | null;
+  setZoom: (zoom: number | null) => void;
   directionsService: google.maps.DirectionsService | null;
   setDirectionsService: (directionsService: google.maps.DirectionsService) => void;
   directionsRenderer: google.maps.DirectionsRenderer | null;
@@ -19,12 +16,10 @@ interface MapStore {
 export const useMapStore = create<MapStore>((set) => ({
   map: null,
   setMap: (map) => set({ map }),
-  center: GOOGLE_MAP_DEFAULT_CENTER,
+  center: null,
   setCenter: (center) => set({ center }),
-  zoom: GOOGLE_MAP_DEFAULT_ZOOM,
+  zoom: null,
   setZoom: (zoom) => set({ zoom }),
-  streetViewPanorama: null,
-  setStreetViewPanorama: (streetViewPanorama) => set({ streetViewPanorama }),
   directionsService: null,
   setDirectionsService: (directionsService) => set({ directionsService }),
   directionsRenderer: null,

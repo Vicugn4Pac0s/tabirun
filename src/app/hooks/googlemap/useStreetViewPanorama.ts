@@ -1,7 +1,7 @@
-import { useMapStore } from "~/app/stores/mapStore";
+import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
 
 const useStreetViewPanorama = () => {
-  const { streetViewPanorama, setStreetViewPanorama } = useMapStore();
+  const { streetViewPanorama, setStreetViewPanorama } = useStreetViewPanoramaStore();
 
   const initStreetViewPanorama = (map: google.maps.Map,panorama: google.maps.StreetViewPanorama) => {
     setStreetViewPanorama(panorama);
