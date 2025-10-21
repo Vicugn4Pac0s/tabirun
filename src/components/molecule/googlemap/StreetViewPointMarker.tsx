@@ -10,6 +10,7 @@ export function StreetViewPointMarker({map, latLng}: StreetViewPointMarkerProps)
   const markerRef = useRef(null)
 
   const content = document.createElement('div');
+  content.innerHTML = 'SV';
   content.style.backgroundColor = "#3B82F6";
   content.style.borderRadius = '50%';
   content.style.color = 'white';

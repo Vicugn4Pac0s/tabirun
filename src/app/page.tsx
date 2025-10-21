@@ -1,5 +1,4 @@
-import StreetViewPanorama from "~/components/atoms/googlemap/StreetViewPanorama";
-import MapWrapper from "~/components/organism/MapWrapper";
+import MapRoot from "~/components/organism/MapRoot";
 import StreetViewPanoramaWrapper from "~/components/organism/StreetViewPanoramaWrapper";
 import { HydrateClient } from "~/trpc/server";
 
@@ -13,9 +12,7 @@ export default async function Home() {
             <StreetViewPanoramaWrapper />
           </div>
           <div className="w-1/2">
-            <MapWrapper currentLocation={null}>
-              <></>
-            </MapWrapper>
+            <MapRoot />
           </div>
         </div>
       </main>
