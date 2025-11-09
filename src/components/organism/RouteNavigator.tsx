@@ -1,19 +1,43 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import { useRouteStore } from "~/app/stores/googlemap/routeStore";
-import MainActionButton from "../atoms/MainActionButton";
 import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
+import MainActionButton from "../atoms/MainActionButton";
 
 export const RouteNavigator = () => {
+  const routePoints = useRouteStore((state) => state.routePoints);
   const addRoutePoint = useRouteStore((state) => state.addRoutePoint);
+  const removeRoutePoint = useRouteStore((state) => state.removeRoutePoint);
   const streetViewPanoramaCenter = useStreetViewPanoramaStore((state) => state.streetViewPanoramaCenter);
+  const [mainActionButtonType, setMainActionButtonType] = useState<'add' | 'delete'>('add');
 
+  useEffect(() => {
+    if (!streetViewPanoramaCenter) return;
+    const exists = routePoints.some(
+      (p) =>
+        p.lat === streetViewPanoramaCenter.lat &&
+        p.lng === streetViewPanoramaCenter.lng
+    );
+    setMainActionButtonType(exists ? "delete" : "add");
+  }, [routePoints, streetViewPanoramaCenter]);
 
   return (
     <div className="flex items-center">
-      <MainActionButton type="add" onClick={() => {
+      <MainActionButton type={mainActionButtonType} onClick={() => {
         if(!streetViewPanoramaCenter) return;
-        addRoutePoint(streetViewPanoramaCenter);
+        if(mainActionButtonType === 'add') {
+          addRoutePoint(streetViewPanoramaCenter);
+        } else if(mainActionButtonType === 'delete') {
+          const index = routePoints.findIndex(
+            (p) =>
+              p.lat === streetViewPanoramaCenter.lat &&
+              p.lng === streetViewPanoramaCenter.lng
+          );
+          if(index !== -1) {
+            removeRoutePoint(index);
+          }
+        }
       }} />
     </div>
   );
