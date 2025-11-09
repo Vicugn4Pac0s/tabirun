@@ -1,16 +1,22 @@
 'use client';
 
+import { useEffect } from "react";
 import { useMapStore } from "~/app/stores/googlemap/mapStore";
+import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
+import { useRouteStore } from "~/app/stores/googlemap/routeStore";
 import MapWrapper from "../molecule/googlemap/MapWrapper";
 import StreetViewPointMarker from "../molecule/googlemap/StreetViewPointMarker";
-import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
+import { useDirections } from "~/app/hooks/googlemap/useDirections";
 
 function MapRoot() {
   const streetViewPanorama = useStreetViewPanoramaStore((state) => state.streetViewPanorama);
   const streetViewPanoramaCenter = useStreetViewPanoramaStore((state) => state.streetViewPanoramaCenter);
   const map = useMapStore((state) => state.map);
   const setDirectionsService = useMapStore((state) => state.setDirectionsService);
+  const directionsRenderer = useMapStore((state) => state.directionsRenderer);
   const setDirectionsRenderer = useMapStore((state) => state.setDirectionsRenderer);
+  const { getDirections } = useDirections();
+  const routePoints = useRouteStore((state) => state.routePoints);
 
   const onInit = (m: google.maps.Map) => {
     const ds = new window.google.maps.DirectionsService();
@@ -31,6 +37,15 @@ function MapRoot() {
     // addRoutePoint(latLngLiteral);
   };
 
+  useEffect(() => {
+    const fetchDirections = async () => {
+      const result = await getDirections(routePoints);
+      if(result && directionsRenderer) {
+        directionsRenderer.setDirections(result);
+      }
+    }
+    fetchDirections();
+  }, [routePoints]);
 
   return (
     <MapWrapper onInit={onInit} onClick={onClick}>

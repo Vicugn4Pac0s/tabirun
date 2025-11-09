@@ -1,4 +1,5 @@
 import MapRoot from "~/components/organism/MapRoot";
+import { RouteNavigator } from "~/components/organism/RouteNavigator";
 import StreetViewPanoramaWrapper from "~/components/organism/StreetViewPanoramaWrapper";
 import { HydrateClient } from "~/trpc/server";
 
@@ -8,8 +9,11 @@ export default async function Home() {
     <HydrateClient>
       <main>
         <div className="flex">
-          <div className="w-1/2">
+          <div className="relative w-1/2">
             <StreetViewPanoramaWrapper />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-10">
+              <RouteNavigator />
+            </div>
           </div>
           <div className="w-1/2">
             <MapRoot />
