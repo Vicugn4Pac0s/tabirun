@@ -5,7 +5,7 @@ export function useDirections() {
   const directionsService = useMapStore((state) => state.directionsService);
 
   const getDirections = useCallback(
-    async (routePoints: google.maps.LatLngLiteral[]) => {
+    async (routePoints: google.maps.LatLngLiteral[], params: Partial<google.maps.DirectionsRequest> = {}) => {
       if (!directionsService || routePoints.length < 2) return null;
 
       const origin = routePoints[0];
@@ -19,6 +19,7 @@ export function useDirections() {
         destination,
         waypoints,
         travelMode: google.maps.TravelMode.WALKING,
+        ...params,
       };
 
       return new Promise<google.maps.DirectionsResult | null>((resolve) => {
