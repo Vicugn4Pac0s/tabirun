@@ -8,7 +8,7 @@ import MainActionButton from "../atoms/MainActionButton";
 export const RouteNavigator = () => {
   const routePoints = useRouteStore((state) => state.routePoints);
   const addRoutePoint = useRouteStore((state) => state.addRoutePoint);
-  const removeRoutePoint = useRouteStore((state) => state.removeRoutePoint);
+  const removeRoutePointByLatLng = useRouteStore((state) => state.removeRoutePointByLatLng);
   const streetViewPanoramaCenter = useStreetViewPanoramaStore((state) => state.streetViewPanoramaCenter);
   const [mainActionButtonType, setMainActionButtonType] = useState<'add' | 'delete'>('add');
 
@@ -29,14 +29,7 @@ export const RouteNavigator = () => {
         if(mainActionButtonType === 'add') {
           addRoutePoint(streetViewPanoramaCenter);
         } else if(mainActionButtonType === 'delete') {
-          const index = routePoints.findIndex(
-            (p) =>
-              p.lat === streetViewPanoramaCenter.lat &&
-              p.lng === streetViewPanoramaCenter.lng
-          );
-          if(index !== -1) {
-            removeRoutePoint(index);
-          }
+          removeRoutePointByLatLng(streetViewPanoramaCenter);
         }
       }} />
     </div>
