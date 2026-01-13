@@ -22,7 +22,7 @@ function MapRoot() {
   const onInit = (m: google.maps.Map) => {
     const ds = new window.google.maps.DirectionsService();
     const dr = new window.google.maps.DirectionsRenderer({
-      suppressMarkers: true,
+      suppressMarkers: false,
     });
     dr.setMap(m);
     setDirectionsService(ds);
@@ -42,7 +42,10 @@ function MapRoot() {
     const fetchDirections = async () => {
       const result = await getDirections(routePoints);
       if(result && directionsRenderer) {
+        directionsRenderer.setMap(map);
         directionsRenderer.setDirections(result);
+      } else if(directionsRenderer) {
+        directionsRenderer.setMap(null); 
       }
     }
     fetchDirections();
