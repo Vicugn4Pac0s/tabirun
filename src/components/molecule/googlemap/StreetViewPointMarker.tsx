@@ -30,9 +30,9 @@ export function StreetViewPointMarker({map, latLng, pov}: StreetViewPointMarkerP
     dot.style.width = `${DOT_SIZE}px`;
     dot.style.height = `${DOT_SIZE}px`;
     dot.style.boxSizing = "border-box";
-    dot.style.backgroundColor = "#3B82F6";
+    dot.style.backgroundColor = "hsl(var(--primary))";
     dot.style.border = `${BORDER}px solid white`;
-    dot.style.boxShadow = "0 0 5px #3B82F6";
+    dot.style.boxShadow = "0 0 5px hsl(var(--primary))";
     dot.style.borderRadius = "50%";
 
     const arrow = document.createElement("div");
@@ -41,8 +41,7 @@ export function StreetViewPointMarker({map, latLng, pov}: StreetViewPointMarkerP
     arrow.style.height = "0";
     arrow.style.borderLeft = "6px solid transparent";
     arrow.style.borderRight = "6px solid transparent";
-    arrow.style.borderBottom = "10px solid #3B82F6";
-    arrow.style.filter = "drop-shadow(0 0 3px rgba(59,130,246,.8))";
+    arrow.style.borderBottom = "10px solid hsl(var(--primary))";
     arrow.style.pointerEvents = "none";
 
     root.appendChild(dot);
