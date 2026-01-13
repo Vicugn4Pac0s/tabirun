@@ -3,10 +3,13 @@ import AdvancedMarker from "~/components/atoms/googlemap/AdvancedMarker";
 
 interface StreetViewPointMarkerProps {
   map: google.maps.Map | null;
-  latLng: google.maps.LatLngLiteral;
+  latLng: google.maps.LatLngLiteral | null;
+  pov: google.maps.StreetViewPov | null;
 }
 
-export function StreetViewPointMarker({map, latLng}: StreetViewPointMarkerProps) {
+export function StreetViewPointMarker({map, latLng, pov}: StreetViewPointMarkerProps) {
+  if(!map || !latLng || !pov) return null;
+
   const markerRef = useRef(null)
 
   const content = document.createElement('div');

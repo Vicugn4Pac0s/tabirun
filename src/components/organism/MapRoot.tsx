@@ -11,6 +11,7 @@ import { useDirections } from "~/app/hooks/googlemap/useDirections";
 function MapRoot() {
   const streetViewPanorama = useStreetViewPanoramaStore((state) => state.streetViewPanorama);
   const streetViewPanoramaCenter = useStreetViewPanoramaStore((state) => state.streetViewPanoramaCenter);
+  const streetViewPanoramaPov = useStreetViewPanoramaStore((state) => state.streetViewPanoramaPov);
   const map = useMapStore((state) => state.map);
   const setDirectionsService = useMapStore((state) => state.setDirectionsService);
   const directionsRenderer = useMapStore((state) => state.directionsRenderer);
@@ -49,7 +50,7 @@ function MapRoot() {
 
   return (
     <MapWrapper onInit={onInit} onClick={onClick}>
-      {streetViewPanoramaCenter && <StreetViewPointMarker map={map} latLng={streetViewPanoramaCenter} />}
+      <StreetViewPointMarker map={map} latLng={streetViewPanoramaCenter} pov={streetViewPanoramaPov} />
     </MapWrapper>
   )
 }
