@@ -7,6 +7,7 @@ import { useRouteStore } from "~/app/stores/googlemap/routeStore";
 import MapWrapper from "../molecule/googlemap/MapWrapper";
 import StreetViewPointMarker from "../molecule/googlemap/StreetViewPointMarker";
 import { useDirections } from "~/app/hooks/googlemap/useDirections";
+import RoutePointMarker from "../molecule/googlemap/RoutePointMarker";
 
 function MapRoot() {
   const streetViewPanorama = useStreetViewPanoramaStore((state) => state.streetViewPanorama);
@@ -22,7 +23,7 @@ function MapRoot() {
   const onInit = (m: google.maps.Map) => {
     const ds = new window.google.maps.DirectionsService();
     const dr = new window.google.maps.DirectionsRenderer({
-      suppressMarkers: false,
+      suppressMarkers: true,
     });
     dr.setMap(m);
     setDirectionsService(ds);
@@ -54,6 +55,11 @@ function MapRoot() {
   return (
     <MapWrapper onInit={onInit} onClick={onClick}>
       <StreetViewPointMarker map={map} latLng={streetViewPanoramaCenter} pov={streetViewPanoramaPov} />
+      {routePoints.map((point, index) => (
+        <RoutePointMarker key={index} map={map} latLng={point} index={index} onClick={()=>{
+          streetViewPanorama?.setPosition(point);
+        }} />
+      ))}
     </MapWrapper>
   )
 }
