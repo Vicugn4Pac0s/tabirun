@@ -1,4 +1,5 @@
 import { MapPinPlus, MapPinX, Play } from "lucide-react";
+import { motion } from "motion/react";
 
 type Props = {
   type: "add" | "delete" | "play";
@@ -6,9 +7,15 @@ type Props = {
   onClick?: () => void;
   onMouseOver?: () => void;
   onMouseOut?: () => void;
-}
+};
 
-const MainActionButton = ({ type, className, onClick, onMouseOver, onMouseOut }: Props) => {
+const MainActionButton = ({
+  type,
+  className,
+  onClick,
+  onMouseOver,
+  onMouseOut,
+}: Props) => {
   let Icon;
 
   switch (type) {
@@ -23,9 +30,18 @@ const MainActionButton = ({ type, className, onClick, onMouseOver, onMouseOut }:
       break;
   }
   return (
-    <button className={`bg-primary border-white text-white rounded-full flex justify-center items-center h-20 w-20 ${className}`} onClick={onClick} onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
+    <motion.button
+      className={`flex h-20 w-20 items-center justify-center rounded-full border-white bg-primary text-white ${className}`}
+      onClick={onClick}
+      onMouseOver={onMouseOver}
+      onMouseOut={onMouseOut}
+      whileTap={{ scale: 0.9 }}
+      transition={{
+        duration: 0.1,
+      }}
+    >
       <Icon className="h-12 w-12" />
-    </button>
+    </motion.button>
   );
-}
+};
 export default MainActionButton;
