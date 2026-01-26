@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouteStore } from "~/app/stores/googlemap/routeStore";
+import { useRoutePointsStore } from "~/app/stores/googlemap/routePointsStore";
 import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
 import MainActionButton from "../atoms/MainActionButton";
 import SubActionButton from "../atoms/SubActionButton";
 
 export const RouteNavigator = () => {
-  const routePoints = useRouteStore((state) => state.routePoints);
-  const addRoutePoint = useRouteStore((state) => state.addRoutePoint);
-  const removeRoutePointByLatLng = useRouteStore(
+  const routePoints = useRoutePointsStore((state) => state.routePoints);
+  const addRoutePoint = useRoutePointsStore((state) => state.addRoutePoint);
+  const removeRoutePointByLatLng = useRoutePointsStore(
     (state) => state.removeRoutePointByLatLng,
   );
   const streetViewPanoramaCenter = useStreetViewPanoramaStore(

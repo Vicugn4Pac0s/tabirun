@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useMapStore } from "~/app/stores/googlemap/mapStore";
 import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
-import { useRouteStore } from "~/app/stores/googlemap/routeStore";
+import { useRoutePointsStore } from "~/app/stores/googlemap/routePointsStore";
 import MapWrapper from "../molecule/googlemap/MapWrapper";
 import StreetViewPointMarker from "../molecule/googlemap/StreetViewPointMarker";
 import { useDirections } from "~/app/hooks/googlemap/useDirections";
@@ -18,7 +18,7 @@ function MapRoot() {
   const directionsRenderer = useMapStore((state) => state.directionsRenderer);
   const setDirectionsRenderer = useMapStore((state) => state.setDirectionsRenderer);
   const { getDirections } = useDirections();
-  const routePoints = useRouteStore((state) => state.routePoints);
+  const routePoints = useRoutePointsStore((state) => state.routePoints);
 
   const onInit = (m: google.maps.Map) => {
     const ds = new window.google.maps.DirectionsService();
