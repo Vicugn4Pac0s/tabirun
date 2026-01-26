@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 type Props = {
   type: "first" | "prev" | "next" | "last";
   className?: string;
+  disabled?: boolean;
   onClick?: () => void;
   onMouseOver?: () => void;
   onMouseOut?: () => void;
@@ -11,6 +12,7 @@ type Props = {
 
 const SubActionButton = ({
   type,
+  disabled = false,
   className,
   onClick,
   onMouseOver,
@@ -39,7 +41,8 @@ const SubActionButton = ({
   }
   return (
     <motion.button
-      className={`flex flex-col gap-1 items-center justify-center h-16 w-16 bg-white ${className}`}
+      className={`flex flex-col gap-1 items-center justify-center h-16 w-16 bg-white ${className} disabled:opacity-50`}
+      disabled={disabled}
       onClick={onClick}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}

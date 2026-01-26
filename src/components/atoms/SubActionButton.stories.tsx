@@ -43,3 +43,10 @@ export const Last: Story = {
     type: 'last',
   },
 };
+
+export const Disabled: Story = {
+  args: {
+    type: 'prev',
+    disabled: true,
+  },
+};
