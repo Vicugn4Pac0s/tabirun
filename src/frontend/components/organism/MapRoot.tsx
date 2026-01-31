@@ -8,6 +8,11 @@ import MapWrapper from "../molecule/googlemap/MapWrapper";
 import StreetViewPointMarker from "../molecule/googlemap/StreetViewPointMarker";
 import { useDirections } from "~/frontend/hooks/googlemap/useDirections";
 import RoutePointMarker from "../molecule/googlemap/RoutePointMarker";
+import { useRouteDirectionsStore } from "~/frontend/stores/googlemap/routeDirectionsStore";
+
+const makeRoutePointsKey = (points: google.maps.LatLngLiteral[]) => {
+  return points.map(p => `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`).join("|");
+}
 
 function MapRoot() {
   const streetViewPanorama = useStreetViewPanoramaStore((state) => state.streetViewPanorama);
@@ -17,6 +22,7 @@ function MapRoot() {
   const setDirectionsService = useMapStore((state) => state.setDirectionsService);
   const directionsRenderer = useMapStore((state) => state.directionsRenderer);
   const setDirectionsRenderer = useMapStore((state) => state.setDirectionsRenderer);
+  const setRouteDirections = useRouteDirectionsStore((state) => state.setRouteDirections);
   const { getDirections } = useDirections();
   const routePoints = useRoutePointsStore((state) => state.routePoints);
 
@@ -40,6 +46,8 @@ function MapRoot() {
   useEffect(() => {
     const fetchDirections = async () => {
       const result = await getDirections(routePoints);
+      const key = makeRoutePointsKey(routePoints);
+      setRouteDirections(key, result);
       if(result && directionsRenderer) {
         directionsRenderer.setMap(map);
         directionsRenderer.setDirections(result);
