@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import useStreetViewPanorama from "~/app/hooks/googlemap/useStreetViewPanorama";
+import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanorama";
 
 interface StreetViewPanoramaProps {
   map: google.maps.Map | null;

@@ -1,7 +1,7 @@
 import { Status, Wrapper } from "@googlemaps/react-wrapper";
-import { GOOGLE_MAP_DEFAULT_CENTER, GOOGLE_MAP_DEFAULT_ZOOM, GOOGLE_MAP_MAX_ZOOM, GOOGLE_MAP_MIN_ZOOM, styledMapTypeOptions } from "~/app/config";
-import { useMapStore } from "~/app/stores/googlemap/mapStore";
-import Map from "~/components/atoms/googlemap/Map";
+import { GOOGLE_MAP_DEFAULT_CENTER, GOOGLE_MAP_DEFAULT_ZOOM, GOOGLE_MAP_MAX_ZOOM, GOOGLE_MAP_MIN_ZOOM, styledMapTypeOptions } from "~/frontend/config";
+import { useMapStore } from "~/frontend/stores/googlemap/mapStore";
+import Map from "~/frontend/components/atoms/googlemap/Map";
 import { useEffect, useRef } from "react";
 
 interface MapWrapperProps {

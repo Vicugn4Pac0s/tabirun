@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect } from "react";
-import { useMapStore } from "~/app/stores/googlemap/mapStore";
-import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
-import { useRoutePointsStore } from "~/app/stores/googlemap/routePointsStore";
+import { useMapStore } from "~/frontend/stores/googlemap/mapStore";
+import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
+import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import MapWrapper from "../molecule/googlemap/MapWrapper";
 import StreetViewPointMarker from "../molecule/googlemap/StreetViewPointMarker";
-import { useDirections } from "~/app/hooks/googlemap/useDirections";
+import { useDirections } from "~/frontend/hooks/googlemap/useDirections";
 import RoutePointMarker from "../molecule/googlemap/RoutePointMarker";
 
 function MapRoot() {

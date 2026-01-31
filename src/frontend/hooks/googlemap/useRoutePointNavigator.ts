@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { useRoutePointsStore } from "~/app/stores/googlemap/routePointsStore";
-import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
+import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
+import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
 
 type LatLng = google.maps.LatLngLiteral;
 

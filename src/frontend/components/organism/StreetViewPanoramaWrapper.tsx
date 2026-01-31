@@ -1,9 +1,9 @@
 'use client';
 
-import { GOOGLE_MAP_DEFAULT_CENTER } from "~/app/config";
-import { useMapStore } from "~/app/stores//googlemap/mapStore";
+import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
+import { useMapStore } from "~/frontend/stores/googlemap/mapStore";
 import StreetViewPanorama from "../atoms/googlemap/StreetViewPanorama";
-import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
+import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
 
 const StreetViewPanoramaWrapper = () => {
   const { map } = useMapStore();

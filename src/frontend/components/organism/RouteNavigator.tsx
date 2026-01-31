@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRoutePointsStore } from "~/app/stores/googlemap/routePointsStore";
-import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
-import { useRoutePointNavigator } from "~/app/hooks/googlemap/useRoutePointNavigator";
+import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
+import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
+import { useRoutePointNavigator } from "~/frontend/hooks/googlemap/useRoutePointNavigator";
 import MainActionButton from "../atoms/MainActionButton";
 import SubActionButton from "../atoms/SubActionButton";
 

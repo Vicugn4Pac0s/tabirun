@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useMapStore } from "~/app/stores/googlemap/mapStore";
+import { useMapStore } from "~/frontend/stores/googlemap/mapStore";
 
 export function useDirections() {
   const directionsService = useMapStore((state) => state.directionsService);

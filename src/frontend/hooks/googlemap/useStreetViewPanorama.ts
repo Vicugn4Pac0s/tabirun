@@ -1,4 +1,4 @@
-import { useStreetViewPanoramaStore } from "~/app/stores/googlemap/streetViewPanoramaStore";
+import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
 
 const useStreetViewPanorama = () => {
   const { streetViewPanorama, setStreetViewPanorama } = useStreetViewPanoramaStore();

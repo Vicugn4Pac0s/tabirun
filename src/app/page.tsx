@@ -1,6 +1,6 @@
-import MapRoot from "~/components/organism/MapRoot";
-import { RouteNavigator } from "~/components/organism/RouteNavigator";
-import StreetViewPanoramaWrapper from "~/components/organism/StreetViewPanoramaWrapper";
+import MapRoot from "~/frontend/components/organism/MapRoot";
+import { RouteNavigator } from "~/frontend/components/organism/RouteNavigator";
+import StreetViewPanoramaWrapper from "~/frontend/components/organism/StreetViewPanoramaWrapper";
 import { HydrateClient } from "~/trpc/server";
 
 export default async function Home() {
