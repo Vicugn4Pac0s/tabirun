@@ -1,34 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
 import { useRoutePointNavigator } from "~/frontend/hooks/googlemap/useRoutePointNavigator";
+import { useMainActionButton } from "~/frontend/hooks/googlemap/useMainActionButton";
 import MainActionButton from "../atoms/MainActionButton";
 import SubActionButton from "../atoms/SubActionButton";
 
 export const RouteNavigator = () => {
-  const addRoutePoint = useRoutePointsStore((state) => state.addRoutePoint);
-  const removeRoutePointByLatLng = useRoutePointsStore(
-    (state) => state.removeRoutePointByLatLng,
-  );
   const streetViewPanorama = useStreetViewPanoramaStore(
     (state) => state.streetViewPanorama,
   );
-  const streetViewPanoramaCenter = useStreetViewPanoramaStore(
-    (state) => state.streetViewPanoramaCenter,
-  );
-
-  const { isInRoute, canFirst, canPrev, canNext, canLast, firstRoutePoint, lastRoutePoint, prevRoutePoint, nextRoutePoint } = useRoutePointNavigator();
+  const { canFirst, canPrev, canNext, canLast, firstRoutePoint, lastRoutePoint, prevRoutePoint, nextRoutePoint } = useRoutePointNavigator();
+  const { mainActionButtonType, clickMainActionButton } = useMainActionButton();
   
-  const [mainActionButtonType, setMainActionButtonType] = useState<
-    "add" | "delete"
-  >("add");
-
-  useEffect(() => {
-    setMainActionButtonType(isInRoute ? "delete" : "add");
-  }, [isInRoute]);
-
   return (
     <div className="bg-white flex gap-16 relative">
       <div className="flex">
@@ -44,14 +28,7 @@ export const RouteNavigator = () => {
       <div className="absolute left-1/2 bottom-0 -translate-x-1/2 z-10">
         <MainActionButton
           type={mainActionButtonType}
-          onClick={() => {
-            if (!streetViewPanoramaCenter) return;
-            if (mainActionButtonType === "add") {
-              addRoutePoint(streetViewPanoramaCenter);
-            } else if (mainActionButtonType === "delete") {
-              removeRoutePointByLatLng(streetViewPanoramaCenter);
-            }
-          }}
+          onClick={clickMainActionButton}
         />
       </div>
       <div className="flex">
