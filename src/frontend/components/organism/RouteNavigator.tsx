@@ -8,7 +8,6 @@ import MainActionButton from "../atoms/MainActionButton";
 import SubActionButton from "../atoms/SubActionButton";
 
 export const RouteNavigator = () => {
-  const routePoints = useRoutePointsStore((state) => state.routePoints);
   const addRoutePoint = useRoutePointsStore((state) => state.addRoutePoint);
   const removeRoutePointByLatLng = useRoutePointsStore(
     (state) => state.removeRoutePointByLatLng,
@@ -20,21 +19,15 @@ export const RouteNavigator = () => {
     (state) => state.streetViewPanoramaCenter,
   );
 
-  const { canFirst, canPrev, canNext, canLast, firstRoutePoint, lastRoutePoint, prevRoutePoint, nextRoutePoint } = useRoutePointNavigator();
+  const { isInRoute, canFirst, canPrev, canNext, canLast, firstRoutePoint, lastRoutePoint, prevRoutePoint, nextRoutePoint } = useRoutePointNavigator();
   
   const [mainActionButtonType, setMainActionButtonType] = useState<
     "add" | "delete"
   >("add");
 
   useEffect(() => {
-    if (!streetViewPanoramaCenter) return;
-    const exists = routePoints.some(
-      (p) =>
-        p.lat === streetViewPanoramaCenter.lat &&
-        p.lng === streetViewPanoramaCenter.lng,
-    );
-    setMainActionButtonType(exists ? "delete" : "add");
-  }, [routePoints, streetViewPanoramaCenter]);
+    setMainActionButtonType(isInRoute ? "delete" : "add");
+  }, [isInRoute]);
 
   return (
     <div className="bg-white flex gap-16 relative">
