@@ -35,8 +35,6 @@ function MapRoot() {
     if(!latLng || !streetViewPanorama) return; 
     const latLngLiteral = latLng.toJSON() as google.maps.LatLngLiteral;
     streetViewPanorama.setPosition(latLngLiteral);
-    // if(page !== 'register') return;
-    // addRoutePoint(latLngLiteral);
   };
 
   useEffect(() => {
