@@ -10,7 +10,8 @@ export default {
   			sans: [
   				'var(--font-geist-sans)',
                     ...fontFamily.sans
-                ]
+                ],
+				inter: ["var(--font-inter)"],
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

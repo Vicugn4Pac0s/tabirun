@@ -3,6 +3,7 @@
 import { useRouteDirectionsData } from "~/frontend/hooks/googlemap/useRouteDirectionsData";
 import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import { Selectbox } from "../atoms/Selectbox";
+import { StatValue } from "../atoms/StatValue";
 
 function RunDetailOverview() {
   const { meta } = useRouteDirectionsData();
@@ -15,7 +16,7 @@ function RunDetailOverview() {
         { value: 'option2', label: 'Option 2' },
       ]}/>
       {meta && (
-        <p>{meta.distanceKm}KM</p>
+        <StatValue value={meta.distanceKm} unit="KM" />
       )}
       {routePoints && (
         <p>Number of Route Points: {routePoints.length}</p>

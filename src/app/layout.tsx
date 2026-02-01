@@ -1,9 +1,15 @@
 import "~/frontend/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
+import { Inter } from "next/font/google"
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
+
+export const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+})
 
 export const metadata: Metadata = {
   title: "TABIRUN",
@@ -15,7 +21,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${inter.variable}`}>
       <body>
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
