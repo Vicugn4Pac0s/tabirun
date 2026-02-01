@@ -16,7 +16,7 @@ function RunDetailOverview() {
         { value: 'option2', label: 'Option 2' },
       ]}/>
       {meta && (
-        <StatValue value={meta.distanceKm} unit="KM" />
+        <StatValue value={meta.distanceKm} unit="KM" className="text-base-gray text-2xl" />
       )}
       {routePoints && (
         <p>Number of Route Points: {routePoints.length}</p>
