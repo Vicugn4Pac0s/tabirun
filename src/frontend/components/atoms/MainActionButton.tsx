@@ -31,7 +31,7 @@ const MainActionButton = ({
   }
   return (
     <motion.button
-      className={`flex h-20 w-20 items-center justify-center rounded-full border-white bg-primary text-white ${className}`}
+      className={`flex h-20 w-20 items-center justify-center rounded-full border-2 border-white bg-primary text-white ${className}`}
       onClick={onClick}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}

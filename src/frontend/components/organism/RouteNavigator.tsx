@@ -25,7 +25,7 @@ export const RouteNavigator = () => {
           streetViewPanorama?.setPosition(prevRoutePoint);
         }} />
       </div>
-      <div className="absolute left-1/2 bottom-0 -translate-x-1/2 z-10">
+      <div className="absolute left-1/2 bottom-1 -translate-x-1/2 z-10">
         <MainActionButton
           type={mainActionButtonType}
           onClick={clickMainActionButton}
