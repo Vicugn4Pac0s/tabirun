@@ -6,6 +6,17 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
+/**
+ * Inter フォント設定オブジェクト。
+ *
+ * @remarks
+ * - `subsets` は読み込む文字セット（グリフのサブセット）を指定します。例: "latin", "latin-ext", "cyrillic"。
+ *   指定することで不要な文字セットを除外し、フォントファイルの読み込みサイズを削減できます。
+ * - `variable` はフォントを参照するための CSS カスタムプロパティ名（またはクラス名）です。
+ * - このオブジェクトは next/font/google 等のフォントユーティリティが返すフォント定義です。
+ *
+ * @constant
+ */
 export const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
