@@ -1,4 +1,6 @@
+import { g } from "vitest/dist/chunks/suite.d.FvehnV49.js";
 import { postRouter } from "~/server/api/routers/post";
+import { googlemapRouter } from "./routers/googlemap";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,6 +10,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   post: postRouter,
+  googlemap: googlemapRouter,
 });
 
 // export type definition of API
