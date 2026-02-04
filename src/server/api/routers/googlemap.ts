@@ -13,15 +13,13 @@ export const googlemapRouter = createTRPCRouter({
   getDirection: publicProcedure
     .input(
       z.object({
-        routePoints: z.array(LatLngLiteral),
+        routePoints: z.array(LatLngLiteral).min(2),
         travelMode: z.enum(["WALK", "DRIVE", "BICYCLE"]).default("WALK"),
       }),
     )
     .query(async ({ input }) => {
       const key = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY;
       if (!key) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "NO_API_KEY" });
-
-      if(input.routePoints.length < 2) return null;
       
       const pts = input.routePoints;
       const origin = pts[0]!;
