@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useEnterKey } from "../useEnterKey";
 import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
 import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import { useRoutePointNavigator } from "./useRoutePointNavigator";
@@ -20,6 +21,10 @@ export const useMainActionButton = () => {
   useEffect(() => {
     setMainActionButtonType(isInRoute ? "delete" : "add");
   }, [isInRoute]);
+
+  useEnterKey(() => {
+    clickMainActionButton();
+  });
 
   const clickMainActionButton = () => {
     if (!streetViewPanoramaCenter) return;
