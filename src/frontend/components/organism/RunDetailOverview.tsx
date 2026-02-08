@@ -1,40 +1,19 @@
 'use client';
 
+import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers } from "~/shared/helpers/calc";
+import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
 import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import { Selectbox } from "../atoms/Selectbox";
 import { StatValue } from "../atoms/StatValue";
-import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
-
-type Pace = `${number}:${number}`;
-
-/**
- * 距離(km) と キロペース(mm:ss) から 総時間(hh:mm:ss) を計算
- */
-export function calcTimeFromDistanceAndPace(
-  distanceKm: number,
-  pace: Pace
-): string {
-  const [paceMin, paceSec] = pace.split(":").map(Number);
-  console.log(  {paceMin, paceSec});
-  if(paceMin === undefined || paceSec === undefined) return "0:00";
-  const paceInSeconds = paceMin * 60 + paceSec;
-  const totalSeconds = Math.round(distanceKm * paceInSeconds);
-
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  const hh = hours > 0 ? `${hours}:` : "00:";
-  const mm = String(minutes).padStart(2, "0");
-  const ss = String(seconds).padStart(2, "0");
-
-  return `${hh}${mm}:${ss}`;
-}
 
 function RunDetailOverview() {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
   const { directions } = useGooglemapDirection(routePoints);
-  
+
+  const kilometers = directions?.distanceMeters ? metersToKilometers(directions.distanceMeters) : 0;
+  const time =  kilometers && calcTimeFromDistanceAndPace(kilometers, "5:00")
+  const calories =  calcCaloriesFromRun(60, kilometers, "5:00");
+
   return (
     <div>
       <div className="mb-6">
@@ -44,16 +23,19 @@ function RunDetailOverview() {
           { value: 'option2', label: 'Option 2' },
         ]} className="w-full"/>
       </div>
-      {directions && directions.distanceMeters && (
+      {kilometers ? (
         <ul className="grid grid-cols-2 text-center mb-6">
           <li>
-            <StatValue value={directions.distanceMeters} unit="M" className="text-base-gray text-2xl" />
+            <StatValue value={kilometers} unit="KM" className="text-base-gray text-2xl" />
           </li>
           <li>
-            <StatValue value={calcTimeFromDistanceAndPace(directions.distanceMeters / 1000, "5:00")} className="text-base-gray text-2xl" />
+            <StatValue value={time} className="text-base-gray text-2xl" />
+          </li>
+          <li>
+            <StatValue value={calories} unit="KCAL" className="text-base-gray text-2xl" />
           </li>
         </ul>
-      )}
+      ) : null}
       {routePoints && (
         <ul>
           {routePoints.map((point, index) => (
