@@ -1,18 +1,16 @@
 'use client';
 
 import { useMapStore } from "~/frontend/stores/googlemap/mapStore";
-import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
 import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import MapWrapper from "../molecule/googlemap/MapWrapper";
 import StreetViewPointMarker from "../molecule/googlemap/StreetViewPointMarker";
 import RoutePointMarker from "../molecule/googlemap/RoutePointMarker";
+import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanorama";
 import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
 import RoutePolyline from "../molecule/googlemap/RoutePolyline";
 
 function MapRoot() {
-  const streetViewPanorama = useStreetViewPanoramaStore((state) => state.streetViewPanorama);
-  const streetViewPanoramaCenter = useStreetViewPanoramaStore((state) => state.streetViewPanoramaCenter);
-  const streetViewPanoramaPov = useStreetViewPanoramaStore((state) => state.streetViewPanoramaPov);
+  const { streetViewPanorama, streetViewPanoramaCenter, streetViewPanoramaPov, moveStreetViewPanorama } = useStreetViewPanorama();
   const map = useMapStore((state) => state.map);
   const routePoints = useRoutePointsStore((state) => state.routePoints);
   const { directions } = useGooglemapDirection(routePoints);
@@ -24,7 +22,7 @@ function MapRoot() {
     const latLng = e.latLng;
     if(!latLng || !streetViewPanorama) return; 
     const latLngLiteral = latLng.toJSON() as google.maps.LatLngLiteral;
-    streetViewPanorama.setPosition(latLngLiteral);
+    moveStreetViewPanorama(latLngLiteral);
   };
 
   return (
@@ -34,7 +32,7 @@ function MapRoot() {
 
       {routePoints.map((point, index) => (
         <RoutePointMarker key={index} map={map} latLng={point} index={index} onClick={()=>{
-          streetViewPanorama?.setPosition(point);
+          moveStreetViewPanorama(point);
         }} />
       ))}
     </MapWrapper>

@@ -1,16 +1,14 @@
 "use client";
 
 import { useEnterKey } from "~/frontend/hooks/useEnterKey";
-import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
 import { useRoutePointNavigator } from "~/frontend/hooks/googlemap/useRoutePointNavigator";
 import { useMainActionButton } from "~/frontend/hooks/googlemap/useMainActionButton";
+import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanorama";
 import MainActionButton from "../atoms/MainActionButton";
 import SubActionButton from "../atoms/SubActionButton";
 
 export const RouteNavigator = () => {
-  const streetViewPanorama = useStreetViewPanoramaStore(
-    (state) => state.streetViewPanorama,
-  );
+  const { streetViewPanorama, moveStreetViewPanorama } = useStreetViewPanorama();
   const { canFirst, canPrev, canNext, canLast, firstRoutePoint, lastRoutePoint, prevRoutePoint, nextRoutePoint } = useRoutePointNavigator();
   const { mainActionButtonType, clickMainActionButton } = useMainActionButton();
   
@@ -23,11 +21,11 @@ export const RouteNavigator = () => {
       <div className="flex">
         <SubActionButton type="first" disabled={!canFirst} onClick={()=>{
           if(!firstRoutePoint) return;
-          streetViewPanorama?.setPosition(firstRoutePoint);
+          moveStreetViewPanorama(firstRoutePoint);
         }} />
         <SubActionButton type="prev" disabled={!canPrev} onClick={()=>{
           if(!prevRoutePoint) return;
-          streetViewPanorama?.setPosition(prevRoutePoint);
+          moveStreetViewPanorama(prevRoutePoint);
         }} />
       </div>
       <div className="absolute left-1/2 bottom-1 -translate-x-1/2 z-10">
@@ -39,11 +37,11 @@ export const RouteNavigator = () => {
       <div className="flex">
         <SubActionButton type="next" disabled={!canNext} onClick={()=>{
           if(!nextRoutePoint) return;
-          streetViewPanorama?.setPosition(nextRoutePoint);
+          moveStreetViewPanorama(nextRoutePoint);
         }} />
         <SubActionButton type="last" disabled={!canLast} onClick={()=>{
           if(!lastRoutePoint) return;
-          streetViewPanorama?.setPosition(lastRoutePoint);
+          moveStreetViewPanorama(lastRoutePoint);
         }} />
       </div>
     </div>
