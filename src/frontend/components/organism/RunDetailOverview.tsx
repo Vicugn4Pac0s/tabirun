@@ -7,6 +7,7 @@ import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanor
 import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import { Selectbox } from "../atoms/Selectbox";
 import { StatValue } from "../atoms/StatValue";
+import RoutePointListItem from "../molecule/RoutePointListItem";
 
 function RunDetailOverview() {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
@@ -55,10 +56,8 @@ function RunDetailOverview() {
       {routePoints && (
         <ul>
           {routePoints.map((point, index) => (
-            <li key={index} className="border-base-gray-light border rounded-md px-2 py-1 mb-2" onClick={() => {
-              moveStreetViewPanorama(point);
-            }}>
-              <p>地点{index + 1}</p>
+            <li key={index} className="mb-2">
+              <RoutePointListItem routePoint={point} index={index} onClick={(_) => moveStreetViewPanorama(point)} />
             </li>
           ))}
         </ul>
