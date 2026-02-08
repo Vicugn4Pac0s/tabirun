@@ -1,5 +1,6 @@
 "use client";
 
+import { useEnterKey } from "~/frontend/hooks/useEnterKey";
 import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
 import { useRoutePointNavigator } from "~/frontend/hooks/googlemap/useRoutePointNavigator";
 import { useMainActionButton } from "~/frontend/hooks/googlemap/useMainActionButton";
@@ -13,6 +14,10 @@ export const RouteNavigator = () => {
   const { canFirst, canPrev, canNext, canLast, firstRoutePoint, lastRoutePoint, prevRoutePoint, nextRoutePoint } = useRoutePointNavigator();
   const { mainActionButtonType, clickMainActionButton } = useMainActionButton();
   
+  useEnterKey(() => {
+    clickMainActionButton();
+  });
+
   return (
     <div className="bg-white flex gap-16 relative">
       <div className="flex">
