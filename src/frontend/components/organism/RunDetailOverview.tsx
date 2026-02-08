@@ -1,6 +1,7 @@
 'use client';
 
-import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers } from "~/shared/helpers/calc";
+import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers, Pace } from "~/shared/helpers/calc";
+import { useState } from "react";
 import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
 import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import { Selectbox } from "../atoms/Selectbox";
@@ -10,18 +11,23 @@ function RunDetailOverview() {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
   const { directions } = useGooglemapDirection(routePoints);
 
+  const [selectedPace, setSelectedPace] = useState<Pace>("5:00");
+
   const kilometers = directions?.distanceMeters ? metersToKilometers(directions.distanceMeters) : 0;
-  const time =  kilometers && calcTimeFromDistanceAndPace(kilometers, "5:00")
-  const calories =  calcCaloriesFromRun(60, kilometers, "5:00");
+  const time =  kilometers && calcTimeFromDistanceAndPace(kilometers, selectedPace)
+  const calories =  calcCaloriesFromRun(60, kilometers, selectedPace);
 
   return (
     <div>
       <div className="mb-6">
         <p className="font-bold text-base-gray mb-2">ペース</p>
         <Selectbox items={[
-          { value: 'option1', label: 'Option 1' },
-          { value: 'option2', label: 'Option 2' },
-        ]} className="w-full"/>
+          { value: '4:00', label: '4:00' },
+          { value: '5:00', label: '5:00' },
+          { value: '6:00', label: '6:00' },
+          { value: '7:00', label: '7:00' },
+          { value: '8:00', label: '8:00' },
+        ]} value={selectedPace} onValueChange={(value) => setSelectedPace(value as Pace)} className="w-full"/>
       </div>
       {kilometers ? (
         <ul className="grid grid-cols-2 text-center mb-6">

@@ -1,4 +1,4 @@
-type Pace = `${number}:${number}`;
+export type Pace = `${number}:${number}`;
 
 /**
  * 距離(km) と キロペース(mm:ss) から 総時間(hh:mm:ss) を計算
