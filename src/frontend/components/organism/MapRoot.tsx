@@ -9,10 +9,6 @@ import RoutePointMarker from "../molecule/googlemap/RoutePointMarker";
 import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
 import RoutePolyline from "../molecule/googlemap/RoutePolyline";
 
-const makeRoutePointsKey = (points: google.maps.LatLngLiteral[]) => {
-  return points.map(p => `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`).join("|");
-}
-
 function MapRoot() {
   const streetViewPanorama = useStreetViewPanoramaStore((state) => state.streetViewPanorama);
   const streetViewPanoramaCenter = useStreetViewPanoramaStore((state) => state.streetViewPanoramaCenter);
