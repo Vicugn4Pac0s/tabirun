@@ -3,6 +3,7 @@
 import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers, Pace } from "~/shared/helpers/calc";
 import { useState } from "react";
 import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
+import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanorama";
 import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import { Selectbox } from "../atoms/Selectbox";
 import { StatValue } from "../atoms/StatValue";
@@ -10,6 +11,7 @@ import { StatValue } from "../atoms/StatValue";
 function RunDetailOverview() {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
   const { directions } = useGooglemapDirection(routePoints);
+  const { moveStreetViewPanorama } = useStreetViewPanorama();
 
   const [selectedPace, setSelectedPace] = useState<Pace>("5:00");
 
@@ -45,7 +47,9 @@ function RunDetailOverview() {
       {routePoints && (
         <ul>
           {routePoints.map((point, index) => (
-            <li key={index} className="border-base-gray-light border rounded-md px-2 py-1 mb-2">
+            <li key={index} className="border-base-gray-light border rounded-md px-2 py-1 mb-2" onClick={() => {
+              moveStreetViewPanorama(point);
+            }}>
               <p>地点{index + 1}</p>
             </li>
           ))}
