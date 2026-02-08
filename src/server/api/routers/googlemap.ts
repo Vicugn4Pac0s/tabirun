@@ -1,12 +1,48 @@
 import { z } from "zod";
-
+import { decode } from "@googlemaps/polyline-codec";
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { publicProcedure } from "../procedure";
-import { TRPCError } from "@trpc/server";
 
 const LatLngLiteral = z.object({
   lat: z.number(),
   lng: z.number(),
+});
+
+const decodePolylineToLatLngLiteral = (encoded: string) => {
+  return decode(encoded).map(([lat, lng]) => ({
+    lat,
+    lng,
+  }));
+};
+
+const DirectionOutputSchema = z.object({
+  distanceMeters: z.number().nullable(),
+  duration: z.string().nullable(),
+  encodedPolyline: z.string().nullable(),
+  path: z.array(
+    z.object({
+      lat: z.number(),
+      lng: z.number(),
+    }),
+  ),
+});
+export type GoogleRouteDirection = z.infer<typeof DirectionOutputSchema>;
+
+const ComputeRoutesResponseSchema = z.object({
+  routes: z
+    .array(
+      z.object({
+        distanceMeters: z.number().optional(),
+        duration: z.string().optional(),
+        polyline: z
+          .object({
+            encodedPolyline: z.string().optional(),
+          })
+          .optional(),
+      }),
+    )
+    .optional(),
 });
 
 export const googlemapRouter = createTRPCRouter({
@@ -17,10 +53,13 @@ export const googlemapRouter = createTRPCRouter({
         travelMode: z.enum(["WALK", "DRIVE", "BICYCLE"]).default("WALK"),
       }),
     )
+    .output(DirectionOutputSchema)
     .query(async ({ input }) => {
       const key = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY;
-      if (!key) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "NO_API_KEY" });
-      
+      if (!key) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "NO_API_KEY" });
+      }
+
       const pts = input.routePoints;
       const origin = pts[0]!;
       const destination = pts[pts.length - 1]!;
@@ -43,16 +82,28 @@ export const googlemapRouter = createTRPCRouter({
         }),
       });
 
-      if (!res.ok) throw new TRPCError({ code: "BAD_REQUEST", message: await res.text() });
+      if (!res.ok) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: await res.text() });
+      }
 
-      const json = await res.json();
-      const r = json?.routes?.[0];
+      const raw = (await res.json()) as unknown;
+      const parsed = ComputeRoutesResponseSchema.safeParse(raw);
+
+      if (!parsed.success) {
+        throw new TRPCError({ code: "PARSE_ERROR", message: "INVALID_ROUTES_API_RESPONSE" });
+      }
+
+      const r = parsed.data.routes?.[0];
       if (!r) throw new TRPCError({ code: "NOT_FOUND", message: "NO_ROUTE" });
+
+      const encodedPolyline = r.polyline?.encodedPolyline ?? null;
+      const path = encodedPolyline ? decodePolylineToLatLngLiteral(encodedPolyline) : [];
 
       return {
         distanceMeters: r.distanceMeters ?? null,
         duration: r.duration ?? null,
-        encodedPolyline: r.polyline?.encodedPolyline ?? null,
+        encodedPolyline,
+        path,
       };
     }),
 });

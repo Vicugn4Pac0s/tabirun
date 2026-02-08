@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.2",
+    "@googlemaps/polyline-codec": "^1.0.28",
     "@googlemaps/react-wrapper": "^1.2.0",
     "@libsql/client": "^0.9.0",
     "@radix-ui/react-select": "^2.2.6",

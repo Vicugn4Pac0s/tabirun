@@ -7,10 +7,6 @@ interface MapStore {
   setCenter: (center: google.maps.LatLngLiteral | null) => void;
   zoom: number | null;
   setZoom: (zoom: number | null) => void;
-  directionsService: google.maps.DirectionsService | null;
-  setDirectionsService: (directionsService: google.maps.DirectionsService) => void;
-  directionsRenderer: google.maps.DirectionsRenderer | null;
-  setDirectionsRenderer: (directionsRenderer: google.maps.DirectionsRenderer) => void;
 }
 
 export const useMapStore = create<MapStore>((set) => ({
@@ -19,9 +15,5 @@ export const useMapStore = create<MapStore>((set) => ({
   center: null,
   setCenter: (center) => set({ center }),
   zoom: null,
-  setZoom: (zoom) => set({ zoom }),
-  directionsService: null,
-  setDirectionsService: (directionsService) => set({ directionsService }),
-  directionsRenderer: null,
-  setDirectionsRenderer: (directionsRenderer) => set({ directionsRenderer })
+  setZoom: (zoom) => set({ zoom })
 }));

@@ -1,9 +1,9 @@
 'use client';
 
-import { useRouteDirectionsData } from "~/frontend/hooks/googlemap/useRouteDirectionsData";
 import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import { Selectbox } from "../atoms/Selectbox";
 import { StatValue } from "../atoms/StatValue";
+import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
 
 type Pace = `${number}:${number}`;
 
@@ -32,8 +32,8 @@ export function calcTimeFromDistanceAndPace(
 }
 
 function RunDetailOverview() {
-  const { meta } = useRouteDirectionsData();
   const routePoints = useRoutePointsStore((state) => state.routePoints);
+  const { directions } = useGooglemapDirection(routePoints);
   
   return (
     <div>
@@ -44,13 +44,13 @@ function RunDetailOverview() {
           { value: 'option2', label: 'Option 2' },
         ]} className="w-full"/>
       </div>
-      {meta && (
+      {directions && directions.distanceMeters && (
         <ul className="grid grid-cols-2 text-center mb-6">
           <li>
-            <StatValue value={meta.distanceKm} unit="KM" className="text-base-gray text-2xl" />
+            <StatValue value={directions.distanceMeters} unit="M" className="text-base-gray text-2xl" />
           </li>
           <li>
-            <StatValue value={calcTimeFromDistanceAndPace(meta.distanceKm, "5:00")} className="text-base-gray text-2xl" />
+            <StatValue value={calcTimeFromDistanceAndPace(directions.distanceMeters / 1000, "5:00")} className="text-base-gray text-2xl" />
           </li>
         </ul>
       )}
