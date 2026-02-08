@@ -10,7 +10,7 @@ import { StatValue } from "../atoms/StatValue";
 
 function RunDetailOverview() {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
-  const { directions } = useGooglemapDirection(routePoints);
+  const { directions, isLoading, error } = useGooglemapDirection(routePoints);
   const { moveStreetViewPanorama } = useStreetViewPanorama();
 
   const [selectedPace, setSelectedPace] = useState<Pace>("5:00");
@@ -18,6 +18,14 @@ function RunDetailOverview() {
   const kilometers = directions?.distanceMeters ? metersToKilometers(directions.distanceMeters) : 0;
   const time =  kilometers && calcTimeFromDistanceAndPace(kilometers, selectedPace)
   const calories =  calcCaloriesFromRun(60, kilometers, selectedPace);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
 
   return (
     <div>
@@ -32,7 +40,7 @@ function RunDetailOverview() {
         ]} value={selectedPace} onValueChange={(value) => setSelectedPace(value as Pace)} className="w-full"/>
       </div>
       {kilometers ? (
-        <ul className="grid grid-cols-2 text-center mb-6">
+        <ul className="grid grid-cols-2 gap-2 text-center mb-6">
           <li>
             <StatValue value={kilometers} unit="KM" className="text-base-gray text-2xl" />
           </li>
