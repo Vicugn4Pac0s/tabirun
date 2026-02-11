@@ -5,6 +5,8 @@ import MapRoot from "./MapRoot";
 import RouteNavigator from "./RouteNavigator";
 import StreetViewPanoramaWrapper from "./StreetViewPanoramaWrapper";
 import Sidebar from "./Sidebar";
+import { CircleUser } from "lucide-react";
+import { Button } from "../ui/button";
 
 function Root() {
   const {data: session} = useSession();
@@ -26,13 +28,11 @@ function Root() {
         </div>
         <div className="absolute top-3 right-3 z-50">
           {session?.user ? (
-            <button className="rounded-full overflow-hidden h-11 w-11" onClick={() => signOut()}>
+            <button className="rounded-full overflow-hidden w-11" onClick={() => signOut()}>
               <img src={session.user.image || ''} alt="" />
             </button>
           ) : (
-            <button className="text-gray-700 text-5xl align-middle" onClick={() => signIn()}>
-              ログイン
-            </button>
+            <Button onClick={() => signIn()}>Sign In</Button>
           )}
         </div>
       </div>
