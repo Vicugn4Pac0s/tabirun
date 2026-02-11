@@ -5,8 +5,8 @@ import MapRoot from "./MapRoot";
 import RouteNavigator from "./RouteNavigator";
 import StreetViewPanoramaWrapper from "./StreetViewPanoramaWrapper";
 import Sidebar from "./Sidebar";
-import { CircleUser } from "lucide-react";
 import { Button } from "../ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
 function Root() {
   const {data: session} = useSession();
@@ -28,9 +28,20 @@ function Root() {
         </div>
         <div className="absolute top-3 right-3 z-50">
           {session?.user ? (
-            <button className="rounded-full overflow-hidden w-11" onClick={() => signOut()}>
-              <img src={session.user.image || ''} alt="" />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full overflow-hidden w-11">
+                  <img src={session.user.image || ''} alt="" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuItem>Profile</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut()}>Logout</DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button onClick={() => signIn()}>Sign In</Button>
           )}
