@@ -34,7 +34,7 @@ function Root() {
                   <img src={session.user.image || ''} alt="" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent align="end">
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuItem>Profile</DropdownMenuItem>
