@@ -8,6 +8,7 @@ import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStor
 import { Selectbox } from "../atoms/Selectbox";
 import { StatValue } from "../atoms/StatValue";
 import RoutePointListItem from "../molecule/RoutePointListItem";
+import { Spinner } from "../ui/spinner";
 
 function RunDetailOverview() {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
@@ -21,7 +22,7 @@ function RunDetailOverview() {
   const calories =  calcCaloriesFromRun(60, kilometers, selectedPace);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="flex justify-center items-center"><Spinner className="size-6" /></div>;
   }
 
   if (error) {
