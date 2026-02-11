@@ -55,7 +55,7 @@ export const googlemapRouter = createTRPCRouter({
     )
     .output(DirectionOutputSchema)
     .query(async ({ input }) => {
-      const key = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY;
+      const key = process.env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY;
       if (!key) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "NO_API_KEY" });
       }
