@@ -7,7 +7,7 @@ import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanor
 import MainActionButton from "../atoms/MainActionButton";
 import SubActionButton from "../atoms/SubActionButton";
 
-export const RouteNavigator = () => {
+const RouteNavigator = () => {
   const { streetViewPanorama, moveStreetViewPanorama } = useStreetViewPanorama();
   const { canFirst, canPrev, canNext, canLast, firstRoutePoint, lastRoutePoint, prevRoutePoint, nextRoutePoint } = useRoutePointNavigator();
   const { mainActionButtonType, clickMainActionButton } = useMainActionButton();
@@ -47,3 +47,5 @@ export const RouteNavigator = () => {
     </div>
   );
 };
+
+export default RouteNavigator;
