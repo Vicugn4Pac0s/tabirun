@@ -1,5 +1,4 @@
-import { g } from "vitest/dist/chunks/suite.d.FvehnV49.js";
-import { postRouter } from "~/server/api/routers/post";
+import { routeRouter } from "~/server/api/routers/route";
 import { googlemapRouter } from "./routers/googlemap";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
@@ -9,7 +8,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  post: postRouter,
+  route: routeRouter,
   googlemap: googlemapRouter,
 });
 

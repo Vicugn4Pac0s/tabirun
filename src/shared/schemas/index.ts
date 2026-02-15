@@ -1,5 +1,5 @@
 import { z } from "zod";
 
-export const postCreateSchema = z.object({ name: z.string().min(1) });
+export const routeCreateSchema = z.object({ title: z.string().min(1), points: z.string().min(1) });
 
-export type PostCreateInput = z.infer<typeof postCreateSchema>;
+export type RouteCreateInput = z.infer<typeof routeCreateSchema>;

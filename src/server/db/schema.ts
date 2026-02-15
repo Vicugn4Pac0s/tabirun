@@ -16,24 +16,25 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = sqliteTableCreator((name) => `template_t3app_${name}`);
 
-export const posts = createTable(
-  "post",
+export const routes = createTable(
+  "route",
   {
     id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    name: text("name", { length: 256 }),
+    title: text("title", { length: 256 }),
+    points: text("points").notNull(),
     createdById: text("created_by", { length: 255 })
       .notNull()
       .references(() => users.id),
     createdAt: int("created_at", { mode: "timestamp" })
       .default(sql`(unixepoch())`)
       .notNull(),
-    updatedAt: int("updatedAt", { mode: "timestamp" }).$onUpdate(
+    updatedAt: int("updated_at", { mode: "timestamp" }).$onUpdate(
       () => new Date()
     ),
   },
   (example) => ({
     createdByIdIdx: index("created_by_idx").on(example.createdById),
-    nameIndex: index("name_idx").on(example.name),
+    titleIndex: index("title_idx").on(example.title),
   })
 );
 
