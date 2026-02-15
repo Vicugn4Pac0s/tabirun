@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { eq } from "drizzle-orm";
 
 import {
@@ -15,7 +14,7 @@ export const routeRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.db.insert(routes).values({
         title: input.title,
-        points: input.points,
+        points: JSON.stringify(input.points),
         createdById: ctx.session.user.id,
       });
     }),
@@ -26,6 +25,9 @@ export const routeRouter = createTRPCRouter({
       .from(routes)
       .where(eq(routes.createdById, ctx.session.user.id));
 
-    return res;
+    return res.map(route => ({
+      ...route,
+      points: JSON.parse(route.points),
+    }));
   }),
 });

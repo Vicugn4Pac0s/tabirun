@@ -9,6 +9,7 @@ import { Selectbox } from "../atoms/Selectbox";
 import { StatValue } from "../atoms/StatValue";
 import RoutePointListItem from "../molecule/RoutePointListItem";
 import { Spinner } from "../ui/spinner";
+import { api } from "~/trpc/react";
 
 function RunDetailOverview() {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
@@ -21,6 +22,13 @@ function RunDetailOverview() {
   const time =  kilometers && calcTimeFromDistanceAndPace(kilometers, selectedPace)
   const calories =  calcCaloriesFromRun(60, kilometers, selectedPace);
 
+  const utils = api.useUtils();
+  const createRoute = api.route.create.useMutation({
+    onSuccess: async () => {
+      await utils.route.invalidate();
+    },
+  });
+  
   if (isLoading) {
     return <div className="flex justify-center items-center"><Spinner className="size-6" /></div>;
   }
@@ -63,6 +71,14 @@ function RunDetailOverview() {
           ))}
         </ul>
       )}
+
+      <button onClick={() => {
+        if(2 > routePoints.length) {
+          alert("ルートポイントを3点以上登録してください");
+          return;
+        }
+        createRoute.mutate({ title: "New Route", points: routePoints });
+      }}>Move to First Point</button>
     </div>
   )
 }
