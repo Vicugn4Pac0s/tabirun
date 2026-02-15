@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession } from "next-auth/react";
 import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers, Pace } from "~/shared/helpers/calc";
 import { useState } from "react";
 import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
@@ -9,7 +10,7 @@ import { Selectbox } from "../atoms/Selectbox";
 import { StatValue } from "../atoms/StatValue";
 import RoutePointListItem from "../molecule/RoutePointListItem";
 import { Spinner } from "../ui/spinner";
-import { api } from "~/trpc/react";
+import RegisterRouteDialog from "./RegisterRouteDialog";
 
 function RunDetailOverview() {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
@@ -22,12 +23,7 @@ function RunDetailOverview() {
   const time =  kilometers && calcTimeFromDistanceAndPace(kilometers, selectedPace)
   const calories =  calcCaloriesFromRun(60, kilometers, selectedPace);
 
-  const utils = api.useUtils();
-  const createRoute = api.route.create.useMutation({
-    onSuccess: async () => {
-      await utils.route.invalidate();
-    },
-  });
+  const {data: session} = useSession();
   
   if (isLoading) {
     return <div className="flex justify-center items-center"><Spinner className="size-6" /></div>;
@@ -72,13 +68,11 @@ function RunDetailOverview() {
         </ul>
       )}
 
-      <button onClick={() => {
-        if(2 > routePoints.length) {
-          alert("ルートポイントを3点以上登録してください");
-          return;
-        }
-        createRoute.mutate({ title: "New Route", points: routePoints });
-      }}>Move to First Point</button>
+      {session?.user && (
+        <div className="text-center">
+          <RegisterRouteDialog routePoints={routePoints} />
+        </div>
+      )}
     </div>
   )
 }
