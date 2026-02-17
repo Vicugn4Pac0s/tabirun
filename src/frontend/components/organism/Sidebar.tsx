@@ -9,7 +9,7 @@ function Sidebar() {
   return (
     <div className="p-5">
       {routePoints.length === 0 ? (
-        <RunRouteList routePoints={routePoints} />
+        <RunRouteList />
       ) : (
         <RunDetailOverview routePoints={routePoints} />
       )}
