@@ -1,4 +1,5 @@
 import { useSession } from "next-auth/react";
+import { api } from "~/trpc/react";
 import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers, Pace } from "~/shared/helpers/calc";
 import { useState } from "react";
 import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
@@ -18,6 +19,8 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
   const { directions, isLoading, error } = useGooglemapDirection(routePoints);
   const { moveStreetViewPanorama } = useStreetViewPanorama();
 
+  const { data: paces } = api.pace.getPace.useQuery();
+
   const [selectedPace, setSelectedPace] = useState<Pace>("5:00");
 
   const kilometers = directions?.distanceMeters ? metersToKilometers(directions.distanceMeters) : 0;
@@ -34,18 +37,14 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
     return <div>Error: {error.message}</div>;
   }
 
+  const paceOptions = paces?.map((pace) => ({ value: pace.value, label: pace.value })) || [];
+
   return (
     <div>
       <div className="mb-6">
         <p className="font-bold text-base-gray mb-2">ペース</p>
-        <Selectbox items={[
-          { value: '4:00', label: '4:00' },
-          { value: '5:00', label: '5:00' },
-          { value: '6:00', label: '6:00' },
-          { value: '7:00', label: '7:00' },
-          { value: '8:00', label: '8:00' },
-        ]} value={selectedPace} onValueChange={(value) => setSelectedPace(value as Pace)} className="w-full"/>
-      </div>
+        <Selectbox items={paceOptions} value={selectedPace} onValueChange={(value) => setSelectedPace(value as Pace)} className="w-full"/>
+      </div> 
       {kilometers ? (
         <ul className="grid grid-cols-2 gap-2 text-center mb-6">
           <li>

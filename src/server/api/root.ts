@@ -1,4 +1,5 @@
 import { routeRouter } from "~/server/api/routers/route";
+import { paceRouter } from "./routers/pace";
 import { googlemapRouter } from "./routers/googlemap";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
@@ -9,6 +10,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   route: routeRouter,
+  pace: paceRouter,
   googlemap: googlemapRouter,
 });
 
