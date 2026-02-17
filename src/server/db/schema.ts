@@ -116,3 +116,8 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );
+
+export const paces = createTable("pace", {
+  id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  value: text("value", { length: 255 }).notNull(),
+});
