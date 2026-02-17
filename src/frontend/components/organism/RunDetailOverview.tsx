@@ -1,19 +1,20 @@
-'use client';
-
 import { useSession } from "next-auth/react";
 import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers, Pace } from "~/shared/helpers/calc";
 import { useState } from "react";
 import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
 import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanorama";
-import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
 import { Selectbox } from "../atoms/Selectbox";
 import { StatValue } from "../atoms/StatValue";
 import RoutePointListItem from "../molecule/RoutePointListItem";
 import { Spinner } from "../ui/spinner";
 import RegisterRouteDialog from "./RegisterRouteDialog";
 
-function RunDetailOverview() {
-  const routePoints = useRoutePointsStore((state) => state.routePoints);
+
+interface RunDetailOverviewProps {
+  routePoints: google.maps.LatLngLiteral[];
+}
+
+function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
   const { directions, isLoading, error } = useGooglemapDirection(routePoints);
   const { moveStreetViewPanorama } = useStreetViewPanorama();
 
