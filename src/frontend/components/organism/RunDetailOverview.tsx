@@ -69,7 +69,7 @@ function RunDetailOverview() {
       )}
 
       {session?.user && routePoints.length >= 2 && (
-        <div className="text-center">
+        <div className="text-center mt-5">
           <RegisterRouteDialog routePoints={routePoints}  kilometers={kilometers} />
         </div>
       )}
