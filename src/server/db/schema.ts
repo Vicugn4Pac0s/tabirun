@@ -22,6 +22,7 @@ export const routes = createTable(
     id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
     title: text("title", { length: 256 }),
     points: text("points").notNull(),
+    kilometers: int("kilometers").notNull(),
     createdById: text("created_by", { length: 255 })
       .notNull()
       .references(() => users.id),

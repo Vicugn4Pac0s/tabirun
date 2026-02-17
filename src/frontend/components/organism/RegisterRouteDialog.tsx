@@ -12,9 +12,10 @@ import { routeCreateSchema } from "~/shared/schemas";
 
 interface RegisterRouteDialogProps {
   routePoints: google.maps.LatLngLiteral[];
+  kilometers: number;
 }
 
-function RegisterRouteDialog({ routePoints }: RegisterRouteDialogProps) {
+function RegisterRouteDialog({ routePoints, kilometers }: RegisterRouteDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
 
@@ -29,7 +30,7 @@ function RegisterRouteDialog({ routePoints }: RegisterRouteDialogProps) {
 
   const submitRoute = () => {
     try {
-      const parsedData = routeCreateSchema.parse({ title, points: routePoints });
+      const parsedData = routeCreateSchema.parse({ title, points: routePoints, kilometers });
       mutate(parsedData);
     } catch (error) {
       console.error("Validation error:", error);
