@@ -68,7 +68,7 @@ function RunDetailOverview() {
         </ul>
       )}
 
-      {session?.user && (
+      {session?.user && routePoints.length >= 2 && (
         <div className="text-center">
           <RegisterRouteDialog routePoints={routePoints} />
         </div>

@@ -4,12 +4,10 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogTitle
 } from "~/frontend/components/ui/dialog"
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { set } from "zod";
 import { routeCreateSchema } from "~/shared/schemas";
 
 interface RegisterRouteDialogProps {
@@ -44,20 +42,20 @@ function RegisterRouteDialog({ routePoints }: RegisterRouteDialogProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
-            <div className="text-center">
-              <Input
-                type="text"
-                placeholder="ルートのタイトルを入力してください"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="mb-4 w-full max-w-64"
-              />
-              <Button className="max-w-64" onClick={submitRoute} disabled={isPending}>
-                {isPending ? "Saving..." : "Save Route"}
-              </Button>
-            </div>
+            <DialogTitle className="text-center">ルート登録</DialogTitle>
           </DialogHeader>
+          <div className="flex flex-col items-center">
+            <Input
+              type="text"
+              placeholder="ルートの名前を入力してください"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mb-4 w-full max-w-64"
+            />
+            <Button className="max-w-64" onClick={submitRoute} disabled={isPending}>
+              {isPending ? "保存中..." : "ルートを保存する"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>
