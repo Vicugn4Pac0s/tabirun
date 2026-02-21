@@ -6,14 +6,14 @@ import MapWrapper from "../molecule/googlemap/MapWrapper";
 import StreetViewPointMarker from "../molecule/googlemap/StreetViewPointMarker";
 import RoutePointMarker from "../molecule/googlemap/RoutePointMarker";
 import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanorama";
-import useGooglemapDirection from "~/frontend/hooks/googlemap/useGooglemapDirection";
+import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
 import RoutePolyline from "../molecule/googlemap/RoutePolyline";
 
 function MapRoot() {
   const { streetViewPanorama, streetViewPanoramaCenter, streetViewPanoramaPov, moveStreetViewPanorama } = useStreetViewPanorama();
   const map = useMapStore((state) => state.map);
   const routePoints = useRoutePointsStore((state) => state.routePoints);
-  const { directions } = useGooglemapDirection(routePoints);
+  const { directions } = useGooglemapDirectionQuery(routePoints);
 
   const onInit = (m: google.maps.Map) => {
   }

@@ -1,6 +1,6 @@
 import { api } from "~/trpc/react";
 
-export const useGooglemapDirection = (
+export const useGooglemapDirectionQuery = (
   routePoints: google.maps.LatLngLiteral[],
 ) => {
   const enabled = routePoints.length >= 2;
@@ -22,4 +22,4 @@ export const useGooglemapDirection = (
   };
 };
 
-export default useGooglemapDirection;
+export default useGooglemapDirectionQuery;
