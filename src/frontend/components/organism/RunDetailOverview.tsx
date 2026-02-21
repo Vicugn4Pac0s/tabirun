@@ -1,7 +1,7 @@
 import { useSession } from "next-auth/react";
 import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers, Pace } from "~/shared/helpers/calc";
 import { useState } from "react";
-import { usePace } from "~/frontend/hooks/api/usePace";
+import { usePaces } from "~/frontend/hooks/api/usePace";
 import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
 import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanorama";
 import { Selectbox } from "../atoms/Selectbox";
@@ -19,7 +19,7 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
   const { directions, isLoading, error } = useGooglemapDirection(routePoints);
   const { moveStreetViewPanorama } = useStreetViewPanorama();
 
-  const { paces } = usePace();
+  const { paces } = usePaces();
 
   const [selectedPace, setSelectedPace] = useState<Pace>("5:00");
 
