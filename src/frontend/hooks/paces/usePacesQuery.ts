@@ -1,6 +1,6 @@
 import { api } from "~/trpc/react";
 
-export const usePaces = () => {
+export const usePacesQuery = () => {
   const { data, ...query } = api.pace.getPace.useQuery(undefined, {
     staleTime: Infinity,
   });
