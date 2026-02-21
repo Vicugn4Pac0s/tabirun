@@ -1,6 +1,9 @@
 import { useCreateRoute } from "~/frontend/hooks/routes/useCreateRoute";
 import { useState } from "react";
-import { routeCreateSchema } from "~/shared/schemas";
+import { RouteCreateInput, routeCreateSchema } from "~/shared/schemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Dialog,
   DialogContent,
@@ -18,13 +21,25 @@ interface RegisterRouteDialogProps {
 function RegisterRouteDialog({ routePoints, kilometers }: RegisterRouteDialogProps) {
   const { createRoute, isCreating } = useCreateRoute();
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
 
-  const submitRoute = async () => {
-    const parsedData = routeCreateSchema.parse({ title, points: routePoints, kilometers });
-    await createRoute(parsedData, {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm<RouteCreateInput>({
+    resolver: zodResolver(routeCreateSchema),
+    defaultValues: {
+      title: "",
+      points: routePoints,
+      kilometers
+    }
+  });
+
+  const submitRoute = async (data: RouteCreateInput) => {
+    await createRoute({ ...data, points: routePoints, kilometers }, {
       onSuccess: () => {
-        setTitle("");
+        reset();
         setOpen(false);
       }
     });
@@ -38,18 +53,23 @@ function RegisterRouteDialog({ routePoints, kilometers }: RegisterRouteDialogPro
           <DialogHeader>
             <DialogTitle className="text-center">ルート登録</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col items-center">
+          <form className="flex flex-col items-center" onSubmit={handleSubmit(submitRoute)}>
             <Input
               type="text"
               placeholder="ルートの名前を入力してください"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              {...register("title")}
               className="mb-4 w-full max-w-64"
             />
-            <Button className="max-w-64" onClick={submitRoute} disabled={isCreating}>
+            {errors.title && (
+              <p className="text-red-500 text-sm mb-1">
+                {errors.title.message}
+              </p>
+            )}
+            
+            <Button className="max-w-64" type="submit" disabled={isCreating}>
               {isCreating ? "保存中..." : "ルートを保存する"}
             </Button>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
     </>
