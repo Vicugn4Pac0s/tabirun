@@ -1,8 +1,8 @@
 import { useSession } from "next-auth/react";
 import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers, Pace } from "~/shared/helpers/calc";
 import { useState } from "react";
-import { usePaces } from "~/frontend/hooks/api/usePace";
-import useGooglemapDirection from "~/frontend/hooks/api/useGooglemapDirection";
+import { usePaces } from "~/frontend/hooks/paces/usePaces";
+import useGooglemapDirection from "~/frontend/hooks/googlemap/useGooglemapDirection";
 import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanorama";
 import { Selectbox } from "../atoms/Selectbox";
 import { StatValue } from "../atoms/StatValue";

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStreetViewPanoramaStore } from "~/frontend/stores/googlemap/streetViewPanoramaStore";
 import { useRoutePointsStore } from "~/frontend/stores/googlemap/routePointsStore";
-import { useRoutePointNavigator } from "./useRoutePointNavigator";
+import { useRoutePointNavigator } from "../googlemap/useRoutePointNavigator";
 
 export const useMainActionButton = () => {
   const streetViewPanoramaCenter = useStreetViewPanoramaStore(

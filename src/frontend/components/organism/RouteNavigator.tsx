@@ -1,8 +1,8 @@
 "use client";
 
-import { useEnterKey } from "~/frontend/hooks/useEnterKey";
+import { useEnterKey } from "~/frontend/hooks/shared/useEnterKey";
 import { useRoutePointNavigator } from "~/frontend/hooks/googlemap/useRoutePointNavigator";
-import { useMainActionButton } from "~/frontend/hooks/googlemap/useMainActionButton";
+import { useMainActionButton } from "~/frontend/hooks/ui/useMainActionButton";
 import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanorama";
 import MainActionButton from "../atoms/MainActionButton";
 import SubActionButton from "../atoms/SubActionButton";
