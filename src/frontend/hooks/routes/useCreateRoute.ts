@@ -1,8 +1,5 @@
+import { RouteCreateInput } from "~/shared/schemas";
 import { api } from "~/trpc/react";
-
-type CreateRouteInput = Parameters<
-  ReturnType<typeof api.route.create.useMutation>["mutate"]
->[0];
 
 type CreateRouteCallbacks = {
   onSuccess?: () => void | Promise<void>;
@@ -19,7 +16,7 @@ export const useCreateRoute = () => {
     },
   });
 
-  const createRoute = async (input: CreateRouteInput, cb?: CreateRouteCallbacks) => {
+  const createRoute = async (input: RouteCreateInput, cb?: CreateRouteCallbacks) => {
     try {
       const result = await mutation.mutateAsync(input);
       await cb?.onSuccess?.();
