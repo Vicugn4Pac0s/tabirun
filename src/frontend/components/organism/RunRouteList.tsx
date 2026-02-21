@@ -1,8 +1,8 @@
-import { api } from "~/trpc/react";
 import { Spinner } from "../ui/spinner";
+import { useRoutesQuery } from "~/frontend/hooks/routes/useRoutesQuery";
 
 function RunRouteList() {
-  const { data, isLoading, error } = api.route.getByUser.useQuery();
+  const { routes, isLoading, error } = useRoutesQuery();
   
   if (isLoading) {
     return <div className="flex justify-center items-center"><Spinner className="size-6" /></div>;
@@ -12,14 +12,14 @@ function RunRouteList() {
     return <p className="text-center text-red-500">エラーが発生しました: {error.message}</p>;
   }
 
-  if(!data || data.length === 0) {
+  if(!routes || routes.length === 0) {
     return <p className="text-center text-base-gray">地図をクリックしてルートを作成してください</p>;
   }
 
   return (
-    data && (
+    routes && (
       <ul className="space-y-4">
-        {data.map((route) => (
+        {routes.map((route) => (
           <li key={route.id} className="p-4 border rounded">
             <h3 className="text-lg font-bold">{route.title}</h3>
             <p className="text-sm text-gray-500">{route.kilometers.toFixed(2)} KM</p>
