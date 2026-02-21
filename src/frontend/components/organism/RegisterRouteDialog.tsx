@@ -1,5 +1,6 @@
-import { api } from "~/trpc/react";
+import { useCreateRoute } from "~/frontend/hooks/routes/useCreateRoute";
 import { useState } from "react";
+import { routeCreateSchema } from "~/shared/schemas";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,6 @@ import {
 } from "~/frontend/components/ui/dialog"
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { routeCreateSchema } from "~/shared/schemas";
 
 interface RegisterRouteDialogProps {
   routePoints: google.maps.LatLngLiteral[];
@@ -16,25 +16,18 @@ interface RegisterRouteDialogProps {
 }
 
 function RegisterRouteDialog({ routePoints, kilometers }: RegisterRouteDialogProps) {
+  const { createRoute, isCreating } = useCreateRoute();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
 
-  const utils = api.useUtils();
-  const { mutate, isPending } = api.route.create.useMutation({
-    onSuccess: async () => {
-      await utils.route.invalidate();
-      setTitle("");
-      setOpen(false);
-    },
-  });
-
-  const submitRoute = () => {
-    try {
-      const parsedData = routeCreateSchema.parse({ title, points: routePoints, kilometers });
-      mutate(parsedData);
-    } catch (error) {
-      console.error("Validation error:", error);
-    }
+  const submitRoute = async () => {
+    const parsedData = routeCreateSchema.parse({ title, points: routePoints, kilometers });
+    await createRoute(parsedData, {
+      onSuccess: () => {
+        setTitle("");
+        setOpen(false);
+      }
+    });
   };
   
   return (
@@ -53,8 +46,8 @@ function RegisterRouteDialog({ routePoints, kilometers }: RegisterRouteDialogPro
               onChange={(e) => setTitle(e.target.value)}
               className="mb-4 w-full max-w-64"
             />
-            <Button className="max-w-64" onClick={submitRoute} disabled={isPending}>
-              {isPending ? "保存中..." : "ルートを保存する"}
+            <Button className="max-w-64" onClick={submitRoute} disabled={isCreating}>
+              {isCreating ? "保存中..." : "ルートを保存する"}
             </Button>
           </div>
         </DialogContent>
