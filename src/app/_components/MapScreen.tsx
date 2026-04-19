@@ -1,5 +1,3 @@
-"use client";
-
 import {
   GOOGLE_MAP_DEFAULT_CENTER,
   GOOGLE_MAP_DEFAULT_ZOOM,
@@ -7,7 +5,6 @@ import {
   GOOGLE_MAP_MIN_ZOOM,
 } from "~/frontend/config";
 import { useState } from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
 import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
@@ -20,7 +17,6 @@ import StreetViewPointMarker from "~/frontend/features/googlemap/components/Stre
 import RoutePolyline from "~/frontend/features/googlemap/components/RoutePolyline";
 
 function MapScreen() {
-  const { data: session } = useSession();
   const { map, setMap, streetView } = useGoogleMap();
   const moveStreetView = useMoveStreetView();
   const [streetViewCenter, setStreetViewCenter] =

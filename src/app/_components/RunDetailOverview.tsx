@@ -1,4 +1,3 @@
-"use client";
 import { Pace } from "~/frontend/types/pace";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
