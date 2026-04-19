@@ -30,7 +30,10 @@ function GoogleMapView({ map, setMap, options, onInit, onClick, onIdle, children
         onInit={onInit ?? (() => undefined)}
         onClick={onClick}
         onIdle={onIdle}
-        options={options}
+        options={{
+          mapId: process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY as string,
+          ...options
+        }}
       >
         {children}
       </GoogleMapCanvas>
