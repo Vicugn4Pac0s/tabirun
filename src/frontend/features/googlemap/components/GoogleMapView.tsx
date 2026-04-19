@@ -3,6 +3,7 @@ import { Status, Wrapper } from "@googlemaps/react-wrapper"
 import GoogleMapCanvas from "./GoogleMapCanvas"
 
 interface GoogleMapViewProps {
+  className?: string
   map: google.maps.Map | null
   setMap: (map: google.maps.Map) => void
   options: google.maps.MapOptions
@@ -12,7 +13,7 @@ interface GoogleMapViewProps {
   children?: React.ReactNode
 }
 
-function GoogleMapView({ map, setMap, options, onInit, onClick, onIdle, children }: GoogleMapViewProps) {
+function GoogleMapView({ className, map, setMap, options, onInit, onClick, onIdle, children }: GoogleMapViewProps) {
   const render = (status: Status) => {
     return <p>{status}</p>
   }
@@ -24,7 +25,7 @@ function GoogleMapView({ map, setMap, options, onInit, onClick, onIdle, children
       libraries={["marker"]}
     >
       <GoogleMapCanvas
-        className="w-full h-[400px]"
+        className={`w-full h-full ${className ?? ""}`}
         map={map}
         setMap={setMap}
         onInit={onInit ?? (() => undefined)}
