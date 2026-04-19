@@ -5,6 +5,7 @@ import {
   GOOGLE_MAP_MIN_ZOOM,
 } from "~/frontend/config";
 import { useState } from "react";
+import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
 import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
@@ -17,6 +18,7 @@ import StreetViewPointMarker from "~/frontend/features/googlemap/components/Stre
 import RoutePolyline from "~/frontend/features/googlemap/components/RoutePolyline";
 
 function MapScreen() {
+  const { permissions } = useAuthPermission();
   const { map, setMap, streetView } = useGoogleMap();
   const moveStreetView = useMoveStreetView();
   const [streetViewCenter, setStreetViewCenter] =
@@ -24,7 +26,9 @@ function MapScreen() {
   const [streetViewPov, setStreetViewPov] =
     useState<google.maps.StreetViewPov | null>(null);
   const routePoints = useRoutePointsStore((state) => state.routePoints);
-  const { directions } = useGooglemapDirectionQuery(routePoints);
+  const { directions } = useGooglemapDirectionQuery(routePoints, {
+    enabled: permissions.canUseDirections,
+  });
 
   return (
     <div className="relative grid flex-1 grid-cols-2">

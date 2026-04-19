@@ -2,7 +2,7 @@ import { z } from "zod";
 import { decode } from "@googlemaps/polyline-codec";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter } from "~/server/api/trpc";
-import { publicProcedure } from "../procedure";
+import { protectedProcedure } from "../procedure";
 
 const LatLngLiteral = z.object({
   lat: z.number(),
@@ -46,7 +46,7 @@ const ComputeRoutesResponseSchema = z.object({
 });
 
 export const googlemapRouter = createTRPCRouter({
-  getDirection: publicProcedure
+  getDirection: protectedProcedure
     .input(
       z.object({
         routePoints: z.array(LatLngLiteral).min(2),

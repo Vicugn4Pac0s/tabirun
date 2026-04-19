@@ -2,6 +2,7 @@ import { Pace } from "~/frontend/types/pace";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers } from "~/frontend/lib/running";
+import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
 import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { Spinner } from "~/frontend/components/ui/spinner";
@@ -15,7 +16,10 @@ interface RunDetailOverviewProps {
 }
 
 function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
-  const { directions, isLoading, error } = useGooglemapDirectionQuery(routePoints);
+  const { permissions } = useAuthPermission();
+  const { directions, isLoading, error } = useGooglemapDirectionQuery(routePoints, {
+    enabled: permissions.canUseDirections,
+  });
   const moveStreetView = useMoveStreetView();
 
   const [selectedPace, setSelectedPace] = useState<Pace>("5:00");
