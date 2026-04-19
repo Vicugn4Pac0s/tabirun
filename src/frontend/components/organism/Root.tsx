@@ -13,7 +13,7 @@ function Root() {
 
   return (
     <div className="flex">
-      <div className="w-72">
+      {/* <div className="w-72">
         <Sidebar />
       </div>
       <div className="flex-1 grid grid-cols-2 relative">
@@ -46,7 +46,7 @@ function Root() {
             <Button onClick={() => signIn()}>Sign In</Button>
           )}
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }
