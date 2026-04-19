@@ -7,11 +7,11 @@ import { useRoutePointAction } from "../hooks/useRoutePointAction";
 import MainActionButton from "~/frontend/components/app-ui/MainActionButton";
 import SubActionButton from "~/frontend/components/app-ui/SubActionButton";
 
-interface RouteNavigationProps {
+interface RoutePointsNavigationProps {
   currentPoint: google.maps.LatLngLiteral;
 }
 
-const RouteNavigation = ({ currentPoint }: RouteNavigationProps) => {
+const RoutePointsNavigation = ({ currentPoint }: RoutePointsNavigationProps) => {
   const moveStreetView = useMoveStreetView();
   const { canFirst, canPrev, canNext, canLast, firstRoutePoint, lastRoutePoint, prevRoutePoint, nextRoutePoint } = useRoutePoints(currentPoint);
   const { type, toggle } = useRoutePointAction(currentPoint);
@@ -52,4 +52,4 @@ const RouteNavigation = ({ currentPoint }: RouteNavigationProps) => {
   );
 };
 
-export default RouteNavigation;
+export default RoutePointsNavigation;

@@ -14,7 +14,7 @@ import { useRoutePointsStore } from "~/frontend/features/route-points/stores/rou
 import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
 import GoogleMapView from "~/frontend/features/googlemap/components/GoogleMapView";
 import StreetView from "~/frontend/features/googlemap/components/StreetView";
-import RouteNavigation from "~/frontend/features/route-navigation/components/RouteNavigation";
+import RoutePointsNavigation from "~/frontend/features/route-points-navigation/components/RouteNavigation";
 import RoutePointMarker from "~/frontend/features/googlemap/components/RoutePointMarker";
 import StreetViewPointMarker from "~/frontend/features/googlemap/components/StreetViewPointMarker";
 import RoutePolyline from "~/frontend/features/googlemap/components/RoutePolyline";
@@ -54,7 +54,7 @@ function MapScreen() {
         />
         <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2">
           {streetViewCenter && (
-            <RouteNavigation currentPoint={streetViewCenter} />
+            <RoutePointsNavigation currentPoint={streetViewCenter} />
           )}
         </div>
       </div>
