@@ -19,7 +19,7 @@ import RoutePointMarker from "~/frontend/features/googlemap/components/RoutePoin
 import { StreetViewPointMarker } from "~/frontend/components/molecule/googlemap/StreetViewPointMarker";
 import RoutePolyline from "~/frontend/components/molecule/googlemap/RoutePolyline";
 
-function Root() {
+function MapScreen() {
   const { data: session } = useSession();
   const { map, setMap, streetView } = useGoogleMap();
   const moveStreetView = useMoveStreetView();
@@ -102,4 +102,4 @@ function Root() {
   );
 }
 
-export default Root;
+export default MapScreen;

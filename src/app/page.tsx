@@ -1,7 +1,7 @@
 import { HydrateClient } from "~/trpc/server";
 import { SessionProvider } from 'next-auth/react';
 import Providers from "./providers";
-import Root from "./Root";
+import Root from "./_components/Root";
 
 export default async function Home() {
 
