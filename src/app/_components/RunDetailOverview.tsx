@@ -1,15 +1,15 @@
+"use client";
+import { Pace } from "~/frontend/types/pace";
 import { useSession } from "next-auth/react";
-import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers, Pace } from "~/shared/helpers/calc";
 import { useState } from "react";
-import { usePacesQuery } from "~/frontend/hooks/paces/usePacesQuery";
+import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers } from "~/frontend/lib/running";
 import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
-import useStreetViewPanorama from "~/frontend/hooks/googlemap/useStreetViewPanorama";
-import { Selectbox } from "../atoms/Selectbox";
-import { StatValue } from "../atoms/StatValue";
-import RoutePointListItem from "../molecule/RoutePointListItem";
-import { Spinner } from "../ui/spinner";
-import RegisterRouteDialog from "./RegisterRouteDialog";
-
+import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
+import { Spinner } from "~/frontend/components/ui/spinner";
+import { StatValue } from "~/frontend/components/app-ui/StatValue";
+import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
+import RoutePointListItem from "~/frontend/features/route-points/components/RoutePointListItem";
+import CreateRouteDialog from "~/frontend/features/route/components/CreateRouteDialog";
 
 interface RunDetailOverviewProps {
   routePoints: google.maps.LatLngLiteral[];
@@ -17,9 +17,7 @@ interface RunDetailOverviewProps {
 
 function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
   const { directions, isLoading, error } = useGooglemapDirectionQuery(routePoints);
-  const { moveStreetViewPanorama } = useStreetViewPanorama();
-
-  const { paces } = usePacesQuery();
+  const moveStreetView = useMoveStreetView();
 
   const [selectedPace, setSelectedPace] = useState<Pace>("5:00");
 
@@ -37,13 +35,11 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
     return <div>Error: {error.message}</div>;
   }
 
-  const paceOptions = paces?.map((pace) => ({ value: pace.value, label: pace.value })) || [];
-
   return (
     <div>
       <div className="mb-6">
         <p className="font-bold text-base-gray mb-2">ペース</p>
-        <Selectbox items={paceOptions} value={selectedPace} onValueChange={(value) => setSelectedPace(value as Pace)} className="w-full"/>
+        <PaceSelect value={selectedPace} onChangeValue={setSelectedPace} className="w-full"/>
       </div> 
       {kilometers ? (
         <ul className="grid grid-cols-2 gap-2 text-center mb-6">
@@ -62,7 +58,7 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
         <ul>
           {routePoints.map((point, index) => (
             <li key={index} className="mb-2">
-              <RoutePointListItem routePoint={point} index={index} onClick={(_) => moveStreetViewPanorama(point)} />
+              <RoutePointListItem routePoint={point} index={index} onClick={(_) => moveStreetView(point)} />
             </li>
           ))}
         </ul>
@@ -70,7 +66,7 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
 
       {session?.user && routePoints.length >= 2 && (
         <div className="text-center mt-5">
-          <RegisterRouteDialog routePoints={routePoints}  kilometers={kilometers} />
+          <CreateRouteDialog routePoints={routePoints}  kilometers={kilometers} />
         </div>
       )}
     </div>
