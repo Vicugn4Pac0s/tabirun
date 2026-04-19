@@ -1,5 +1,6 @@
 import Sidebar from "~/frontend/components/layout/Sidebar";
 import MapScreen from "./MapScreen";
+import { UserMenu } from "~/frontend/features/auth/components/UserMenu";
 
 function Root() {
   return (
@@ -10,6 +11,9 @@ function Root() {
         </Sidebar>
       </div>
       <MapScreen />
+      <div className="absolute top-3 right-3 z-50">
+        <UserMenu />
+      </div>
     </div>
   );
 }
