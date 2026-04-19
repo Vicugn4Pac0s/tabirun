@@ -1,4 +1,4 @@
-import { useCreateRoute } from "~/frontend/hooks/routes/useCreateRoute";
+import { useCreateRoute } from "../hooks/useCreateRoute";
 import { useState } from "react";
 import { RouteCreateInput, routeCreateSchema } from "~/shared/schemas";
 import { useForm } from "react-hook-form";
@@ -10,15 +10,15 @@ import {
   DialogHeader,
   DialogTitle
 } from "~/frontend/components/ui/dialog"
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Button } from "~/frontend/components/ui/button";
+import { Input } from "~/frontend/components/ui/input";
 
-interface RegisterRouteDialogProps {
+interface CreateRouteDialogProps {
   routePoints: google.maps.LatLngLiteral[];
   kilometers: number;
 }
 
-function RegisterRouteDialog({ routePoints, kilometers }: RegisterRouteDialogProps) {
+function CreateRouteDialog({ routePoints, kilometers }: CreateRouteDialogProps) {
   const { createRoute, isCreating } = useCreateRoute();
   const [open, setOpen] = useState(false);
 
@@ -76,4 +76,4 @@ function RegisterRouteDialog({ routePoints, kilometers }: RegisterRouteDialogPro
   )
 }
 
-export default RegisterRouteDialog
+export default CreateRouteDialog

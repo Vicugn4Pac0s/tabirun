@@ -1,7 +1,9 @@
-import { Spinner } from "../ui/spinner";
-import { useRoutesQuery } from "~/frontend/hooks/routes/useRoutesQuery";
+"use client";
 
-function RunRouteList() {
+import { Spinner } from "~/frontend/components/ui/spinner";
+import { useRoutesQuery } from "../hooks/useRoutesQuery";
+
+function RouteList() {
   const { routes, isLoading, error } = useRoutesQuery();
   
   if (isLoading) {
@@ -30,4 +32,4 @@ function RunRouteList() {
   );
 }
 
-export default RunRouteList
+export default RouteList
