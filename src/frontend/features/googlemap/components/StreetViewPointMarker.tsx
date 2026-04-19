@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import AdvancedMarker from "~/frontend/components/atoms/googlemap/AdvancedMarker";
+import AdvancedMarker from "./AdvancedMarker";
 
 interface StreetViewPointMarkerProps {
   map: google.maps.Map | null;

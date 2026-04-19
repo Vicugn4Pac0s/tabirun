@@ -16,8 +16,8 @@ import GoogleMapView from "~/frontend/features/googlemap/components/GoogleMapVie
 import StreetView from "~/frontend/features/googlemap/components/StreetView";
 import RouteNavigation from "~/frontend/features/route-navigation/components/RouteNavigation";
 import RoutePointMarker from "~/frontend/features/googlemap/components/RoutePointMarker";
-import { StreetViewPointMarker } from "~/frontend/components/molecule/googlemap/StreetViewPointMarker";
-import RoutePolyline from "~/frontend/components/molecule/googlemap/RoutePolyline";
+import StreetViewPointMarker from "~/frontend/features/googlemap/components/StreetViewPointMarker";
+import RoutePolyline from "~/frontend/features/googlemap/components/RoutePolyline";
 
 function MapScreen() {
   const { data: session } = useSession();
