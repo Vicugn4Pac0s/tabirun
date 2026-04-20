@@ -14,6 +14,7 @@ export const AuthUserMenu = () => {
   return (
     <UserMenuView
       image={session.user.image}
+      name={session.user.name}
       onLogout={() => signOut()}
     />
   );
