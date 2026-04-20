@@ -1,6 +1,7 @@
 import { routeRouter } from "~/server/api/routers/route";
 import { paceRouter } from "./routers/pace";
 import { googlemapRouter } from "./routers/googlemap";
+import { userRouter } from "./routers/user";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -12,6 +13,7 @@ export const appRouter = createTRPCRouter({
   route: routeRouter,
   pace: paceRouter,
   googlemap: googlemapRouter,
+  user: userRouter,
 });
 
 // export type definition of API

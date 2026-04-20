@@ -14,7 +14,9 @@ import { type AdapterAccount } from "next-auth/adapters";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = sqliteTableCreator((name) => `template_t3app_${name}`);
+export const createTable = sqliteTableCreator(
+  (name) => `template_t3app_${name}`,
+);
 
 export const routes = createTable(
   "route",
@@ -30,13 +32,13 @@ export const routes = createTable(
       .default(sql`(unixepoch())`)
       .notNull(),
     updatedAt: int("updated_at", { mode: "timestamp" }).$onUpdate(
-      () => new Date()
+      () => new Date(),
     ),
   },
   (example) => ({
     createdByIdIdx: index("created_by_idx").on(example.createdById),
     titleIndex: index("title_idx").on(example.title),
-  })
+  }),
 );
 
 export const users = createTable("user", {
@@ -50,6 +52,11 @@ export const users = createTable("user", {
     mode: "timestamp",
   }).default(sql`(unixepoch())`),
   image: text("image", { length: 255 }),
+  birthDate: text("birth_date", { length: 10 }),
+  gender: text("gender", { length: 50 }),
+  pace: text("pace", { length: 255 }),
+  height: int("height"),
+  weight: int("weight"),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -80,7 +87,7 @@ export const accounts = createTable(
       columns: [account.provider, account.providerAccountId],
     }),
     userIdIdx: index("account_user_id_idx").on(account.userId),
-  })
+  }),
 );
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -98,7 +105,7 @@ export const sessions = createTable(
   },
   (session) => ({
     userIdIdx: index("session_userId_idx").on(session.userId),
-  })
+  }),
 );
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -114,7 +121,7 @@ export const verificationTokens = createTable(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-  })
+  }),
 );
 
 export const paces = createTable("pace", {
