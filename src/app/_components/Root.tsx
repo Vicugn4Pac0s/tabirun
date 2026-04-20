@@ -2,7 +2,7 @@
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import Sidebar from "~/frontend/components/layout/Sidebar";
 import MapScreen from "./MapScreen";
-import { UserMenu } from "~/frontend/features/auth/components/UserMenu";
+import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import RouteList from "~/frontend/features/route/components/RouteList";
 import RunDetailOverview from "./RunDetailOverview";
 
@@ -21,7 +21,7 @@ function Root() {
       </div>
       <MapScreen />
       <div className="absolute top-3 right-3 z-50">
-        <UserMenu />
+        <AuthUserMenu />
       </div>
     </div>
   );
