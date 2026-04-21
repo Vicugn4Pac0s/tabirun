@@ -128,3 +128,23 @@ export const paces = createTable("pace", {
   id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
   value: text("value", { length: 255 }).notNull(),
 });
+
+export const quotaUsages = createTable(
+  "quota_usage",
+  {
+    id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+    userId: text("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id),
+    feature: text("feature", { length: 255 }).notNull(),
+    date: text("date", { length: 10 }).notNull(), // YYYY-MM-DD
+    count: int("count").notNull().default(0),
+  },
+  (t) => ({
+    userFeatureDateIdx: index("quota_user_feature_date_idx").on(
+      t.userId,
+      t.feature,
+      t.date,
+    ),
+  }),
+);

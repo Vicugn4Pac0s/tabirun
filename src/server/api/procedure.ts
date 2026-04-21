@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { timingMiddleware } from "./middleware";
 import { createTRPCProcedure } from "./trpc";
+import { type QuotaFeature } from "~/server/quota/config";
+import { checkQuota } from "~/server/quota/service";
 
 /**
  * Public (unauthenticated) procedure
@@ -31,4 +33,16 @@ export const protectedProcedure = createTRPCProcedure
         session: { ...ctx.session, user: ctx.session.user },
       },
     });
+  });
+
+/**
+ * クォータ付き保護済みプロシージャ
+ *
+ * 認証済みユーザーに対して、指定した機能の1日あたりの利用上限を事前チェックする。
+ * API呼び出し成功後のインクリメントは各 router 側で incrementQuota() を呼び出すこと。
+ */
+export const quotaProtectedProcedure = (feature: QuotaFeature) =>
+  protectedProcedure.use(async ({ ctx, next }) => {
+    await checkQuota(ctx.db, ctx.session.user.id, feature);
+    return next();
   });

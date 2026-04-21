@@ -2,7 +2,8 @@ import { z } from "zod";
 import { decode } from "@googlemaps/polyline-codec";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter } from "~/server/api/trpc";
-import { protectedProcedure } from "../procedure";
+import { quotaProtectedProcedure } from "../procedure";
+import { incrementQuota } from "~/server/quota/service";
 
 const LatLngLiteral = z.object({
   lat: z.number(),
@@ -46,7 +47,7 @@ const ComputeRoutesResponseSchema = z.object({
 });
 
 export const googlemapRouter = createTRPCRouter({
-  getDirection: protectedProcedure
+  getDirection: quotaProtectedProcedure("direction")
     .input(
       z.object({
         routePoints: z.array(LatLngLiteral).min(2),
@@ -54,7 +55,7 @@ export const googlemapRouter = createTRPCRouter({
       }),
     )
     .output(DirectionOutputSchema)
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const key = process.env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY;
       if (!key) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "NO_API_KEY" });
@@ -98,6 +99,8 @@ export const googlemapRouter = createTRPCRouter({
 
       const encodedPolyline = r.polyline?.encodedPolyline ?? null;
       const path = encodedPolyline ? decodePolylineToLatLngLiteral(encodedPolyline) : [];
+
+      await incrementQuota(ctx.db, ctx.session.user.id, "direction");
 
       return {
         distanceMeters: r.distanceMeters ?? null,
