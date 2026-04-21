@@ -16,6 +16,7 @@ export const useGooglemapDirectionQuery = (
       {
         enabled,
         staleTime: Infinity,
+        retry: false,
       },
     );
 

@@ -17,7 +17,7 @@ interface RunDetailOverviewProps {
 
 function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
   const { permissions } = useAuthPermission();
-  const { directions, isLoading, error } = useGooglemapDirectionQuery(routePoints, {
+  const { directions, isLoading } = useGooglemapDirectionQuery(routePoints, {
     enabled: permissions.canUseDirections,
   });
   const moveStreetView = useMoveStreetView();
@@ -32,10 +32,6 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
   
   if (isLoading) {
     return <div className="flex justify-center items-center"><Spinner className="size-6" /></div>;
-  }
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
   }
 
   return (
