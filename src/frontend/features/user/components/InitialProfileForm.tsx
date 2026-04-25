@@ -11,7 +11,6 @@ import {
   UserProfileFormFields,
 } from "~/frontend/features/user/components/UserProfileFormFields";
 import { useCompleteInitialProfile } from "~/frontend/features/user/hooks/useCompleteInitialProfile";
-import { useUserProfileFieldOptions } from "~/frontend/features/user/hooks/useUserProfileFieldOptions";
 import {
   userInitialProfileSchema,
 } from "~/shared/schemas";
@@ -22,7 +21,6 @@ type InitialProfileFormProps = {
 
 export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) => {
   const router = useRouter();
-  const { genderOptions } = useUserProfileFieldOptions();
   const { completeInitialProfile, isCompleting } = useCompleteInitialProfile();
 
   const {
@@ -61,7 +59,6 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
         register={register}
         control={control}
         errors={errors}
-        genderOptions={genderOptions}
         disabled={isCompleting}
       />
 

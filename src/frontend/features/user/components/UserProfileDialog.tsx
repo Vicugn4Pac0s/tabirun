@@ -18,7 +18,6 @@ import {
   type UserProfileFormValues,
   UserProfileFormFields,
 } from "~/frontend/features/user/components/UserProfileFormFields";
-import { useUserProfileFieldOptions } from "~/frontend/features/user/hooks/useUserProfileFieldOptions";
 import { useUpdateUser } from "~/frontend/features/user/hooks/useUpdateUser";
 import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
 import { userProfileUpdateSchema } from "~/shared/schemas";
@@ -33,7 +32,6 @@ export const UserProfileDialog = ({
   onOpenChange,
 }: UserProfileDialogProps) => {
   const { user, isLoading } = useUserQuery();
-  const { genderOptions } = useUserProfileFieldOptions();
   const { updateUser, isUpdating } = useUpdateUser();
 
   const {
@@ -94,7 +92,6 @@ export const UserProfileDialog = ({
             register={register}
             control={control}
             errors={errors}
-            genderOptions={genderOptions}
             disabled={isLoading || isUpdating}
           />
 

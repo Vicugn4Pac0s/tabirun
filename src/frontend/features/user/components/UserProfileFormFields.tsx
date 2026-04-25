@@ -11,6 +11,13 @@ type SelectOption = {
   label: string;
 };
 
+const genderOptions: SelectOption[] = [
+  { value: "male", label: "男性" },
+  { value: "female", label: "女性" },
+  { value: "other", label: "その他" },
+  { value: "prefer_not_to_say", label: "回答しない" },
+];
+
 export type UserProfileFormValues = {
   birthDate?: string;
   gender?: string;
@@ -23,7 +30,6 @@ type UserProfileFormFieldsProps = {
   register: UseFormRegister<UserProfileFormValues>;
   control: Control<UserProfileFormValues>;
   errors: FieldErrors<UserProfileFormValues>;
-  genderOptions: SelectOption[];
   disabled: boolean;
 };
 
@@ -38,7 +44,6 @@ export const UserProfileFormFields = ({
   register,
   control,
   errors,
-  genderOptions,
   disabled,
 }: UserProfileFormFieldsProps) => {
   const birthDateError = getErrorMessage(errors.birthDate);
