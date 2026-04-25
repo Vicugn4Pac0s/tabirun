@@ -58,6 +58,7 @@ function CreateRouteDialog({ routePoints, kilometers }: CreateRouteDialogProps) 
               type="text"
               placeholder="ルートの名前を入力してください"
               {...register("title")}
+              disabled={isCreating}
               className="mb-4 w-full max-w-64"
             />
             {errors.title && (

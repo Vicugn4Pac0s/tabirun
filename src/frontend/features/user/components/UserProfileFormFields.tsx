@@ -74,6 +74,7 @@ export const UserProfileFormFields = ({
               onValueChange={(value) => field.onChange(value)}
               placeholder="選択してください"
               className="w-full"
+              disabled={disabled}
             />
           )}
         />
@@ -92,7 +93,8 @@ export const UserProfileFormFields = ({
               onValueChange={(value) => field.onChange(value)}
               placeholder="選択してください"
               className="w-full"
-            />
+              disabled={disabled}
+              />
           )}
         />
         {paceError && <p className="text-sm text-red-500">{paceError}</p>}
