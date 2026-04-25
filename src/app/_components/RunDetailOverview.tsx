@@ -1,16 +1,16 @@
 import { Pace } from "~/frontend/types/pace";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers } from "~/frontend/lib/running";
+import { metersToKilometers } from "~/frontend/lib/running";
 import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
 import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { Spinner } from "~/frontend/components/ui/spinner";
-import { StatValue } from "~/frontend/components/app-ui/StatValue";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import RoutePointListItem from "~/frontend/features/route-points/components/RoutePointListItem";
 import CreateRouteDialog from "~/frontend/features/route/components/CreateRouteDialog";
 import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
+import { RunCalculatedStats } from "./RunCalculatedStats";
 
 interface RunDetailOverviewProps {
   routePoints: google.maps.LatLngLiteral[];
@@ -34,8 +34,6 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
   }, [user?.pace]);
 
   const kilometers = directions?.distanceMeters ? metersToKilometers(directions.distanceMeters) : 0;
-  const time =  kilometers && calcTimeFromDistanceAndPace(kilometers, selectedPace)
-  const calories = calcCaloriesFromRun(user?.weight ?? 60, kilometers, selectedPace);
   
   if (isLoading) {
     return <div className="flex justify-center items-center"><Spinner className="size-6" /></div>;
@@ -47,19 +45,11 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
         <p className="font-bold text-base-gray mb-2">ペース</p>
         <PaceSelect value={selectedPace} onChangeValue={setSelectedPace} className="w-full"/>
       </div> 
-      {kilometers ? (
-        <ul className="grid grid-cols-2 gap-2 text-center mb-6">
-          <li>
-            <StatValue value={kilometers} unit="KM" className="text-base-gray text-2xl" />
-          </li>
-          <li>
-            <StatValue value={time} className="text-base-gray text-2xl" />
-          </li>
-          <li>
-            <StatValue value={calories} unit="KCAL" className="text-base-gray text-2xl" />
-          </li>
-        </ul>
-      ) : null}
+      <RunCalculatedStats
+        pace={selectedPace}
+        distanceKm={kilometers}
+        weightKg={user?.weight}
+      />
       {routePoints && (
         <ul>
           {routePoints.map((point, index) => (
