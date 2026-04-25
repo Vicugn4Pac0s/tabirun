@@ -2,14 +2,13 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import { Button } from "~/frontend/components/ui/button";
-import { Input } from "~/frontend/components/ui/input";
-import { usePacesQuery } from "~/frontend/features/pace/hooks/usePacesQuery";
+import { UserProfileFormFields } from "~/frontend/features/user/components/UserProfileFormFields";
 import { useCompleteInitialProfile } from "~/frontend/features/user/hooks/useCompleteInitialProfile";
+import { useUserProfileFieldOptions } from "~/frontend/features/user/hooks/useUserProfileFieldOptions";
 import {
   type UserInitialProfileInput,
   userInitialProfileSchema,
@@ -25,16 +24,9 @@ type InitialProfileFormProps = {
   };
 };
 
-const genderOptions = [
-  { value: "male", label: "男性" },
-  { value: "female", label: "女性" },
-  { value: "other", label: "その他" },
-  { value: "prefer_not_to_say", label: "回答しない" },
-];
-
 export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) => {
   const router = useRouter();
-  const { paces } = usePacesQuery();
+  const { genderOptions, paceOptions } = useUserProfileFieldOptions();
   const { completeInitialProfile, isCompleting } = useCompleteInitialProfile();
 
   const {
@@ -53,11 +45,6 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
     },
   });
 
-  const paceOptions = paces.map((pace) => ({
-    value: pace.value,
-    label: pace.value,
-  }));
-
   const submitProfile = async (data: UserInitialProfileInput) => {
     await completeInitialProfile(data, {
       onSuccess: () => {
@@ -72,91 +59,14 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(submitProfile)}>
-      <div className="space-y-1">
-        <label className="text-sm font-medium">生年月日</label>
-        <Input
-          type="date"
-          disabled={isCompleting}
-          {...register("birthDate")}
-        />
-        {errors.birthDate && (
-          <p className="text-sm text-red-500">{errors.birthDate.message}</p>
-        )}
-      </div>
-
-      <div className="space-y-1">
-        <label className="text-sm font-medium">性別</label>
-        <Controller
-          control={control}
-          name="gender"
-          render={({ field }) => (
-            <Selectbox
-              items={genderOptions}
-              value={field.value}
-              onValueChange={(value) => field.onChange(value)}
-              placeholder="選択してください"
-              className="w-full"
-            />
-          )}
-        />
-        {errors.gender && (
-          <p className="text-sm text-red-500">{errors.gender.message}</p>
-        )}
-      </div>
-
-      <div className="space-y-1">
-        <label className="text-sm font-medium">ランニングのペース</label>
-        <Controller
-          control={control}
-          name="pace"
-          render={({ field }) => (
-            <Selectbox
-              items={paceOptions}
-              value={field.value}
-              onValueChange={(value) => field.onChange(value)}
-              placeholder="選択してください"
-              className="w-full"
-            />
-          )}
-        />
-        {errors.pace && (
-          <p className="text-sm text-red-500">{errors.pace.message}</p>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-1">
-          <label className="text-sm font-medium">身長(cm)</label>
-          <Input
-            type="number"
-            inputMode="numeric"
-            disabled={isCompleting}
-            {...register("height", {
-              setValueAs: (value: string) =>
-                value === "" ? undefined : Number.parseInt(value, 10),
-            })}
-          />
-          {errors.height && (
-            <p className="text-sm text-red-500">{errors.height.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-sm font-medium">体重(kg)</label>
-          <Input
-            type="number"
-            inputMode="numeric"
-            disabled={isCompleting}
-            {...register("weight", {
-              setValueAs: (value: string) =>
-                value === "" ? undefined : Number.parseInt(value, 10),
-            })}
-          />
-          {errors.weight && (
-            <p className="text-sm text-red-500">{errors.weight.message}</p>
-          )}
-        </div>
-      </div>
+      <UserProfileFormFields
+        register={register}
+        control={control}
+        errors={errors}
+        genderOptions={genderOptions}
+        paceOptions={paceOptions}
+        disabled={isCompleting}
+      />
 
       <Button type="submit" className="w-full" disabled={isCompleting}>
         {isCompleting ? "保存中..." : "初期設定を完了"}
