@@ -3,6 +3,7 @@
 import { Controller, type Control, type FieldErrors, type FieldError, type UseFormRegister } from "react-hook-form";
 
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
+import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import { Input } from "~/frontend/components/ui/input";
 
 type SelectOption = {
@@ -23,7 +24,6 @@ type UserProfileFormFieldsProps = {
   control: Control<UserProfileFormValues>;
   errors: FieldErrors<UserProfileFormValues>;
   genderOptions: SelectOption[];
-  paceOptions: SelectOption[];
   disabled: boolean;
 };
 
@@ -39,7 +39,6 @@ export const UserProfileFormFields = ({
   control,
   errors,
   genderOptions,
-  paceOptions,
   disabled,
 }: UserProfileFormFieldsProps) => {
   const birthDateError = getErrorMessage(errors.birthDate);
@@ -87,14 +86,12 @@ export const UserProfileFormFields = ({
           control={control}
           name="pace"
           render={({ field }) => (
-            <Selectbox
-              items={paceOptions}
+            <PaceSelect
               value={field.value ?? undefined}
-              onValueChange={(value) => field.onChange(value)}
+              onChangeValue={field.onChange}
               placeholder="選択してください"
-              className="w-full"
               disabled={disabled}
-              />
+            />
           )}
         />
         {paceError && <p className="text-sm text-red-500">{paceError}</p>}

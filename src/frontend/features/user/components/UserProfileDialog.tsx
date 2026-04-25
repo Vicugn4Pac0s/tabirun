@@ -33,7 +33,7 @@ export const UserProfileDialog = ({
   onOpenChange,
 }: UserProfileDialogProps) => {
   const { user, isLoading } = useUserQuery();
-  const { genderOptions, paceOptions } = useUserProfileFieldOptions();
+  const { genderOptions } = useUserProfileFieldOptions();
   const { updateUser, isUpdating } = useUpdateUser();
 
   const {
@@ -95,7 +95,6 @@ export const UserProfileDialog = ({
             control={control}
             errors={errors}
             genderOptions={genderOptions}
-            paceOptions={paceOptions}
             disabled={isLoading || isUpdating}
           />
 

@@ -3,7 +3,7 @@ import { usePacesQuery } from "../hooks/usePacesQuery";
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 
 interface PaceSelectProps {
-  value?: Pace;
+  value?: string;
   onChangeValue: (pace: Pace) => void;
   placeholder?: string;
   className?: string;

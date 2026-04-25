@@ -22,7 +22,7 @@ type InitialProfileFormProps = {
 
 export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) => {
   const router = useRouter();
-  const { genderOptions, paceOptions } = useUserProfileFieldOptions();
+  const { genderOptions } = useUserProfileFieldOptions();
   const { completeInitialProfile, isCompleting } = useCompleteInitialProfile();
 
   const {
@@ -62,7 +62,6 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
         control={control}
         errors={errors}
         genderOptions={genderOptions}
-        paceOptions={paceOptions}
         disabled={isCompleting}
       />
 

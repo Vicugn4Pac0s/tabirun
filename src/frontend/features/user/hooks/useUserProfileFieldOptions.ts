@@ -1,7 +1,3 @@
-import { useMemo } from "react";
-
-import { usePacesQuery } from "~/frontend/features/pace/hooks/usePacesQuery";
-
 export const genderOptions = [
   { value: "male", label: "男性" },
   { value: "female", label: "女性" },
@@ -10,19 +6,7 @@ export const genderOptions = [
 ];
 
 export const useUserProfileFieldOptions = () => {
-  const { paces } = usePacesQuery();
-
-  const paceOptions = useMemo(
-    () =>
-      paces.map((pace) => ({
-        value: pace.value,
-        label: pace.value,
-      })),
-    [paces],
-  );
-
   return {
     genderOptions,
-    paceOptions,
   };
 };
