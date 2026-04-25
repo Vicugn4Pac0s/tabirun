@@ -49,16 +49,15 @@ export const UserProfileDialog = ({
     control,
     handleSubmit,
     reset,
-    setValue,
     formState: { errors },
   } = useForm<UserProfileUpdateInput>({
     resolver: zodResolver(userProfileUpdateSchema),
     defaultValues: {
       birthDate: null,
-      gender: null,
-      pace: null,
-      height: null,
-      weight: null,
+      gender: undefined,
+      pace: undefined,
+      height: undefined,
+      weight: undefined,
     },
   });
 
@@ -67,10 +66,10 @@ export const UserProfileDialog = ({
 
     reset({
       birthDate: user?.birthDate ?? null,
-      gender: user?.gender ?? null,
-      pace: user?.pace ?? null,
-      height: user?.height ?? null,
-      weight: user?.weight ?? null,
+      gender: user?.gender,
+      pace: user?.pace,
+      height: user?.height,
+      weight: user?.weight,
     });
   }, [open, reset, user]);
 
@@ -124,23 +123,13 @@ export const UserProfileDialog = ({
               render={({ field }) => (
                 <Selectbox
                   items={genderOptions}
-                  value={field.value ?? undefined}
+                  value={field.value}
                   onValueChange={(value) => field.onChange(value)}
                   placeholder="選択してください"
                   className="w-full"
                 />
               )}
             />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="px-0"
-              onClick={() => setValue("gender", null)}
-              disabled={isUpdating}
-            >
-              性別をクリア
-            </Button>
             {errors.gender && (
               <p className="text-sm text-red-500">{errors.gender.message}</p>
             )}
@@ -154,23 +143,13 @@ export const UserProfileDialog = ({
               render={({ field }) => (
                 <Selectbox
                   items={paceOptions}
-                  value={field.value ?? undefined}
+                  value={field.value}
                   onValueChange={(value) => field.onChange(value)}
                   placeholder="選択してください"
                   className="w-full"
                 />
               )}
             />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="px-0"
-              onClick={() => setValue("pace", null)}
-              disabled={isUpdating}
-            >
-              ペースをクリア
-            </Button>
             {errors.pace && (
               <p className="text-sm text-red-500">{errors.pace.message}</p>
             )}
@@ -185,7 +164,7 @@ export const UserProfileDialog = ({
                 disabled={isLoading || isUpdating}
                 {...register("height", {
                   setValueAs: (value: string) =>
-                    value === "" ? null : Number.parseInt(value, 10),
+                    value === "" ? undefined : Number.parseInt(value, 10),
                 })}
               />
               {errors.height && (
@@ -201,7 +180,7 @@ export const UserProfileDialog = ({
                 disabled={isLoading || isUpdating}
                 {...register("weight", {
                   setValueAs: (value: string) =>
-                    value === "" ? null : Number.parseInt(value, 10),
+                    value === "" ? undefined : Number.parseInt(value, 10),
                 })}
               />
               {errors.weight && (
