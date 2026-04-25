@@ -14,14 +14,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/frontend/components/ui/dialog";
-import { UserProfileFormFields } from "~/frontend/features/user/components/UserProfileFormFields";
+import {
+  type UserProfileFormValues,
+  UserProfileFormFields,
+} from "~/frontend/features/user/components/UserProfileFormFields";
 import { useUserProfileFieldOptions } from "~/frontend/features/user/hooks/useUserProfileFieldOptions";
 import { useUpdateUser } from "~/frontend/features/user/hooks/useUpdateUser";
 import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
-import {
-  type UserProfileUpdateInput,
-  userProfileUpdateSchema,
-} from "~/shared/schemas";
+import { userProfileUpdateSchema } from "~/shared/schemas";
 
 type UserProfileDialogProps = {
   open: boolean;
@@ -42,7 +42,7 @@ export const UserProfileDialog = ({
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<UserProfileUpdateInput>({
+  } = useForm<UserProfileFormValues>({
     resolver: zodResolver(userProfileUpdateSchema),
     defaultValues: {
       birthDate: undefined,
@@ -65,8 +65,10 @@ export const UserProfileDialog = ({
     });
   }, [open, reset, user]);
 
-  const submitProfile = async (data: UserProfileUpdateInput) => {
-    await updateUser(data, {
+  const submitProfile = async (data: UserProfileFormValues) => {
+    const parsedData = userProfileUpdateSchema.parse(data);
+
+    await updateUser(parsedData, {
       onSuccess: () => {
         toast.success("プロフィールを更新しました");
         onOpenChange(false);

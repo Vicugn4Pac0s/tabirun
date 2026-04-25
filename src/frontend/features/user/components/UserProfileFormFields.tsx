@@ -1,6 +1,6 @@
 "use client";
 
-import { Controller, type Control, type FieldErrors, type FieldValues, type Path, type UseFormRegister } from "react-hook-form";
+import { Controller, type Control, type FieldErrors, type FieldError, type UseFormRegister } from "react-hook-form";
 
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import { Input } from "~/frontend/components/ui/input";
@@ -10,7 +10,7 @@ type SelectOption = {
   label: string;
 };
 
-type UserProfileFormFieldValues = {
+export type UserProfileFormValues = {
   birthDate?: string;
   gender?: string;
   pace?: string;
@@ -18,10 +18,10 @@ type UserProfileFormFieldValues = {
   weight?: number;
 };
 
-type UserProfileFormFieldsProps<T extends FieldValues & UserProfileFormFieldValues> = {
-  register: UseFormRegister<T>;
-  control: Control<T>;
-  errors: FieldErrors<T>;
+type UserProfileFormFieldsProps = {
+  register: UseFormRegister<UserProfileFormValues>;
+  control: Control<UserProfileFormValues>;
+  errors: FieldErrors<UserProfileFormValues>;
   genderOptions: SelectOption[];
   paceOptions: SelectOption[];
   disabled: boolean;
@@ -32,29 +32,16 @@ const toOptionalString = (value: string) => (value === "" ? undefined : value);
 const toOptionalInt = (value: string) =>
   value === "" ? undefined : Number.parseInt(value, 10);
 
-const getErrorMessage = (error: unknown) => {
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof (error as { message?: unknown }).message === "string"
-  ) {
-    return (error as { message: string }).message;
-  }
+const getErrorMessage = (error: FieldError | undefined) => error?.message;
 
-  return undefined;
-};
-
-export const UserProfileFormFields = <
-  T extends FieldValues & UserProfileFormFieldValues,
->({
+export const UserProfileFormFields = ({
   register,
   control,
   errors,
   genderOptions,
   paceOptions,
   disabled,
-}: UserProfileFormFieldsProps<T>) => {
+}: UserProfileFormFieldsProps) => {
   const birthDateError = getErrorMessage(errors.birthDate);
   const genderError = getErrorMessage(errors.gender);
   const paceError = getErrorMessage(errors.pace);
@@ -68,7 +55,7 @@ export const UserProfileFormFields = <
         <Input
           type="date"
           disabled={disabled}
-          {...register("birthDate" as Path<T>, {
+          {...register("birthDate", {
             setValueAs: toOptionalString,
           })}
         />
@@ -79,11 +66,11 @@ export const UserProfileFormFields = <
         <label className="text-sm font-medium">性別</label>
         <Controller
           control={control}
-          name={"gender" as Path<T>}
+          name="gender"
           render={({ field }) => (
             <Selectbox
               items={genderOptions}
-              value={(field.value as string | undefined) ?? undefined}
+              value={field.value ?? undefined}
               onValueChange={(value) => field.onChange(value)}
               placeholder="選択してください"
               className="w-full"
@@ -97,11 +84,11 @@ export const UserProfileFormFields = <
         <label className="text-sm font-medium">ランニングのペース</label>
         <Controller
           control={control}
-          name={"pace" as Path<T>}
+          name="pace"
           render={({ field }) => (
             <Selectbox
               items={paceOptions}
-              value={(field.value as string | undefined) ?? undefined}
+              value={field.value ?? undefined}
               onValueChange={(value) => field.onChange(value)}
               placeholder="選択してください"
               className="w-full"
@@ -118,7 +105,7 @@ export const UserProfileFormFields = <
             type="number"
             inputMode="numeric"
             disabled={disabled}
-            {...register("height" as Path<T>, {
+            {...register("height", {
               setValueAs: toOptionalInt,
             })}
           />
@@ -131,7 +118,7 @@ export const UserProfileFormFields = <
             type="number"
             inputMode="numeric"
             disabled={disabled}
-            {...register("weight" as Path<T>, {
+            {...register("weight", {
               setValueAs: toOptionalInt,
             })}
           />

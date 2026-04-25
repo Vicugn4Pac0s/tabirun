@@ -6,22 +6,18 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "~/frontend/components/ui/button";
-import { UserProfileFormFields } from "~/frontend/features/user/components/UserProfileFormFields";
+import {
+  type UserProfileFormValues,
+  UserProfileFormFields,
+} from "~/frontend/features/user/components/UserProfileFormFields";
 import { useCompleteInitialProfile } from "~/frontend/features/user/hooks/useCompleteInitialProfile";
 import { useUserProfileFieldOptions } from "~/frontend/features/user/hooks/useUserProfileFieldOptions";
 import {
-  type UserInitialProfileInput,
   userInitialProfileSchema,
 } from "~/shared/schemas";
 
 type InitialProfileFormProps = {
-  initialValues: {
-    birthDate?: string;
-    gender?: string;
-    pace?: string;
-    height?: number;
-    weight?: number;
-  };
+  initialValues: UserProfileFormValues;
 };
 
 export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) => {
@@ -34,7 +30,7 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<UserInitialProfileInput>({
+  } = useForm<UserProfileFormValues>({
     resolver: zodResolver(userInitialProfileSchema),
     defaultValues: {
       birthDate: initialValues.birthDate,
@@ -45,8 +41,10 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
     },
   });
 
-  const submitProfile = async (data: UserInitialProfileInput) => {
-    await completeInitialProfile(data, {
+  const submitProfile = async (data: UserProfileFormValues) => {
+    const parsedData = userInitialProfileSchema.parse(data);
+
+    await completeInitialProfile(parsedData, {
       onSuccess: () => {
         toast.success("初期設定を保存しました");
         router.replace("/");
