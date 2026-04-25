@@ -9,7 +9,7 @@ import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import { Button } from "~/frontend/components/ui/button";
 import { Input } from "~/frontend/components/ui/input";
 import { usePacesQuery } from "~/frontend/features/pace/hooks/usePacesQuery";
-import { useUpdateUser } from "~/frontend/features/user/hooks/useUpdateUser";
+import { useCompleteInitialProfile } from "~/frontend/features/user/hooks/useCompleteInitialProfile";
 import {
   type UserInitialProfileInput,
   userInitialProfileSchema,
@@ -35,7 +35,7 @@ const genderOptions = [
 export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) => {
   const router = useRouter();
   const { paces } = usePacesQuery();
-  const { updateUser, isUpdating } = useUpdateUser();
+  const { completeInitialProfile, isCompleting } = useCompleteInitialProfile();
 
   const {
     register,
@@ -59,7 +59,7 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
   }));
 
   const submitProfile = async (data: UserInitialProfileInput) => {
-    await updateUser(data, {
+    await completeInitialProfile(data, {
       onSuccess: () => {
         toast.success("初期設定を保存しました");
         router.replace("/");
@@ -76,7 +76,7 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
         <label className="text-sm font-medium">生年月日</label>
         <Input
           type="date"
-          disabled={isUpdating}
+          disabled={isCompleting}
           {...register("birthDate")}
         />
         {errors.birthDate && (
@@ -130,9 +130,10 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
           <Input
             type="number"
             inputMode="numeric"
-            disabled={isUpdating}
+            disabled={isCompleting}
             {...register("height", {
-              setValueAs: (value: string) => Number.parseInt(value, 10),
+              setValueAs: (value: string) =>
+                value === "" ? undefined : Number.parseInt(value, 10),
             })}
           />
           {errors.height && (
@@ -145,9 +146,10 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
           <Input
             type="number"
             inputMode="numeric"
-            disabled={isUpdating}
+            disabled={isCompleting}
             {...register("weight", {
-              setValueAs: (value: string) => Number.parseInt(value, 10),
+              setValueAs: (value: string) =>
+                value === "" ? undefined : Number.parseInt(value, 10),
             })}
           />
           {errors.weight && (
@@ -156,8 +158,8 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isUpdating}>
-        {isUpdating ? "保存中..." : "初期設定を完了"}
+      <Button type="submit" className="w-full" disabled={isCompleting}>
+        {isCompleting ? "保存中..." : "初期設定を完了"}
       </Button>
     </form>
   );

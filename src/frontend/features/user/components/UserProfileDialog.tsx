@@ -65,11 +65,11 @@ export const UserProfileDialog = ({
     if (!open) return;
 
     reset({
-      birthDate: user?.birthDate,
-      gender: user?.gender,
-      pace: user?.pace,
-      height: user?.height,
-      weight: user?.weight,
+      birthDate: user?.birthDate ?? undefined,
+      gender: user?.gender ?? undefined,
+      pace: user?.pace ?? undefined,
+      height: user?.height ?? undefined,
+      weight: user?.weight ?? undefined,
     });
   }, [open, reset, user]);
 

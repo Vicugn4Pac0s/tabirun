@@ -2,7 +2,10 @@ import { eq } from "drizzle-orm";
 
 import { createTRPCRouter } from "~/server/api/trpc";
 import { protectedProcedure } from "../procedure";
-import { userProfileUpdateSchema } from "~/shared/schemas";
+import {
+  userInitialProfileSchema,
+  userProfileUpdateSchema,
+} from "~/shared/schemas";
 import { users } from "~/server/db/schema";
 
 export const userRouter = createTRPCRouter({
@@ -19,6 +22,7 @@ export const userRouter = createTRPCRouter({
         pace: true,
         height: true,
         weight: true,
+        profileCompletedAt: true,
       },
     });
 
@@ -53,6 +57,39 @@ export const userRouter = createTRPCRouter({
           pace: true,
           height: true,
           weight: true,
+          profileCompletedAt: true,
+        },
+      });
+    }),
+
+  completeInitialProfile: protectedProcedure
+    .input(userInitialProfileSchema)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(users)
+        .set({
+          birthDate: input.birthDate,
+          gender: input.gender,
+          pace: input.pace,
+          height: input.height,
+          weight: input.weight,
+          profileCompletedAt: new Date(),
+        })
+        .where(eq(users.id, ctx.session.user.id));
+
+      return ctx.db.query.users.findFirst({
+        where: eq(users.id, ctx.session.user.id),
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          birthDate: true,
+          gender: true,
+          pace: true,
+          height: true,
+          weight: true,
+          profileCompletedAt: true,
         },
       });
     }),

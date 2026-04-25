@@ -7,7 +7,6 @@ import { db } from "~/server/db";
 import { users } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { isUserProfileCompleted } from "~/shared/schemas";
 
 export default async function Home() {
   const session = await auth();
@@ -16,15 +15,11 @@ export default async function Home() {
     const user = await db.query.users.findFirst({
       where: eq(users.id, session.user.id),
       columns: {
-        birthDate: true,
-        gender: true,
-        pace: true,
-        height: true,
-        weight: true,
+        profileCompletedAt: true,
       },
     });
 
-    if (user && !isUserProfileCompleted(user)) {
+    if (user && !user.profileCompletedAt) {
       redirect("/setup-profile");
     }
   }
