@@ -53,7 +53,7 @@ export const UserProfileDialog = ({
   } = useForm<UserProfileUpdateInput>({
     resolver: zodResolver(userProfileUpdateSchema),
     defaultValues: {
-      birthDate: null,
+      birthDate: undefined,
       gender: undefined,
       pace: undefined,
       height: undefined,
@@ -65,7 +65,7 @@ export const UserProfileDialog = ({
     if (!open) return;
 
     reset({
-      birthDate: user?.birthDate ?? null,
+      birthDate: user?.birthDate,
       gender: user?.gender,
       pace: user?.pace,
       height: user?.height,
@@ -106,9 +106,7 @@ export const UserProfileDialog = ({
             <Input
               type="date"
               disabled={isLoading || isUpdating}
-              {...register("birthDate", {
-                setValueAs: (value: string) => value || null,
-              })}
+              {...register("birthDate")}
             />
             {errors.birthDate && (
               <p className="text-sm text-red-500">{errors.birthDate.message}</p>

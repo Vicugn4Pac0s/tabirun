@@ -5,7 +5,11 @@ import { InitialProfileForm } from "~/frontend/features/user/components/InitialP
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { users } from "~/server/db/schema";
-import { isUserProfileCompleted, UNSET_PROFILE_VALUE } from "~/shared/schemas";
+import {
+  isUserProfileCompleted,
+  UNSET_BIRTH_DATE_VALUE,
+  UNSET_PROFILE_VALUE,
+} from "~/shared/schemas";
 
 export default async function SetupProfilePage() {
   const session = await auth();
@@ -17,6 +21,7 @@ export default async function SetupProfilePage() {
   const user = await db.query.users.findFirst({
     where: eq(users.id, session.user.id),
     columns: {
+      birthDate: true,
       gender: true,
       pace: true,
       height: true,
@@ -44,6 +49,10 @@ export default async function SetupProfilePage() {
 
         <InitialProfileForm
           initialValues={{
+            birthDate:
+              user.birthDate === UNSET_BIRTH_DATE_VALUE
+                ? undefined
+                : user.birthDate,
             gender: user.gender === UNSET_PROFILE_VALUE ? undefined : user.gender,
             pace: user.pace === UNSET_PROFILE_VALUE ? undefined : user.pace,
             height: user.height > 0 ? user.height : undefined,

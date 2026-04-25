@@ -17,6 +17,7 @@ import {
 
 type InitialProfileFormProps = {
   initialValues: {
+    birthDate?: string;
     gender?: string;
     pace?: string;
     height?: number;
@@ -44,6 +45,7 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
   } = useForm<UserInitialProfileInput>({
     resolver: zodResolver(userInitialProfileSchema),
     defaultValues: {
+      birthDate: initialValues.birthDate,
       gender: initialValues.gender,
       pace: initialValues.pace,
       height: initialValues.height,
@@ -70,6 +72,18 @@ export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) =
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(submitProfile)}>
+      <div className="space-y-1">
+        <label className="text-sm font-medium">生年月日</label>
+        <Input
+          type="date"
+          disabled={isUpdating}
+          {...register("birthDate")}
+        />
+        {errors.birthDate && (
+          <p className="text-sm text-red-500">{errors.birthDate.message}</p>
+        )}
+      </div>
+
       <div className="space-y-1">
         <label className="text-sm font-medium">性別</label>
         <Controller

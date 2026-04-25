@@ -16,6 +16,7 @@ export default async function Home() {
     const user = await db.query.users.findFirst({
       where: eq(users.id, session.user.id),
       columns: {
+        birthDate: true,
         gender: true,
         pace: true,
         height: true,

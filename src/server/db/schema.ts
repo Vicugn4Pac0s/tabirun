@@ -52,7 +52,7 @@ export const users = createTable("user", {
     mode: "timestamp",
   }).default(sql`(unixepoch())`),
   image: text("image", { length: 255 }),
-  birthDate: text("birth_date", { length: 10 }),
+  birthDate: text("birth_date", { length: 10 }).notNull().default("0000-00-00"),
   gender: text("gender", { length: 50 }).notNull().default("unset"),
   pace: text("pace", { length: 255 }).notNull().default("unset"),
   height: int("height").notNull().default(0),

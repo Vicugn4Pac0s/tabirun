@@ -5,7 +5,7 @@ CREATE TABLE `__new_template_t3app_user` (
 	`email` text(255) NOT NULL,
 	`email_verified` integer DEFAULT (unixepoch()),
 	`image` text(255),
-	`birth_date` text(10),
+	`birth_date` text(10) DEFAULT '0000-00-00' NOT NULL,
 	`gender` text(50) DEFAULT 'unset' NOT NULL,
 	`pace` text(255) DEFAULT 'unset' NOT NULL,
 	`height` integer DEFAULT 0 NOT NULL,
@@ -19,11 +19,11 @@ SELECT
 	"email",
 	"email_verified",
 	"image",
-	"birth_date",
-	COALESCE("gender", 'unset'),
-	COALESCE("pace", 'unset'),
-	COALESCE("height", 0),
-	COALESCE("weight", 0)
+	COALESCE("birth_date", '0000-00-00'),
+	"gender",
+	"pace",
+	"height",
+	"weight"
 FROM `template_t3app_user`;--> statement-breakpoint
 DROP TABLE `template_t3app_user`;--> statement-breakpoint
 ALTER TABLE `__new_template_t3app_user` RENAME TO `template_t3app_user`;--> statement-breakpoint

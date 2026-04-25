@@ -43,6 +43,13 @@
       "when": 1777097571365,
       "tag": "0005_fresh_manta",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1777098567746,
+      "tag": "0006_soft_jazinda",
+      "breakpoints": true
     }
   ]
 }
