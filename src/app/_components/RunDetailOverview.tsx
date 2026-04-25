@@ -1,6 +1,6 @@
 import { Pace } from "~/frontend/types/pace";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { calcCaloriesFromRun, calcTimeFromDistanceAndPace, metersToKilometers } from "~/frontend/lib/running";
 import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
 import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
@@ -10,6 +10,7 @@ import { StatValue } from "~/frontend/components/app-ui/StatValue";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import RoutePointListItem from "~/frontend/features/route-points/components/RoutePointListItem";
 import CreateRouteDialog from "~/frontend/features/route/components/CreateRouteDialog";
+import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
 
 interface RunDetailOverviewProps {
   routePoints: google.maps.LatLngLiteral[];
@@ -17,6 +18,8 @@ interface RunDetailOverviewProps {
 
 function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
   const { permissions } = useAuthPermission();
+  const { data: session, status } = useSession();
+  const { user } = useUserQuery({ enabled: status === "authenticated" });
   const { directions, isLoading } = useGooglemapDirectionQuery(routePoints, {
     enabled: permissions.canUseDirections,
   });
@@ -24,11 +27,15 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
 
   const [selectedPace, setSelectedPace] = useState<Pace>("5:00");
 
+  useEffect(() => {
+    if (user?.pace) {
+      setSelectedPace(user.pace as Pace);
+    }
+  }, [user?.pace]);
+
   const kilometers = directions?.distanceMeters ? metersToKilometers(directions.distanceMeters) : 0;
   const time =  kilometers && calcTimeFromDistanceAndPace(kilometers, selectedPace)
-  const calories =  calcCaloriesFromRun(60, kilometers, selectedPace);
-
-  const {data: session} = useSession();
+  const calories = calcCaloriesFromRun(user?.weight ?? 60, kilometers, selectedPace);
   
   if (isLoading) {
     return <div className="flex justify-center items-center"><Spinner className="size-6" /></div>;

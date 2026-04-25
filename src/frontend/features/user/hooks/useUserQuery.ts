@@ -1,8 +1,13 @@
 import { api } from "~/trpc/react";
 
-export const useUserQuery = () => {
+type UseUserQueryOptions = {
+  enabled?: boolean;
+};
+
+export const useUserQuery = ({ enabled = true }: UseUserQueryOptions = {}) => {
   const { data, ...query } = api.user.getCurrent.useQuery(undefined, {
     staleTime: Infinity,
+    enabled,
   });
 
   return {
