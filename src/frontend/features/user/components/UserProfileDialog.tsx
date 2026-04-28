@@ -65,7 +65,7 @@ export const UserProfileDialog = ({
 
   useEffect(() => {
     if (!open || !error) return;
-    toast.error("プロフィール情報の取得に失敗しました");
+    toast.error("プロフィール情報を取得できませんでした。時間をおいて再度お試しください。");
   }, [error, open]);
 
   const submitProfile = async (data: UserProfileFormValues) => {
@@ -77,7 +77,7 @@ export const UserProfileDialog = ({
         onOpenChange(false);
       },
       onError: () => {
-        toast.error("プロフィールの更新に失敗しました");
+        toast.error("プロフィールを更新できませんでした。時間をおいて再度お試しください。");
       },
     });
   };

@@ -44,7 +44,7 @@ function CreateRouteDialog({ routePoints, kilometers }: CreateRouteDialogProps) 
         setOpen(false);
       },
       onError: () => {
-        toast.error("ルートの保存に失敗しました");
+        toast.error("ルートを保存できませんでした。時間をおいて再度お試しください。");
       },
     });
   };

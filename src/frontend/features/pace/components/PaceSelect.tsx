@@ -45,7 +45,7 @@ function PaceSelect({
       />
       {error && (
         <p className="mt-2 text-sm text-red-500">
-          ペース一覧の取得に失敗しました。時間をおいて再度お試しください。
+          ペース一覧を取得できませんでした。時間をおいて再度お試しください。
         </p>
       )}
     </div>
