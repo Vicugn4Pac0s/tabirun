@@ -25,11 +25,11 @@ const RoutePointsNavigation = ({ currentPoint }: RoutePointsNavigationProps) => 
       <div className="flex">
         <SubActionButton type="first" disabled={!canFirst} onClick={()=>{
           if(!firstRoutePoint) return;
-          moveStreetView(firstRoutePoint);
+          void moveStreetView(firstRoutePoint);
         }} />
         <SubActionButton type="prev" disabled={!canPrev} onClick={()=>{
           if(!prevRoutePoint) return;
-          moveStreetView(prevRoutePoint);
+          void moveStreetView(prevRoutePoint);
         }} />
       </div>
       <div className="absolute left-1/2 bottom-1 -translate-x-1/2 z-10">
@@ -41,11 +41,11 @@ const RoutePointsNavigation = ({ currentPoint }: RoutePointsNavigationProps) => 
       <div className="flex">
         <SubActionButton type="next" disabled={!canNext} onClick={()=>{
           if(!nextRoutePoint) return;
-          moveStreetView(nextRoutePoint);
+          void moveStreetView(nextRoutePoint);
         }} />
         <SubActionButton type="last" disabled={!canLast} onClick={()=>{
           if(!lastRoutePoint) return;
-          moveStreetView(lastRoutePoint);
+          void moveStreetView(lastRoutePoint);
         }} />
       </div>
     </div>

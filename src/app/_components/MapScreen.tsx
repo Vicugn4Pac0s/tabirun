@@ -19,7 +19,7 @@ import RoutePolyline from "~/frontend/features/googlemap/components/RoutePolylin
 
 function MapScreen() {
   const { permissions } = useAuthPermission();
-  const { map, setMap, streetView } = useGoogleMap();
+  const { map, setMap, streetView, streetViewUnavailable } = useGoogleMap();
   const moveStreetView = useMoveStreetView();
   const [streetViewCenter, setStreetViewCenter] =
     useState<google.maps.LatLngLiteral | null>(null);
@@ -52,6 +52,16 @@ function MapScreen() {
             setStreetViewPov(pov);
           }}
         />
+        {streetViewUnavailable && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/55 px-6 text-center text-white">
+            <div>
+              <p className="text-lg font-bold">この地点ではStreet Viewを表示できません</p>
+              <p className="mt-2 text-sm text-white/80">
+                道路沿いなど、Street Viewに対応した地点を選んでください。
+              </p>
+            </div>
+          </div>
+        )}
         <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2">
           {streetViewCenter && (
             <RoutePointsNavigation currentPoint={streetViewCenter} />
@@ -76,7 +86,7 @@ function MapScreen() {
             const latLng = e.latLng;
             if (!latLng) return;
             const latLngLiteral = latLng.toJSON() as google.maps.LatLngLiteral;
-            moveStreetView(latLngLiteral);
+            void moveStreetView(latLngLiteral);
           }}
         >
           <StreetViewPointMarker
@@ -92,7 +102,7 @@ function MapScreen() {
               latLng={point}
               index={index}
               onClick={() => {
-                moveStreetView(point);
+                void moveStreetView(point);
               }}
             />
           ))}

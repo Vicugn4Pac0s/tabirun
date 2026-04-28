@@ -13,6 +13,8 @@ type MapContextValue = {
   map: google.maps.Map | null;
   setMap: Dispatch<SetStateAction<google.maps.Map | null>>;
   streetView: React.MutableRefObject<google.maps.StreetViewPanorama | null>;
+  streetViewUnavailable: boolean;
+  setStreetViewUnavailable: Dispatch<SetStateAction<boolean>>;
 };
 
 const GoogleMapContext = createContext<MapContextValue | null>(null);
@@ -23,6 +25,7 @@ type Props = {
 
 export const GoogleMapProvider = ({ children }: Props) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [streetViewUnavailable, setStreetViewUnavailable] = useState(false);
   const streetView = useRef<google.maps.StreetViewPanorama | null>(null);
 
   const value = useMemo(
@@ -30,8 +33,10 @@ export const GoogleMapProvider = ({ children }: Props) => {
       map,
       setMap,
       streetView,
+      streetViewUnavailable,
+      setStreetViewUnavailable,
     }),
-    [map]
+    [map, streetViewUnavailable]
   );
 
   return <GoogleMapContext.Provider value={value}>{children}</GoogleMapContext.Provider>;

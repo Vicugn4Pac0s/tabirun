@@ -54,7 +54,7 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
         <ul>
           {routePoints.map((point, index) => (
             <li key={index} className="mb-2">
-              <RoutePointListItem routePoint={point} index={index} onClick={(_) => moveStreetView(point)} />
+              <RoutePointListItem routePoint={point} index={index} onClick={(_) => void moveStreetView(point)} />
             </li>
           ))}
         </ul>
