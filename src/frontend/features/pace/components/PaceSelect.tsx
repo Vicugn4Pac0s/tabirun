@@ -17,7 +17,7 @@ function PaceSelect({
   className,
   disabled,
 }: PaceSelectProps) {
-  const { paces } = usePacesQuery();
+  const { paces, error } = usePacesQuery();
 
   const paceOptions =
     paces?.map((pace) => ({
@@ -30,18 +30,25 @@ function PaceSelect({
   };
 
   return (
-    <Selectbox
-      items={paceOptions}
-      value={value}
-      onValueChange={(value) => {
-        if (isPace(value)) {
-          onChangeValue(value);
-        }
-      }}
-      placeholder={placeholder}
-      disabled={disabled}
-      className={`w-full ${className || ""}`}
-    />
+    <div className={`w-full ${className || ""}`}>
+      <Selectbox
+        items={paceOptions}
+        value={value}
+        onValueChange={(value) => {
+          if (isPace(value)) {
+            onChangeValue(value);
+          }
+        }}
+        placeholder={placeholder}
+        disabled={disabled || !!error}
+        className="w-full"
+      />
+      {error && (
+        <p className="mt-2 text-sm text-red-500">
+          ペース一覧の取得に失敗しました。時間をおいて再度お試しください。
+        </p>
+      )}
+    </div>
   );
 }
 

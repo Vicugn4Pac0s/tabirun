@@ -31,7 +31,7 @@ export const UserProfileDialog = ({
   open,
   onOpenChange,
 }: UserProfileDialogProps) => {
-  const { user, isLoading } = useUserQuery();
+  const { user, isLoading, error } = useUserQuery();
   const { updateUser, isUpdating } = useUpdateUser();
 
   const {
@@ -62,6 +62,11 @@ export const UserProfileDialog = ({
       weight: user?.weight ?? undefined,
     });
   }, [open, reset, user]);
+
+  useEffect(() => {
+    if (!open || !error) return;
+    toast.error("プロフィール情報の取得に失敗しました");
+  }, [error, open]);
 
   const submitProfile = async (data: UserProfileFormValues) => {
     const parsedData = userProfileUpdateSchema.parse(data);
@@ -104,7 +109,7 @@ export const UserProfileDialog = ({
             >
               キャンセル
             </Button>
-            <Button type="submit" disabled={isLoading || isUpdating}>
+            <Button type="submit" disabled={isLoading || isUpdating || !!error}>
               {isUpdating ? "更新中..." : "保存する"}
             </Button>
           </DialogFooter>

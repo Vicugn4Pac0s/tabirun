@@ -10,6 +10,9 @@ import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import RoutePointListItem from "~/frontend/features/route-points/components/RoutePointListItem";
 import CreateRouteDialog from "~/frontend/features/route/components/CreateRouteDialog";
 import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
+import { type TRPCClientErrorLike } from "@trpc/client";
+import { type AppRouter } from "~/server/api/root";
+import DirectionsWarningBanner from "./DirectionsWarningBanner";
 import { RunCalculatedStats } from "./RunCalculatedStats";
 
 interface RunDetailOverviewProps {
@@ -20,7 +23,7 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
   const { permissions } = useAuthPermission();
   const { data: session, status } = useSession();
   const { user } = useUserQuery({ enabled: status === "authenticated" });
-  const { directions, isLoading } = useGooglemapDirectionQuery(routePoints, {
+  const { directions, isLoading, error } = useGooglemapDirectionQuery(routePoints, {
     enabled: permissions.canUseDirections,
   });
   const moveStreetView = useMoveStreetView();
@@ -41,6 +44,11 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
 
   return (
     <div>
+      {error && (
+        <DirectionsWarningBanner
+          error={error as TRPCClientErrorLike<AppRouter>}
+        />
+      )}
       <div className="mb-6">
         <p className="font-bold text-base-gray mb-2">ペース</p>
         <PaceSelect value={selectedPace} onChangeValue={setSelectedPace} className="w-full"/>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { RouteCreateInput, routeCreateSchema } from "~/shared/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 import {
   Dialog,
@@ -41,7 +42,10 @@ function CreateRouteDialog({ routePoints, kilometers }: CreateRouteDialogProps) 
       onSuccess: () => {
         reset();
         setOpen(false);
-      }
+      },
+      onError: () => {
+        toast.error("ルートの保存に失敗しました");
+      },
     });
   };
   
