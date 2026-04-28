@@ -9,7 +9,7 @@ import { useAuthPermission } from "~/frontend/features/auth/components/hooks/use
 import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
-import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
+import useRoutePolylinePath from "~/frontend/hooks/googlemap/useRoutePolylinePath";
 import GoogleMapView from "~/frontend/features/googlemap/components/GoogleMapView";
 import StreetView from "~/frontend/features/googlemap/components/StreetView";
 import RoutePointsNavigation from "~/frontend/features/route-points-navigation/components/RouteNavigation";
@@ -26,8 +26,8 @@ function MapScreen() {
   const [streetViewPov, setStreetViewPov] =
     useState<google.maps.StreetViewPov | null>(null);
   const routePoints = useRoutePointsStore((state) => state.routePoints);
-  const { directions } = useGooglemapDirectionQuery(routePoints, {
-    enabled: permissions.canUseDirections,
+  const { polylinePath } = useRoutePolylinePath(routePoints, {
+    canUseDirections: permissions.canUseDirections,
   });
 
   return (
@@ -94,7 +94,9 @@ function MapScreen() {
             latLng={streetViewCenter}
             pov={streetViewPov}
           />
-          {directions && <RoutePolyline map={map} polylineArray={directions.path} />}
+          {polylinePath && (
+            <RoutePolyline map={map} polylineArray={polylinePath} />
+          )}
           {routePoints.map((point, index) => (
             <RoutePointMarker
               key={index}
