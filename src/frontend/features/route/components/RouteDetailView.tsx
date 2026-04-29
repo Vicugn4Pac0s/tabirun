@@ -14,7 +14,15 @@ function RouteDetailView() {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
   const clearRoutePoints = useRoutePointsStore((state) => state.clearRoutePoints);
   const setRoutePoints = useRoutePointsStore((state) => state.setRoutePoints);
-  const { selectedRoute, mode, draftTitle, isDirty } = useRouteEditorState();
+  const {
+    selectedRoute,
+    mode,
+    draftTitle,
+    trimmedDraftTitle,
+    isDirty,
+    canUpdate,
+  } =
+    useRouteEditorState();
   const setDraftTitle = useSelectedRouteStore((state) => state.setDraftTitle);
   const setMode = useSelectedRouteStore((state) => state.setMode);
   const clearSelectedRoute = useSelectedRouteStore(
@@ -98,14 +106,14 @@ function RouteDetailView() {
                 void updateRoute(
                   {
                     id: selectedRoute.id,
-                    title: draftTitle,
+                    title: trimmedDraftTitle,
                     points: routePoints,
                   },
                   {
                     onSuccess: () => {
                       selectRoute({
                         ...selectedRoute,
-                        title: draftTitle,
+                        title: trimmedDraftTitle,
                         points: routePoints,
                       });
                       setMode("view");
@@ -119,7 +127,7 @@ function RouteDetailView() {
                   },
                 );
               }}
-              disabled={!isDirty || isUpdating}
+              disabled={!canUpdate || isUpdating}
             >
               {isUpdating ? "更新中..." : "更新する"}
             </Button>

@@ -20,17 +20,25 @@ export function useRouteEditorState() {
   const selectedRoute = useSelectedRouteStore((state) => state.selectedRoute);
   const mode = useSelectedRouteStore((state) => state.mode);
   const draftTitle = useSelectedRouteStore((state) => state.draftTitle);
+  const trimmedDraftTitle = draftTitle.trim();
 
   const isDirty = selectedRoute
     ? (selectedRoute.title ?? "") !== draftTitle ||
       !areRoutePointsEqual(selectedRoute.points, routePoints)
     : false;
+  const canUpdate =
+    mode === "edit" &&
+    isDirty &&
+    trimmedDraftTitle.length > 0 &&
+    routePoints.length >= 2;
 
   return {
     selectedRoute,
     mode,
     draftTitle,
+    trimmedDraftTitle,
     isDirty,
+    canUpdate,
     isViewingSavedRoute: Boolean(selectedRoute),
     canEditRoutePoints: !selectedRoute || mode === "edit",
   };
