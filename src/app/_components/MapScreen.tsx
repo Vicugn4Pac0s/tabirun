@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
 import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
+import { useRouteEditorState } from "~/frontend/features/route/hooks/useRouteEditorState";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import useRoutePolylinePath from "~/frontend/hooks/googlemap/useRoutePolylinePath";
 import GoogleMapView from "~/frontend/features/googlemap/components/GoogleMapView";
@@ -26,6 +27,7 @@ function MapScreen() {
   const [streetViewPov, setStreetViewPov] =
     useState<google.maps.StreetViewPov | null>(null);
   const routePoints = useRoutePointsStore((state) => state.routePoints);
+  const { canEditRoutePoints } = useRouteEditorState();
   const { polylinePath } = useRoutePolylinePath(routePoints, {
     canUseDirections: permissions.canUseDirections,
   });
@@ -44,8 +46,7 @@ function MapScreen() {
             motionTrackingControl: false,
           }}
           onPositionChanged={(position) => {
-            const positionLatLngLiteral =
-              position.toJSON() as google.maps.LatLngLiteral;
+            const positionLatLngLiteral = position.toJSON();
             setStreetViewCenter(positionLatLngLiteral);
           }}
           onPovChanged={(pov) => {
@@ -64,7 +65,10 @@ function MapScreen() {
         )}
         <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2">
           {streetViewCenter && (
-            <RoutePointsNavigation currentPoint={streetViewCenter} />
+            <RoutePointsNavigation
+              currentPoint={streetViewCenter}
+              canEdit={canEditRoutePoints}
+            />
           )}
         </div>
       </div>
@@ -85,7 +89,7 @@ function MapScreen() {
           onClick={(e) => {
             const latLng = e.latLng;
             if (!latLng) return;
-            const latLngLiteral = latLng.toJSON() as google.maps.LatLngLiteral;
+            const latLngLiteral = latLng.toJSON();
             void moveStreetView(latLngLiteral);
           }}
         >

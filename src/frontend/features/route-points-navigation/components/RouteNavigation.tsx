@@ -9,14 +9,19 @@ import SubActionButton from "~/frontend/components/app-ui/SubActionButton";
 
 interface RoutePointsNavigationProps {
   currentPoint: google.maps.LatLngLiteral;
+  canEdit?: boolean;
 }
 
-const RoutePointsNavigation = ({ currentPoint }: RoutePointsNavigationProps) => {
+const RoutePointsNavigation = ({
+  currentPoint,
+  canEdit = true,
+}: RoutePointsNavigationProps) => {
   const moveStreetView = useMoveStreetView();
   const { canFirst, canPrev, canNext, canLast, firstRoutePoint, lastRoutePoint, prevRoutePoint, nextRoutePoint } = useRoutePoints(currentPoint);
   const { type, toggle } = useRoutePointAction(currentPoint);
   
   useEnterKey(() => {
+    if (!canEdit) return;
     toggle();
   });
 
@@ -33,10 +38,12 @@ const RoutePointsNavigation = ({ currentPoint }: RoutePointsNavigationProps) => 
         }} />
       </div>
       <div className="absolute left-1/2 bottom-1 -translate-x-1/2 z-10">
-        <MainActionButton
-          type={type}
-          onClick={toggle}
-        />
+        {canEdit ? (
+          <MainActionButton
+            type={type}
+            onClick={toggle}
+          />
+        ) : null}
       </div>
       <div className="flex">
         <SubActionButton type="next" disabled={!canNext} onClick={()=>{
