@@ -1,5 +1,6 @@
 import type { Pace } from "~/frontend/types/pace";
 import { useSession } from "next-auth/react";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { metersToKilometers } from "~/frontend/lib/running";
 import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
@@ -17,9 +18,15 @@ import { type AppRouter } from "~/server/api/root";
 
 interface RunDetailOverviewProps {
   routePoints: google.maps.LatLngLiteral[];
+  header?: ReactNode;
+  action?: ReactNode;
 }
 
-function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
+function RunDetailOverview({
+  routePoints,
+  header,
+  action,
+}: RunDetailOverviewProps) {
   const { permissions } = useAuthPermission();
   const { data: session, status } = useSession();
   const { user } = useUserQuery({ enabled: status === "authenticated" });
@@ -48,6 +55,7 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
 
   return (
     <div>
+      {header ? <div className="mb-6">{header}</div> : null}
       {error && (
         <DirectionsWarningBanner
           error={error as TRPCClientErrorLike<AppRouter>}
@@ -73,11 +81,13 @@ function RunDetailOverview({ routePoints }: RunDetailOverviewProps) {
         }}
       />
       <div className="mt-5 text-center">
-        <RouteCreateAction
-          isAuthenticated={Boolean(session?.user)}
-          routePoints={routePoints}
-          kilometers={kilometers}
-        />
+        {action ?? (
+          <RouteCreateAction
+            isAuthenticated={Boolean(session?.user)}
+            routePoints={routePoints}
+            kilometers={kilometers}
+          />
+        )}
       </div>
     </div>
   );

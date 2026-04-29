@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 interface RoutePointsStore {
   routePoints: google.maps.LatLngLiteral[];
+  setRoutePoints: (routePoints: google.maps.LatLngLiteral[]) => void;
   addRoutePoint: (routePoint: google.maps.LatLngLiteral) => void;
   removeRoutePoint: (index: number) => void;
   removeRoutePointByLatLng: (latLng: google.maps.LatLngLiteral) => void;
@@ -10,6 +11,7 @@ interface RoutePointsStore {
 
 export const useRoutePointsStore = create<RoutePointsStore>((set) => ({
   routePoints: [],
+  setRoutePoints: (routePoints) => set({ routePoints }),
   addRoutePoint: (routePoint) => set(state => ({ routePoints: [...state.routePoints, routePoint] })),
   removeRoutePoint: (index) => set(state => ({ routePoints: state.routePoints.filter((_, i) => i !== index) })),
   removeRoutePointByLatLng: (latLng) => set(state => ({ routePoints: state.routePoints.filter(p => p.lat !== latLng.lat || p.lng !== latLng.lng) })),
