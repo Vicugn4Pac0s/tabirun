@@ -19,7 +19,6 @@ function RouteDetailView() {
     mode,
     draftTitle,
     trimmedDraftTitle,
-    isDirty,
     canUpdate,
   } =
     useRouteEditorState();
@@ -131,13 +130,6 @@ function RouteDetailView() {
             >
               {isUpdating ? "更新中..." : "更新する"}
             </Button>
-            <span
-              className={`self-center text-sm ${
-                isDirty ? "text-amber-600" : "text-gray-500"
-              }`}
-            >
-              {isDirty ? "未保存の変更があります" : "変更はありません"}
-            </span>
           </div>
         )
       }
