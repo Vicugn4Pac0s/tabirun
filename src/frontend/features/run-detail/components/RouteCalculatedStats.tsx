@@ -5,7 +5,7 @@ import {
 } from "~/frontend/lib/running";
 import { type Pace } from "~/frontend/types/pace";
 
-type RunCalculatedStatsProps = {
+type RouteCalculatedStatsProps = {
   pace: Pace;
   distanceKm: number;
   weightKg?: number | null;
@@ -13,11 +13,11 @@ type RunCalculatedStatsProps = {
 
 const DEFAULT_WEIGHT_KG = 60;
 
-export function RunCalculatedStats({
+export function RouteCalculatedStats({
   pace,
   distanceKm,
   weightKg,
-}: RunCalculatedStatsProps) {
+}: RouteCalculatedStatsProps) {
   if (!distanceKm) {
     return null;
   }
@@ -30,15 +30,15 @@ export function RunCalculatedStats({
   );
 
   return (
-    <ul className="grid grid-cols-2 gap-2 text-center mb-6">
+    <ul className="mb-6 grid grid-cols-2 gap-2 text-center">
       <li>
-        <StatValue value={distanceKm} unit="KM" className="text-base-gray text-2xl" />
+        <StatValue value={distanceKm} unit="KM" className="text-2xl text-base-gray" />
       </li>
       <li>
-        <StatValue value={time} className="text-base-gray text-2xl" />
+        <StatValue value={time} className="text-2xl text-base-gray" />
       </li>
       <li>
-        <StatValue value={calories} unit="KCAL" className="text-base-gray text-2xl" />
+        <StatValue value={calories} unit="KCAL" className="text-2xl text-base-gray" />
       </li>
     </ul>
   );
