@@ -1,20 +1,20 @@
-import type { Pace } from "~/frontend/types/pace";
+import type { TRPCClientErrorLike } from "@trpc/client";
 import { useSession } from "next-auth/react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { metersToKilometers } from "~/frontend/lib/running";
-import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
-import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
-import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { Spinner } from "~/frontend/components/ui/spinner";
+import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
+import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import RouteCreateAction from "~/frontend/features/route/components/RouteCreateAction";
-import DirectionsWarningBanner from "~/frontend/features/run-detail/components/DirectionsWarningBanner";
-import { RouteCalculatedStats } from "~/frontend/features/run-detail/components/RouteCalculatedStats";
-import RoutePointList from "~/frontend/features/run-detail/components/RoutePointList";
 import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
-import { type TRPCClientErrorLike } from "@trpc/client";
-import { type AppRouter } from "~/server/api/root";
+import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
+import { metersToKilometers } from "~/frontend/lib/running";
+import type { Pace } from "~/frontend/types/pace";
+import type { AppRouter } from "~/server/api/root";
+import DirectionsWarningBanner from "./DirectionsWarningBanner";
+import { RouteCalculatedStats } from "./RouteCalculatedStats";
+import RoutePointList from "./RoutePointList";
 
 interface RunDetailOverviewProps {
   routePoints: google.maps.LatLngLiteral[];
@@ -30,9 +30,12 @@ function RunDetailOverview({
   const { permissions } = useAuthPermission();
   const { data: session, status } = useSession();
   const { user } = useUserQuery({ enabled: status === "authenticated" });
-  const { directions, isLoading, error } = useGooglemapDirectionQuery(routePoints, {
-    enabled: permissions.canUseDirections,
-  });
+  const { directions, isLoading, error } = useGooglemapDirectionQuery(
+    routePoints,
+    {
+      enabled: permissions.canUseDirections,
+    },
+  );
   const moveStreetView = useMoveStreetView();
 
   const [selectedPace, setSelectedPace] = useState<Pace>("5:00");
@@ -43,7 +46,9 @@ function RunDetailOverview({
     }
   }, [user?.pace]);
 
-  const kilometers = directions?.distanceMeters ? metersToKilometers(directions.distanceMeters) : 0;
+  const kilometers = directions?.distanceMeters
+    ? metersToKilometers(directions.distanceMeters)
+    : 0;
 
   if (isLoading) {
     return (

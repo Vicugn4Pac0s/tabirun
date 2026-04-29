@@ -2,7 +2,7 @@
 
 import { Button } from "~/frontend/components/ui/button";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
-import RunDetailOverview from "~/app/_components/RunDetailOverview";
+import RunDetailOverview from "~/frontend/features/run-detail/components/RunDetailOverview";
 import { useSelectedRouteStore } from "../stores/selectedRouteStore";
 
 function RouteDetailView() {

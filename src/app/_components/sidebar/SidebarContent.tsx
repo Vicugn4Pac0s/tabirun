@@ -5,7 +5,7 @@ import { useRoutePointsStore } from "~/frontend/features/route-points/stores/rou
 import RouteDetailView from "~/frontend/features/route/components/RouteDetailView";
 import RouteList from "~/frontend/features/route/components/RouteList";
 import { useSelectedRouteStore } from "~/frontend/features/route/stores/selectedRouteStore";
-import RunDetailOverview from "../RunDetailOverview";
+import RunDetailOverview from "~/frontend/features/run-detail/components/RunDetailOverview";
 import GuestSidebarContent from "./GuestSidebarContent";
 
 function SidebarContent() {
