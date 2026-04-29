@@ -1,12 +1,22 @@
 import { z } from "zod";
 
+export const routePointsSchema = z
+  .array(z.object({ lat: z.number(), lng: z.number() }))
+  .min(2);
+
 export const routeCreateSchema = z.object({
   title: z.string().min(1),
-  points: z.array(z.object({ lat: z.number(), lng: z.number() })).min(2),
+  points: routePointsSchema,
   kilometers: z.number().min(0),
 });
 
 export type RouteCreateInput = z.infer<typeof routeCreateSchema>;
+
+export const routeUpdateSchema = routeCreateSchema.extend({
+  id: z.number().int().positive(),
+});
+
+export type RouteUpdateInput = z.infer<typeof routeUpdateSchema>;
 
 export const userProfileUpdateSchema = z
   .object({

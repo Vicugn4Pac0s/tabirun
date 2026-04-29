@@ -1,11 +1,15 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import {
   createTRPCRouter,
 } from "~/server/api/trpc";
-import { protectedProcedure, publicProcedure } from "../procedure";
+import { protectedProcedure } from "../procedure";
 import { routes } from "~/server/db/schema";
-import { routeCreateSchema } from "~/shared/schemas";
+import {
+  routeCreateSchema,
+  routePointsSchema,
+  routeUpdateSchema,
+} from "~/shared/schemas";
 
 export const routeRouter = createTRPCRouter({
 
@@ -19,6 +23,25 @@ export const routeRouter = createTRPCRouter({
         createdById: ctx.session.user.id,
       });
     }),
+
+  update: protectedProcedure
+    .input(routeUpdateSchema)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(routes)
+        .set({
+          title: input.title,
+          points: JSON.stringify(input.points),
+          kilometers: input.kilometers,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(routes.id, input.id),
+            eq(routes.createdById, ctx.session.user.id),
+          ),
+        );
+    }),
   
   getByUser: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db
@@ -28,7 +51,7 @@ export const routeRouter = createTRPCRouter({
 
     return res.map(route => ({
       ...route,
-      points: JSON.parse(route.points),
+      points: routePointsSchema.parse(JSON.parse(route.points)),
     }));
   }),
 });

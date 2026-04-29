@@ -4,7 +4,9 @@ import { Button } from "~/frontend/components/ui/button";
 import { Input } from "~/frontend/components/ui/input";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import RunDetailOverview from "~/frontend/features/run-detail/components/RunDetailOverview";
+import { toast } from "sonner";
 import { useRouteEditorState } from "../hooks/useRouteEditorState";
+import { useUpdateRoute } from "../hooks/useUpdateRoute";
 import { useSelectedRouteStore } from "../stores/selectedRouteStore";
 
 function RouteDetailView() {
@@ -17,6 +19,8 @@ function RouteDetailView() {
   const clearSelectedRoute = useSelectedRouteStore(
     (state) => state.clearSelectedRoute,
   );
+  const selectRoute = useSelectedRouteStore((state) => state.selectRoute);
+  const { updateRoute, isUpdating } = useUpdateRoute();
 
   if (!selectedRoute) {
     return null;
@@ -56,7 +60,7 @@ function RouteDetailView() {
           </Button>
         </div>
       }
-      action={
+      action={({ kilometers }) =>
         mode === "view" ? (
           <Button
             type="button"
@@ -76,8 +80,42 @@ function RouteDetailView() {
                 setDraftTitle(selectedRoute.title ?? "");
                 setRoutePoints(selectedRoute.points);
               }}
+              disabled={isUpdating}
             >
               編集をやめる
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                void updateRoute(
+                  {
+                    id: selectedRoute.id,
+                    title: draftTitle,
+                    points: routePoints,
+                    kilometers,
+                  },
+                  {
+                    onSuccess: () => {
+                      selectRoute({
+                        ...selectedRoute,
+                        title: draftTitle,
+                        points: routePoints,
+                        kilometers,
+                      });
+                      setMode("view");
+                      toast.success("ルートを更新しました。");
+                    },
+                    onError: () => {
+                      toast.error(
+                        "ルートを更新できませんでした。時間をおいて再度お試しください。",
+                      );
+                    },
+                  },
+                );
+              }}
+              disabled={!isDirty || isUpdating}
+            >
+              {isUpdating ? "更新中..." : "更新する"}
             </Button>
             <span
               className={`self-center text-sm ${
