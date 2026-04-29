@@ -3,6 +3,7 @@
 import { Spinner } from "~/frontend/components/ui/spinner";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
+import { useRouteDiscardGuard } from "../hooks/useRouteDiscardGuard";
 import { useRoutesQuery } from "../hooks/useRoutesQuery";
 import { useSelectedRouteStore } from "../stores/selectedRouteStore";
 
@@ -11,6 +12,7 @@ function RouteList() {
   const setRoutePoints = useRoutePointsStore((state) => state.setRoutePoints);
   const selectRoute = useSelectedRouteStore((state) => state.selectRoute);
   const moveStreetView = useMoveStreetView();
+  const { confirmDiscard } = useRouteDiscardGuard();
 
   if (isLoading) {
     return <div className="flex justify-center items-center"><Spinner className="size-6" /></div>;
@@ -37,6 +39,9 @@ function RouteList() {
                 type="button"
                 className="w-full rounded border p-4 text-left transition-colors hover:bg-gray-50"
                 onClick={() => {
+                  if (!confirmDiscard()) {
+                    return;
+                  }
                   selectRoute({
                     id: route.id,
                     title: route.title,

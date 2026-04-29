@@ -5,6 +5,7 @@ import { Input } from "~/frontend/components/ui/input";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import RunDetailOverview from "~/frontend/features/run-detail/components/RunDetailOverview";
 import { toast } from "sonner";
+import { useRouteDiscardGuard } from "../hooks/useRouteDiscardGuard";
 import { useRouteEditorState } from "../hooks/useRouteEditorState";
 import { useUpdateRoute } from "../hooks/useUpdateRoute";
 import { useSelectedRouteStore } from "../stores/selectedRouteStore";
@@ -21,6 +22,7 @@ function RouteDetailView() {
   );
   const selectRoute = useSelectedRouteStore((state) => state.selectRoute);
   const { updateRoute, isUpdating } = useUpdateRoute();
+  const { confirmDiscard } = useRouteDiscardGuard();
 
   if (!selectedRoute) {
     return null;
@@ -52,6 +54,9 @@ function RouteDetailView() {
             type="button"
             variant="outline"
             onClick={() => {
+              if (!confirmDiscard()) {
+                return;
+              }
               clearSelectedRoute();
               clearRoutePoints();
             }}
@@ -76,6 +81,9 @@ function RouteDetailView() {
               type="button"
               variant="outline"
               onClick={() => {
+                if (!confirmDiscard()) {
+                  return;
+                }
                 setMode("view");
                 setDraftTitle(selectedRoute.title ?? "");
                 setRoutePoints(selectedRoute.points);
