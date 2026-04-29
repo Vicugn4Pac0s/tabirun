@@ -60,7 +60,7 @@ function RouteDetailView() {
           </Button>
         </div>
       }
-      action={({ kilometers }) =>
+      action={
         mode === "view" ? (
           <Button
             type="button"
@@ -92,7 +92,6 @@ function RouteDetailView() {
                     id: selectedRoute.id,
                     title: draftTitle,
                     points: routePoints,
-                    kilometers,
                   },
                   {
                     onSuccess: () => {
@@ -100,7 +99,6 @@ function RouteDetailView() {
                         ...selectedRoute,
                         title: draftTitle,
                         points: routePoints,
-                        kilometers,
                       });
                       setMode("view");
                       toast.success("ルートを更新しました。");

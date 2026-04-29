@@ -6,7 +6,6 @@ export interface SelectedRoute {
   id: number;
   title: string | null;
   points: google.maps.LatLngLiteral[];
-  kilometers: number;
 }
 
 interface SelectedRouteStore {

@@ -19,7 +19,7 @@ import RoutePointList from "./RoutePointList";
 interface RunDetailOverviewProps {
   routePoints: google.maps.LatLngLiteral[];
   header?: ReactNode;
-  action?: ReactNode | ((context: { kilometers: number }) => ReactNode);
+  action?: ReactNode;
 }
 
 function RunDetailOverview({
@@ -86,15 +86,12 @@ function RunDetailOverview({
         }}
       />
       <div className="mt-5 text-center">
-        {typeof action === "function"
-          ? action({ kilometers })
-          : action ?? (
-              <RouteCreateAction
-                isAuthenticated={Boolean(session?.user)}
-                routePoints={routePoints}
-                kilometers={kilometers}
-              />
-            )}
+        {action ?? (
+          <RouteCreateAction
+            isAuthenticated={Boolean(session?.user)}
+            routePoints={routePoints}
+          />
+        )}
       </div>
     </div>
   );

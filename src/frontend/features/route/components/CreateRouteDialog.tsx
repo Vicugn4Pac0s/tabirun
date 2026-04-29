@@ -1,6 +1,7 @@
 import { useCreateRoute } from "../hooks/useCreateRoute";
 import { useState } from "react";
-import { RouteCreateInput, routeCreateSchema } from "~/shared/schemas";
+import type { RouteCreateInput } from "~/shared/schemas";
+import { routeCreateSchema } from "~/shared/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -16,10 +17,9 @@ import { Input } from "~/frontend/components/ui/input";
 
 interface CreateRouteDialogProps {
   routePoints: google.maps.LatLngLiteral[];
-  kilometers: number;
 }
 
-function CreateRouteDialog({ routePoints, kilometers }: CreateRouteDialogProps) {
+function CreateRouteDialog({ routePoints }: CreateRouteDialogProps) {
   const { createRoute, isCreating } = useCreateRoute();
   const [open, setOpen] = useState(false);
 
@@ -33,12 +33,11 @@ function CreateRouteDialog({ routePoints, kilometers }: CreateRouteDialogProps) 
     defaultValues: {
       title: "",
       points: routePoints,
-      kilometers
     }
   });
 
   const submitRoute = async (data: RouteCreateInput) => {
-    await createRoute({ ...data, points: routePoints, kilometers }, {
+    await createRoute({ ...data, points: routePoints }, {
       onSuccess: () => {
         reset();
         setOpen(false);

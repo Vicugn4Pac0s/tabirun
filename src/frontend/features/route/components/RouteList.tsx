@@ -41,7 +41,6 @@ function RouteList() {
                     id: route.id,
                     title: route.title,
                     points: routePoints,
-                    kilometers: route.kilometers,
                   });
                   setRoutePoints(routePoints);
                   if (firstPoint) {
@@ -50,7 +49,7 @@ function RouteList() {
                 }}
               >
                 <h3 className="text-lg font-bold">{route.title}</h3>
-                <p className="text-sm text-gray-500">{route.kilometers.toFixed(2)} KM</p>
+                <p className="text-sm text-gray-500">{routePoints.length} 地点</p>
               </button>
             </li>
           );

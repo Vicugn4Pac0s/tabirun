@@ -19,7 +19,6 @@ export const routeRouter = createTRPCRouter({
       await ctx.db.insert(routes).values({
         title: input.title,
         points: JSON.stringify(input.points),
-        kilometers: input.kilometers,
         createdById: ctx.session.user.id,
       });
     }),
@@ -32,7 +31,6 @@ export const routeRouter = createTRPCRouter({
         .set({
           title: input.title,
           points: JSON.stringify(input.points),
-          kilometers: input.kilometers,
           updatedAt: new Date(),
         })
         .where(

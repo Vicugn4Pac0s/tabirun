@@ -7,7 +7,6 @@ export const routePointsSchema = z
 export const routeCreateSchema = z.object({
   title: z.string().min(1),
   points: routePointsSchema,
-  kilometers: z.number().min(0),
 });
 
 export type RouteCreateInput = z.infer<typeof routeCreateSchema>;

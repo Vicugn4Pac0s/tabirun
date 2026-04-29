@@ -1,0 +1,1 @@
+ALTER TABLE `template_t3app_route` DROP COLUMN `kilometers`;
