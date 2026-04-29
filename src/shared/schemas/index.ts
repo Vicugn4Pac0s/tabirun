@@ -17,6 +17,12 @@ export const routeUpdateSchema = routeCreateSchema.extend({
 
 export type RouteUpdateInput = z.infer<typeof routeUpdateSchema>;
 
+export const routeDeleteSchema = z.object({
+  id: z.number().int().positive(),
+});
+
+export type RouteDeleteInput = z.infer<typeof routeDeleteSchema>;
+
 export const userProfileUpdateSchema = z
   .object({
     birthDate: z.string().date().optional(),

@@ -5,6 +5,7 @@ import { Input } from "~/frontend/components/ui/input";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import RunDetailOverview from "~/frontend/features/run-detail/components/RunDetailOverview";
 import { toast } from "sonner";
+import { useDeleteRoute } from "../hooks/useDeleteRoute";
 import { useRouteDiscardGuard } from "../hooks/useRouteDiscardGuard";
 import { useRouteEditorState } from "../hooks/useRouteEditorState";
 import { useUpdateRoute } from "../hooks/useUpdateRoute";
@@ -29,6 +30,7 @@ function RouteDetailView() {
   );
   const selectRoute = useSelectedRouteStore((state) => state.selectRoute);
   const { updateRoute, isUpdating } = useUpdateRoute();
+  const { deleteRoute, isDeleting } = useDeleteRoute();
   const { confirmDiscard } = useRouteDiscardGuard();
 
   if (!selectedRoute) {
@@ -74,14 +76,48 @@ function RouteDetailView() {
       }
       action={
         mode === "view" ? (
-          <Button
-            type="button"
-            onClick={() => {
-              setMode("edit");
-            }}
-          >
-            編集する
-          </Button>
+          <div className="flex justify-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  const confirmed = window.confirm("このルートを削除しますか？");
+                  if (!confirmed) {
+                    return;
+                  }
+                }
+
+                void deleteRoute(
+                  { id: selectedRoute.id },
+                  {
+                    onSuccess: () => {
+                      clearSelectedRoute();
+                      clearRoutePoints();
+                      toast.success("ルートを削除しました。");
+                    },
+                    onError: () => {
+                      toast.error(
+                        "ルートを削除できませんでした。時間をおいて再度お試しください。",
+                      );
+                    },
+                  },
+                );
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "削除中..." : "削除する"}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setMode("edit");
+              }}
+              disabled={isDeleting}
+            >
+              編集する
+            </Button>
+          </div>
         ) : (
           <div className="flex justify-center gap-2">
             <Button
@@ -95,7 +131,7 @@ function RouteDetailView() {
                 setDraftTitle(selectedRoute.title ?? "");
                 setRoutePoints(selectedRoute.points);
               }}
-              disabled={isUpdating}
+              disabled={isUpdating || isDeleting}
             >
               編集をやめる
             </Button>
@@ -126,7 +162,7 @@ function RouteDetailView() {
                   },
                 );
               }}
-              disabled={!canUpdate || isUpdating}
+              disabled={!canUpdate || isUpdating || isDeleting}
             >
               {isUpdating ? "更新中..." : "更新する"}
             </Button>

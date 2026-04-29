@@ -7,6 +7,7 @@ import { protectedProcedure } from "../procedure";
 import { routes } from "~/server/db/schema";
 import {
   routeCreateSchema,
+  routeDeleteSchema,
   routePointsSchema,
   routeUpdateSchema,
 } from "~/shared/schemas";
@@ -33,6 +34,19 @@ export const routeRouter = createTRPCRouter({
           points: JSON.stringify(input.points),
           updatedAt: new Date(),
         })
+        .where(
+          and(
+            eq(routes.id, input.id),
+            eq(routes.createdById, ctx.session.user.id),
+          ),
+        );
+    }),
+
+  delete: protectedProcedure
+    .input(routeDeleteSchema)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(routes)
         .where(
           and(
             eq(routes.id, input.id),
