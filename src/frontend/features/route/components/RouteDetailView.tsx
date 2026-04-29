@@ -4,15 +4,14 @@ import { Button } from "~/frontend/components/ui/button";
 import { Input } from "~/frontend/components/ui/input";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import RunDetailOverview from "~/frontend/features/run-detail/components/RunDetailOverview";
+import { useRouteEditorState } from "../hooks/useRouteEditorState";
 import { useSelectedRouteStore } from "../stores/selectedRouteStore";
 
 function RouteDetailView() {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
   const clearRoutePoints = useRoutePointsStore((state) => state.clearRoutePoints);
   const setRoutePoints = useRoutePointsStore((state) => state.setRoutePoints);
-  const selectedRoute = useSelectedRouteStore((state) => state.selectedRoute);
-  const mode = useSelectedRouteStore((state) => state.mode);
-  const draftTitle = useSelectedRouteStore((state) => state.draftTitle);
+  const { selectedRoute, mode, draftTitle, isDirty } = useRouteEditorState();
   const setDraftTitle = useSelectedRouteStore((state) => state.setDraftTitle);
   const setMode = useSelectedRouteStore((state) => state.setMode);
   const clearSelectedRoute = useSelectedRouteStore(
@@ -80,9 +79,13 @@ function RouteDetailView() {
             >
               編集をやめる
             </Button>
-            <p className="self-center text-sm text-gray-500">
-              更新導線は次の段階で追加します。
-            </p>
+            <span
+              className={`self-center text-sm ${
+                isDirty ? "text-amber-600" : "text-gray-500"
+              }`}
+            >
+              {isDirty ? "未保存の変更があります" : "変更はありません"}
+            </span>
           </div>
         )
       }
