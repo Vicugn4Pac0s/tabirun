@@ -38,12 +38,11 @@ const RoutePointsNavigation = ({
         }} />
       </div>
       <div className="absolute left-1/2 bottom-1 -translate-x-1/2 z-10">
-        {canEdit ? (
-          <MainActionButton
-            type={type}
-            onClick={toggle}
-          />
-        ) : null}
+        <MainActionButton
+          type={type}
+          onClick={toggle}
+          disabled={!canEdit}
+        />
       </div>
       <div className="flex">
         <SubActionButton type="next" disabled={!canNext} onClick={()=>{
