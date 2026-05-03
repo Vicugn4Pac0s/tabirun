@@ -1,11 +1,11 @@
-import { RouteCreateInput } from "~/shared/schemas";
+import {
+  executeMutationWithCallbacks,
+  type MutationCallbacks,
+} from "~/frontend/lib/executeMutationWithCallbacks";
+import type { RouteCreateInput } from "~/shared/schemas";
 import { api } from "~/trpc/react";
 
-type CreateRouteCallbacks = {
-  onSuccess?: () => void | Promise<void>;
-  onError?: (err: unknown) => void | Promise<void>;
-  onSettled?: () => void | Promise<void>;
-};
+type CreateRouteCallbacks = MutationCallbacks;
 
 export const useCreateRoute = () => {
   const utils = api.useUtils();
@@ -17,16 +17,7 @@ export const useCreateRoute = () => {
   });
 
   const createRoute = async (input: RouteCreateInput, cb?: CreateRouteCallbacks) => {
-    try {
-      const result = await mutation.mutateAsync(input);
-      await cb?.onSuccess?.();
-      return result;
-    } catch (err) {
-      await cb?.onError?.(err);
-      throw err;
-    } finally {
-      await cb?.onSettled?.();
-    }
+    return executeMutationWithCallbacks(mutation, input, cb);
   };
 
   return {

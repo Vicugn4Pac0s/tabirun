@@ -1,11 +1,11 @@
+import {
+  executeMutationWithCallbacks,
+  type MutationCallbacks,
+} from "~/frontend/lib/executeMutationWithCallbacks";
 import type { RouteDeleteInput } from "~/shared/schemas";
 import { api } from "~/trpc/react";
 
-type DeleteRouteCallbacks = {
-  onSuccess?: () => void | Promise<void>;
-  onError?: (err: unknown) => void | Promise<void>;
-  onSettled?: () => void | Promise<void>;
-};
+type DeleteRouteCallbacks = MutationCallbacks;
 
 export const useDeleteRoute = () => {
   const utils = api.useUtils();
@@ -17,16 +17,7 @@ export const useDeleteRoute = () => {
   });
 
   const deleteRoute = async (input: RouteDeleteInput, cb?: DeleteRouteCallbacks) => {
-    try {
-      const result = await mutation.mutateAsync(input);
-      await cb?.onSuccess?.();
-      return result;
-    } catch (err) {
-      await cb?.onError?.(err);
-      throw err;
-    } finally {
-      await cb?.onSettled?.();
-    }
+    return executeMutationWithCallbacks(mutation, input, cb);
   };
 
   return {

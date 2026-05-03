@@ -1,11 +1,11 @@
+import {
+  executeMutationWithCallbacks,
+  type MutationCallbacks,
+} from "~/frontend/lib/executeMutationWithCallbacks";
 import type { UserProfileUpdateInput } from "~/shared/schemas";
 import { api } from "~/trpc/react";
 
-type UpdateUserCallbacks = {
-  onSuccess?: () => void | Promise<void>;
-  onError?: (err: unknown) => void | Promise<void>;
-  onSettled?: () => void | Promise<void>;
-};
+type UpdateUserCallbacks = MutationCallbacks;
 
 export const useUpdateUser = () => {
   const utils = api.useUtils();
@@ -20,16 +20,7 @@ export const useUpdateUser = () => {
     input: UserProfileUpdateInput,
     cb?: UpdateUserCallbacks,
   ) => {
-    try {
-      const result = await mutation.mutateAsync(input);
-      await cb?.onSuccess?.();
-      return result;
-    } catch (err) {
-      await cb?.onError?.(err);
-      throw err;
-    } finally {
-      await cb?.onSettled?.();
-    }
+    return executeMutationWithCallbacks(mutation, input, cb);
   };
 
   return {
