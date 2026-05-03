@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 type Props = {
   type: "add" | "delete" | "play";
   className?: string;
+  disabled?: boolean;
   onClick?: () => void;
   onMouseOver?: () => void;
   onMouseOut?: () => void;
@@ -12,6 +13,7 @@ type Props = {
 const MainActionButton = ({
   type,
   className,
+  disabled = false,
   onClick,
   onMouseOver,
   onMouseOut,
@@ -31,11 +33,12 @@ const MainActionButton = ({
   }
   return (
     <motion.button
-      className={`flex h-20 w-20 items-center justify-center rounded-full border-2 border-white bg-primary text-white ${className}`}
+      className={`flex h-20 w-20 items-center justify-center rounded-full border-2 border-white bg-primary text-white transition-opacity disabled:opacity-50 ${className}`}
+      disabled={disabled}
       onClick={onClick}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
-      whileTap={{ scale: 0.9 }}
+      whileTap={disabled ? undefined : { scale: 0.9 }}
       transition={{
         duration: 0.1,
       }}

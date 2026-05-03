@@ -37,3 +37,10 @@ export const Play: Story = {
     type: 'play',
   },
 };
+
+export const Disabled: Story = {
+  args: {
+    type: 'add',
+    disabled: true,
+  },
+};
