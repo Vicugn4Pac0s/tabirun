@@ -1,5 +1,4 @@
 import type { TRPCClientErrorLike } from "@trpc/client";
-import { useSession } from "next-auth/react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Spinner } from "~/frontend/components/ui/spinner";
@@ -27,9 +26,8 @@ function RunDetailOverview({
   header,
   action,
 }: RunDetailOverviewProps) {
-  const { permissions } = useAuthPermission();
-  const { data: session, status } = useSession();
-  const { user } = useUserQuery({ enabled: status === "authenticated" });
+  const { isAuthenticated, permissions } = useAuthPermission();
+  const { user } = useUserQuery({ enabled: isAuthenticated });
   const { directions, isLoading, error } = useGooglemapDirectionQuery(
     routePoints,
     {
@@ -88,7 +86,7 @@ function RunDetailOverview({
       <div className="mt-5 text-center">
         {action ?? (
           <RouteCreateAction
-            isAuthenticated={Boolean(session?.user)}
+            isAuthenticated={isAuthenticated}
             routePoints={routePoints}
           />
         )}
