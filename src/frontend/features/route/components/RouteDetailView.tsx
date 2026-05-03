@@ -20,6 +20,7 @@ function RouteDetailView() {
     mode,
     draftTitle,
     trimmedDraftTitle,
+    isDirty,
     canUpdate,
   } =
     useRouteEditorState();
@@ -119,52 +120,74 @@ function RouteDetailView() {
             </Button>
           </div>
         ) : (
-          <div className="flex justify-center gap-2">
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex justify-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (!confirmDiscard()) {
+                    return;
+                  }
+                  setMode("view");
+                  setDraftTitle(selectedRoute.title ?? "");
+                  setRoutePoints(selectedRoute.points);
+                }}
+                disabled={isUpdating || isDeleting}
+              >
+                編集をやめる
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  void updateRoute(
+                    {
+                      id: selectedRoute.id,
+                      title: trimmedDraftTitle,
+                      points: routePoints,
+                    },
+                    {
+                      onSuccess: () => {
+                        selectRoute({
+                          ...selectedRoute,
+                          title: trimmedDraftTitle,
+                          points: routePoints,
+                        });
+                        setMode("view");
+                        toast.success("ルートを更新しました。");
+                      },
+                      onError: () => {
+                        toast.error(
+                          "ルートを更新できませんでした。時間をおいて再度お試しください。",
+                        );
+                      },
+                    },
+                  );
+                }}
+                disabled={!canUpdate || isUpdating || isDeleting}
+              >
+                {isUpdating ? "更新中..." : "更新する"}
+              </Button>
+            </div>
             <Button
               type="button"
               variant="outline"
               onClick={() => {
-                if (!confirmDiscard()) {
-                  return;
+                if (typeof window !== "undefined") {
+                  const confirmed = window.confirm(
+                    "編集中の変更を破棄してリセットしますか？",
+                  );
+                  if (!confirmed) {
+                    return;
+                  }
                 }
-                setMode("view");
+
                 setDraftTitle(selectedRoute.title ?? "");
                 setRoutePoints(selectedRoute.points);
               }}
-              disabled={isUpdating || isDeleting}
+              disabled={!isDirty || isUpdating || isDeleting}
             >
-              編集をやめる
-            </Button>
-            <Button
-              type="button"
-              onClick={() => {
-                void updateRoute(
-                  {
-                    id: selectedRoute.id,
-                    title: trimmedDraftTitle,
-                    points: routePoints,
-                  },
-                  {
-                    onSuccess: () => {
-                      selectRoute({
-                        ...selectedRoute,
-                        title: trimmedDraftTitle,
-                        points: routePoints,
-                      });
-                      setMode("view");
-                      toast.success("ルートを更新しました。");
-                    },
-                    onError: () => {
-                      toast.error(
-                        "ルートを更新できませんでした。時間をおいて再度お試しください。",
-                      );
-                    },
-                  },
-                );
-              }}
-              disabled={!canUpdate || isUpdating || isDeleting}
-            >
-              {isUpdating ? "更新中..." : "更新する"}
+              リセット
             </Button>
           </div>
         )
