@@ -26,7 +26,7 @@ export default async function Home() {
 
   return (
     <HydrateClient>
-      <SessionProvider>
+      <SessionProvider session={session}>
         <main>
           <Providers>
             <Root />
