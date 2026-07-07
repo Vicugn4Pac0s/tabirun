@@ -1,29 +1,63 @@
-# Create T3 App
+# TABIRUN
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+TABIRUN は、走りたいルートを地図上で自由に作成できるアプリです。日常のランニングから旅先でのランまで、自分に合ったコース作成をサポートします。
 
-## What's next? How do I make an app with this?
+## 技術スタック
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- Next.js
+- React
+- TypeScript
+- NextAuth.js
+- tRPC
+- Drizzle ORM
+- Tailwind CSS
+- Zustand
+- Google Maps Platform
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## セットアップ
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+### 前提
 
-## Learn More
+- Node.js
+- npm
+- Google 認証および Google Maps Platform の利用に必要な環境変数
+- SQLite / Turso 互換のデータベース接続先
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+### インストール
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+```bash
+npm install
+```
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+### 開発サーバー起動
 
-## How do I deploy this?
+```bash
+npm run dev
+```
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## 主要コマンド
+
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm run typecheck
+npm run test:run
+```
+
+## データベース関連コマンド
+
+```bash
+npm run db:generate
+npm run db:migrate
+npm run db:push
+npm run db:studio
+```
+
+## ディレクトリ概要
+
+- `src/app`: App Router のページとレイアウト
+- `src/frontend`: UI、hooks、feature 単位のフロントエンド実装
+- `src/server`: 認証、API、DB スキーマなどのサーバー実装
+- `src/trpc`: tRPC クライアント/サーバー連携

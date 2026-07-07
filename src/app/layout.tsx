@@ -25,7 +25,8 @@ export const inter = Inter({
 
 export const metadata: Metadata = {
   title: "TABIRUN",
-  description: "",
+  description:
+    "走りたいルートを地図上で自由に作成できるアプリ。日常のランニングから旅先でのランまで、自分に合ったコース作成をサポートします。",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
