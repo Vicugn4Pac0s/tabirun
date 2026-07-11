@@ -1,17 +1,16 @@
-import {
-  GOOGLE_MAP_DEFAULT_CENTER,
-  GOOGLE_MAP_DEFAULT_ZOOM,
-  GOOGLE_MAP_MAX_ZOOM,
-  GOOGLE_MAP_MIN_ZOOM,
-} from "~/frontend/config";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
-import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
+import { useEffect, useRef, useState } from "react";
 import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { useRouteEditorState } from "~/frontend/features/route/hooks/useRouteEditorState";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import useRoutePolylinePath from "~/frontend/hooks/googlemap/useRoutePolylinePath";
+import {
+  GOOGLE_MAP_DEFAULT_ZOOM,
+  GOOGLE_MAP_MAX_ZOOM,
+  GOOGLE_MAP_MIN_ZOOM,
+} from "~/frontend/config";
+import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
+import { useUserMapDefaultCenter } from "~/frontend/features/user/hooks/useUserMapDefaultCenter";
 import GoogleMapView from "~/frontend/features/googlemap/components/GoogleMapView";
 import StreetView from "~/frontend/features/googlemap/components/StreetView";
 import RoutePointsNavigation from "~/frontend/features/route-points-navigation/components/RouteNavigation";
@@ -20,10 +19,11 @@ import StreetViewPointMarker from "~/frontend/features/googlemap/components/Stre
 import RoutePolyline from "~/frontend/features/googlemap/components/RoutePolyline";
 
 function MapScreen() {
-  const { permissions, isAuthenticated } = useAuthPermission();
+  const { permissions } = useAuthPermission();
   const { map, setMap, streetView, streetViewUnavailable } = useGoogleMap();
   const moveStreetView = useMoveStreetView();
-  const { user } = useUserQuery({ enabled: isAuthenticated });
+  const { defaultCenter, isReady: isDefaultCenterReady } =
+    useUserMapDefaultCenter();
   const [streetViewCenter, setStreetViewCenter] =
     useState<google.maps.LatLngLiteral | null>(null);
   const [streetViewPov, setStreetViewPov] =
@@ -35,27 +35,24 @@ function MapScreen() {
   const { polylinePath } = useRoutePolylinePath(routePoints, {
     canUseDirections: permissions.canUseDirections,
   });
-  const initialCenter = useMemo(
-    () =>
-      user?.homeLat != null && user?.homeLng != null
-        ? { lat: user.homeLat, lng: user.homeLng }
-        : GOOGLE_MAP_DEFAULT_CENTER,
-    [user?.homeLat, user?.homeLng]
-  );
 
   useEffect(() => {
-    if (map && !hasAppliedMapCenterRef.current) {
-      map.setCenter(initialCenter);
+    if (isDefaultCenterReady && map && !hasAppliedMapCenterRef.current) {
+      map.setCenter(defaultCenter);
       hasAppliedMapCenterRef.current = true;
     }
-  }, [initialCenter, map]);
+  }, [defaultCenter, isDefaultCenterReady, map]);
 
   useEffect(() => {
-    if (streetView.current && !hasAppliedStreetViewCenterRef.current) {
-      streetView.current.setPosition(initialCenter);
+    if (
+      isDefaultCenterReady &&
+      streetView.current &&
+      !hasAppliedStreetViewCenterRef.current
+    ) {
+      streetView.current.setPosition(defaultCenter);
       hasAppliedStreetViewCenterRef.current = true;
     }
-  }, [initialCenter, map, streetView]);
+  }, [defaultCenter, isDefaultCenterReady, streetView]);
 
   return (
     <div className="relative grid flex-1 grid-cols-1 min-[1201px]:grid-cols-2">
@@ -64,15 +61,14 @@ function MapScreen() {
           map={map}
           streetView={streetView}
           options={{
-            position: initialCenter,
+            position: defaultCenter,
             pov: { heading: 165, pitch: 0 },
             zoomControl: false,
             addressControl: false,
             motionTrackingControl: false,
           }}
           onPositionChanged={(position) => {
-            const positionLatLngLiteral = position.toJSON();
-            setStreetViewCenter(positionLatLngLiteral);
+            setStreetViewCenter(position.toJSON());
           }}
           onPovChanged={(pov) => {
             setStreetViewPov(pov);
@@ -103,7 +99,7 @@ function MapScreen() {
           map={map}
           setMap={setMap}
           options={{
-            center: initialCenter,
+            center: defaultCenter,
             zoom: GOOGLE_MAP_DEFAULT_ZOOM,
             maxZoom: GOOGLE_MAP_MAX_ZOOM,
             minZoom: GOOGLE_MAP_MIN_ZOOM,
@@ -114,8 +110,7 @@ function MapScreen() {
           onClick={(e) => {
             const latLng = e.latLng;
             if (!latLng) return;
-            const latLngLiteral = latLng.toJSON();
-            void moveStreetView(latLngLiteral);
+            void moveStreetView(latLng.toJSON());
           }}
         >
           <StreetViewPointMarker
