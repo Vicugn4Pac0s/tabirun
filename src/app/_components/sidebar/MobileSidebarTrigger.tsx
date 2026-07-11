@@ -26,10 +26,10 @@ const MobileSidebarTrigger = forwardRef<HTMLButtonElement, ButtonProps>(
         {label ? (
           <span
             className={cn(
-              "font-semibold",
+              "text-base-gray",
               isDistanceLabel
-                ? "text-sm leading-[1.1] tracking-[0.08em] tabular-nums"
-                : "text-base leading-none tracking-[0.18em]"
+                ? "font-inter font-black text-lg leading-[1.1] tabular-nums"
+                : "font-bold text-sm leading-none tracking-[0.18em]"
             )}
             style={{
               writingMode: "vertical-rl",
