@@ -1,4 +1,4 @@
-import { Pace } from "~/frontend/types/pace";
+import { type Pace } from "~/frontend/types/pace";
 import { usePacesQuery } from "../hooks/usePacesQuery";
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 
@@ -23,14 +23,14 @@ function PaceSelect({
     paces?.map((pace) => ({
       value: pace.value,
       label: pace.value,
-    })) || [];
+    })) ?? [];
 
   const isPace = (value: string): value is Pace => {
     return paces?.some((pace) => pace.value === value) ?? false;
   };
 
   return (
-    <div className={`w-full ${className || ""}`}>
+    <div className={`w-full ${className ?? ""}`}>
       <Selectbox
         items={paceOptions}
         value={value}
@@ -40,7 +40,7 @@ function PaceSelect({
           }
         }}
         placeholder={placeholder}
-        disabled={disabled || !!error}
+        disabled={(disabled ?? false) || Boolean(error)}
         className="w-full"
       />
       {error && (

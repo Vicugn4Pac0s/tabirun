@@ -18,7 +18,7 @@ import { Toaster } from "~/frontend/components/ui/sonner"
  *
  * @constant
  */
-export const inter = Inter({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
 })

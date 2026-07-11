@@ -2,7 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, renderHook } from "@testing-library/react";
 import { useRouteDiscardGuard } from "~/frontend/features/route/hooks/useRouteDiscardGuard";
 
-const mockUseRouteEditorState = vi.fn();
+type MockRouteEditorState = {
+  mode: "view" | "edit";
+  isDirty: boolean;
+};
+
+const mockUseRouteEditorState = vi.fn<() => MockRouteEditorState>();
 
 vi.mock("~/frontend/features/route/hooks/useRouteEditorState", () => ({
   useRouteEditorState: () => mockUseRouteEditorState(),

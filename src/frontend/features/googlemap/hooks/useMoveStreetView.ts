@@ -41,7 +41,7 @@ export const useMoveStreetView = () => {
       const streetViewService = new window.google.maps.StreetViewService();
       const panorama = await new Promise<google.maps.StreetViewPanoramaData | null>(
         (resolve) => {
-          streetViewService.getPanorama(
+          void streetViewService.getPanorama(
             {
               location: requestedPosition,
               radius: STREET_VIEW_SEARCH_RADIUS_METERS,

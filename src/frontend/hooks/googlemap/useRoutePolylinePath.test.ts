@@ -2,12 +2,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useRoutePolylinePath } from "~/frontend/hooks/googlemap/useRoutePolylinePath";
 
-const mockUseGooglemapDirectionQuery = vi.fn();
+type MockDirectionQueryResult = {
+  directions: { path: google.maps.LatLngLiteral[] } | null;
+  error: { data?: { code?: string } } | null;
+  isLoading: boolean;
+  enabled: boolean;
+};
+
+const mockUseGooglemapDirectionQuery = vi.fn<
+  (...args: unknown[]) => MockDirectionQueryResult
+>();
 
 vi.mock("./useGooglemapDirectionQuery", () => ({
   __esModule: true,
-  default: (...args: unknown[]) => mockUseGooglemapDirectionQuery(...args),
-  useGooglemapDirectionQuery: (...args: unknown[]) =>
+  default: (...args: Parameters<typeof mockUseGooglemapDirectionQuery>) =>
+    mockUseGooglemapDirectionQuery(...args),
+  useGooglemapDirectionQuery: (
+    ...args: Parameters<typeof mockUseGooglemapDirectionQuery>
+  ) =>
     mockUseGooglemapDirectionQuery(...args),
 }));
 

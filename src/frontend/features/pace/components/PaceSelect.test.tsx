@@ -2,13 +2,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 
-const mockUsePacesQuery = vi.fn();
+type MockPacesQueryResult = {
+  paces: Array<{ value: string }>;
+  error: Error | null;
+};
+
+const mockUsePacesQuery = vi.fn<() => MockPacesQueryResult>();
 const mockSelectbox = vi.fn();
 
 type MockSelectboxProps = {
+  items?: Array<{ value: string; label: string }>;
   disabled?: boolean;
   onValueChange?: (value: string) => void;
   placeholder?: string;
+  value?: string;
 };
 
 vi.mock("../hooks/usePacesQuery", () => ({

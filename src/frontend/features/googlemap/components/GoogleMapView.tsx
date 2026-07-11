@@ -1,4 +1,4 @@
-import { Status, Wrapper } from "@googlemaps/react-wrapper"
+import { Wrapper, type Status } from "@googlemaps/react-wrapper"
 
 import GoogleMapCanvas from "./GoogleMapCanvas"
 
@@ -14,13 +14,15 @@ interface GoogleMapViewProps {
 }
 
 function GoogleMapView({ className, map, setMap, options, onInit, onClick, onIdle, children }: GoogleMapViewProps) {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY!
+
   const render = (status: Status) => {
     return <p>{status}</p>
   }
 
   return (
     <Wrapper
-      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY as string}
+      apiKey={apiKey}
       render={render}
       libraries={["marker"]}
     >
@@ -32,7 +34,7 @@ function GoogleMapView({ className, map, setMap, options, onInit, onClick, onIdl
         onClick={onClick}
         onIdle={onIdle}
         options={{
-          mapId: process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY as string,
+          mapId: apiKey,
           ...options
         }}
       >

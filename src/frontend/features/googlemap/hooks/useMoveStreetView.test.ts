@@ -2,7 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 
-const mockUseGoogleMap = vi.fn();
+type MockGoogleMapContext = {
+  streetView: {
+    current: {
+      setPosition: typeof setPosition;
+      setVisible: typeof setVisible;
+    } | null;
+  };
+  setStreetViewUnavailable: typeof setStreetViewUnavailable;
+};
+
+const mockUseGoogleMap = vi.fn<() => MockGoogleMapContext>();
 
 vi.mock("../providers/GoogleMapProvider", () => ({
   useGoogleMap: () => mockUseGoogleMap(),
@@ -104,9 +114,9 @@ describe("useMoveStreetView", () => {
 
     const { result } = renderHook(() => useMoveStreetView());
 
-    await expect(result.current(new MockLatLng(35.0, 139.0) as never)).resolves.toBe(
-      true,
-    );
+    await expect(
+      result.current(new MockLatLng(35.0, 139.0) as unknown as google.maps.LatLng),
+    ).resolves.toBe(true);
 
     expect(getPanorama).toHaveBeenCalledWith({
       location: { lat: 35.0, lng: 139.0 },

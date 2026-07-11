@@ -3,10 +3,29 @@ import { useRoutePointsStore } from "../stores/routePointsStore";
 
 type LatLng = google.maps.LatLngLiteral;
 
+type RoutePointsState = {
+  activeIndex: number | null;
+  isInRoute: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  canPrev: boolean;
+  canNext: boolean;
+  canFirst: boolean;
+  canLast: boolean;
+  prevIndex: number | null;
+  nextIndex: number | null;
+  firstIndex: number | null;
+  lastIndex: number | null;
+  prevRoutePoint: LatLng | null;
+  nextRoutePoint: LatLng | null;
+  firstRoutePoint: LatLng | null;
+  lastRoutePoint: LatLng | null;
+};
+
 export function useRoutePoints(currentPoint: google.maps.LatLngLiteral) {
   const routePoints = useRoutePointsStore((state) => state.routePoints);
 
-  return useMemo(() => {
+  return useMemo<RoutePointsState>(() => {
     if (routePoints.length === 0) {
       return {
         activeIndex: null,
@@ -17,14 +36,14 @@ export function useRoutePoints(currentPoint: google.maps.LatLngLiteral) {
         canNext: false,
         canFirst: false,
         canLast: false,
-        prevIndex: null as number | null,
-        nextIndex: null as number | null,
-        firstIndex: null as number | null,
-        lastIndex: null as number | null,
-        prevRoutePoint: null as LatLng | null,
-        nextRoutePoint: null as LatLng | null,
-        firstRoutePoint: null as LatLng | null,
-        lastRoutePoint: null as LatLng | null,
+        prevIndex: null,
+        nextIndex: null,
+        firstIndex: null,
+        lastIndex: null,
+        prevRoutePoint: null,
+        nextRoutePoint: null,
+        firstRoutePoint: null,
+        lastRoutePoint: null,
       };
     }
 
@@ -44,16 +63,17 @@ export function useRoutePoints(currentPoint: google.maps.LatLngLiteral) {
     const canFirst = isInRoute && !isFirst;
     const canLast = isInRoute && !isLast;
 
-    const prevIndex = canPrev ? (activeIndex! - 1) : null;
-    const nextIndex = canNext ? (activeIndex! + 1) : null;
+    const prevIndex = canPrev ? activeIndex - 1 : null;
+    const nextIndex = canNext ? activeIndex + 1 : null;
 
     const firstIndex = isInRoute ? 0 : null;
     const lastIndex = isInRoute ? routePoints.length - 1 : null;
 
-    const prevRoutePoint = prevIndex !== null ? routePoints[prevIndex] : null;
-    const nextRoutePoint = nextIndex !== null ? routePoints[nextIndex] : null;
-    const firstRoutePoint = firstIndex !== null ? routePoints[firstIndex] : null;
-    const lastRoutePoint = lastIndex !== null ? routePoints[lastIndex] : null;
+    const prevRoutePoint = prevIndex !== null ? routePoints[prevIndex] ?? null : null;
+    const nextRoutePoint = nextIndex !== null ? routePoints[nextIndex] ?? null : null;
+    const firstRoutePoint =
+      firstIndex !== null ? routePoints[firstIndex] ?? null : null;
+    const lastRoutePoint = lastIndex !== null ? routePoints[lastIndex] ?? null : null;
     
     return {
       activeIndex,
@@ -71,7 +91,7 @@ export function useRoutePoints(currentPoint: google.maps.LatLngLiteral) {
       prevRoutePoint,
       nextRoutePoint,
       firstRoutePoint,
-      lastRoutePoint
+      lastRoutePoint,
     };
   }, [routePoints, currentPoint]);
 }

@@ -5,6 +5,8 @@ import {
   calcCaloriesFromRun,
 } from "~/frontend/lib/running";
 
+const invalidPace = "invalid" as unknown as `${number}:${number}`;
+
 describe("calcTimeFromDistanceAndPace", () => {
   it("距離とペースから総時間を計算できる", () => {
     // 10km × 6:00/km = 1:00:00
@@ -26,7 +28,7 @@ describe("calcTimeFromDistanceAndPace", () => {
   });
 
   it("不正なペース文字列のとき 0:00 を返す", () => {
-    expect(calcTimeFromDistanceAndPace(10, "invalid" as any)).toBe("0:00");
+    expect(calcTimeFromDistanceAndPace(10, invalidPace)).toBe("0:00");
   });
 });
 
@@ -75,7 +77,7 @@ describe("calcCaloriesFromRun", () => {
   });
 
   it("不正なペース文字列のとき 0 を返す", () => {
-    expect(calcCaloriesFromRun(60, 10, "invalid" as any)).toBe(0);
+    expect(calcCaloriesFromRun(60, 10, invalidPace)).toBe(0);
   });
 
   it("小数点以下の桁数を指定できる", () => {

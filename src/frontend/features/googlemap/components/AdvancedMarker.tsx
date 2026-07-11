@@ -19,28 +19,54 @@ const AdvancedMarker = ({
   onMouseOver,
   onMouseOut,
 }: AdvancedMarkerProps) => {
-  const createMarker = () => {
-    markerRef.current = new window.google.maps.marker.AdvancedMarkerElement({
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+
+    const marker = new window.google.maps.marker.AdvancedMarkerElement({
       map,
       content,
       ...options,
     });
-
-    return markerRef.current;
-  };
-
-  useEffect(() => {
-    createMarker();
+    markerRef.current = marker;
 
     return () => {
-      if (markerRef.current) {
-        markerRef.current.map =null;
+      window.google.maps.event.clearInstanceListeners(marker);
+
+      if (marker.content && onMouseOver) {
+        marker.content.removeEventListener("mouseover", onMouseOver);
+      }
+
+      if (marker.content && onMouseOut) {
+        marker.content.removeEventListener("mouseout", onMouseOut);
+      }
+
+      marker.map = null;
+
+      if (markerRef.current === marker) {
+        markerRef.current = null;
       }
     };
-  }, [map, markerRef, options.position]);
+  }, [content, map, markerRef]);
 
   useEffect(() => {
     const marker = markerRef.current;
+    if (!marker) {
+      return;
+    }
+
+    marker.map = map;
+    marker.content = content;
+
+    Object.assign(marker, options);
+  }, [content, map, markerRef, options]);
+
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker) {
+      return;
+    }
 
     const contentElement = marker?.content;
     if (marker && onClick) {
@@ -55,16 +81,16 @@ const AdvancedMarker = ({
     }
 
     return () => {
-      if (markerRef.current) {
-        if (contentElement && onMouseOver) {
-          contentElement.removeEventListener("mouseover", onMouseOver as EventListener);
-        }
-        if (contentElement && onMouseOut) {
-          contentElement.removeEventListener("mouseout", onMouseOut as EventListener);
-        }
+      window.google.maps.event.clearListeners(marker, "click");
+
+      if (contentElement && onMouseOver) {
+        contentElement.removeEventListener("mouseover", onMouseOver);
+      }
+      if (contentElement && onMouseOut) {
+        contentElement.removeEventListener("mouseout", onMouseOut);
       }
     };
-  }, [map, options, onClick, onMouseOver, onMouseOut]);
+  }, [map, markerRef, onClick, onMouseOver, onMouseOut]);
 
   return null;
 };

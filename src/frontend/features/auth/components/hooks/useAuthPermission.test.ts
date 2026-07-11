@@ -2,7 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, renderHook } from "@testing-library/react";
 import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
 
-const mockUseSession = vi.fn();
+type MockSessionResult = {
+  data: { user: { id: string; name: string } } | null;
+  status: "loading" | "unauthenticated" | "authenticated";
+};
+
+const mockUseSession = vi.fn<() => MockSessionResult>();
 
 vi.mock("next-auth/react", () => ({
   useSession: () => mockUseSession(),

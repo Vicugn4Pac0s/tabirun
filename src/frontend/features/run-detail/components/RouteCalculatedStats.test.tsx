@@ -3,8 +3,17 @@ import { render, screen } from "@testing-library/react";
 import { RouteCalculatedStats } from "~/frontend/features/run-detail/components/RouteCalculatedStats";
 
 const mockStatValue = vi.fn();
-const mockCalcTimeFromDistanceAndPace = vi.fn();
-const mockCalcCaloriesFromRun = vi.fn();
+const mockCalcTimeFromDistanceAndPace = vi.fn<
+  (distanceKm: number, pace: `${number}:${number}`) => string
+>();
+const mockCalcCaloriesFromRun = vi.fn<
+  (
+    weightKg: number,
+    distanceKm: number,
+    pace: `${number}:${number}`,
+    fractionDigits?: number,
+  ) => number
+>();
 
 vi.mock("~/frontend/components/app-ui/StatValue", () => ({
   StatValue: (props: { value: number | string; unit?: string }) => {
@@ -19,9 +28,12 @@ vi.mock("~/frontend/components/app-ui/StatValue", () => ({
 }));
 
 vi.mock("~/frontend/lib/running", () => ({
-  calcTimeFromDistanceAndPace: (...args: unknown[]) =>
+  calcTimeFromDistanceAndPace: (
+    ...args: Parameters<typeof mockCalcTimeFromDistanceAndPace>
+  ) =>
     mockCalcTimeFromDistanceAndPace(...args),
-  calcCaloriesFromRun: (...args: unknown[]) => mockCalcCaloriesFromRun(...args),
+  calcCaloriesFromRun: (...args: Parameters<typeof mockCalcCaloriesFromRun>) =>
+    mockCalcCaloriesFromRun(...args),
 }));
 
 describe("RouteCalculatedStats", () => {
