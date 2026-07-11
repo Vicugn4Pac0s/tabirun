@@ -110,7 +110,7 @@ export const UserProfileDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
         <DialogHeader>
           <DialogTitle>プロフィールを編集</DialogTitle>
           <DialogDescription>
@@ -118,16 +118,21 @@ export const UserProfileDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit(submitProfile)}>
-          <UserProfileFormFields
-            register={register}
-            control={control}
-            errors={errors}
-            disabled={isLoading || isUpdating}
-            showHomeLocationFields
-            canUseCurrentMapCenter={canReadCurrentMapCenter}
-            onUseCurrentMapCenter={applyCurrentMapCenter}
-          />
+        <form
+          className="flex min-h-0 flex-col gap-4"
+          onSubmit={handleSubmit(submitProfile)}
+        >
+          <div className="min-h-0 overflow-y-auto pr-1">
+            <UserProfileFormFields
+              register={register}
+              control={control}
+              errors={errors}
+              disabled={isLoading || isUpdating}
+              showHomeLocationFields
+              canUseCurrentMapCenter={canReadCurrentMapCenter}
+              onUseCurrentMapCenter={applyCurrentMapCenter}
+            />
+          </div>
 
           <DialogFooter className="gap-2 sm:gap-0">
             <Button
