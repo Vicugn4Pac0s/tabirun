@@ -3,6 +3,7 @@ import {
   index,
   int,
   primaryKey,
+  real,
   sqliteTableCreator,
   text,
 } from "drizzle-orm/sqlite-core";
@@ -50,6 +51,8 @@ export const users = createTable("user", {
   pace: text("pace", { length: 255 }),
   height: int("height"),
   weight: int("weight"),
+  homeLat: real("home_lat"),
+  homeLng: real("home_lng"),
   profileCompletedAt: int("profile_completed_at", { mode: "timestamp" }),
 });
 

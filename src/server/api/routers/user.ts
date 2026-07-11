@@ -22,6 +22,8 @@ export const userRouter = createTRPCRouter({
         pace: true,
         height: true,
         weight: true,
+        homeLat: true,
+        homeLng: true,
         profileCompletedAt: true,
       },
     });
@@ -42,6 +44,8 @@ export const userRouter = createTRPCRouter({
           ...(input.pace !== undefined ? { pace: input.pace } : {}),
           ...(input.height !== undefined ? { height: input.height } : {}),
           ...(input.weight !== undefined ? { weight: input.weight } : {}),
+          ...(input.homeLat !== undefined ? { homeLat: input.homeLat } : {}),
+          ...(input.homeLng !== undefined ? { homeLng: input.homeLng } : {}),
         })
         .where(eq(users.id, ctx.session.user.id));
 
@@ -57,6 +61,8 @@ export const userRouter = createTRPCRouter({
           pace: true,
           height: true,
           weight: true,
+          homeLat: true,
+          homeLng: true,
           profileCompletedAt: true,
         },
       });
@@ -89,6 +95,8 @@ export const userRouter = createTRPCRouter({
           pace: true,
           height: true,
           weight: true,
+          homeLat: true,
+          homeLng: true,
           profileCompletedAt: true,
         },
       });

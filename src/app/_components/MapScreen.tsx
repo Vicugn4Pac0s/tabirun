@@ -4,7 +4,8 @@ import {
   GOOGLE_MAP_MAX_ZOOM,
   GOOGLE_MAP_MIN_ZOOM,
 } from "~/frontend/config";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
 import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
 import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
@@ -19,18 +20,42 @@ import StreetViewPointMarker from "~/frontend/features/googlemap/components/Stre
 import RoutePolyline from "~/frontend/features/googlemap/components/RoutePolyline";
 
 function MapScreen() {
-  const { permissions } = useAuthPermission();
+  const { permissions, isAuthenticated } = useAuthPermission();
   const { map, setMap, streetView, streetViewUnavailable } = useGoogleMap();
   const moveStreetView = useMoveStreetView();
+  const { user } = useUserQuery({ enabled: isAuthenticated });
   const [streetViewCenter, setStreetViewCenter] =
     useState<google.maps.LatLngLiteral | null>(null);
   const [streetViewPov, setStreetViewPov] =
     useState<google.maps.StreetViewPov | null>(null);
+  const hasAppliedMapCenterRef = useRef(false);
+  const hasAppliedStreetViewCenterRef = useRef(false);
   const routePoints = useRoutePointsStore((state) => state.routePoints);
   const { canEditRoutePoints } = useRouteEditorState();
   const { polylinePath } = useRoutePolylinePath(routePoints, {
     canUseDirections: permissions.canUseDirections,
   });
+  const initialCenter = useMemo(
+    () =>
+      user?.homeLat != null && user?.homeLng != null
+        ? { lat: user.homeLat, lng: user.homeLng }
+        : GOOGLE_MAP_DEFAULT_CENTER,
+    [user?.homeLat, user?.homeLng]
+  );
+
+  useEffect(() => {
+    if (map && !hasAppliedMapCenterRef.current) {
+      map.setCenter(initialCenter);
+      hasAppliedMapCenterRef.current = true;
+    }
+  }, [initialCenter, map]);
+
+  useEffect(() => {
+    if (streetView.current && !hasAppliedStreetViewCenterRef.current) {
+      streetView.current.setPosition(initialCenter);
+      hasAppliedStreetViewCenterRef.current = true;
+    }
+  }, [initialCenter, map, streetView]);
 
   return (
     <div className="relative grid flex-1 grid-cols-1 min-[1201px]:grid-cols-2">
@@ -39,7 +64,7 @@ function MapScreen() {
           map={map}
           streetView={streetView}
           options={{
-            position: GOOGLE_MAP_DEFAULT_CENTER,
+            position: initialCenter,
             pov: { heading: 165, pitch: 0 },
             zoomControl: false,
             addressControl: false,
@@ -78,7 +103,7 @@ function MapScreen() {
           map={map}
           setMap={setMap}
           options={{
-            center: GOOGLE_MAP_DEFAULT_CENTER,
+            center: initialCenter,
             zoom: GOOGLE_MAP_DEFAULT_ZOOM,
             maxZoom: GOOGLE_MAP_MAX_ZOOM,
             minZoom: GOOGLE_MAP_MIN_ZOOM,

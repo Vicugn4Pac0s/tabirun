@@ -71,6 +71,13 @@
       "when": 1783400000000,
       "tag": "0009_solid_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1783751219516,
+      "tag": "0010_misty_ink",
+      "breakpoints": true
     }
   ]
 }

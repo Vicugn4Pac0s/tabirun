@@ -24,6 +24,8 @@ export type UserProfileFormValues = {
   pace?: string;
   height?: number;
   weight?: number;
+  homeLat?: number | null;
+  homeLng?: number | null;
 };
 
 type UserProfileFormFieldsProps = {
@@ -31,12 +33,16 @@ type UserProfileFormFieldsProps = {
   control: Control<UserProfileFormValues>;
   errors: FieldErrors<UserProfileFormValues>;
   disabled: boolean;
+  showHomeLocationFields?: boolean;
 };
 
 const toOptionalString = (value: string) => (value === "" ? undefined : value);
 
 const toOptionalInt = (value: string) =>
   value === "" ? undefined : Number.parseInt(value, 10);
+
+const toNullableFloat = (value: string) =>
+  value === "" ? null : Number.parseFloat(value);
 
 const getErrorMessage = (error: FieldError | undefined) => error?.message;
 
@@ -45,12 +51,15 @@ export const UserProfileFormFields = ({
   control,
   errors,
   disabled,
+  showHomeLocationFields = false,
 }: UserProfileFormFieldsProps) => {
   const birthDateError = getErrorMessage(errors.birthDate);
   const genderError = getErrorMessage(errors.gender);
   const paceError = getErrorMessage(errors.pace);
   const heightError = getErrorMessage(errors.height);
   const weightError = getErrorMessage(errors.weight);
+  const homeLatError = getErrorMessage(errors.homeLat);
+  const homeLngError = getErrorMessage(errors.homeLng);
 
   return (
     <>
@@ -129,6 +138,38 @@ export const UserProfileFormFields = ({
           {weightError && <p className="text-sm text-red-500">{weightError}</p>}
         </div>
       </div>
+
+      {showHomeLocationFields ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1">
+            <label className="text-sm font-medium">地図の初期緯度</label>
+            <Input
+              type="number"
+              inputMode="decimal"
+              step="any"
+              disabled={disabled}
+              {...register("homeLat", {
+                setValueAs: toNullableFloat,
+              })}
+            />
+            {homeLatError && <p className="text-sm text-red-500">{homeLatError}</p>}
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">地図の初期経度</label>
+            <Input
+              type="number"
+              inputMode="decimal"
+              step="any"
+              disabled={disabled}
+              {...register("homeLng", {
+                setValueAs: toNullableFloat,
+              })}
+            />
+            {homeLngError && <p className="text-sm text-red-500">{homeLngError}</p>}
+          </div>
+        </div>
+      ) : null}
     </>
   );
 };

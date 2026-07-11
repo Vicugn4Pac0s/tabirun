@@ -48,6 +48,8 @@ export const UserProfileDialog = ({
       pace: undefined,
       height: undefined,
       weight: undefined,
+      homeLat: undefined,
+      homeLng: undefined,
     },
   });
 
@@ -60,6 +62,8 @@ export const UserProfileDialog = ({
       pace: user?.pace ?? undefined,
       height: user?.height ?? undefined,
       weight: user?.weight ?? undefined,
+      homeLat: user?.homeLat ?? null,
+      homeLng: user?.homeLng ?? null,
     });
   }, [open, reset, user]);
 
@@ -98,6 +102,7 @@ export const UserProfileDialog = ({
             control={control}
             errors={errors}
             disabled={isLoading || isUpdating}
+            showHomeLocationFields
           />
 
           <DialogFooter className="gap-2 sm:gap-0">
