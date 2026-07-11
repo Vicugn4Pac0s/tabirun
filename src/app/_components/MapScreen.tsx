@@ -33,8 +33,8 @@ function MapScreen() {
   });
 
   return (
-    <div className="relative grid flex-1 grid-cols-2">
-      <div className="relative">
+    <div className="relative grid flex-1 grid-cols-2 max-[1200px]:grid-cols-1">
+      <div className="relative h-screen max-[1200px]:order-2 max-[1200px]:h-[50vh]">
         <StreetView
           map={map}
           streetView={streetView}
@@ -72,9 +72,9 @@ function MapScreen() {
           )}
         </div>
       </div>
-      <div>
+      <div className="h-screen max-[1200px]:order-1 max-[1200px]:h-[50vh]">
         <GoogleMapView
-          className="h-screen"
+          className="h-full"
           map={map}
           setMap={setMap}
           options={{
