@@ -100,7 +100,7 @@ export const UserProfileDialog = ({
             disabled={isLoading || isUpdating}
           />
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button
               type="button"
               variant="outline"
