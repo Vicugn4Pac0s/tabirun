@@ -21,23 +21,20 @@ export function useMobileSidebarTriggerState() {
 
   if (!isDetailState) {
     return {
-      ariaLabel: "一覧を開く",
-      isCompact: true,
-      label: null,
+      ariaLabel: "コースを開く",
+      label: "コース",
     };
   }
 
   if (isLoading) {
     return {
-      ariaLabel: "詳細を開く",
-      isCompact: false,
+      ariaLabel: "コースを開く",
       label: "計測中",
     };
   }
 
   return {
-    ariaLabel: "詳細を開く",
-    isCompact: false,
-    label: distanceKm > 0 ? `${distanceKm} km` : "詳細",
+    ariaLabel: "コースを開く",
+    label: distanceKm > 0 ? `${distanceKm} km` : "コース",
   };
 }
