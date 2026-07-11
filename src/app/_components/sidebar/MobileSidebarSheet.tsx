@@ -1,8 +1,7 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useState } from "react";
-import { Button } from "~/frontend/components/ui/button";
 import {
   Drawer,
   DrawerClose,
@@ -11,6 +10,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "~/frontend/components/ui/drawer";
+import MobileSidebarTrigger from "./MobileSidebarTrigger";
 
 interface MobileSidebarSheetProps {
   children: React.ReactNode;
@@ -22,14 +22,7 @@ function MobileSidebarSheet({ children }: MobileSidebarSheetProps) {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute left-3 top-3 z-50 md:hidden"
-          aria-label="メニューを開く"
-        >
-          <Menu />
-        </Button>
+        <MobileSidebarTrigger />
       </DrawerTrigger>
       <DrawerContent className="h-[72vh] max-h-[72vh] gap-0 rounded-t-2xl border-x-0 border-b-0">
         <DrawerHeader className="sr-only">
