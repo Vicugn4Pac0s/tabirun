@@ -1,9 +1,11 @@
 "use client";
 
+import { MapPinned } from "lucide-react";
 import { Controller, type Control, type FieldErrors, type FieldError, type UseFormRegister } from "react-hook-form";
 
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
+import { Button } from "~/frontend/components/ui/button";
 import { Input } from "~/frontend/components/ui/input";
 
 type SelectOption = {
@@ -34,6 +36,8 @@ type UserProfileFormFieldsProps = {
   errors: FieldErrors<UserProfileFormValues>;
   disabled: boolean;
   showHomeLocationFields?: boolean;
+  canUseCurrentMapCenter?: boolean;
+  onUseCurrentMapCenter?: () => void;
 };
 
 const toOptionalString = (value: string) => (value === "" ? undefined : value);
@@ -52,6 +56,8 @@ export const UserProfileFormFields = ({
   errors,
   disabled,
   showHomeLocationFields = false,
+  canUseCurrentMapCenter = false,
+  onUseCurrentMapCenter,
 }: UserProfileFormFieldsProps) => {
   const birthDateError = getErrorMessage(errors.birthDate);
   const genderError = getErrorMessage(errors.gender);
@@ -140,33 +146,57 @@ export const UserProfileFormFields = ({
       </div>
 
       {showHomeLocationFields ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-1">
-            <label className="text-sm font-medium">地図の初期緯度</label>
-            <Input
-              type="number"
-              inputMode="decimal"
-              step="any"
-              disabled={disabled}
-              {...register("homeLat", {
-                setValueAs: toNullableFloat,
-              })}
-            />
-            {homeLatError && <p className="text-sm text-red-500">{homeLatError}</p>}
+        <div className="space-y-3 rounded-lg border border-base-gray-light bg-white/70 p-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <p className="text-sm font-medium">地図の初期位置</p>
+              <p className="text-xs leading-relaxed text-base-gray">
+                現在表示中の地図中心をホーム地点として保存できます。
+              </p>
+            </div>
+            {onUseCurrentMapCenter ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+                disabled={disabled || !canUseCurrentMapCenter}
+                onClick={onUseCurrentMapCenter}
+              >
+                <MapPinned />
+                現在の地図位置を使う
+              </Button>
+            ) : null}
           </div>
 
-          <div className="space-y-1">
-            <label className="text-sm font-medium">地図の初期経度</label>
-            <Input
-              type="number"
-              inputMode="decimal"
-              step="any"
-              disabled={disabled}
-              {...register("homeLng", {
-                setValueAs: toNullableFloat,
-              })}
-            />
-            {homeLngError && <p className="text-sm text-red-500">{homeLngError}</p>}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">緯度</label>
+              <Input
+                type="number"
+                inputMode="decimal"
+                step="any"
+                disabled={disabled}
+                {...register("homeLat", {
+                  setValueAs: toNullableFloat,
+                })}
+              />
+              {homeLatError && <p className="text-sm text-red-500">{homeLatError}</p>}
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium">経度</label>
+              <Input
+                type="number"
+                inputMode="decimal"
+                step="any"
+                disabled={disabled}
+                {...register("homeLng", {
+                  setValueAs: toNullableFloat,
+                })}
+              />
+              {homeLngError && <p className="text-sm text-red-500">{homeLngError}</p>}
+            </div>
           </div>
         </div>
       ) : null}

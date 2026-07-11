@@ -18,6 +18,7 @@ import {
   type UserProfileFormValues,
   UserProfileFormFields,
 } from "~/frontend/features/user/components/UserProfileFormFields";
+import { useCurrentMapCenter } from "~/frontend/features/googlemap/hooks/useCurrentMapCenter";
 import { useUpdateUser } from "~/frontend/features/user/hooks/useUpdateUser";
 import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
 import { userProfileUpdateSchema } from "~/shared/schemas";
@@ -33,12 +34,14 @@ export const UserProfileDialog = ({
 }: UserProfileDialogProps) => {
   const { user, isLoading, error } = useUserQuery();
   const { updateUser, isUpdating } = useUpdateUser();
+  const { canReadCurrentMapCenter, getCurrentMapCenter } = useCurrentMapCenter();
 
   const {
     register,
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<UserProfileFormValues>({
     resolver: zodResolver(userProfileUpdateSchema),
@@ -86,6 +89,25 @@ export const UserProfileDialog = ({
     });
   };
 
+  const applyCurrentMapCenter = () => {
+    const center = getCurrentMapCenter();
+
+    if (!center) {
+      toast.error("現在表示中の地図位置を取得できませんでした。");
+      return;
+    }
+
+    setValue("homeLat", Number(center.lat.toFixed(6)), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setValue("homeLng", Number(center.lng.toFixed(6)), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    toast.success("現在表示中の地図位置をホーム地点に設定しました");
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -103,6 +125,8 @@ export const UserProfileDialog = ({
             errors={errors}
             disabled={isLoading || isUpdating}
             showHomeLocationFields
+            canUseCurrentMapCenter={canReadCurrentMapCenter}
+            onUseCurrentMapCenter={applyCurrentMapCenter}
           />
 
           <DialogFooter className="gap-2 sm:gap-0">
