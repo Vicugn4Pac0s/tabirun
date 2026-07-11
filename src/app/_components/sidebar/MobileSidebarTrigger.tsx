@@ -1,5 +1,6 @@
 "use client";
 
+import { Route } from "lucide-react";
 import { forwardRef } from "react";
 import { cn } from "~/frontend/lib/utils";
 import { Button, type ButtonProps } from "~/frontend/components/ui/button";
@@ -16,24 +17,25 @@ const MobileSidebarTrigger = forwardRef<HTMLButtonElement, ButtonProps>(
         variant="outline"
         className={cn(
           "absolute right-0 bottom-28 z-50 md:hidden",
-          "flex h-auto w-10 flex-col items-center gap-1",
+          "flex h-auto w-10 flex-col items-center gap-2",
           "rounded-tl-md rounded-r-none border-r-0 px-0 py-3 shadow-md",
           className
         )}
         aria-label={ariaLabel}
         {...props}
       >
+        <Route className="h-4 w-4 shrink-0 text-base-gray" />
         {label ? (
           <span
             className={cn(
-              "text-base-gray",
+              "font-inter text-base-gray",
               isDistanceLabel
-                ? "font-inter font-black text-lg leading-[1.1]"
-                : "font-bold text-sm leading-none tracking-[0.18em]"
+                ? "font-black text-lg"
+                : "font-bold text-md"
             )}
             style={{
               writingMode: "vertical-rl",
-              textOrientation: isDistanceLabel ? "mixed" : "upright",
+              textOrientation: "mixed",
             }}
           >
             {label}
