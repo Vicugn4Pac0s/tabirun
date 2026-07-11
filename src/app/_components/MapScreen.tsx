@@ -11,6 +11,7 @@ import {
 } from "~/frontend/config";
 import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
 import { useUserMapDefaultCenter } from "~/frontend/features/user/hooks/useUserMapDefaultCenter";
+import { Spinner } from "~/frontend/components/ui/spinner";
 import GoogleMapView from "~/frontend/features/googlemap/components/GoogleMapView";
 import StreetView from "~/frontend/features/googlemap/components/StreetView";
 import RoutePointsNavigation from "~/frontend/features/route-points-navigation/components/RouteNavigation";
@@ -53,6 +54,14 @@ function MapScreen() {
       hasAppliedStreetViewCenterRef.current = true;
     }
   }, [defaultCenter, isDefaultCenterReady, streetView]);
+
+  if (!isDefaultCenterReady) {
+    return (
+      <div className="flex min-h-screen flex-1 items-center justify-center bg-base-gray-light">
+        <Spinner className="size-8 text-base-gray/70" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative grid flex-1 grid-cols-1 min-[1201px]:grid-cols-2">
