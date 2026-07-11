@@ -8,23 +8,31 @@ import { useMobileSidebarTriggerState } from "./hooks/useMobileSidebarTriggerSta
 
 const MobileSidebarTrigger = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, ...props }, ref) => {
-    const { ariaLabel, isCompact, label } = useMobileSidebarTriggerState();
+    const { ariaLabel, label } = useMobileSidebarTriggerState();
 
     return (
       <Button
         ref={ref}
         variant="outline"
-        size={isCompact ? "icon" : "default"}
+        size="default"
         className={cn(
-          "absolute left-3 top-3 z-50 md:hidden",
-          !isCompact && "h-10 rounded-full px-3 text-sm font-semibold",
+          "absolute right-0 bottom-28 z-50 md:hidden",
+          "flex h-auto w-10 flex-col items-center gap-1",
+          "rounded-l-2xl rounded-r-none border-r-0 px-0 py-3 shadow-md",
           className
         )}
         aria-label={ariaLabel}
         {...props}
       >
-        <Menu />
-        {label ? <span>{label}</span> : null}
+        <Menu className="h-4 w-4 shrink-0" />
+        {label ? (
+          <span
+            className="text-xs font-semibold leading-tight"
+            style={{ writingMode: "vertical-rl" }}
+          >
+            {label}
+          </span>
+        ) : null}
       </Button>
     );
   }
