@@ -28,7 +28,7 @@ const MobileSidebarTrigger = forwardRef<HTMLButtonElement, ButtonProps>(
             className={cn(
               "text-base-gray",
               isDistanceLabel
-                ? "font-inter font-black text-lg leading-[1.1] tabular-nums"
+                ? "font-inter font-black text-lg leading-[1.1]"
                 : "font-bold text-sm leading-none tracking-[0.18em]"
             )}
             style={{
