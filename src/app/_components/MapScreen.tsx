@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
+import { useApplyMapDefaultCenter } from "~/frontend/features/googlemap/hooks/useApplyMapDefaultCenter";
 import { useRouteEditorState } from "~/frontend/features/route/hooks/useRouteEditorState";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import useRoutePolylinePath from "~/frontend/hooks/googlemap/useRoutePolylinePath";
@@ -29,31 +30,16 @@ function MapScreen() {
     useState<google.maps.LatLngLiteral | null>(null);
   const [streetViewPov, setStreetViewPov] =
     useState<google.maps.StreetViewPov | null>(null);
-  const hasAppliedMapCenterRef = useRef(false);
-  const hasAppliedStreetViewCenterRef = useRef(false);
   const routePoints = useRoutePointsStore((state) => state.routePoints);
   const { canEditRoutePoints } = useRouteEditorState();
   const { polylinePath } = useRoutePolylinePath(routePoints, {
     canUseDirections: permissions.canUseDirections,
   });
 
-  useEffect(() => {
-    if (isDefaultCenterReady && map && !hasAppliedMapCenterRef.current) {
-      map.setCenter(defaultCenter);
-      hasAppliedMapCenterRef.current = true;
-    }
-  }, [defaultCenter, isDefaultCenterReady, map]);
-
-  useEffect(() => {
-    if (
-      isDefaultCenterReady &&
-      streetView.current &&
-      !hasAppliedStreetViewCenterRef.current
-    ) {
-      streetView.current.setPosition(defaultCenter);
-      hasAppliedStreetViewCenterRef.current = true;
-    }
-  }, [defaultCenter, isDefaultCenterReady, streetView]);
+  useApplyMapDefaultCenter({
+    center: defaultCenter,
+    enabled: isDefaultCenterReady,
+  });
 
   if (!isDefaultCenterReady) {
     return (
