@@ -1,104 +1,102 @@
 {
-  "version": "6",
-  "dialect": "sqlite",
-  "id": "a6375452-3219-4b3b-9fb1-95bf4e386fad",
+  "id": "e81f7a9f-9ee0-4886-973b-8874ab0210e9",
   "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "template_t3app_account": {
-      "name": "template_t3app_account",
+    "public.tabirun_account": {
+      "name": "tabirun_account",
+      "schema": "",
       "columns": {
         "user_id": {
           "name": "user_id",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "type": {
           "name": "type",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "provider": {
           "name": "provider",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "provider_account_id": {
           "name": "provider_account_id",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "refresh_token": {
           "name": "refresh_token",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "access_token": {
           "name": "access_token",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "expires_at": {
           "name": "expires_at",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "token_type": {
           "name": "token_type",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "scope": {
           "name": "scope",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "id_token": {
           "name": "id_token",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "session_state": {
           "name": "session_state",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         }
       },
       "indexes": {
         "account_user_id_idx": {
           "name": "account_user_id_idx",
           "columns": [
-            "user_id"
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
-        "template_t3app_account_user_id_template_t3app_user_id_fk": {
-          "name": "template_t3app_account_user_id_template_t3app_user_id_fk",
-          "tableFrom": "template_t3app_account",
-          "tableTo": "template_t3app_user",
+        "tabirun_account_user_id_tabirun_user_id_fk": {
+          "name": "tabirun_account_user_id_tabirun_user_id_fk",
+          "tableFrom": "tabirun_account",
+          "tableTo": "tabirun_user",
           "columnsFrom": [
             "user_id"
           ],
@@ -110,85 +108,209 @@
         }
       },
       "compositePrimaryKeys": {
-        "template_t3app_account_provider_provider_account_id_pk": {
+        "tabirun_account_provider_provider_account_id_pk": {
+          "name": "tabirun_account_provider_provider_account_id_pk",
           "columns": [
             "provider",
             "provider_account_id"
-          ],
-          "name": "template_t3app_account_provider_provider_account_id_pk"
+          ]
         }
       },
       "uniqueConstraints": {},
-      "checkConstraints": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "template_t3app_route": {
-      "name": "template_t3app_route",
+    "public.tabirun_pace": {
+      "name": "tabirun_pace",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tabirun_quota_usage": {
+      "name": "tabirun_quota_usage",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "feature": {
+          "name": "feature",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "count": {
+          "name": "count",
+          "type": "integer",
+          "primaryKey": false,
           "notNull": true,
-          "autoincrement": true
+          "default": 0
+        }
+      },
+      "indexes": {
+        "quota_user_feature_date_idx": {
+          "name": "quota_user_feature_date_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "feature",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "tabirun_quota_usage_user_id_tabirun_user_id_fk": {
+          "name": "tabirun_quota_usage_user_id_tabirun_user_id_fk",
+          "tableFrom": "tabirun_quota_usage",
+          "tableTo": "tabirun_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tabirun_route": {
+      "name": "tabirun_route",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
         },
         "title": {
           "name": "title",
-          "type": "text(256)",
+          "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "points": {
           "name": "points",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "created_by": {
           "name": "created_by",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "(unixepoch())"
+          "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "integer",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         }
       },
       "indexes": {
         "created_by_idx": {
           "name": "created_by_idx",
           "columns": [
-            "created_by"
+            {
+              "expression": "created_by",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         },
         "title_idx": {
           "name": "title_idx",
           "columns": [
-            "title"
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
-        "template_t3app_route_created_by_template_t3app_user_id_fk": {
-          "name": "template_t3app_route_created_by_template_t3app_user_id_fk",
-          "tableFrom": "template_t3app_route",
-          "tableTo": "template_t3app_user",
+        "tabirun_route_created_by_tabirun_user_id_fk": {
+          "name": "tabirun_route_created_by_tabirun_user_id_fk",
+          "tableFrom": "tabirun_route",
+          "tableTo": "tabirun_user",
           "columnsFrom": [
             "created_by"
           ],
@@ -201,47 +323,55 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "template_t3app_session": {
-      "name": "template_t3app_session",
+    "public.tabirun_session": {
+      "name": "tabirun_session",
+      "schema": "",
       "columns": {
         "session_token": {
           "name": "session_token",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "expires": {
           "name": "expires",
-          "type": "integer",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         }
       },
       "indexes": {
         "session_userId_idx": {
           "name": "session_userId_idx",
           "columns": [
-            "userId"
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
-        "template_t3app_session_userId_template_t3app_user_id_fk": {
-          "name": "template_t3app_session_userId_template_t3app_user_id_fk",
-          "tableFrom": "template_t3app_session",
-          "tableTo": "template_t3app_user",
+        "tabirun_session_userId_tabirun_user_id_fk": {
+          "name": "tabirun_session_userId_tabirun_user_id_fk",
+          "tableFrom": "tabirun_session",
+          "tableTo": "tabirun_user",
           "columnsFrom": [
             "userId"
           ],
@@ -254,102 +384,151 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "template_t3app_user": {
-      "name": "template_t3app_user",
+    "public.tabirun_user": {
+      "name": "tabirun_user",
+      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "name": {
           "name": "name",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "email": {
           "name": "email",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "email_verified": {
           "name": "email_verified",
-          "type": "integer",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
-          "default": "(unixepoch())"
+          "default": "now()"
         },
         "image": {
           "name": "image",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
+        },
+        "birth_date": {
+          "name": "birth_date",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gender": {
+          "name": "gender",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pace": {
+          "name": "pace",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "height": {
+          "name": "height",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weight": {
+          "name": "weight",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "home_lat": {
+          "name": "home_lat",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "home_lng": {
+          "name": "home_lng",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profile_completed_at": {
+          "name": "profile_completed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
-    "template_t3app_verification_token": {
-      "name": "template_t3app_verification_token",
+    "public.tabirun_verification_token": {
+      "name": "tabirun_verification_token",
+      "schema": "",
       "columns": {
         "identifier": {
           "name": "identifier",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "token": {
           "name": "token",
-          "type": "text(255)",
+          "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "expires": {
           "name": "expires",
-          "type": "integer",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "template_t3app_verification_token_identifier_token_pk": {
+        "tabirun_verification_token_identifier_token_pk": {
+          "name": "tabirun_verification_token_identifier_token_pk",
           "columns": [
             "identifier",
             "token"
-          ],
-          "name": "template_t3app_verification_token_identifier_token_pk"
+          ]
         }
       },
       "uniqueConstraints": {},
-      "checkConstraints": {}
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
-  "views": {},
   "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "internal": {
-    "indexes": {}
+    "tables": {}
   }
 }

@@ -1,59 +1,56 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
+  doublePrecision,
   index,
-  int,
+  integer,
   primaryKey,
-  real,
-  sqliteTableCreator,
+  pgTableCreator,
+  serial,
   text,
-} from "drizzle-orm/sqlite-core";
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
-export const createTable = sqliteTableCreator(
-  (name) => `tabirun_${name}`,
-);
+export const createTable = pgTableCreator((name) => `tabirun_${name}`);
 
 export const routes = createTable(
   "route",
   {
-    id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    title: text("title", { length: 256 }),
+    id: serial("id").primaryKey(),
+    title: varchar("title", { length: 256 }),
     points: text("points").notNull(),
-    createdById: text("created_by", { length: 255 })
+    createdById: varchar("created_by", { length: 255 })
       .notNull()
       .references(() => users.id),
-    createdAt: int("created_at", { mode: "timestamp" })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    updatedAt: int("updated_at", { mode: "timestamp" }).$onUpdate(
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
       () => new Date(),
     ),
   },
-  (example) => ({
-    createdByIdIdx: index("created_by_idx").on(example.createdById),
-    titleIndex: index("title_idx").on(example.title),
-  }),
+  (route) => [
+    index("created_by_idx").on(route.createdById),
+    index("title_idx").on(route.title),
+  ],
 );
 
 export const users = createTable("user", {
-  id: text("id", { length: 255 })
+  id: varchar("id", { length: 255 })
     .notNull()
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: text("name", { length: 255 }),
-  email: text("email", { length: 255 }).notNull(),
-  emailVerified: int("email_verified", {
-    mode: "timestamp",
-  }).default(sql`(unixepoch())`),
-  image: text("image", { length: 255 }),
-  birthDate: text("birth_date", { length: 10 }),
-  gender: text("gender", { length: 50 }),
-  pace: text("pace", { length: 255 }),
-  height: int("height"),
-  weight: int("weight"),
-  homeLat: real("home_lat"),
-  homeLng: real("home_lng"),
-  profileCompletedAt: int("profile_completed_at", { mode: "timestamp" }),
+  name: varchar("name", { length: 255 }),
+  email: varchar("email", { length: 255 }).notNull(),
+  emailVerified: timestamp("email_verified", { mode: "date" }).defaultNow(),
+  image: varchar("image", { length: 255 }),
+  birthDate: varchar("birth_date", { length: 10 }),
+  gender: varchar("gender", { length: 50 }),
+  pace: varchar("pace", { length: 255 }),
+  height: integer("height"),
+  weight: integer("weight"),
+  homeLat: doublePrecision("home_lat"),
+  homeLng: doublePrecision("home_lng"),
+  profileCompletedAt: timestamp("profile_completed_at", { mode: "date" }),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -63,28 +60,30 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const accounts = createTable(
   "account",
   {
-    userId: text("user_id", { length: 255 })
+    userId: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => users.id),
-    type: text("type", { length: 255 })
+    type: varchar("type", { length: 255 })
       .$type<AdapterAccount["type"]>()
       .notNull(),
-    provider: text("provider", { length: 255 }).notNull(),
-    providerAccountId: text("provider_account_id", { length: 255 }).notNull(),
+    provider: varchar("provider", { length: 255 }).notNull(),
+    providerAccountId: varchar("provider_account_id", {
+      length: 255,
+    }).notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
-    expires_at: int("expires_at"),
-    token_type: text("token_type", { length: 255 }),
-    scope: text("scope", { length: 255 }),
+    expires_at: integer("expires_at"),
+    token_type: varchar("token_type", { length: 255 }),
+    scope: varchar("scope", { length: 255 }),
     id_token: text("id_token"),
-    session_state: text("session_state", { length: 255 }),
+    session_state: varchar("session_state", { length: 255 }),
   },
-  (account) => ({
-    compoundKey: primaryKey({
+  (account) => [
+    primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
-    userIdIdx: index("account_user_id_idx").on(account.userId),
-  }),
+    index("account_user_id_idx").on(account.userId),
+  ],
 );
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -94,15 +93,15 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 export const sessions = createTable(
   "session",
   {
-    sessionToken: text("session_token", { length: 255 }).notNull().primaryKey(),
-    userId: text("userId", { length: 255 })
+    sessionToken: varchar("session_token", { length: 255 })
+      .notNull()
+      .primaryKey(),
+    userId: varchar("userId", { length: 255 })
       .notNull()
       .references(() => users.id),
-    expires: int("expires", { mode: "timestamp" }).notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
   },
-  (session) => ({
-    userIdIdx: index("session_userId_idx").on(session.userId),
-  }),
+  (session) => [index("session_userId_idx").on(session.userId)],
 );
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -112,36 +111,28 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 export const verificationTokens = createTable(
   "verification_token",
   {
-    identifier: text("identifier", { length: 255 }).notNull(),
-    token: text("token", { length: 255 }).notNull(),
-    expires: int("expires", { mode: "timestamp" }).notNull(),
+    identifier: varchar("identifier", { length: 255 }).notNull(),
+    token: varchar("token", { length: 255 }).notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
   },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-  }),
+  (vt) => [primaryKey({ columns: [vt.identifier, vt.token] })],
 );
 
 export const paces = createTable("pace", {
-  id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-  value: text("value", { length: 255 }).notNull(),
+  id: serial("id").primaryKey(),
+  value: varchar("value", { length: 255 }).notNull(),
 });
 
 export const quotaUsages = createTable(
   "quota_usage",
   {
-    id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    userId: text("user_id", { length: 255 })
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => users.id),
-    feature: text("feature", { length: 255 }).notNull(),
-    date: text("date", { length: 10 }).notNull(), // YYYY-MM-DD
-    count: int("count").notNull().default(0),
+    feature: varchar("feature", { length: 255 }).notNull(),
+    date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
+    count: integer("count").notNull().default(0),
   },
-  (t) => ({
-    userFeatureDateIdx: index("quota_user_feature_date_idx").on(
-      t.userId,
-      t.feature,
-      t.date,
-    ),
-  }),
+  (t) => [index("quota_user_feature_date_idx").on(t.userId, t.feature, t.date)],
 );
