@@ -1,1 +1,0 @@
-ALTER TABLE `template_t3app_route` ADD `kilometers` integer NOT NULL;
