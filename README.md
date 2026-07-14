@@ -21,7 +21,7 @@ TABIRUN は、走りたいルートを地図上で自由に作成できるアプ
 - Node.js
 - npm
 - Google 認証および Google Maps Platform の利用に必要な環境変数
-- SQLite / Turso 互換のデータベース接続先
+- Supabase（PostgreSQL）のデータベース接続先
 
 ### インストール
 
