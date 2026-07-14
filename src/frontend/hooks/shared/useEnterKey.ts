@@ -5,6 +5,12 @@ type UseEnterKeyOptions = {
   preventDefault?: boolean;
 };
 
+const isFormControl = (target: EventTarget | null) =>
+  target instanceof HTMLInputElement ||
+  target instanceof HTMLTextAreaElement ||
+  target instanceof HTMLSelectElement ||
+  (target instanceof HTMLElement && target.isContentEditable);
+
 export const useEnterKey = (
   onEnter: () => void,
   options: UseEnterKeyOptions = {},
@@ -16,6 +22,7 @@ export const useEnterKey = (
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
+      if (isFormControl(e.target)) return;
 
       if (preventDefault) {
         e.preventDefault();

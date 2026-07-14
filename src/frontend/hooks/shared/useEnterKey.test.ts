@@ -37,6 +37,30 @@ describe("useEnterKey", () => {
     expect(onEnter).not.toHaveBeenCalled();
   });
 
+  it("フォーム入力中の Enter では反応しない", () => {
+    const onEnter = vi.fn();
+    const preventDefault = vi.fn();
+    const input = document.createElement("input");
+    document.body.append(input);
+
+    renderHook(() => useEnterKey(onEnter));
+
+    const event = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(event, "preventDefault", {
+      value: preventDefault,
+    });
+    input.dispatchEvent(event);
+
+    expect(onEnter).not.toHaveBeenCalled();
+    expect(preventDefault).not.toHaveBeenCalled();
+
+    input.remove();
+  });
+
   it("preventDefault=true のとき preventDefault を呼ぶ", () => {
     const onEnter = vi.fn();
 
