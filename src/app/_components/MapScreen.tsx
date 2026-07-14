@@ -11,8 +11,6 @@ import {
   GOOGLE_MAP_MIN_ZOOM,
 } from "~/frontend/config";
 import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
-import { useUserMapDefaultCenter } from "~/frontend/features/user/hooks/useUserMapDefaultCenter";
-import { Spinner } from "~/frontend/components/ui/spinner";
 import GoogleMapView from "~/frontend/features/googlemap/components/GoogleMapView";
 import StreetView from "~/frontend/features/googlemap/components/StreetView";
 import RoutePointsNavigation from "~/frontend/features/route-points-navigation/components/RouteNavigation";
@@ -20,12 +18,14 @@ import RoutePointMarker from "~/frontend/features/googlemap/components/RoutePoin
 import StreetViewPointMarker from "~/frontend/features/googlemap/components/StreetViewPointMarker";
 import RoutePolyline from "~/frontend/features/googlemap/components/RoutePolyline";
 
-function MapScreen() {
+type MapScreenProps = {
+  defaultCenter: google.maps.LatLngLiteral;
+};
+
+function MapScreen({ defaultCenter }: MapScreenProps) {
   const { permissions } = useAuthPermission();
   const { map, setMap, streetView, streetViewUnavailable } = useGoogleMap();
   const moveStreetView = useMoveStreetView();
-  const { defaultCenter, isReady: isDefaultCenterReady } =
-    useUserMapDefaultCenter();
   const [streetViewCenter, setStreetViewCenter] =
     useState<google.maps.LatLngLiteral | null>(null);
   const [streetViewPov, setStreetViewPov] =
@@ -38,16 +38,8 @@ function MapScreen() {
 
   useApplyMapDefaultCenter({
     center: defaultCenter,
-    enabled: isDefaultCenterReady,
+    enabled: true,
   });
-
-  if (!isDefaultCenterReady) {
-    return (
-      <div className="flex min-h-screen flex-1 items-center justify-center bg-base-gray-light">
-        <Spinner className="size-8 text-base-gray/70" />
-      </div>
-    );
-  }
 
   return (
     <div className="relative grid flex-1 grid-cols-1 min-[1201px]:grid-cols-2">
@@ -72,7 +64,9 @@ function MapScreen() {
         {streetViewUnavailable && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/55 px-6 text-center text-white">
             <div>
-              <p className="text-lg font-bold">この地点ではStreet Viewを表示できません</p>
+              <p className="text-lg font-bold">
+                この地点ではStreet Viewを表示できません
+              </p>
               <p className="mt-2 text-sm text-white/80">
                 道路沿いなど、Street Viewに対応した地点を選んでください。
               </p>
