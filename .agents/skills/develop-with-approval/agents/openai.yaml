@@ -1,0 +1,4 @@
+interface:
+  display_name: "承認付き開発ワークフロー"
+  short_description: "調査・承認・実装・検証・自己レビュー・ローカル引き渡しを進行"
+  default_prompt: "Use $develop-with-approval to investigate this repository task, present an implementation plan for approval, and execute it after approval."
