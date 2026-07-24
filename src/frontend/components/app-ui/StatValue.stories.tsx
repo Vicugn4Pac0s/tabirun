@@ -1,25 +1,23 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { fn } from 'storybook/test';
-import { StatValue } from './StatValue';
+import { StatValue } from "./StatValue";
 
 const meta = {
-  title: 'Atoms/StatValue',
+  title: "Atoms/StatValue",
   component: StatValue,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
     value: 100,
-    unit: 'km',
-    className: '',
+    unit: "km",
+    className: "",
   },
 } satisfies Meta<typeof StatValue>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: {
-  },
+  args: {},
 };

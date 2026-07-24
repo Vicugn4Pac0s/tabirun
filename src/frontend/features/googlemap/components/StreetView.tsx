@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef } from "react";
+import { useEffect, useRef, type MutableRefObject } from "react";
 
 interface StreetViewProps {
   map: google.maps.Map | null;
@@ -8,34 +8,52 @@ interface StreetViewProps {
   onPovChanged?: (position: google.maps.StreetViewPov) => void;
 }
 
-const StreetView = ({ map, streetView, options, onPositionChanged, onPovChanged }: StreetViewProps) => {
+const StreetView = ({
+  map,
+  streetView,
+  options,
+  onPositionChanged,
+  onPovChanged,
+}: StreetViewProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (ref.current && map) {
-      const panorama = new window.google.maps.StreetViewPanorama(
-        ref.current,
-        options
-      );
-      panorama.addListener("position_changed", () => {
+    if (!ref.current || !map) {
+      return;
+    }
+
+    const panorama = new window.google.maps.StreetViewPanorama(
+      ref.current,
+      options,
+    );
+    const positionChangedListener = panorama.addListener(
+      "position_changed",
+      () => {
         const position = panorama.getPosition();
         if (position && onPositionChanged) {
           onPositionChanged(position);
         }
-      });
-      panorama.addListener("pov_changed", () => {
-        const pov = panorama.getPov();
-        if (pov && onPovChanged) {
-          onPovChanged(pov);
-        }
-      });
-      if (streetView) {
-        streetView.current = panorama;
+      },
+    );
+    const povChangedListener = panorama.addListener("pov_changed", () => {
+      const pov = panorama.getPov();
+      if (pov && onPovChanged) {
+        onPovChanged(pov);
       }
-    }
-  }, [ref, map]);
+    });
+    streetView.current = panorama;
 
-  return <div ref={ref} style={{ width: '100%', height: '100%' }} />;
+    return () => {
+      positionChangedListener.remove();
+      povChangedListener.remove();
+
+      if (streetView.current === panorama) {
+        streetView.current = null;
+      }
+    };
+  }, [map, onPositionChanged, onPovChanged, options, streetView]);
+
+  return <div ref={ref} style={{ width: "100%", height: "100%" }} />;
 };
 
 export default StreetView;

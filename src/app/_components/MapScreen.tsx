@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { useApplyMapDefaultCenter } from "~/frontend/features/googlemap/hooks/useApplyMapDefaultCenter";
@@ -35,6 +35,28 @@ function MapScreen() {
   const { polylinePath } = useRoutePolylinePath(routePoints, {
     canUseDirections: permissions.canUseDirections,
   });
+  const streetViewOptions = useMemo(
+    () => ({
+      position: defaultCenter,
+      pov: { heading: 165, pitch: 0 },
+      zoomControl: false,
+      addressControl: false,
+      motionTrackingControl: false,
+    }),
+    [defaultCenter],
+  );
+  const handleStreetViewPositionChanged = useCallback(
+    (position: google.maps.LatLng) => {
+      setStreetViewCenter(position.toJSON());
+    },
+    [],
+  );
+  const handleStreetViewPovChanged = useCallback(
+    (pov: google.maps.StreetViewPov) => {
+      setStreetViewPov(pov);
+    },
+    [],
+  );
 
   useApplyMapDefaultCenter({
     center: defaultCenter,
@@ -55,24 +77,16 @@ function MapScreen() {
         <StreetView
           map={map}
           streetView={streetView}
-          options={{
-            position: defaultCenter,
-            pov: { heading: 165, pitch: 0 },
-            zoomControl: false,
-            addressControl: false,
-            motionTrackingControl: false,
-          }}
-          onPositionChanged={(position) => {
-            setStreetViewCenter(position.toJSON());
-          }}
-          onPovChanged={(pov) => {
-            setStreetViewPov(pov);
-          }}
+          options={streetViewOptions}
+          onPositionChanged={handleStreetViewPositionChanged}
+          onPovChanged={handleStreetViewPovChanged}
         />
         {streetViewUnavailable && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/55 px-6 text-center text-white">
             <div>
-              <p className="text-lg font-bold">この地点ではStreet Viewを表示できません</p>
+              <p className="text-lg font-bold">
+                この地点ではStreet Viewを表示できません
+              </p>
               <p className="mt-2 text-sm text-white/80">
                 道路沿いなど、Street Viewに対応した地点を選んでください。
               </p>

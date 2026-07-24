@@ -1,13 +1,13 @@
-import React, { useEffect } from "react";
+import { useEffect, type Dispatch, type SetStateAction } from "react";
 
 interface PolylineProps {
   map: google.maps.Map | null;
   polyline: google.maps.Polyline | null;
-  setPolyline: React.Dispatch<React.SetStateAction<google.maps.Polyline | null>>;
+  setPolyline: Dispatch<SetStateAction<google.maps.Polyline | null>>;
   options: google.maps.PolylineOptions;
 }
 
-function Polyline({map, polyline, setPolyline, options}: PolylineProps) {
+function Polyline({ map, polyline, setPolyline, options }: PolylineProps) {
   useEffect(() => {
     if (!polyline) {
       setPolyline(new window.google.maps.Polyline());
@@ -18,13 +18,13 @@ function Polyline({map, polyline, setPolyline, options}: PolylineProps) {
         polyline.setMap(null);
       }
     };
-  }, [polyline]);
+  }, [polyline, setPolyline]);
 
   useEffect(() => {
     if (polyline) {
       polyline.setOptions({
         map,
-        ...options
+        ...options,
       });
     }
   }, [map, polyline, options]);

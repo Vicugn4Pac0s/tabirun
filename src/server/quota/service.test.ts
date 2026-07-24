@@ -1,13 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { TRPCError } from "@trpc/server";
 import { checkQuota, incrementQuota } from "~/server/quota/service";
 
 const fixedDate = new Date("2026-07-08T12:00:00.000Z");
-
-type FindFirstMock = ReturnType<typeof vi.fn>;
-type WhereMock = ReturnType<typeof vi.fn>;
-type SetMock = ReturnType<typeof vi.fn>;
-type ValuesMock = ReturnType<typeof vi.fn>;
 
 const createDbMock = (existing: { count: number } | null) => {
   const findFirst = vi.fn().mockResolvedValue(existing);
@@ -51,7 +45,9 @@ describe("checkQuota", () => {
   it("当日の利用回数が上限未満ならエラーを投げない", async () => {
     const { db, mocks } = createDbMock({ count: 49 });
 
-    await expect(checkQuota(db, "user-1", "direction")).resolves.toBeUndefined();
+    await expect(
+      checkQuota(db, "user-1", "direction"),
+    ).resolves.toBeUndefined();
 
     expect(mocks.findFirst).toHaveBeenCalledTimes(1);
   });
