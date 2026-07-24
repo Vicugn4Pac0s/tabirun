@@ -16,6 +16,16 @@ const StreetView = ({
   onPovChanged,
 }: StreetViewProps) => {
   const ref = useRef<HTMLDivElement>(null);
+  const optionsRef = useRef(options);
+  const callbacksRef = useRef({ onPositionChanged, onPovChanged });
+
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
+
+  useEffect(() => {
+    callbacksRef.current = { onPositionChanged, onPovChanged };
+  }, [onPositionChanged, onPovChanged]);
 
   useEffect(() => {
     if (!ref.current || !map) {
@@ -24,21 +34,21 @@ const StreetView = ({
 
     const panorama = new window.google.maps.StreetViewPanorama(
       ref.current,
-      options,
+      optionsRef.current,
     );
     const positionChangedListener = panorama.addListener(
       "position_changed",
       () => {
         const position = panorama.getPosition();
-        if (position && onPositionChanged) {
-          onPositionChanged(position);
+        if (position) {
+          callbacksRef.current.onPositionChanged?.(position);
         }
       },
     );
     const povChangedListener = panorama.addListener("pov_changed", () => {
       const pov = panorama.getPov();
-      if (pov && onPovChanged) {
-        onPovChanged(pov);
+      if (pov) {
+        callbacksRef.current.onPovChanged?.(pov);
       }
     });
     streetView.current = panorama;
@@ -51,7 +61,7 @@ const StreetView = ({
         streetView.current = null;
       }
     };
-  }, [map, onPositionChanged, onPovChanged, options, streetView]);
+  }, [map, streetView]);
 
   return <div ref={ref} style={{ width: "100%", height: "100%" }} />;
 };

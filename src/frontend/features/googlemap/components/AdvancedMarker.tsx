@@ -81,7 +81,7 @@ const AdvancedMarker = ({
         contentElement.removeEventListener("mouseout", onMouseOut);
       }
     };
-  }, [map, markerRef, onClick, onMouseOver, onMouseOut]);
+  }, [content, map, markerRef, onClick, onMouseOver, onMouseOut]);
 
   return null;
 };
