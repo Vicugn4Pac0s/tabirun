@@ -36,22 +36,28 @@ const StreetView = ({
       ref.current,
       optionsRef.current,
     );
-    const positionChangedListener = panorama.addListener(
-      "position_changed",
-      () => {
-        const position = panorama.getPosition();
-        if (position) {
-          callbacksRef.current.onPositionChanged?.(position);
-        }
-      },
-    );
-    const povChangedListener = panorama.addListener("pov_changed", () => {
+    const notifyPosition = () => {
+      const position = panorama.getPosition();
+      if (position) {
+        callbacksRef.current.onPositionChanged?.(position);
+      }
+    };
+    const notifyPov = () => {
       const pov = panorama.getPov();
       if (pov) {
         callbacksRef.current.onPovChanged?.(pov);
       }
-    });
+    };
+    const positionChangedListener = panorama.addListener(
+      "position_changed",
+      notifyPosition,
+    );
+    const povChangedListener = panorama.addListener("pov_changed", notifyPov);
     streetView.current = panorama;
+
+    // 初期値の設定時に発生したイベントは、リスナー登録後には届かない。
+    notifyPosition();
+    notifyPov();
 
     return () => {
       positionChangedListener.remove();

@@ -80,6 +80,11 @@ describe("StreetView", () => {
       />,
     );
 
+    expect(initialPositionChanged).toHaveBeenCalledWith(position);
+    expect(initialPovChanged).toHaveBeenCalledWith(pov);
+    initialPositionChanged.mockClear();
+    initialPovChanged.mockClear();
+
     rerender(
       <StreetView
         map={map}
@@ -111,5 +116,31 @@ describe("StreetView", () => {
     expect(listenerRemovers.get("position_changed")).toHaveBeenCalledTimes(1);
     expect(listenerRemovers.get("pov_changed")).toHaveBeenCalledTimes(1);
     expect(streetViewRef.current).toBeNull();
+  });
+
+  it("位置を遅延取得した場合も変更イベントで通知する", () => {
+    panorama.getPosition.mockReturnValue(null);
+    const onPositionChanged = vi.fn();
+    const onPovChanged = vi.fn();
+
+    render(
+      <StreetView
+        map={map}
+        streetView={{ current: null }}
+        options={{}}
+        onPositionChanged={onPositionChanged}
+        onPovChanged={onPovChanged}
+      />,
+    );
+
+    expect(onPositionChanged).not.toHaveBeenCalled();
+    expect(onPovChanged).toHaveBeenCalledWith(pov);
+
+    panorama.getPosition.mockReturnValue(position);
+    act(() => {
+      listeners.get("position_changed")?.();
+    });
+
+    expect(onPositionChanged).toHaveBeenCalledWith(position);
   });
 });
