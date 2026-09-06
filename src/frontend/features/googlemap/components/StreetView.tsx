@@ -8,34 +8,45 @@ interface StreetViewProps {
   onPovChanged?: (position: google.maps.StreetViewPov) => void;
 }
 
-const StreetView = ({ map, streetView, options, onPositionChanged, onPovChanged }: StreetViewProps) => {
+const StreetView = ({
+  map,
+  streetView,
+  options,
+  onPositionChanged,
+  onPovChanged,
+}: StreetViewProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (ref.current && map) {
       const panorama = new window.google.maps.StreetViewPanorama(
         ref.current,
-        options
+        options,
       );
-      panorama.addListener("position_changed", () => {
+      const notifyPosition = () => {
         const position = panorama.getPosition();
         if (position && onPositionChanged) {
           onPositionChanged(position);
         }
-      });
-      panorama.addListener("pov_changed", () => {
+      };
+      const notifyPov = () => {
         const pov = panorama.getPov();
         if (pov && onPovChanged) {
           onPovChanged(pov);
         }
-      });
+      };
+      panorama.addListener("position_changed", notifyPosition);
+      panorama.addListener("pov_changed", notifyPov);
       if (streetView) {
         streetView.current = panorama;
       }
+      // 初期値の設定時に発生したイベントは、リスナー登録後には届かない。
+      notifyPosition();
+      notifyPov();
     }
   }, [ref, map]);
 
-  return <div ref={ref} style={{ width: '100%', height: '100%' }} />;
+  return <div ref={ref} style={{ width: "100%", height: "100%" }} />;
 };
 
 export default StreetView;
