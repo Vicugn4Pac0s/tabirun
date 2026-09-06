@@ -18,7 +18,7 @@ import {
   type UserProfileFormValues,
   UserProfileFormFields,
 } from "~/frontend/features/user/components/UserProfileFormFields";
-import { useCurrentMapCenter } from "~/frontend/features/googlemap/hooks/useCurrentMapCenter";
+import { useCurrentStreetViewPosition } from "~/frontend/features/googlemap/hooks/useCurrentStreetViewPosition";
 import { useUpdateUser } from "~/frontend/features/user/hooks/useUpdateUser";
 import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
 import { userProfileUpdateSchema } from "~/shared/schemas";
@@ -34,7 +34,10 @@ export const UserProfileDialog = ({
 }: UserProfileDialogProps) => {
   const { user, isLoading, error } = useUserQuery();
   const { updateUser, isUpdating } = useUpdateUser();
-  const { canReadCurrentMapCenter, getCurrentMapCenter } = useCurrentMapCenter();
+  const {
+    canReadCurrentStreetViewPosition,
+    getCurrentStreetViewPosition,
+  } = useCurrentStreetViewPosition();
 
   const {
     register,
@@ -89,23 +92,23 @@ export const UserProfileDialog = ({
     });
   };
 
-  const applyCurrentMapCenter = () => {
-    const center = getCurrentMapCenter();
+  const applyCurrentStreetViewPosition = () => {
+    const position = getCurrentStreetViewPosition();
 
-    if (!center) {
-      toast.error("現在表示中の地図位置を取得できませんでした。");
+    if (!position) {
+      toast.error("現在表示中のマーカー位置を取得できませんでした。");
       return;
     }
 
-    setValue("homeLat", Number(center.lat.toFixed(6)), {
+    setValue("homeLat", Number(position.lat.toFixed(6)), {
       shouldDirty: true,
       shouldValidate: true,
     });
-    setValue("homeLng", Number(center.lng.toFixed(6)), {
+    setValue("homeLng", Number(position.lng.toFixed(6)), {
       shouldDirty: true,
       shouldValidate: true,
     });
-    toast.success("現在表示中の地図位置をホーム地点に設定しました");
+    toast.success("現在表示中のマーカー位置をホーム地点に設定しました");
   };
 
   return (
@@ -129,8 +132,10 @@ export const UserProfileDialog = ({
               errors={errors}
               disabled={isLoading || isUpdating}
               showHomeLocationFields
-              canUseCurrentMapCenter={canReadCurrentMapCenter}
-              onUseCurrentMapCenter={applyCurrentMapCenter}
+              canUseCurrentStreetViewPosition={
+                canReadCurrentStreetViewPosition
+              }
+              onUseCurrentStreetViewPosition={applyCurrentStreetViewPosition}
             />
           </div>
 
