@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { auth } from "~/server/auth";
-import { getUserMapSettings } from "~/server/features/user/queries";
+import { getUserHomePageSettings } from "~/server/features/user/queries";
 import { HydrateClient } from "~/trpc/server";
 import { getDefaultCenter } from "~/app/_lib/getDefaultCenter";
 import Root from "./_components/Root";
@@ -13,7 +13,7 @@ export default async function Home() {
   const session = await auth();
 
   const user = session?.user?.id
-    ? await getUserMapSettings(session.user.id)
+    ? await getUserHomePageSettings(session.user.id)
     : null;
 
   if (user && !user.profileCompletedAt) {
