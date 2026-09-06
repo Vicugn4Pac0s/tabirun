@@ -1,6 +1,7 @@
 "use client";
 
 import { Spinner } from "~/frontend/components/ui/spinner";
+import { useFocusMapOnRoute } from "~/frontend/features/googlemap/hooks/useFocusMapOnRoute";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import { useRouteDiscardGuard } from "../hooks/useRouteDiscardGuard";
@@ -11,6 +12,7 @@ function RouteList() {
   const { routes, isLoading, error } = useRoutesQuery();
   const setRoutePoints = useRoutePointsStore((state) => state.setRoutePoints);
   const selectRoute = useSelectedRouteStore((state) => state.selectRoute);
+  const { focusMapOnRoute } = useFocusMapOnRoute();
   const moveStreetView = useMoveStreetView();
   const { confirmDiscard } = useRouteDiscardGuard();
 
@@ -48,6 +50,7 @@ function RouteList() {
                     points: routePoints,
                   });
                   setRoutePoints(routePoints);
+                  focusMapOnRoute(routePoints);
                   if (firstPoint) {
                     void moveStreetView(firstPoint);
                   }

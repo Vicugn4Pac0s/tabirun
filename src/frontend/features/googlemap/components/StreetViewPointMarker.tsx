@@ -7,14 +7,18 @@ interface StreetViewPointMarkerProps {
   pov: google.maps.StreetViewPov | null;
 }
 
-export function StreetViewPointMarker({map, latLng, pov}: StreetViewPointMarkerProps) {
-
-  const markerRef = useRef(null)
-  const contentRef = useRef<HTMLDivElement | null>(null)
+export function StreetViewPointMarker({
+  map,
+  latLng,
+  pov,
+}: StreetViewPointMarkerProps) {
+  const markerRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const arrowRef = useRef<HTMLDivElement | null>(null);
-  
+
   const DOT_SIZE = 20;
   const BORDER = 2;
+  const heading = pov?.heading;
 
   if (!contentRef.current && typeof document !== "undefined") {
     const root = document.createElement("div");
@@ -52,13 +56,14 @@ export function StreetViewPointMarker({map, latLng, pov}: StreetViewPointMarkerP
   }
 
   useEffect(() => {
-    if (!contentRef.current || !arrowRef.current || !pov) return;
+    if (!contentRef.current || !arrowRef.current || heading === undefined)
+      return;
 
     const cx = DOT_SIZE / 2;
     const cy = DOT_SIZE / 2;
 
     const r = 16; // 外周付近なら 10〜14あたりで調整
-    const rad = (pov.heading * Math.PI) / 180;
+    const rad = (heading * Math.PI) / 180;
 
     // 北0度を上に：x=sin, y=-cos
     const x = r * Math.sin(rad);
@@ -67,15 +72,20 @@ export function StreetViewPointMarker({map, latLng, pov}: StreetViewPointMarkerP
     arrowRef.current.style.left = `${cx + x}px`;
     arrowRef.current.style.top = `${cy + y}px`;
 
-    arrowRef.current.style.transform = `translate(-50%, -50%) rotate(${pov.heading}deg)`;
-  }, [pov?.heading]);
+    arrowRef.current.style.transform = `translate(-50%, -50%) rotate(${heading}deg)`;
+  }, [heading]);
 
   if (!map || !latLng || !pov || !contentRef.current) return null;
 
   return (
-    <AdvancedMarker map={map} markerRef={markerRef} content={contentRef.current} options={{
-      position: latLng,
-    }} />
+    <AdvancedMarker
+      map={map}
+      markerRef={markerRef}
+      content={contentRef.current}
+      options={{
+        position: latLng,
+      }}
+    />
   );
 }
 export default StreetViewPointMarker;

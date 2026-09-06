@@ -27,20 +27,11 @@ const AdvancedMarker = ({
     const marker = new window.google.maps.marker.AdvancedMarkerElement({
       map,
       content,
-      ...options,
     });
     markerRef.current = marker;
 
     return () => {
       window.google.maps.event.clearInstanceListeners(marker);
-
-      if (marker.content && onMouseOver) {
-        marker.content.removeEventListener("mouseover", onMouseOver);
-      }
-
-      if (marker.content && onMouseOut) {
-        marker.content.removeEventListener("mouseout", onMouseOut);
-      }
 
       marker.map = null;
 
@@ -90,7 +81,7 @@ const AdvancedMarker = ({
         contentElement.removeEventListener("mouseout", onMouseOut);
       }
     };
-  }, [map, markerRef, onClick, onMouseOver, onMouseOut]);
+  }, [content, map, markerRef, onClick, onMouseOver, onMouseOut]);
 
   return null;
 };

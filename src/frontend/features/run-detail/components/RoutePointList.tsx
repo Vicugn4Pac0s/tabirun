@@ -18,7 +18,6 @@ function RoutePointList({
       {routePoints.map((point, index) => (
         <li key={index} className="mb-2">
           <RoutePointListItem
-            routePoint={point}
             index={index}
             onClick={() => {
               onRoutePointClick?.(point, index);
