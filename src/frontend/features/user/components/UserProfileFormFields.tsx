@@ -36,8 +36,8 @@ type UserProfileFormFieldsProps = {
   errors: FieldErrors<UserProfileFormValues>;
   disabled: boolean;
   showHomeLocationFields?: boolean;
-  canUseCurrentMapCenter?: boolean;
-  onUseCurrentMapCenter?: () => void;
+  canUseCurrentStreetViewPosition?: boolean;
+  onUseCurrentStreetViewPosition?: () => void;
 };
 
 const toOptionalString = (value: string) => (value === "" ? undefined : value);
@@ -56,8 +56,8 @@ export const UserProfileFormFields = ({
   errors,
   disabled,
   showHomeLocationFields = false,
-  canUseCurrentMapCenter = false,
-  onUseCurrentMapCenter,
+  canUseCurrentStreetViewPosition = false,
+  onUseCurrentStreetViewPosition,
 }: UserProfileFormFieldsProps) => {
   const birthDateError = getErrorMessage(errors.birthDate);
   const genderError = getErrorMessage(errors.gender);
@@ -151,20 +151,20 @@ export const UserProfileFormFields = ({
             <div className="space-y-1">
               <p className="text-sm font-medium">地図の初期位置</p>
               <p className="text-xs leading-relaxed text-base-gray">
-                現在表示中の地図中心をホーム地点として保存できます。
+                現在Street Viewで表示している地点をホーム地点として保存できます。
               </p>
             </div>
-            {onUseCurrentMapCenter ? (
+            {onUseCurrentStreetViewPosition ? (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 className="w-full sm:w-auto"
-                disabled={disabled || !canUseCurrentMapCenter}
-                onClick={onUseCurrentMapCenter}
+                disabled={disabled || !canUseCurrentStreetViewPosition}
+                onClick={onUseCurrentStreetViewPosition}
               >
                 <MapPinned />
-                現在の地図位置を使う
+                表示中の地点を使う
               </Button>
             ) : null}
           </div>
