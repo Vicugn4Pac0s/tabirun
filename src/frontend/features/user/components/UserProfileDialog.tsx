@@ -96,7 +96,7 @@ export const UserProfileDialog = ({
     const position = getCurrentStreetViewPosition();
 
     if (!position) {
-      toast.error("現在表示中のマーカー位置を取得できませんでした。");
+      toast.error("表示中の地点を取得できませんでした。");
       return;
     }
 
@@ -108,7 +108,7 @@ export const UserProfileDialog = ({
       shouldDirty: true,
       shouldValidate: true,
     });
-    toast.success("現在表示中のマーカー位置をホーム地点に設定しました");
+    toast.success("表示中の地点をホーム地点に設定しました");
   };
 
   return (

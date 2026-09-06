@@ -151,7 +151,7 @@ export const UserProfileFormFields = ({
             <div className="space-y-1">
               <p className="text-sm font-medium">地図の初期位置</p>
               <p className="text-xs leading-relaxed text-base-gray">
-                現在表示中のマーカー位置をホーム地点として保存できます。
+                現在Street Viewで表示している地点をホーム地点として保存できます。
               </p>
             </div>
             {onUseCurrentStreetViewPosition ? (
@@ -164,7 +164,7 @@ export const UserProfileFormFields = ({
                 onClick={onUseCurrentStreetViewPosition}
               >
                 <MapPinned />
-                現在のマーカー位置を使う
+                表示中の地点を使う
               </Button>
             ) : null}
           </div>
