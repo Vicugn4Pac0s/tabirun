@@ -1,27 +1,19 @@
-import { HydrateClient } from "~/trpc/server";
 import { SessionProvider } from "next-auth/react";
-import Providers from "./providers";
-import Root from "./_components/Root";
-import { auth } from "~/server/auth";
-import { db } from "~/server/db";
-import { users } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
+import { auth } from "~/server/auth";
+import { getUserMapSettings } from "~/server/features/user/queries";
+import { HydrateClient } from "~/trpc/server";
 import { getDefaultCenter } from "~/app/_lib/getDefaultCenter";
+import Root from "./_components/Root";
+import Providers from "./providers";
 
 export default async function Home() {
   const session = await auth();
 
   const user = session?.user?.id
-    ? await db.query.users.findFirst({
-        where: eq(users.id, session.user.id),
-        columns: {
-          profileCompletedAt: true,
-          homeLat: true,
-          homeLng: true,
-        },
-      })
+    ? await getUserMapSettings(session.user.id)
     : null;
 
   if (user && !user.profileCompletedAt) {
