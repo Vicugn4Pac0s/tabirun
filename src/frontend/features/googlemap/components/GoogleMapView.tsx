@@ -11,11 +11,11 @@ interface GoogleMapViewProps {
   onInit?: (map: google.maps.Map) => void
   onClick?: (e: google.maps.MapMouseEvent) => void
   onIdle?: (map: google.maps.Map) => void
-  showLoadingOverlay?: boolean
+  isLoading?: boolean
   children?: React.ReactNode
 }
 
-function GoogleMapView({ className, map, setMap, options, onInit, onClick, onIdle, showLoadingOverlay = false, children }: GoogleMapViewProps) {
+function GoogleMapView({ className, map, setMap, options, onInit, onClick, onIdle, isLoading = false, children }: GoogleMapViewProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY!
 
   const render = (status: Status) => {
@@ -52,7 +52,7 @@ function GoogleMapView({ className, map, setMap, options, onInit, onClick, onIdl
           {children}
         </GoogleMapCanvas>
       </Wrapper>
-      {showLoadingOverlay && <MapLoadingOverlay />}
+      {isLoading && <MapLoadingOverlay />}
     </div>
   )
 }

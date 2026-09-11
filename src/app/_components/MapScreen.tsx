@@ -90,7 +90,7 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
           className="h-full"
           map={map}
           setMap={setMap}
-          showLoadingOverlay={isDirectionLoading}
+          isLoading={isDirectionLoading}
           options={{
             center: defaultCenter,
             zoom: GOOGLE_MAP_DEFAULT_ZOOM,
