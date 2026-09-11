@@ -17,7 +17,6 @@ import RoutePointsNavigation from "~/frontend/features/route-points-navigation/c
 import RoutePointMarker from "~/frontend/features/googlemap/components/RoutePointMarker";
 import StreetViewPointMarker from "~/frontend/features/googlemap/components/StreetViewPointMarker";
 import RoutePolyline from "~/frontend/features/googlemap/components/RoutePolyline";
-import { Spinner } from "~/frontend/components/ui/spinner";
 
 type MapScreenProps = {
   defaultCenter: google.maps.LatLngLiteral;
@@ -86,11 +85,12 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
           )}
         </div>
       </div>
-      <div className="relative order-1 h-[50vh] min-[1201px]:order-none min-[1201px]:h-screen">
+      <div className="order-1 h-[50vh] min-[1201px]:order-none min-[1201px]:h-screen">
         <GoogleMapView
           className="h-full"
           map={map}
           setMap={setMap}
+          showLoadingOverlay={isDirectionLoading}
           options={{
             center: defaultCenter,
             zoom: GOOGLE_MAP_DEFAULT_ZOOM,
@@ -126,11 +126,6 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
             />
           ))}
         </GoogleMapView>
-        {isDirectionLoading && (
-          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
-            <Spinner className="size-6 text-gray-500" />
-          </div>
-        )}
       </div>
     </div>
   );
