@@ -114,17 +114,18 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
           {polylinePath && (
             <RoutePolyline map={map} polylineArray={polylinePath} />
           )}
-          {routePoints.map((point, index) => (
-            <RoutePointMarker
-              key={index}
-              map={map}
-              latLng={point}
-              index={index}
-              onClick={() => {
-                void moveStreetView(point);
-              }}
-            />
-          ))}
+          {!isDirectionLoading &&
+            routePoints.map((point, index) => (
+              <RoutePointMarker
+                key={index}
+                map={map}
+                latLng={point}
+                index={index}
+                onClick={() => {
+                  void moveStreetView(point);
+                }}
+              />
+            ))}
         </GoogleMapView>
       </div>
     </div>
