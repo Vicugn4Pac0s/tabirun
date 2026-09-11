@@ -1,5 +1,6 @@
-import { Wrapper, type Status } from "@googlemaps/react-wrapper"
+import { Status, Wrapper } from "@googlemaps/react-wrapper"
 
+import { Spinner } from "~/frontend/components/ui/spinner"
 import GoogleMapCanvas from "./GoogleMapCanvas"
 
 interface GoogleMapViewProps {
@@ -17,6 +18,14 @@ function GoogleMapView({ className, map, setMap, options, onInit, onClick, onIdl
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY!
 
   const render = (status: Status) => {
+    if (status === Status.LOADING) {
+      return (
+        <div className="flex h-full items-center justify-center">
+          <Spinner className="size-6 text-gray-500" />
+        </div>
+      )
+    }
+
     return <p>{status}</p>
   }
 
