@@ -32,9 +32,12 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
     useState<google.maps.StreetViewPov | null>(null);
   const routePoints = useRoutePointsStore((state) => state.routePoints);
   const { canEditRoutePoints } = useRouteEditorState();
-  const { polylinePath } = useRoutePolylinePath(routePoints, {
-    canUseDirections: permissions.canUseDirections,
-  });
+  const { polylinePath, isLoading: isDirectionLoading } = useRoutePolylinePath(
+    routePoints,
+    {
+      canUseDirections: permissions.canUseDirections,
+    },
+  );
 
   useApplyMapDefaultCenter({
     center: defaultCenter,
@@ -87,6 +90,7 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
           className="h-full"
           map={map}
           setMap={setMap}
+          isLoading={isDirectionLoading}
           options={{
             center: defaultCenter,
             zoom: GOOGLE_MAP_DEFAULT_ZOOM,
@@ -110,17 +114,18 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
           {polylinePath && (
             <RoutePolyline map={map} polylineArray={polylinePath} />
           )}
-          {routePoints.map((point, index) => (
-            <RoutePointMarker
-              key={index}
-              map={map}
-              latLng={point}
-              index={index}
-              onClick={() => {
-                void moveStreetView(point);
-              }}
-            />
-          ))}
+          {!isDirectionLoading &&
+            routePoints.map((point, index) => (
+              <RoutePointMarker
+                key={index}
+                map={map}
+                latLng={point}
+                index={index}
+                onClick={() => {
+                  void moveStreetView(point);
+                }}
+              />
+            ))}
         </GoogleMapView>
       </div>
     </div>
