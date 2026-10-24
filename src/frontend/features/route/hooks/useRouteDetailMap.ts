@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
 
 export function useRouteDetailMap(points: google.maps.LatLngLiteral[]) {
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const { map, setMap } = useGoogleMap();
   const { directions, isLoading, error } = useGooglemapDirectionQuery(points, {
     enabled: true,
   });

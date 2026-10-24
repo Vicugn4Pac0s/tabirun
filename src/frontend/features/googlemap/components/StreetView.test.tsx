@@ -59,6 +59,9 @@ describe("StreetView", () => {
       {
         current: null,
       };
+    const onInit = vi.fn(() => {
+      expect(streetViewRef.current).toBe(panorama);
+    });
     const initialPositionChanged = vi.fn();
     const initialPovChanged = vi.fn();
     const latestPositionChanged = vi.fn();
@@ -75,6 +78,7 @@ describe("StreetView", () => {
         map={map}
         streetView={streetViewRef}
         options={initialOptions}
+        onInit={onInit}
         onPositionChanged={initialPositionChanged}
         onPovChanged={initialPovChanged}
       />,
@@ -90,12 +94,14 @@ describe("StreetView", () => {
         map={map}
         streetView={streetViewRef}
         options={latestOptions}
+        onInit={onInit}
         onPositionChanged={latestPositionChanged}
         onPovChanged={latestPovChanged}
       />,
     );
 
     expect(panoramaConstructor).toHaveBeenCalledTimes(1);
+    expect(onInit).toHaveBeenCalledTimes(1);
     expect(panoramaConstructor).toHaveBeenCalledWith(
       expect.any(HTMLDivElement),
       initialOptions,
