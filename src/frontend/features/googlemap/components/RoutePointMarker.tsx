@@ -4,12 +4,21 @@ import AdvancedMarker from "./AdvancedMarker";
 interface RoutePointMarkerProps {
   map: google.maps.Map | null;
   latLng: google.maps.LatLngLiteral;
-  index: number;
+  label: string;
+  title: string;
+  color?: string;
   onClick?: () => void;
 }
 
-export function RoutePointMarker({map, latLng, index, onClick}: RoutePointMarkerProps) {
-  const markerRef = useRef(null)
+export function RoutePointMarker({
+  map,
+  latLng,
+  label,
+  title,
+  color = "rgba(0, 0, 0, 0.6)",
+  onClick,
+}: RoutePointMarkerProps) {
+  const markerRef = useRef(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   const SIZE = 28;
@@ -33,14 +42,22 @@ export function RoutePointMarker({map, latLng, index, onClick}: RoutePointMarker
     return null;
   }
 
-  contentRef.current.innerHTML = (index + 1).toString();
-  
+  contentRef.current.textContent = label;
+  contentRef.current.style.backgroundColor = color;
+
   return (
-    <AdvancedMarker map={map} markerRef={markerRef} content={contentRef.current} onClick={()=>{
-      onClick?.()
-    }} options={{
-      position: latLng,
-    }} />
+    <AdvancedMarker
+      map={map}
+      markerRef={markerRef}
+      content={contentRef.current}
+      onClick={() => {
+        onClick?.();
+      }}
+      options={{
+        position: latLng,
+        title,
+      }}
+    />
   );
 }
 export default RoutePointMarker;

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useGoogleMap } from "../providers/GoogleMapProvider";
 import { useMoveStreetView } from "../hooks/useMoveStreetView";
 import { useApplyMapDefaultCenter } from "../hooks/useApplyMapDefaultCenter";
@@ -15,11 +15,20 @@ import RoutePointMarker from "./RoutePointMarker";
 import StreetViewPointMarker from "./StreetViewPointMarker";
 import RoutePolyline from "./RoutePolyline";
 
+export type RouteMapMarker = {
+  id: string;
+  position: google.maps.LatLngLiteral;
+  label: string;
+  title: string;
+  color?: string;
+  onClick?: () => void;
+};
+
 type RouteMapViewProps = {
   initialCenter: google.maps.LatLngLiteral;
-  routePoints: google.maps.LatLngLiteral[];
-  polylinePath: google.maps.LatLngLiteral[] | null;
-  isDirectionLoading: boolean;
+  path: google.maps.LatLngLiteral[] | null;
+  markers: RouteMapMarker[];
+  isLoading?: boolean;
   fitToRoute?: boolean;
   renderNavigation?: (point: google.maps.LatLngLiteral) => ReactNode;
   notice?: ReactNode;
@@ -27,9 +36,9 @@ type RouteMapViewProps = {
 
 function RouteMapView({
   initialCenter,
-  routePoints,
-  polylinePath,
-  isDirectionLoading,
+  path,
+  markers,
+  isLoading = false,
   fitToRoute = false,
   renderNavigation,
   notice,
@@ -56,11 +65,16 @@ function RouteMapView({
   };
 
   useApplyMapDefaultCenter({ center: initialCenter, enabled: true });
-  const [initialPoints] = useState(routePoints);
+  const hasFittedRoute = useRef(false);
   const { focusMapOnRoute } = useFocusMapOnRoute();
   useEffect(() => {
-    if (fitToRoute) focusMapOnRoute(initialPoints);
-  }, [fitToRoute, focusMapOnRoute, initialPoints]);
+    if (fitToRoute && !isLoading && !hasFittedRoute.current) {
+      const positions = path?.length
+        ? path
+        : markers.map((marker) => marker.position);
+      hasFittedRoute.current = focusMapOnRoute(positions);
+    }
+  }, [fitToRoute, isLoading, path, markers, focusMapOnRoute]);
 
   return (
     <div className="relative grid min-w-0 flex-1 grid-cols-1 min-[1201px]:grid-cols-2">
@@ -113,7 +127,7 @@ function RouteMapView({
           className="h-full"
           map={map}
           setMap={setMap}
-          isLoading={isDirectionLoading}
+          isLoading={isLoading}
           options={{
             center: initialCenter,
             zoom: GOOGLE_MAP_DEFAULT_ZOOM,
@@ -134,19 +148,22 @@ function RouteMapView({
             latLng={streetViewUnavailable ? null : streetViewCenter}
             pov={streetViewPov}
           />
-          {polylinePath && (
-            <RoutePolyline map={map} polylineArray={polylinePath} />
-          )}
-          {!isDirectionLoading &&
-            routePoints.map((point, index) => (
+          {path && <RoutePolyline map={map} polylineArray={path} />}
+          {!isLoading &&
+            markers.map((marker) => (
               <RoutePointMarker
-                key={index}
+                key={marker.id}
                 map={map}
-                latLng={point}
-                index={index}
-                onClick={() => {
-                  void previewPoint(point);
-                }}
+                latLng={marker.position}
+                label={marker.label}
+                title={marker.title}
+                color={marker.color}
+                onClick={
+                  marker.onClick ??
+                  (() => {
+                    void previewPoint(marker.position);
+                  })
+                }
               />
             ))}
         </GoogleMapView>

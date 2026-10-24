@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
-import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
+import RouteMapView, {
+  type RouteMapMarker,
+} from "~/frontend/features/googlemap/components/RouteMapView";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
-import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
-import RoutePointList from "~/frontend/features/run-detail/components/RoutePointList";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 
 type RouteDetailWorkspaceProps = {
@@ -19,7 +19,27 @@ function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
     route.points,
     { enabled: true },
   );
-  const moveStreetView = useMoveStreetView();
+  const start = route.points[0];
+  const goal = route.points[route.points.length - 1];
+  const markers: RouteMapMarker[] = [];
+  if (start && goal) {
+    const isRoundTrip = start.lat === goal.lat && start.lng === goal.lng;
+    markers.push({
+      id: "start",
+      position: start,
+      label: isRoundTrip ? "S/G" : "S",
+      title: isRoundTrip ? "スタート／ゴール" : "スタート",
+      color: isRoundTrip ? "#1d4ed8" : "#15803d",
+    });
+    if (!isRoundTrip)
+      markers.push({
+        id: "goal",
+        position: goal,
+        label: "G",
+        title: "ゴール",
+        color: "#b91c1c",
+      });
+  }
   return (
     <SidebarLayout
       sidebarTitle="ルート情報"
@@ -34,25 +54,16 @@ function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
             {route.title?.trim() ? route.title : "無題のルート"}
           </h1>
           <p className="mb-6 text-sm text-gray-600">
-            地図や経由地点を選んで、Street Viewで下見できます。
+            地図上の位置を選んで、Street Viewで下見できます。
           </p>
-          <h2 className="mb-3 font-bold">
-            経由地点（{route.points.length} 地点）
-          </h2>
-          <RoutePointList
-            routePoints={route.points}
-            onRoutePointClick={(point) => {
-              void moveStreetView(point);
-            }}
-          />
         </>
       }
     >
       <RouteMapView
         initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
-        routePoints={route.points}
-        polylinePath={directions?.path.length ? directions.path : null}
-        isDirectionLoading={isLoading}
+        path={directions?.path.length ? directions.path : null}
+        markers={markers}
+        isLoading={isLoading}
         fitToRoute
         notice={
           error ? (
@@ -60,7 +71,7 @@ function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
               role="alert"
               className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900"
             >
-              経路を取得できませんでした。経由地点のみ表示しています。時間をおいて再度お試しください。
+              経路を取得できませんでした。スタート・ゴールのみ表示しています。時間をおいて再度お試しください。
             </p>
           ) : undefined
         }

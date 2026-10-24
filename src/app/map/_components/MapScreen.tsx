@@ -20,9 +20,14 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
   return (
     <RouteMapView
       initialCenter={initialRoute?.points[0] ?? defaultCenter}
-      routePoints={routePoints}
-      polylinePath={polylinePath}
-      isDirectionLoading={isLoading}
+      path={polylinePath}
+      markers={routePoints.map((point, index) => ({
+        id: String(index),
+        position: point,
+        label: String(index + 1),
+        title: `地点 ${index + 1}`,
+      }))}
+      isLoading={isLoading}
       fitToRoute={Boolean(initialRoute)}
       renderNavigation={(point) => (
         <RoutePointsNavigation
