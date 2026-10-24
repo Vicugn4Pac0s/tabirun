@@ -10,20 +10,19 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "~/frontend/components/ui/drawer";
-import MobileSidebarTrigger from "./MobileSidebarTrigger";
+import type { ReactElement } from "react";
 
 interface MobileSidebarSheetProps {
   children: React.ReactNode;
+  trigger: ReactElement;
 }
 
-function MobileSidebarSheet({ children }: MobileSidebarSheetProps) {
+function MobileSidebarSheet({ children, trigger }: MobileSidebarSheetProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        <MobileSidebarTrigger />
-      </DrawerTrigger>
+      <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent className="h-[72vh] max-h-[72vh] gap-0 rounded-t-2xl border-x-0 border-b-0">
         <DrawerHeader className="sr-only">
           <DrawerTitle>メニュー</DrawerTitle>

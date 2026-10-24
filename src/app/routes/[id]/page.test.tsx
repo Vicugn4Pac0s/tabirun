@@ -3,20 +3,34 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import RouteDetailPage from "./page";
 
-const { auth, getUserHomePageSettings, getById, notFound, redirect } =
-  vi.hoisted(() => ({
-    auth: vi.fn(),
-    getUserHomePageSettings: vi.fn(),
-    getById: vi.fn(),
-    notFound: vi.fn(() => {
-      throw new Error("NOT_FOUND_PAGE");
-    }),
-    redirect: vi.fn((path: string) => {
-      throw new Error(`REDIRECT:${path}`);
-    }),
-  }));
-vi.mock("~/frontend/features/route/components/RouteDetailMap", () => ({
-  RouteDetailMap: () => <section aria-label="ルート地図" />,
+const {
+  auth,
+  getUserHomePageSettings,
+  getById,
+  notFound,
+  redirect,
+  workspace,
+} = vi.hoisted(() => ({
+  workspace: vi.fn(),
+  auth: vi.fn(),
+  getUserHomePageSettings: vi.fn(),
+  getById: vi.fn(),
+  notFound: vi.fn(() => {
+    throw new Error("NOT_FOUND_PAGE");
+  }),
+  redirect: vi.fn((path: string) => {
+    throw new Error(`REDIRECT:${path}`);
+  }),
+}));
+vi.mock("~/frontend/features/route/components/RouteDetailWorkspace", () => ({
+  RouteDetailWorkspace: ({
+    route,
+  }: {
+    route: { title: string; points: google.maps.LatLngLiteral[] };
+  }) => {
+    workspace(route);
+    return <h1>{route.title}</h1>;
+  },
 }));
 vi.mock("~/server/auth", () => ({ auth }));
 vi.mock("~/server/features/user/queries", () => ({ getUserHomePageSettings }));
@@ -47,14 +61,13 @@ describe("RouteDetailPage", () => {
     expect(
       screen.getByRole("heading", { name: "朝のルート" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("region", { name: "ルート地図" }),
-    ).toBeInTheDocument();
-    expect(screen.getAllByRole("listitem")).toHaveLength(2);
-    expect(screen.getByRole("link", { name: "ホームへ戻る" })).toHaveAttribute(
-      "href",
-      "/",
-    );
+    expect(workspace).toHaveBeenCalledWith({
+      title: "朝のルート",
+      points: [
+        { lat: 35, lng: 135 },
+        { lat: 36, lng: 136 },
+      ],
+    });
   });
 
   it("未ログインではホームへ戻す", async () => {

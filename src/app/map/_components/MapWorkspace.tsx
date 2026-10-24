@@ -1,11 +1,11 @@
 "use client";
+
 import Link from "next/link";
 import { useRouteDiscardGuard } from "~/frontend/features/route/hooks/useRouteDiscardGuard";
-import Sidebar from "~/frontend/components/layout/Sidebar";
+import { MapWorkspaceLayout } from "~/frontend/features/googlemap/components/MapWorkspaceLayout";
 import MapScreen from "./MapScreen";
-import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import SidebarContent from "./sidebar/SidebarContent";
-import MobileSidebarSheet from "./sidebar/MobileSidebarSheet";
+import MobileSidebarTrigger from "./sidebar/MobileSidebarTrigger";
 
 type MapWorkspaceProps = {
   defaultCenter: google.maps.LatLngLiteral;
@@ -14,9 +14,9 @@ type MapWorkspaceProps = {
 function MapWorkspace({ defaultCenter }: MapWorkspaceProps) {
   const { confirmDiscard } = useRouteDiscardGuard();
   return (
-    <div className="relative flex">
-      <div className="hidden w-72 md:block">
-        <Sidebar>
+    <MapWorkspaceLayout
+      sidebar={
+        <>
           <Link
             href="/"
             className="mb-5 inline-block font-medium underline"
@@ -27,28 +27,12 @@ function MapWorkspace({ defaultCenter }: MapWorkspaceProps) {
             ホームへ戻る
           </Link>
           <SidebarContent />
-        </Sidebar>
-      </div>
-      <div className="md:hidden">
-        <MobileSidebarSheet>
-          <Link
-            href="/"
-            className="mb-5 inline-block font-medium underline"
-            onClick={(event) => {
-              if (!confirmDiscard()) event.preventDefault();
-            }}
-          >
-            ホームへ戻る
-          </Link>
-          <SidebarContent />
-        </MobileSidebarSheet>
-      </div>
+        </>
+      }
+      mobileTrigger={<MobileSidebarTrigger />}
+    >
       <MapScreen defaultCenter={defaultCenter} />
-      <div className="absolute right-3 top-3 z-50">
-        <AuthUserMenu />
-      </div>
-    </div>
+    </MapWorkspaceLayout>
   );
 }
-
 export default MapWorkspace;
