@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
-import RouteMapView, {
-  type RouteMapMarker,
-} from "~/frontend/features/googlemap/components/RouteMapView";
+import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
+import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 
 type RouteDetailWorkspaceProps = {
@@ -21,25 +20,7 @@ function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
   );
   const start = route.points[0];
   const goal = route.points[route.points.length - 1];
-  const markers: RouteMapMarker[] = [];
-  if (start && goal) {
-    const isRoundTrip = start.lat === goal.lat && start.lng === goal.lng;
-    markers.push({
-      id: "start",
-      position: start,
-      label: isRoundTrip ? "S/G" : "S",
-      title: isRoundTrip ? "スタート／ゴール" : "スタート",
-      color: isRoundTrip ? "#1d4ed8" : "#15803d",
-    });
-    if (!isRoundTrip)
-      markers.push({
-        id: "goal",
-        position: goal,
-        label: "G",
-        title: "ゴール",
-        color: "#b91c1c",
-      });
-  }
+  const markers = getRoutePreviewMarkers(start, goal);
   return (
     <SidebarLayout
       sidebarTitle="ルート情報"

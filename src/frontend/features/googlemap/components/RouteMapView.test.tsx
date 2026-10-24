@@ -2,7 +2,8 @@ import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GoogleMapProvider } from "../providers/GoogleMapProvider";
-import RouteMapView, { type RouteMapMarker } from "./RouteMapView";
+import RouteMapView from "./RouteMapView";
+import type { RouteMapMarker } from "../types";
 
 const { moveStreetView, focusMapOnRoute } = vi.hoisted(() => ({
   moveStreetView: vi.fn(),

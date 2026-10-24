@@ -12,17 +12,9 @@ import {
 import GoogleMapView from "./GoogleMapView";
 import StreetView from "./StreetView";
 import RoutePointMarker from "./RoutePointMarker";
+import type { RouteMapMarker } from "../types";
 import StreetViewPointMarker from "./StreetViewPointMarker";
 import RoutePolyline from "./RoutePolyline";
-
-export type RouteMapMarker = {
-  id: string;
-  position: google.maps.LatLngLiteral;
-  label: string;
-  title: string;
-  color?: string;
-  onClick?: () => void;
-};
 
 type RouteMapViewProps = {
   initialCenter: google.maps.LatLngLiteral;
@@ -154,7 +146,7 @@ function RouteMapView({
               <RoutePointMarker
                 key={marker.id}
                 map={map}
-                latLng={marker.position}
+                position={marker.position}
                 label={marker.label}
                 title={marker.title}
                 color={marker.color}

@@ -26,7 +26,7 @@ describe("RoutePointMarker", () => {
     render(
       <RoutePointMarker
         map={null}
-        latLng={{ lat: 35, lng: 135 }}
+        position={{ lat: 35, lng: 135 }}
         label={label}
         title={title}
       />,
@@ -38,7 +38,7 @@ describe("RoutePointMarker", () => {
     render(
       <RoutePointMarker
         map={null}
-        latLng={{ lat: 35, lng: 135 }}
+        position={{ lat: 35, lng: 135 }}
         label="2"
         title="地点 2"
       />,

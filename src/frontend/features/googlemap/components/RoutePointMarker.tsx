@@ -1,18 +1,14 @@
 import { useRef } from "react";
 import AdvancedMarker from "./AdvancedMarker";
+import type { RouteMapMarker } from "../types";
 
-interface RoutePointMarkerProps {
+type RoutePointMarkerProps = Omit<RouteMapMarker, "id"> & {
   map: google.maps.Map | null;
-  latLng: google.maps.LatLngLiteral;
-  label: string;
-  title: string;
-  color?: string;
-  onClick?: () => void;
-}
+};
 
 export function RoutePointMarker({
   map,
-  latLng,
+  position,
   label,
   title,
   color = "rgba(0, 0, 0, 0.6)",
@@ -54,7 +50,7 @@ export function RoutePointMarker({
         onClick?.();
       }}
       options={{
-        position: latLng,
+        position,
         title,
       }}
     />
