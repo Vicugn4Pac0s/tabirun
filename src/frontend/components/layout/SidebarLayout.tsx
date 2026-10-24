@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactElement, ReactNode } from "react";
-import Sidebar from "~/frontend/components/layout/Sidebar";
 import { Button } from "~/frontend/components/ui/button";
 import MobileSidebarSheet from "~/frontend/components/app-ui/MobileSidebarSheet";
 
@@ -26,7 +25,7 @@ export function SidebarLayout({
         aria-label={sidebarTitle}
         className="hidden h-screen w-72 shrink-0 overflow-y-auto md:block"
       >
-        <Sidebar>{sidebar}</Sidebar>
+        <div className="p-5">{sidebar}</div>
       </aside>
       <div className="md:hidden">
         <MobileSidebarSheet
