@@ -19,6 +19,7 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
   });
   return (
     <RouteMapView
+      showStreetView
       initialCenter={initialRoute?.points[0] ?? defaultCenter}
       path={polylinePath}
       markers={routePoints.map((point, index) => ({

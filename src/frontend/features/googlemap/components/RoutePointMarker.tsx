@@ -46,9 +46,7 @@ export function RoutePointMarker({
       map={map}
       markerRef={markerRef}
       content={contentRef.current}
-      onClick={() => {
-        onClick?.();
-      }}
+      onClick={onClick}
       options={{
         position,
         title,

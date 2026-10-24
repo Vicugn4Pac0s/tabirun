@@ -41,6 +41,7 @@ function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
       }
     >
       <RouteMapView
+        showStreetView
         initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
         path={directions?.path.length ? directions.path : null}
         markers={markers}

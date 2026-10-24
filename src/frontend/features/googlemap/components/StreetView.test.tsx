@@ -17,6 +17,7 @@ let panorama: {
   addListener: ReturnType<typeof vi.fn>;
   getPosition: ReturnType<typeof vi.fn>;
   getPov: ReturnType<typeof vi.fn>;
+  setVisible: ReturnType<typeof vi.fn>;
 };
 let panoramaConstructor: ReturnType<typeof vi.fn>;
 
@@ -32,6 +33,7 @@ beforeEach(() => {
     }),
     getPosition: vi.fn(() => position),
     getPov: vi.fn(() => pov),
+    setVisible: vi.fn(),
   };
   panoramaConstructor = vi.fn(function MockStreetViewPanorama() {
     return panorama;
@@ -122,6 +124,53 @@ describe("StreetView", () => {
     expect(listenerRemovers.get("position_changed")).toHaveBeenCalledTimes(1);
     expect(listenerRemovers.get("pov_changed")).toHaveBeenCalledTimes(1);
     expect(streetViewRef.current).toBeNull();
+    expect(panorama.setVisible).toHaveBeenCalledWith(false);
+  });
+
+  it("地図の初期化を待ち、非表示から再表示した際も生成時の初期位置を使う", () => {
+    const streetViewRef: MutableRefObject<google.maps.StreetViewPanorama | null> =
+      { current: null };
+    const options = { position: { lat: 35, lng: 135 } };
+    const onInit = vi.fn();
+    const { rerender } = render(
+      <StreetView
+        map={null}
+        streetView={streetViewRef}
+        options={options}
+        onInit={onInit}
+      />,
+    );
+    expect(panoramaConstructor).not.toHaveBeenCalled();
+    rerender(
+      <StreetView
+        map={map}
+        streetView={streetViewRef}
+        options={options}
+        onInit={onInit}
+      />,
+    );
+    expect(panoramaConstructor).toHaveBeenCalledWith(
+      expect.any(HTMLDivElement),
+      options,
+    );
+    expect(onInit).toHaveBeenCalledTimes(1);
+    rerender(<></>);
+    expect(streetViewRef.current).toBeNull();
+    expect(panorama.setVisible).toHaveBeenCalledWith(false);
+    rerender(
+      <StreetView
+        map={map}
+        streetView={streetViewRef}
+        options={options}
+        onInit={onInit}
+      />,
+    );
+    expect(panoramaConstructor).toHaveBeenCalledTimes(2);
+    expect(panoramaConstructor).toHaveBeenLastCalledWith(
+      expect.any(HTMLDivElement),
+      options,
+    );
+    expect(onInit).toHaveBeenCalledTimes(2);
   });
 
   it("位置を遅延取得した場合も変更イベントで通知する", () => {

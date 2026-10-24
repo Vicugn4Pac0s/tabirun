@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useGoogleMap } from "../providers/GoogleMapProvider";
 import { useMoveStreetView } from "../hooks/useMoveStreetView";
-import { useApplyMapDefaultCenter } from "../hooks/useApplyMapDefaultCenter";
 import { useFocusMapOnRoute } from "../hooks/useFocusMapOnRoute";
 import {
   GOOGLE_MAP_DEFAULT_ZOOM,
@@ -21,6 +20,7 @@ type RouteMapViewProps = {
   path: google.maps.LatLngLiteral[] | null;
   markers: RouteMapMarker[];
   isLoading?: boolean;
+  showStreetView?: boolean;
   fitToRoute?: boolean;
   renderNavigation?: (point: google.maps.LatLngLiteral) => ReactNode;
   notice?: ReactNode;
@@ -31,6 +31,7 @@ function RouteMapView({
   path,
   markers,
   isLoading = false,
+  showStreetView = false,
   fitToRoute = false,
   renderNavigation,
   notice,
@@ -49,6 +50,7 @@ function RouteMapView({
     useState<google.maps.StreetViewPov | null>(null);
 
   const previewPoint = async (point: google.maps.LatLngLiteral) => {
+    if (!showStreetView) return;
     try {
       await moveStreetView(point);
     } catch {
@@ -56,7 +58,6 @@ function RouteMapView({
     }
   };
 
-  useApplyMapDefaultCenter({ center: initialCenter, enabled: true });
   const hasFittedRoute = useRef(false);
   const { focusMapOnRoute } = useFocusMapOnRoute();
   useEffect(() => {
@@ -69,49 +70,55 @@ function RouteMapView({
   }, [fitToRoute, isLoading, path, markers, focusMapOnRoute]);
 
   return (
-    <div className="relative grid min-w-0 flex-1 grid-cols-1 min-[1201px]:grid-cols-2">
-      <div
-        role="region"
-        aria-label="Street Viewで下見"
-        className="relative order-2 h-[50vh] min-[1201px]:order-none min-[1201px]:h-screen"
-      >
-        <StreetView
-          map={map}
-          streetView={streetView}
-          options={{
-            position: initialCenter,
-            pov: { heading: 165, pitch: 0 },
-            zoomControl: false,
-            addressControl: false,
-            motionTrackingControl: false,
-          }}
-          onInit={() => {
-            void previewPoint(initialCenter);
-          }}
-          onPositionChanged={(position) => {
-            setStreetViewCenter(position.toJSON());
-          }}
-          onPovChanged={(pov) => {
-            setStreetViewPov(pov);
-          }}
-        />
-        {streetViewUnavailable && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/55 px-6 text-center text-white">
-            <div>
-              <p className="text-lg font-bold">
-                この地点ではStreet Viewを表示できません
-              </p>
-              <p className="mt-2 text-sm text-white/80">
-                道路沿いなど、Street Viewに対応した地点を選んでください。
-              </p>
+    <div
+      className={`relative grid min-w-0 flex-1 grid-cols-1 ${showStreetView ? "min-[1201px]:grid-cols-2" : ""}`}
+    >
+      {showStreetView && (
+        <div
+          role="region"
+          aria-label="Street Viewで下見"
+          className="relative order-2 h-[50vh] min-[1201px]:order-none min-[1201px]:h-screen"
+        >
+          <StreetView
+            map={map}
+            streetView={streetView}
+            options={{
+              position: initialCenter,
+              pov: { heading: 165, pitch: 0 },
+              zoomControl: false,
+              addressControl: false,
+              motionTrackingControl: false,
+            }}
+            onInit={() => {
+              void previewPoint(initialCenter);
+            }}
+            onPositionChanged={(position) => {
+              setStreetViewCenter(position.toJSON());
+            }}
+            onPovChanged={(pov) => {
+              setStreetViewPov(pov);
+            }}
+          />
+          {streetViewUnavailable && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/55 px-6 text-center text-white">
+              <div>
+                <p className="text-lg font-bold">
+                  この地点ではStreet Viewを表示できません
+                </p>
+                <p className="mt-2 text-sm text-white/80">
+                  道路沿いなど、Street Viewに対応した地点を選んでください。
+                </p>
+              </div>
             </div>
+          )}
+          <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2">
+            {streetViewCenter && renderNavigation?.(streetViewCenter)}
           </div>
-        )}
-        <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2">
-          {streetViewCenter && renderNavigation?.(streetViewCenter)}
         </div>
-      </div>
-      <div className="relative order-1 h-[50vh] min-[1201px]:order-none min-[1201px]:h-screen">
+      )}
+      <div
+        className={`relative ${showStreetView ? "order-1 h-[50vh] min-[1201px]:order-none min-[1201px]:h-screen" : "h-screen"}`}
+      >
         {notice && (
           <div className="absolute left-3 right-3 top-3 z-30">{notice}</div>
         )}
@@ -129,17 +136,22 @@ function RouteMapView({
             mapTypeControl: false,
             fullscreenControl: false,
           }}
-          onClick={(e) => {
-            const latLng = e.latLng;
-            if (!latLng) return;
-            void previewPoint(latLng.toJSON());
-          }}
+          onClick={
+            showStreetView
+              ? (e) => {
+                  const latLng = e.latLng;
+                  if (latLng) void previewPoint(latLng.toJSON());
+                }
+              : undefined
+          }
         >
-          <StreetViewPointMarker
-            map={map}
-            latLng={streetViewUnavailable ? null : streetViewCenter}
-            pov={streetViewPov}
-          />
+          {showStreetView && (
+            <StreetViewPointMarker
+              map={map}
+              latLng={streetViewUnavailable ? null : streetViewCenter}
+              pov={streetViewPov}
+            />
+          )}
           {path && <RoutePolyline map={map} polylineArray={path} />}
           {!isLoading &&
             markers.map((marker) => (
@@ -152,9 +164,11 @@ function RouteMapView({
                 color={marker.color}
                 onClick={
                   marker.onClick ??
-                  (() => {
-                    void previewPoint(marker.position);
-                  })
+                  (showStreetView
+                    ? () => {
+                        void previewPoint(marker.position);
+                      }
+                    : undefined)
                 }
               />
             ))}

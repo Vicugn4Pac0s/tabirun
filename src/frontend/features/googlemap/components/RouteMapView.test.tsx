@@ -5,10 +5,13 @@ import { GoogleMapProvider } from "../providers/GoogleMapProvider";
 import RouteMapView from "./RouteMapView";
 import type { RouteMapMarker } from "../types";
 
-const { moveStreetView, focusMapOnRoute } = vi.hoisted(() => ({
-  moveStreetView: vi.fn(),
-  focusMapOnRoute: vi.fn(),
-}));
+const { moveStreetView, focusMapOnRoute, renderStreetView } = vi.hoisted(
+  () => ({
+    moveStreetView: vi.fn(),
+    renderStreetView: vi.fn(),
+    focusMapOnRoute: vi.fn(),
+  }),
+);
 vi.mock("../hooks/useMoveStreetView", () => ({
   useMoveStreetView: () => moveStreetView,
 }));
@@ -19,17 +22,32 @@ vi.mock("./GoogleMapView", () => ({
   default: ({
     children,
     isLoading,
+    onClick,
   }: {
     children: React.ReactNode;
     isLoading: boolean;
+    onClick?: (event: {
+      latLng: { toJSON: () => google.maps.LatLngLiteral };
+    }) => void;
   }) => (
     <div>
+      <div
+        data-testid="map"
+        onClick={() =>
+          onClick?.({ latLng: { toJSON: () => ({ lat: 35, lng: 135 }) } })
+        }
+      />
       {isLoading && <p role="status">読み込み中</p>}
       {children}
     </div>
   ),
 }));
-vi.mock("./StreetView", () => ({ default: () => null }));
+vi.mock("./StreetView", () => ({
+  default: () => {
+    renderStreetView();
+    return null;
+  },
+}));
 vi.mock("./RoutePointMarker", () => ({
   default: ({
     label,
@@ -38,7 +56,7 @@ vi.mock("./RoutePointMarker", () => ({
   }: {
     label: string;
     title: string;
-    onClick: () => void;
+    onClick?: () => void;
   }) => (
     <button aria-label={title} onClick={onClick}>
       {label}
@@ -97,6 +115,7 @@ describe("RouteMapView", () => {
     render(
       <GoogleMapProvider>
         <RouteMapView
+          showStreetView
           initialCenter={start}
           path={null}
           markers={[markers[0]!, { ...markers[1]!, onClick }]}
@@ -108,6 +127,84 @@ describe("RouteMapView", () => {
     await user.click(screen.getByRole("button", { name: "ゴール" }));
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(moveStreetView).toHaveBeenCalledTimes(1);
+  });
+
+  it("省略時はStreet Viewを初期化せず、地図やマーカーを押しても下見を開始しない", async () => {
+    const user = userEvent.setup();
+    const renderNavigation = vi.fn();
+    render(
+      <GoogleMapProvider>
+        <RouteMapView
+          initialCenter={start}
+          path={savedPath}
+          markers={markers}
+          renderNavigation={renderNavigation}
+        />
+      </GoogleMapProvider>,
+    );
+    expect(renderStreetView).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("region", { name: "Street Viewで下見" }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByTestId("map"));
+    await user.click(screen.getByRole("button", { name: "スタート" }));
+    expect(moveStreetView).not.toHaveBeenCalled();
+    expect(renderNavigation).not.toHaveBeenCalled();
+  });
+
+  it("Street Viewが無効でも、画面側で指定したマーカー操作は維持する", async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <GoogleMapProvider>
+        <RouteMapView
+          initialCenter={start}
+          path={null}
+          markers={[{ ...markers[0]!, onClick }]}
+          showStreetView={false}
+        />
+      </GoogleMapProvider>,
+    );
+    await user.click(screen.getByRole("button", { name: "スタート" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(moveStreetView).not.toHaveBeenCalled();
+  });
+
+  it("表示中に無効化した場合も、パネルを外して連動操作を止める", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <GoogleMapProvider>
+        <RouteMapView
+          initialCenter={start}
+          path={savedPath}
+          markers={markers}
+          showStreetView
+        />
+      </GoogleMapProvider>,
+    );
+    expect(renderStreetView).toHaveBeenCalled();
+    expect(
+      screen.getByRole("region", { name: "Street Viewで下見" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByTestId("map"));
+    expect(moveStreetView).toHaveBeenCalledWith(start);
+    moveStreetView.mockClear();
+    rerender(
+      <GoogleMapProvider>
+        <RouteMapView
+          initialCenter={start}
+          path={savedPath}
+          markers={markers}
+          showStreetView={false}
+        />
+      </GoogleMapProvider>,
+    );
+    expect(
+      screen.queryByRole("region", { name: "Street Viewで下見" }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByTestId("map"));
+    await user.click(screen.getByRole("button", { name: "スタート" }));
+    expect(moveStreetView).not.toHaveBeenCalled();
   });
 
   it("経路データが揃ってから、マーカーの位置でなく経路全体を表示範囲に使う", () => {

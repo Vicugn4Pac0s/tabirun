@@ -63,6 +63,7 @@ const StreetView = ({
     callbacksRef.current.onInit?.();
 
     return () => {
+      panorama.setVisible(false);
       positionChangedListener.remove();
       povChangedListener.remove();
 
