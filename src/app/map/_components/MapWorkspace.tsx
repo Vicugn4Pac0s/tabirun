@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouteDiscardGuard } from "~/frontend/features/route/hooks/useRouteDiscardGuard";
-import { MapWorkspaceLayout } from "~/frontend/features/googlemap/components/MapWorkspaceLayout";
+import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
+import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import MapScreen from "./MapScreen";
 import SidebarContent from "./sidebar/SidebarContent";
 import MobileSidebarTrigger from "./sidebar/MobileSidebarTrigger";
@@ -14,7 +15,9 @@ type MapWorkspaceProps = {
 function MapWorkspace({ defaultCenter }: MapWorkspaceProps) {
   const { confirmDiscard } = useRouteDiscardGuard();
   return (
-    <MapWorkspaceLayout
+    <SidebarLayout
+      sidebarTitle="ルート情報"
+      topRight={<AuthUserMenu />}
       sidebar={
         <>
           <Link
@@ -32,7 +35,7 @@ function MapWorkspace({ defaultCenter }: MapWorkspaceProps) {
       mobileTrigger={<MobileSidebarTrigger />}
     >
       <MapScreen defaultCenter={defaultCenter} />
-    </MapWorkspaceLayout>
+    </SidebarLayout>
   );
 }
 export default MapWorkspace;

@@ -1,41 +1,44 @@
 "use client";
 
 import type { ReactElement, ReactNode } from "react";
-import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import Sidebar from "~/frontend/components/layout/Sidebar";
 import { Button } from "~/frontend/components/ui/button";
-import MobileSidebarSheet from "./MobileSidebarSheet";
+import MobileSidebarSheet from "~/frontend/components/app-ui/MobileSidebarSheet";
 
-type MapWorkspaceLayoutProps = {
+type SidebarLayoutProps = {
   sidebar: ReactNode;
   children: ReactNode;
   mobileTrigger?: ReactElement;
+  sidebarTitle?: string;
+  topRight?: ReactNode;
 };
 
-export function MapWorkspaceLayout({
+export function SidebarLayout({
   sidebar,
   children,
   mobileTrigger,
-}: MapWorkspaceLayoutProps) {
+  sidebarTitle = "メニュー",
+  topRight,
+}: SidebarLayoutProps) {
   return (
     <div className="relative flex min-h-screen">
       <aside
-        aria-label="ルート情報"
+        aria-label={sidebarTitle}
         className="hidden h-screen w-72 shrink-0 overflow-y-auto md:block"
       >
         <Sidebar>{sidebar}</Sidebar>
       </aside>
       <div className="md:hidden">
         <MobileSidebarSheet
-          title="ルート情報"
+          title={sidebarTitle}
           trigger={
             mobileTrigger ?? (
               <Button
                 variant="outline"
                 className="absolute bottom-28 right-0 z-50"
-                aria-label="ルート情報を開く"
+                aria-label={`${sidebarTitle}を開く`}
               >
-                ルート情報
+                {sidebarTitle}
               </Button>
             )
           }
@@ -44,9 +47,9 @@ export function MapWorkspaceLayout({
         </MobileSidebarSheet>
       </div>
       {children}
-      <div className="absolute right-3 top-3 z-50">
-        <AuthUserMenu />
-      </div>
+      {topRight && (
+        <div className="absolute right-3 top-3 z-50">{topRight}</div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { MapWorkspaceLayout } from "~/frontend/features/googlemap/components/MapWorkspaceLayout";
+import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
+import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
@@ -20,7 +21,9 @@ function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
   );
   const moveStreetView = useMoveStreetView();
   return (
-    <MapWorkspaceLayout
+    <SidebarLayout
+      sidebarTitle="ルート情報"
+      topRight={<AuthUserMenu />}
       sidebar={
         <>
           <Link href="/" className="mb-5 inline-block font-medium underline">
@@ -62,7 +65,7 @@ function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
           ) : undefined
         }
       />
-    </MapWorkspaceLayout>
+    </SidebarLayout>
   );
 }
 
