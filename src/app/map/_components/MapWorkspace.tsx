@@ -6,7 +6,7 @@ import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import MapScreen from "./MapScreen";
 import SidebarContent from "./sidebar/SidebarContent";
-import MobileSidebarTrigger from "./sidebar/MobileSidebarTrigger";
+import MapMenuButton from "./sidebar/MapMenuButton";
 
 type MapWorkspaceProps = {
   defaultCenter: google.maps.LatLngLiteral;
@@ -32,7 +32,7 @@ function MapWorkspace({ defaultCenter }: MapWorkspaceProps) {
           <SidebarContent />
         </>
       }
-      mobileTrigger={<MobileSidebarTrigger />}
+      mobileTrigger={<MapMenuButton />}
     >
       <MapScreen defaultCenter={defaultCenter} />
     </SidebarLayout>

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import RouteMenuButton from "~/frontend/features/route/components/RouteMenuButton";
+import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import type { RouterOutputs } from "~/trpc/react";
 import { Input } from "~/frontend/components/ui/input";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
@@ -33,6 +35,12 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
   return (
     <SidebarLayout
       sidebarTitle="ルート編集"
+      mobileTrigger={
+        <RouteMenuButton
+          label={getRouteMenuLabel(directions?.distanceMeters, isLoading)}
+          aria-label="ルート編集を開く"
+        />
+      }
       topRight={<AuthUserMenu />}
       sidebar={
         <>

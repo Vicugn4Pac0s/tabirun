@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import RouteMenuButton from "~/frontend/features/route/components/RouteMenuButton";
+import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import type { RouterOutputs } from "~/trpc/react";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
@@ -26,6 +28,12 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
   return (
     <SidebarLayout
       sidebarTitle="ルート情報"
+      mobileTrigger={
+        <RouteMenuButton
+          label={getRouteMenuLabel(directions?.distanceMeters, isLoading)}
+          aria-label="ルート情報を開く"
+        />
+      }
       topRight={<AuthUserMenu />}
       sidebar={
         <>

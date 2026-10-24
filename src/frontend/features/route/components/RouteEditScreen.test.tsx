@@ -67,6 +67,30 @@ afterEach(() => {
 });
 
 describe("RouteEditScreen", () => {
+  it("取得済みの経路距離をSPメニューボタンに表示する", () => {
+    directionsQuery.mockReturnValue({
+      directions: { path: route.points, distanceMeters: 5200 },
+      isLoading: false,
+      error: null,
+    });
+    render(<RouteEditScreen route={route} />);
+    expect(
+      screen.getByRole("button", { name: "ルート編集を開く" }),
+    ).toHaveTextContent("5.2 km");
+  });
+
+  it("経路取得中はSPメニューに計測中を表示する", () => {
+    directionsQuery.mockReturnValue({
+      directions: null,
+      isLoading: true,
+      error: null,
+    });
+    render(<RouteEditScreen route={route} />);
+    expect(
+      screen.getByRole("button", { name: "ルート編集を開く" }),
+    ).toHaveTextContent("MEASURING");
+  });
+
   it("既存の外枠で名前・経由地点一覧・全地点マーカーを表示する", () => {
     render(<RouteEditScreen route={route} />);
     const sidebar = screen.getByRole("complementary", { name: "ルート編集" });
