@@ -63,12 +63,10 @@ vi.mock("./RoutePointMarker", () => ({
     </button>
   ),
 }));
-vi.mock("./RoutePolyline", () => ({
-  default: ({
-    polylineArray,
-  }: {
-    polylineArray: google.maps.LatLngLiteral[];
-  }) => <span aria-label="描画する経路">{JSON.stringify(polylineArray)}</span>,
+vi.mock("./Polyline", () => ({
+  default: ({ path }: { path: google.maps.LatLngLiteral[] }) => (
+    <span aria-label="描画する経路">{JSON.stringify(path)}</span>
+  ),
 }));
 
 const start = { lat: 35, lng: 135 };

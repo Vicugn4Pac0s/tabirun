@@ -36,7 +36,7 @@ vi.mock("~/frontend/features/googlemap/components/RoutePointMarker", () => ({
     </span>
   ),
 }));
-vi.mock("~/frontend/features/googlemap/components/RoutePolyline", () => ({
+vi.mock("~/frontend/features/googlemap/components/Polyline", () => ({
   default: () => <span>経路線</span>,
 }));
 

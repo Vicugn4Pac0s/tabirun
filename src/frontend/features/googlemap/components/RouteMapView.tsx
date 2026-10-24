@@ -13,7 +13,7 @@ import StreetView from "./StreetView";
 import RoutePointMarker from "./RoutePointMarker";
 import type { RouteMapMarker } from "../types";
 import StreetViewPointMarker from "./StreetViewPointMarker";
-import RoutePolyline from "./RoutePolyline";
+import Polyline from "./Polyline";
 
 type RouteMapViewProps = {
   initialCenter: google.maps.LatLngLiteral;
@@ -152,7 +152,13 @@ function RouteMapView({
               pov={streetViewPov}
             />
           )}
-          {path && <RoutePolyline map={map} polylineArray={path} />}
+          {path && (
+            <Polyline
+              map={map}
+              path={path}
+              options={{ strokeColor: "black", strokeWeight: 3 }}
+            />
+          )}
           {!isLoading &&
             markers.map((marker) => (
               <RoutePointMarker
