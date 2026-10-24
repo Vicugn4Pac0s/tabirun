@@ -1,17 +1,18 @@
 "use client";
 
 import { useCallback } from "react";
-import { useGoogleMap } from "../providers/GoogleMapProvider";
+import { useOptionalGoogleMap } from "../providers/GoogleMapProvider";
 
 export const useCurrentStreetViewPosition = () => {
-  const { streetView } = useGoogleMap();
+  const context = useOptionalGoogleMap();
+  const streetView = context?.streetView;
 
   const getCurrentStreetViewPosition = useCallback(() => {
-    return streetView.current?.getPosition()?.toJSON() ?? null;
+    return streetView?.current?.getPosition()?.toJSON() ?? null;
   }, [streetView]);
 
   return {
-    canReadCurrentStreetViewPosition: streetView.current != null,
+    canReadCurrentStreetViewPosition: streetView?.current != null,
     getCurrentStreetViewPosition,
   };
 };

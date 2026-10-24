@@ -10,11 +10,11 @@ type MockGoogleMapContext = {
   };
 };
 
-const mockUseGoogleMap = vi.fn<() => MockGoogleMapContext>();
+const mockUseGoogleMap = vi.fn<() => MockGoogleMapContext | null>();
 const getPosition = vi.fn();
 
 vi.mock("../providers/GoogleMapProvider", () => ({
-  useGoogleMap: () => mockUseGoogleMap(),
+  useOptionalGoogleMap: () => mockUseGoogleMap(),
 }));
 
 afterEach(() => {
@@ -37,6 +37,12 @@ beforeEach(() => {
 });
 
 describe("useCurrentStreetViewPosition", () => {
+  it("地図Providerがないホームでも利用できる", () => {
+    mockUseGoogleMap.mockReturnValue(null);
+    const { result } = renderHook(() => useCurrentStreetViewPosition());
+    expect(result.current.canReadCurrentStreetViewPosition).toBe(false);
+    expect(result.current.getCurrentStreetViewPosition()).toBeNull();
+  });
   it("Street View が初期化済みなら現在のマーカー座標を返す", () => {
     const { result } = renderHook(() => useCurrentStreetViewPosition());
 

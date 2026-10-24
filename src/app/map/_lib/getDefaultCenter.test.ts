@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getDefaultCenter } from "~/app/_lib/getDefaultCenter";
+import { getDefaultCenter } from "./getDefaultCenter";
 
 const fallbackCenter = { lat: 34.682952, lng: 135.532147 };
 

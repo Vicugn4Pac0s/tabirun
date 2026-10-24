@@ -1,3 +1,5 @@
+"use client";
+
 import {
   createContext,
   useContext,
@@ -36,14 +38,20 @@ export const GoogleMapProvider = ({ children }: Props) => {
       streetViewUnavailable,
       setStreetViewUnavailable,
     }),
-    [map, streetViewUnavailable]
+    [map, streetViewUnavailable],
   );
 
-  return <GoogleMapContext.Provider value={value}>{children}</GoogleMapContext.Provider>;
+  return (
+    <GoogleMapContext.Provider value={value}>
+      {children}
+    </GoogleMapContext.Provider>
+  );
 };
 
+export const useOptionalGoogleMap = () => useContext(GoogleMapContext);
+
 export const useGoogleMap = () => {
-  const context = useContext(GoogleMapContext);
+  const context = useOptionalGoogleMap();
 
   if (!context) {
     throw new Error("useGoogleMap must be used within GoogleMapProvider");

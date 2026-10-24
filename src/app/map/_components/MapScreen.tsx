@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useFocusMapOnRoute } from "~/frontend/features/googlemap/hooks/useFocusMapOnRoute";
 import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { useApplyMapDefaultCenter } from "~/frontend/features/googlemap/hooks/useApplyMapDefaultCenter";
@@ -31,7 +32,10 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
   const [streetViewPov, setStreetViewPov] =
     useState<google.maps.StreetViewPov | null>(null);
   const routePoints = useRoutePointsStore((state) => state.routePoints);
-  const { canEditRoutePoints } = useRouteEditorState();
+  const { canEditRoutePoints, selectedRoute } = useRouteEditorState();
+  const [initialRoute] = useState(selectedRoute);
+  const initialCenter = initialRoute?.points[0] ?? defaultCenter;
+  const { focusMapOnRoute } = useFocusMapOnRoute();
   const { polylinePath, isLoading: isDirectionLoading } = useRoutePolylinePath(
     routePoints,
     {
@@ -40,9 +44,13 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
   );
 
   useApplyMapDefaultCenter({
-    center: defaultCenter,
+    center: initialCenter,
     enabled: true,
   });
+
+  useEffect(() => {
+    if (initialRoute) focusMapOnRoute(initialRoute.points);
+  }, [focusMapOnRoute, initialRoute]);
 
   return (
     <div className="relative grid flex-1 grid-cols-1 min-[1201px]:grid-cols-2">
@@ -51,7 +59,7 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
           map={map}
           streetView={streetView}
           options={{
-            position: defaultCenter,
+            position: initialCenter,
             pov: { heading: 165, pitch: 0 },
             zoomControl: false,
             addressControl: false,
@@ -92,7 +100,7 @@ function MapScreen({ defaultCenter }: MapScreenProps) {
           setMap={setMap}
           isLoading={isDirectionLoading}
           options={{
-            center: defaultCenter,
+            center: initialCenter,
             zoom: GOOGLE_MAP_DEFAULT_ZOOM,
             maxZoom: GOOGLE_MAP_MAX_ZOOM,
             minZoom: GOOGLE_MAP_MIN_ZOOM,
