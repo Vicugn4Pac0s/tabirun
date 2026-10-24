@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { RouterOutputs } from "~/trpc/react";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
@@ -10,11 +11,11 @@ import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapD
 import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 
-type RouteDetailWorkspaceProps = {
-  route: { title: string | null; points: google.maps.LatLngLiteral[] };
+type RouteDetailScreenProps = {
+  route: Pick<RouterOutputs["route"]["getById"], "id" | "title" | "points">;
 };
 
-function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
+function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
   const { directions, isLoading, error } = useGooglemapDirectionQuery(
     route.points,
     { enabled: true },
@@ -35,6 +36,12 @@ function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
           <h1 className="mb-4 mt-2 break-words text-xl font-bold">
             {route.title?.trim() ? route.title : "無題のルート"}
           </h1>
+          <Link
+            href={`/routes/${route.id}/edit`}
+            className="mb-4 inline-block rounded-md border px-3 py-2 text-sm font-medium hover:bg-gray-50"
+          >
+            編集する
+          </Link>
           <p className="mb-6 text-sm text-gray-600">
             地図上の位置を選んで、Street Viewで下見できます。
           </p>
@@ -60,10 +67,10 @@ function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
   );
 }
 
-export function RouteDetailWorkspace(props: RouteDetailWorkspaceProps) {
+export function RouteDetailScreen(props: RouteDetailScreenProps) {
   return (
     <GoogleMapProvider>
-      <RouteDetailContent {...props} />
+      <RouteDetailScreenContent {...props} />
     </GoogleMapProvider>
   );
 }

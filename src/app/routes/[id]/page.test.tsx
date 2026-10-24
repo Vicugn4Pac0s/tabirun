@@ -9,9 +9,9 @@ const {
   getById,
   notFound,
   redirect,
-  workspace,
+  detailScreen,
 } = vi.hoisted(() => ({
-  workspace: vi.fn(),
+  detailScreen: vi.fn(),
   auth: vi.fn(),
   getUserHomePageSettings: vi.fn(),
   getById: vi.fn(),
@@ -22,13 +22,13 @@ const {
     throw new Error(`REDIRECT:${path}`);
   }),
 }));
-vi.mock("~/frontend/features/route/components/RouteDetailWorkspace", () => ({
-  RouteDetailWorkspace: ({
+vi.mock("~/frontend/features/route/components/RouteDetailScreen", () => ({
+  RouteDetailScreen: ({
     route,
   }: {
     route: { title: string; points: google.maps.LatLngLiteral[] };
   }) => {
-    workspace(route);
+    detailScreen(route);
     return <h1>{route.title}</h1>;
   },
 }));
@@ -61,7 +61,7 @@ describe("RouteDetailPage", () => {
     expect(
       screen.getByRole("heading", { name: "朝のルート" }),
     ).toBeInTheDocument();
-    expect(workspace).toHaveBeenCalledWith({
+    expect(detailScreen).toHaveBeenCalledWith({
       title: "朝のルート",
       points: [
         { lat: 35, lng: 135 },

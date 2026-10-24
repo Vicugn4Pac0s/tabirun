@@ -1,7 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { RouteDetailWorkspace } from "./RouteDetailWorkspace";
+import { RouteDetailScreen } from "./RouteDetailScreen";
 
 const { directionsQuery } = vi.hoisted(() => ({
   directionsQuery: vi.fn(),
@@ -41,6 +41,7 @@ vi.mock("~/frontend/features/googlemap/components/Polyline", () => ({
 }));
 
 const route = {
+  id: 1,
   title: "朝のルート",
   points: [
     { lat: 35, lng: 135 },
@@ -65,9 +66,9 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("RouteDetailWorkspace", () => {
+describe("RouteDetailScreen", () => {
   it("既存mapと共通の外枠と表示部品で、ルート情報・地図・Street Viewを表示する", () => {
-    render(<RouteDetailWorkspace route={route} />);
+    render(<RouteDetailScreen route={route} />);
     const sidebar = screen.getByRole("complementary", { name: "ルート情報" });
     expect(
       within(sidebar).getByRole("heading", { name: "朝のルート" }),
@@ -83,6 +84,9 @@ describe("RouteDetailWorkspace", () => {
     expect(
       screen.getByRole("region", { name: "Street Viewで下見" }),
     ).toBeInTheDocument();
+    expect(
+      within(sidebar).getByRole("link", { name: "編集する" }),
+    ).toHaveAttribute("href", "/routes/1/edit");
     expect(screen.getByText("経路線")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "スタート" })).toHaveTextContent(
       "S",
@@ -96,7 +100,7 @@ describe("RouteDetailWorkspace", () => {
 
   it("周回コースではS/Gのマーカー1つだけを渡す", () => {
     render(
-      <RouteDetailWorkspace
+      <RouteDetailScreen
         route={{ ...route, points: [...route.points, route.points[0]!] }}
       />,
     );
@@ -108,7 +112,7 @@ describe("RouteDetailWorkspace", () => {
 
   it("モバイルではルート情報を開いて確認できる", async () => {
     const user = userEvent.setup();
-    render(<RouteDetailWorkspace route={route} />);
+    render(<RouteDetailScreen route={route} />);
     await user.click(screen.getByRole("button", { name: "ルート情報を開く" }));
     expect(
       within(screen.getByRole("dialog", { name: "ルート情報" })).getByRole(
@@ -126,7 +130,7 @@ describe("RouteDetailWorkspace", () => {
       isLoading: false,
       error: new Error("failed"),
     });
-    render(<RouteDetailWorkspace route={route} />);
+    render(<RouteDetailScreen route={route} />);
     expect(screen.getByRole("alert")).toHaveTextContent(
       "スタート・ゴールのみ表示",
     );

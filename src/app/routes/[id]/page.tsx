@@ -3,7 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 
-import { RouteDetailWorkspace } from "~/frontend/features/route/components/RouteDetailWorkspace";
+import { RouteDetailScreen } from "~/frontend/features/route/components/RouteDetailScreen";
 import { auth } from "~/server/auth";
 import { getUserHomePageSettings } from "~/server/features/user/queries";
 import { api } from "~/trpc/server";
@@ -40,7 +40,7 @@ export default async function RouteDetailPage({
   return (
     <SessionProvider session={session}>
       <main>
-        <RouteDetailWorkspace key={route.id} route={route} />
+        <RouteDetailScreen key={route.id} route={route} />
       </main>
     </SessionProvider>
   );
