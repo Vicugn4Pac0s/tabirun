@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
@@ -49,12 +50,9 @@ function RouteDetailContent({ route }: RouteDetailWorkspaceProps) {
         fitToRoute
         notice={
           error ? (
-            <p
-              role="alert"
-              className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900"
-            >
+            <WarningBanner>
               経路を取得できませんでした。スタート・ゴールのみ表示しています。時間をおいて再度お試しください。
-            </p>
+            </WarningBanner>
           ) : undefined
         }
       />

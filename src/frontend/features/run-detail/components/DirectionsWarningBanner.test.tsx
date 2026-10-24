@@ -3,6 +3,16 @@ import { render, screen } from "@testing-library/react";
 import DirectionsWarningBanner from "~/frontend/features/run-detail/components/DirectionsWarningBanner";
 
 describe("DirectionsWarningBanner", () => {
+  it("共通の警告枠でメッセージを通知する", () => {
+    render(
+      <DirectionsWarningBanner
+        error={{ data: { code: "TOO_MANY_REQUESTS" } } as never}
+      />,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "自動ルート生成の利用上限に達しました",
+    );
+  });
   it("quota 超過時の文言を表示する", () => {
     render(
       <DirectionsWarningBanner
@@ -22,7 +32,9 @@ describe("DirectionsWarningBanner", () => {
 
   it("route 未検出時の文言を表示する", () => {
     render(
-      <DirectionsWarningBanner error={{ data: { code: "NOT_FOUND" } } as never} />,
+      <DirectionsWarningBanner
+        error={{ data: { code: "NOT_FOUND" } } as never}
+      />,
     );
 
     expect(

@@ -60,9 +60,11 @@ function RunDetailOverview({
     <div>
       {header ? <div className="mb-6">{header}</div> : null}
       {error && (
-        <DirectionsWarningBanner
-          error={error as TRPCClientErrorLike<AppRouter>}
-        />
+        <div className="mb-4">
+          <DirectionsWarningBanner
+            error={error as TRPCClientErrorLike<AppRouter>}
+          />
+        </div>
       )}
       <div className="mb-6">
         <p className="mb-2 font-bold text-base-gray">ペース</p>

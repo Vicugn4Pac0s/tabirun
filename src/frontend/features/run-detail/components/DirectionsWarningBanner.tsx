@@ -1,3 +1,4 @@
+import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { type TRPCClientErrorLike } from "@trpc/client";
 import { type AppRouter } from "~/server/api/root";
 
@@ -5,9 +6,7 @@ interface DirectionsWarningBannerProps {
   error: TRPCClientErrorLike<AppRouter>;
 }
 
-function getDirectionsWarningContent(
-  error: TRPCClientErrorLike<AppRouter>,
-) {
+function getDirectionsWarningContent(error: TRPCClientErrorLike<AppRouter>) {
   if (error.data?.code === "TOO_MANY_REQUESTS") {
     return {
       title: "自動ルート生成の利用上限に達しました",
@@ -35,10 +34,10 @@ function DirectionsWarningBanner({ error }: DirectionsWarningBannerProps) {
   const content = getDirectionsWarningContent(error);
 
   return (
-    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-      <p className="text-sm font-semibold text-amber-900">{content.title}</p>
-      <p className="mt-1 text-sm text-amber-800">{content.description}</p>
-    </div>
+    <WarningBanner>
+      <p className="font-semibold">{content.title}</p>
+      <p className="mt-1">{content.description}</p>
+    </WarningBanner>
   );
 }
 
