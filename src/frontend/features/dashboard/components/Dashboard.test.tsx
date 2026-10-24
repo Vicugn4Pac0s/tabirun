@@ -1,6 +1,8 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Dashboard } from "./Dashboard";
+
+const { routesQuery } = vi.hoisted(() => ({ routesQuery: vi.fn() }));
 
 vi.mock("next-auth/react", () => ({
   useSession: () => ({ status: "authenticated" }),
@@ -19,7 +21,10 @@ vi.mock("~/frontend/features/user/hooks/useUserQuery", () => ({
   }),
 }));
 vi.mock("~/frontend/features/route/hooks/useRoutesQuery", () => ({
-  useRoutesQuery: () => ({
+  useRoutesQuery: routesQuery,
+}));
+beforeEach(() => {
+  routesQuery.mockReturnValue({
     routes: [
       {
         id: 123,
@@ -34,11 +39,8 @@ vi.mock("~/frontend/features/route/hooks/useRoutesQuery", () => ({
     ],
     isLoading: false,
     error: null,
-  }),
-}));
-vi.mock("../hooks/useDashboardNavigation", () => ({
-  useDashboardNavigation: () => ({ createRoute: vi.fn() }),
-}));
+  });
+});
 
 afterEach(cleanup);
 
@@ -50,7 +52,15 @@ describe("Dashboard", () => {
       "/routes/123",
     );
     expect(
-      screen.getByRole("button", { name: "新しいルートを作る" }),
-    ).toBeInTheDocument();
+      screen.getByRole("link", { name: "新しいルートを作る" }),
+    ).toHaveAttribute("href", "/routes/new");
+  });
+  it("ルート未登録時の作成リンクも新規作成画面へ向く", () => {
+    routesQuery.mockReturnValue({ routes: [], isLoading: false, error: null });
+    render(<Dashboard />);
+    expect(screen.getByRole("link", { name: "ルートを作る" })).toHaveAttribute(
+      "href",
+      "/routes/new",
+    );
   });
 });

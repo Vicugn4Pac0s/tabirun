@@ -3,48 +3,43 @@
 import Link from "next/link";
 import RouteMenuButton from "~/frontend/features/route/components/RouteMenuButton";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
-import type { RouterOutputs } from "~/trpc/react";
 import { Input } from "~/frontend/components/ui/input";
-import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
-import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
-import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import RoutePointList from "~/frontend/features/run-detail/components/RoutePointList";
 import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
+import { Button } from "~/frontend/components/ui/button";
+
+import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
+import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
+import { RouteNavigation } from "~/frontend/features/route-points-navigation/components/RouteNavigation";
+import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
+import type { RouterOutputs } from "~/trpc/react";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteEdit } from "../hooks/useRouteEdit";
-import { Button } from "~/frontend/components/ui/button";
-import { RouteNavigation } from "~/frontend/features/route-points-navigation/components/RouteNavigation";
-
-type EditableRoute = Pick<
-  RouterOutputs["route"]["getById"],
-  "id" | "title" | "points"
->;
 
 type RouteEditScreenProps = {
-  route: EditableRoute;
+  route: Pick<RouterOutputs["route"]["getById"], "id" | "title" | "points">;
 };
 
 function RouteEditScreenContent({ route }: RouteEditScreenProps) {
   const {
     title,
-    setTitle,
     points,
+    setTitle,
     togglePoint,
     isDirty,
     canSave,
     isUpdating,
     save,
-    confirmDiscard,
     reset,
+    confirmDiscard,
   } = useRouteEdit(route);
   const { directions, isLoading, error } = useGooglemapDirectionQuery(points, {
     enabled: true,
   });
   const moveStreetView = useMoveStreetView();
-
   return (
     <SidebarLayout
       sidebarTitle="ルート編集"
@@ -115,7 +110,7 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
     >
       <RouteMapView
         showStreetView
-        initialCenter={points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
+        initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
         path={directions?.path.length ? directions.path : null}
         markers={points.map((point, index) => ({
           id: String(index),

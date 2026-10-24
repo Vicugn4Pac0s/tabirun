@@ -31,3 +31,13 @@ export const NewPoint: Story = {
 };
 export const Saving: Story = { args: { disabled: true } };
 export const ReadOnly: Story = { args: { canEdit: false } };
+
+export const EmptyRoute: Story = {
+  args: { points: [] },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole("button", { name: "次へ" })).toBeDisabled();
+    await userEvent.click(canvas.getByRole("button", { name: "地点を追加" }));
+    await expect(args.onToggle).toHaveBeenCalledTimes(1);
+  },
+};

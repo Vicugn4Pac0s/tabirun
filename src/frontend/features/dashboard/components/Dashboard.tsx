@@ -14,7 +14,6 @@ import {
 import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
 import { UserProfileDialog } from "~/frontend/features/user/components/UserProfileDialog";
 import { useRoutesQuery } from "~/frontend/features/route/hooks/useRoutesQuery";
-import { useDashboardNavigation } from "../hooks/useDashboardNavigation";
 
 function PersonalDashboard() {
   const { user, isLoading, error } = useUserQuery();
@@ -23,7 +22,6 @@ function PersonalDashboard() {
     isLoading: routesLoading,
     error: routesError,
   } = useRoutesQuery();
-  const { createRoute } = useDashboardNavigation();
   const [profileOpen, setProfileOpen] = useState(false);
 
   return (
@@ -77,9 +75,11 @@ function PersonalDashboard() {
               お気に入りの道を、次のランニングへ。
             </p>
           </div>
-          <Button onClick={createRoute}>
-            <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-            新しいルートを作る
+          <Button asChild>
+            <Link href="/routes/new">
+              <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+              新しいルートを作る
+            </Link>
           </Button>
         </div>
         {routesLoading ? (
@@ -103,8 +103,8 @@ function PersonalDashboard() {
             <p className="mb-5 mt-2 text-sm text-gray-500">
               地図とStreet Viewで道を確認しながら、自分だけのコースを作れます。
             </p>
-            <Button variant="outline" onClick={createRoute}>
-              ルートを作る
+            <Button variant="outline" asChild>
+              <Link href="/routes/new">ルートを作る</Link>
             </Button>
           </div>
         ) : (
