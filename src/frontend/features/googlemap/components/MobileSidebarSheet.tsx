@@ -15,9 +15,14 @@ import type { ReactElement } from "react";
 interface MobileSidebarSheetProps {
   children: React.ReactNode;
   trigger: ReactElement;
+  title?: string;
 }
 
-function MobileSidebarSheet({ children, trigger }: MobileSidebarSheetProps) {
+function MobileSidebarSheet({
+  children,
+  trigger,
+  title = "メニュー",
+}: MobileSidebarSheetProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -25,7 +30,7 @@ function MobileSidebarSheet({ children, trigger }: MobileSidebarSheetProps) {
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
       <DrawerContent className="h-[72vh] max-h-[72vh] gap-0 rounded-t-2xl border-x-0 border-b-0">
         <DrawerHeader className="sr-only">
-          <DrawerTitle>メニュー</DrawerTitle>
+          <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>
         <DrawerClose className="absolute right-4 top-3 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
           <X className="h-4 w-4" />

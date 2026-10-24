@@ -27,6 +27,7 @@ export function MapWorkspaceLayout({
       </aside>
       <div className="md:hidden">
         <MobileSidebarSheet
+          title="ルート情報"
           trigger={
             mobileTrigger ?? (
               <Button

@@ -97,9 +97,12 @@ describe("RouteDetailWorkspace", () => {
     render(<RouteDetailWorkspace route={route} />);
     await user.click(screen.getByRole("button", { name: "ルート情報を開く" }));
     expect(
-      within(screen.getByRole("dialog")).getByRole("heading", {
-        name: "朝のルート",
-      }),
+      within(screen.getByRole("dialog", { name: "ルート情報" })).getByRole(
+        "heading",
+        {
+          name: "朝のルート",
+        },
+      ),
     ).toBeInTheDocument();
   });
 
