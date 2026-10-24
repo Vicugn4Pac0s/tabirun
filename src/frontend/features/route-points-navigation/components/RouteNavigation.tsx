@@ -1,61 +1,70 @@
 "use client";
 
 import { useEnterKey } from "~/frontend/hooks/shared/useEnterKey";
-import { useMoveStreetView } from "../../googlemap/hooks/useMoveStreetView";
-import { useRoutePoints } from "../../route-points/hooks/useRoutePoints";
-import { useRoutePointAction } from "../hooks/useRoutePointAction";
 import MainActionButton from "~/frontend/components/app-ui/MainActionButton";
 import SubActionButton from "~/frontend/components/app-ui/SubActionButton";
 
-interface RoutePointsNavigationProps {
+type RouteNavigationProps = {
+  points: google.maps.LatLngLiteral[];
   currentPoint: google.maps.LatLngLiteral;
+  onMove: (point: google.maps.LatLngLiteral) => void;
+  onToggle: () => void;
+  disabled?: boolean;
   canEdit?: boolean;
-}
+};
 
-const RoutePointsNavigation = ({
+export function RouteNavigation({
+  points,
   currentPoint,
+  onMove,
+  onToggle,
+  disabled = false,
   canEdit = true,
-}: RoutePointsNavigationProps) => {
-  const moveStreetView = useMoveStreetView();
-  const { canFirst, canPrev, canNext, canLast, firstRoutePoint, lastRoutePoint, prevRoutePoint, nextRoutePoint } = useRoutePoints(currentPoint);
-  const { type, toggle } = useRoutePointAction(currentPoint);
-  
-  useEnterKey(() => {
-    if (!canEdit) return;
-    toggle();
-  });
+}: RouteNavigationProps) {
+  const index = points.findIndex(
+    (point) => point.lat === currentPoint.lat && point.lng === currentPoint.lng,
+  );
+  const canPrev = index > 0;
+  const canNext = index >= 0 && index < points.length - 1;
+  const move = (targetIndex: number) => {
+    const point = points[targetIndex];
+    if (point) onMove(point);
+  };
+  useEnterKey(onToggle, { enabled: canEdit && !disabled });
 
   return (
-    <div className="bg-white flex gap-16 relative">
+    <div className="relative flex gap-16 bg-white">
       <div className="flex">
-        <SubActionButton type="first" disabled={!canFirst} onClick={()=>{
-          if(!firstRoutePoint) return;
-          void moveStreetView(firstRoutePoint);
-        }} />
-        <SubActionButton type="prev" disabled={!canPrev} onClick={()=>{
-          if(!prevRoutePoint) return;
-          void moveStreetView(prevRoutePoint);
-        }} />
+        <SubActionButton
+          type="first"
+          disabled={disabled || !canPrev}
+          onClick={() => move(0)}
+        />
+        <SubActionButton
+          type="prev"
+          disabled={disabled || !canPrev}
+          onClick={() => move(index - 1)}
+        />
       </div>
-      <div className="absolute left-1/2 bottom-1 -translate-x-1/2 z-10">
+      <div className="absolute bottom-1 left-1/2 z-10 -translate-x-1/2">
         <MainActionButton
-          type={type}
-          onClick={toggle}
-          disabled={!canEdit}
+          type={index >= 0 ? "delete" : "add"}
+          onClick={onToggle}
+          disabled={disabled || !canEdit}
         />
       </div>
       <div className="flex">
-        <SubActionButton type="next" disabled={!canNext} onClick={()=>{
-          if(!nextRoutePoint) return;
-          void moveStreetView(nextRoutePoint);
-        }} />
-        <SubActionButton type="last" disabled={!canLast} onClick={()=>{
-          if(!lastRoutePoint) return;
-          void moveStreetView(lastRoutePoint);
-        }} />
+        <SubActionButton
+          type="next"
+          disabled={disabled || !canNext}
+          onClick={() => move(index + 1)}
+        />
+        <SubActionButton
+          type="last"
+          disabled={disabled || !canNext}
+          onClick={() => move(points.length - 1)}
+        />
       </div>
     </div>
   );
-};
-
-export default RoutePointsNavigation;
+}

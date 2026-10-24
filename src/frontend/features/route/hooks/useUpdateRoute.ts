@@ -11,12 +11,18 @@ export const useUpdateRoute = () => {
   const utils = api.useUtils();
 
   const mutation = api.route.update.useMutation({
-    onSuccess: async () => {
-      await utils.route.getByUser.invalidate();
+    onSuccess: async (_data, input) => {
+      await Promise.all([
+        utils.route.getByUser.invalidate(),
+        utils.route.getById.invalidate({ id: input.id }),
+      ]);
     },
   });
 
-  const updateRoute = async (input: RouteUpdateInput, cb?: UpdateRouteCallbacks) => {
+  const updateRoute = async (
+    input: RouteUpdateInput,
+    cb?: UpdateRouteCallbacks,
+  ) => {
     return executeMutationWithCallbacks(mutation, input, cb);
   };
 

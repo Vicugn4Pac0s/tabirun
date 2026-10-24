@@ -33,6 +33,13 @@ const MainActionButton = ({
   }
   return (
     <motion.button
+      aria-label={
+        type === "add"
+          ? "地点を追加"
+          : type === "delete"
+            ? "地点を削除"
+            : "再生"
+      }
       className={`flex h-20 w-20 items-center justify-center rounded-full border-2 border-white bg-primary text-white transition-opacity disabled:opacity-50 ${className}`}
       disabled={disabled}
       onClick={onClick}

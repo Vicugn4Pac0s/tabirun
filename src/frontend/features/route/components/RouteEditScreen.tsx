@@ -14,7 +14,9 @@ import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveSt
 import RoutePointList from "~/frontend/features/run-detail/components/RoutePointList";
 import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
-import { useRouteDraft } from "../hooks/useRouteDraft";
+import { useRouteEdit } from "../hooks/useRouteEdit";
+import { Button } from "~/frontend/components/ui/button";
+import { RouteNavigation } from "~/frontend/features/route-points-navigation/components/RouteNavigation";
 
 type EditableRoute = Pick<
   RouterOutputs["route"]["getById"],
@@ -26,7 +28,18 @@ type RouteEditScreenProps = {
 };
 
 function RouteEditScreenContent({ route }: RouteEditScreenProps) {
-  const { title, setTitle, points } = useRouteDraft(route);
+  const {
+    title,
+    setTitle,
+    points,
+    togglePoint,
+    isDirty,
+    canSave,
+    isUpdating,
+    save,
+    confirmDiscard,
+    reset,
+  } = useRouteEdit(route);
   const { directions, isLoading, error } = useGooglemapDirectionQuery(points, {
     enabled: true,
   });
@@ -47,6 +60,10 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
           <Link
             href={`/routes/${route.id}`}
             className="mb-5 inline-block font-medium underline"
+            onClick={(event) => {
+              if (isUpdating || !confirmDiscard()) event.preventDefault();
+            }}
+            aria-disabled={isUpdating}
           >
             ルートに戻る
           </Link>
@@ -54,18 +71,43 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
           <label className="block text-sm font-medium">
             <span className="mb-2 block">ルート名</span>
             <Input
+              disabled={isUpdating}
               value={title}
               onChange={(event) => setTitle(event.target.value)}
             />
           </label>
-          <p className="mb-6 mt-2 text-sm text-gray-500">
-            入力内容はまだ保存できません。
+          <p className="mt-2 text-sm text-gray-500">
+            Street View下部のボタンで地点を追加・削除できます。
           </p>
+          <div className="my-6 flex gap-2">
+            <Button
+              type="button"
+              disabled={!canSave || isUpdating}
+              onClick={() => {
+                void save();
+              }}
+            >
+              {isUpdating ? "更新中..." : "更新する"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!isDirty || isUpdating}
+              onClick={reset}
+            >
+              リセット
+            </Button>
+          </div>
+          {points.length < 2 && (
+            <p role="status" className="mb-3 text-sm text-gray-500">
+              保存するには2地点以上を登録してください。
+            </p>
+          )}
           <h2 className="mb-3 font-bold">経由地点（{points.length} 地点）</h2>
           <RoutePointList
             routePoints={points}
             onRoutePointClick={(point) => {
-              void moveStreetView(point);
+              void moveStreetView(point).catch(() => undefined);
             }}
           />
         </>
@@ -83,6 +125,17 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
         }))}
         isLoading={isLoading}
         fitToRoute
+        renderNavigation={(point) => (
+          <RouteNavigation
+            points={points}
+            currentPoint={point}
+            onMove={(target) => {
+              void moveStreetView(target).catch(() => undefined);
+            }}
+            onToggle={() => togglePoint(point)}
+            disabled={isUpdating}
+          />
+        )}
         notice={
           error ? (
             <WarningBanner>
