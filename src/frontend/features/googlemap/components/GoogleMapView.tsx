@@ -1,7 +1,7 @@
 import { Status, Wrapper } from "@googlemaps/react-wrapper"
 
 import GoogleMapCanvas from "./GoogleMapCanvas"
-import MapLoadingOverlay from "./MapLoadingOverlay"
+import LoadingOverlay from "~/frontend/components/app-ui/LoadingOverlay"
 
 interface GoogleMapViewProps {
   className?: string
@@ -22,7 +22,7 @@ function GoogleMapView({ className, map, setMap, options, onInit, onClick, onIdl
     if (status === Status.LOADING) {
       return (
         <div className="relative h-full">
-          <MapLoadingOverlay />
+          <LoadingOverlay />
         </div>
       )
     }
@@ -52,7 +52,7 @@ function GoogleMapView({ className, map, setMap, options, onInit, onClick, onIdl
           {children}
         </GoogleMapCanvas>
       </Wrapper>
-      {isLoading && <MapLoadingOverlay />}
+      {isLoading && <LoadingOverlay />}
     </div>
   )
 }
