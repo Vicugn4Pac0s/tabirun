@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
 import { useGoogleMap } from "../providers/GoogleMapProvider";
-import { useRoutePreview } from "../hooks/useRoutePreview";
+import { useMoveStreetView } from "../hooks/useMoveStreetView";
 import { useApplyMapDefaultCenter } from "../hooks/useApplyMapDefaultCenter";
 import { useFocusMapOnRoute } from "../hooks/useFocusMapOnRoute";
 import {
@@ -34,16 +34,27 @@ function RouteMapView({
   renderNavigation,
   notice,
 }: RouteMapViewProps) {
-  const { map, setMap } = useGoogleMap();
   const {
+    map,
+    setMap,
     streetView,
     streetViewUnavailable,
-    position: streetViewCenter,
-    setPosition: setStreetViewCenter,
-    pov: streetViewPov,
-    setPov: setStreetViewPov,
-    previewPoint: moveStreetView,
-  } = useRoutePreview();
+    setStreetViewUnavailable,
+  } = useGoogleMap();
+  const moveStreetView = useMoveStreetView();
+  const [streetViewCenter, setStreetViewCenter] =
+    useState<google.maps.LatLngLiteral | null>(null);
+  const [streetViewPov, setStreetViewPov] =
+    useState<google.maps.StreetViewPov | null>(null);
+
+  const previewPoint = async (point: google.maps.LatLngLiteral) => {
+    try {
+      await moveStreetView(point);
+    } catch {
+      setStreetViewUnavailable(true);
+    }
+  };
+
   useApplyMapDefaultCenter({ center: initialCenter, enabled: true });
   const [initialPoints] = useState(routePoints);
   const { focusMapOnRoute } = useFocusMapOnRoute();
@@ -69,7 +80,7 @@ function RouteMapView({
             motionTrackingControl: false,
           }}
           onInit={() => {
-            void moveStreetView(initialCenter);
+            void previewPoint(initialCenter);
           }}
           onPositionChanged={(position) => {
             setStreetViewCenter(position.toJSON());
@@ -115,7 +126,7 @@ function RouteMapView({
           onClick={(e) => {
             const latLng = e.latLng;
             if (!latLng) return;
-            void moveStreetView(latLng.toJSON());
+            void previewPoint(latLng.toJSON());
           }}
         >
           <StreetViewPointMarker
@@ -134,7 +145,7 @@ function RouteMapView({
                 latLng={point}
                 index={index}
                 onClick={() => {
-                  void moveStreetView(point);
+                  void previewPoint(point);
                 }}
               />
             ))}
