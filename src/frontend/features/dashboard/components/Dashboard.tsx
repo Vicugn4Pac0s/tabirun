@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { ArrowRight, MapPin, Plus, Route, UserRound } from "lucide-react";
@@ -22,7 +23,7 @@ function PersonalDashboard() {
     isLoading: routesLoading,
     error: routesError,
   } = useRoutesQuery();
-  const { openRoute, createRoute } = useDashboardNavigation();
+  const { createRoute } = useDashboardNavigation();
   const [profileOpen, setProfileOpen] = useState(false);
 
   return (
@@ -110,10 +111,9 @@ function PersonalDashboard() {
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {routes.map((route) => (
               <li key={route.id}>
-                <button
-                  type="button"
-                  onClick={() => openRoute(route)}
-                  className="group h-full w-full rounded-2xl border bg-white p-6 text-left transition hover:border-gray-400 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
+                <Link
+                  href={`/routes/${route.id}`}
+                  className="group block h-full w-full rounded-2xl border bg-white p-6 text-left transition hover:border-gray-400 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
                 >
                   <div className="mb-6 flex items-center justify-between text-gray-400">
                     <MapPin className="h-5 w-5" aria-hidden="true" />
@@ -134,7 +134,7 @@ function PersonalDashboard() {
                       route.updatedAt ?? route.createdAt,
                     )}
                   </p>
-                </button>
+                </Link>
               </li>
             ))}
           </ul>

@@ -13,13 +13,6 @@ beforeEach(() => {
   useRoutePointsStore.getState().clearRoutePoints();
 });
 describe("useDashboardNavigation", () => {
-  it("選択したルートと経由地点を地図画面に引き継ぐ", () => {
-    const { result } = renderHook(() => useDashboardNavigation());
-    act(() => result.current.openRoute(route));
-    expect(useSelectedRouteStore.getState().selectedRoute).toEqual(route);
-    expect(useRoutePointsStore.getState().routePoints).toEqual(route.points);
-    expect(push).toHaveBeenCalledWith("/map");
-  });
   it("新規作成では以前の選択と編集地点をクリアする", () => {
     useSelectedRouteStore.getState().selectRoute(route);
     useRoutePointsStore.getState().setRoutePoints(route.points);
