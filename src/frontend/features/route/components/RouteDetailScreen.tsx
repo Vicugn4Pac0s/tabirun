@@ -10,7 +10,7 @@ import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
-import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";
+import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
@@ -24,10 +24,11 @@ type RouteDetailScreenProps = {
 function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
   const { remove, isDeleting } = useRouteDeletion(route.id);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
-  const { directions, isLoading, error } = useGoogleMapDirectionQuery(
+  const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
     route.points,
-    { enabled: true },
+    { canUseDirections: true },
   );
+  const isQuotaExceeded = error?.data?.code === "TOO_MANY_REQUESTS";
   const start = route.points[0];
   const goal = route.points[route.points.length - 1];
   const markers = getRoutePreviewMarkers(start, goal);
@@ -88,14 +89,16 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
       <RouteMapView
         showStreetView
         initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
-        path={directions?.path.length ? directions.path : null}
+        path={polylinePath}
         markers={markers}
         isLoading={isLoading}
         fitToRoute
         notice={
           error ? (
             <WarningBanner>
-              経路を取得できませんでした。スタート・ゴールのみ表示しています。時間をおいて再度お試しください。
+              {isQuotaExceeded
+                ? "自動ルート生成の利用上限に達しました。登録地点を直線で結んで表示しています。"
+                : "経路を取得できませんでした。スタート・ゴールのみ表示しています。時間をおいて再度お試しください。"}
             </WarningBanner>
           ) : undefined
         }

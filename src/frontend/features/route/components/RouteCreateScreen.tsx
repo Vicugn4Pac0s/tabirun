@@ -10,7 +10,7 @@ import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveSt
 import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
-import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";
+import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
 import { Button } from "~/frontend/components/ui/button";
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
@@ -34,9 +34,11 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
     reset,
     confirmDiscard,
   } = useRouteCreation();
-  const { directions, isLoading, error } = useGoogleMapDirectionQuery(points, {
-    enabled: true,
-  });
+  const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
+    points,
+    { canUseDirections: true },
+  );
+  const isQuotaExceeded = error?.data?.code === "TOO_MANY_REQUESTS";
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const moveStreetView = useMoveStreetView();
   return (
@@ -117,7 +119,7 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
       <RouteMapView
         showStreetView
         initialCenter={defaultCenter}
-        path={directions?.path.length ? directions.path : null}
+        path={polylinePath}
         markers={points.map((point, index) => ({
           id: String(index),
           position: point,
@@ -139,7 +141,9 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
         notice={
           error ? (
             <WarningBanner>
-              経路を取得できませんでした。経由地点のみ表示しています。時間をおいて再度お試しください。
+              {isQuotaExceeded
+                ? "自動ルート生成の利用上限に達しました。経由地点を直線で結んで表示しています。"
+                : "経路を取得できませんでした。経由地点のみ表示しています。時間をおいて再度お試しください。"}
             </WarningBanner>
           ) : undefined
         }

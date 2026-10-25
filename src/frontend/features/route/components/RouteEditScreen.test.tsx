@@ -75,7 +75,9 @@ vi.mock("~/frontend/features/googlemap/components/RoutePointMarker", () => ({
   ),
 }));
 vi.mock("~/frontend/features/googlemap/components/Polyline", () => ({
-  default: () => <span>経路線</span>,
+  default: ({ path }: { path: google.maps.LatLngLiteral[] }) => (
+    <span data-path={JSON.stringify(path)}>経路線</span>
+  ),
 }));
 
 const route = {
@@ -193,6 +195,22 @@ describe("RouteEditScreen", () => {
       route.title,
     );
     expect(screen.getAllByRole("img")).toHaveLength(3);
+  });
+  it("利用上限に達したら編集中の地点を直線で結ぶ", () => {
+    directionsQuery.mockReturnValue({
+      directions: null,
+      isLoading: false,
+      error: { data: { code: "TOO_MANY_REQUESTS" } },
+    });
+
+    render(<RouteEditScreen route={route} />);
+
+    expect(screen.getByText("経路線")).toHaveAttribute(
+      "data-path",
+      JSON.stringify(route.points),
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("直線で結んで表示");
+    expect(screen.getByText("距離を表示できません。")).toBeInTheDocument();
   });
   it("地点を削除して経路を再計算し、入力した名前と地点を保存する", async () => {
     const user = userEvent.setup();

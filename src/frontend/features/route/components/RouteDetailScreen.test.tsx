@@ -58,7 +58,9 @@ vi.mock("~/frontend/features/googlemap/components/RoutePointMarker", () => ({
   ),
 }));
 vi.mock("~/frontend/features/googlemap/components/Polyline", () => ({
-  default: () => <span>経路線</span>,
+  default: ({ path }: { path: google.maps.LatLngLiteral[] }) => (
+    <span data-path={JSON.stringify(path)}>経路線</span>
+  ),
 }));
 
 const route = {
@@ -221,5 +223,22 @@ describe("RouteDetailScreen", () => {
     expect(
       screen.getByRole("region", { name: "Street Viewで下見" }),
     ).toBeInTheDocument();
+  });
+
+  it("利用上限に達したら保存済みの全地点を直線で結ぶ", () => {
+    directionsQuery.mockReturnValue({
+      directions: null,
+      isLoading: false,
+      error: { data: { code: "TOO_MANY_REQUESTS" } },
+    });
+
+    render(<RouteDetailScreen route={route} />);
+
+    expect(screen.getByText("経路線")).toHaveAttribute(
+      "data-path",
+      JSON.stringify(route.points),
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("直線で結んで表示");
+    expect(screen.getByText("距離を表示できません。")).toBeInTheDocument();
   });
 });
