@@ -15,7 +15,7 @@ import { Button } from "~/frontend/components/ui/button";
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
-import { RouteNavigation } from "~/frontend/features/route-points-navigation/components/RouteNavigation";
+import { RouteNavigation } from "~/frontend/features/route-points/components/RouteNavigation";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { useRouteCreation } from "../hooks/useRouteCreation";
 
