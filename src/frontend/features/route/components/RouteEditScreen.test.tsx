@@ -16,6 +16,22 @@ vi.mock("../api/useUpdateRoute", () => ({
 vi.mock("~/frontend/features/googlemap/api/useGoogleMapDirectionQuery", () => ({
   useGoogleMapDirectionQuery: directionsQuery,
 }));
+vi.mock("~/frontend/features/user/api/useCurrentUserQuery", () => ({
+  useCurrentUserQuery: () => ({ user: { pace: "5:00", weight: 60 } }),
+}));
+vi.mock("~/frontend/features/pace/components/PaceSelect", () => ({
+  default: ({
+    value,
+    onChangeValue,
+  }: {
+    value: string;
+    onChangeValue: (pace: "6:00") => void;
+  }) => (
+    <button type="button" onClick={() => onChangeValue("6:00")}>
+      ペース {value}
+    </button>
+  ),
+}));
 vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
   AuthUserMenu: () => null,
 }));
@@ -101,6 +117,9 @@ describe("RouteEditScreen", () => {
     expect(
       screen.getByRole("button", { name: "ルート編集を開く" }),
     ).toHaveTextContent("5.2 km");
+    expect(screen.getByText("5.2")).toBeInTheDocument();
+    expect(screen.getByText("予想時間")).toBeInTheDocument();
+    expect(screen.getByText("消費カロリー")).toBeInTheDocument();
   });
 
   it("経路取得中はSPメニューに計測中を表示する", () => {

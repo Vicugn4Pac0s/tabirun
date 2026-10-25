@@ -19,6 +19,7 @@ type SelectboxProps = {
   onValueChange?: (value: string) => void
   placeholder?: string
   label?: string
+  ariaLabel?: string
   disabled?: boolean
   className?: string
 }
@@ -29,12 +30,16 @@ export function Selectbox({
   onValueChange,
   placeholder = "Select",
   label,
+  ariaLabel,
   disabled,
   className,
 }: SelectboxProps) {
   return (
     <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className={className ?? "w-full max-w-48"}>
+      <SelectTrigger
+        aria-label={ariaLabel}
+        className={className ?? "w-full max-w-48"}
+      >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

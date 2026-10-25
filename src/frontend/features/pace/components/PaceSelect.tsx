@@ -32,6 +32,7 @@ function PaceSelect({
   return (
     <div className={`w-full ${className ?? ""}`}>
       <Selectbox
+        ariaLabel="ペース"
         items={paceOptions}
         value={value}
         onValueChange={(value) => {

@@ -11,6 +11,8 @@ import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";
+import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
+import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteDeletion } from "../hooks/useRouteDeletion";
@@ -21,6 +23,7 @@ type RouteDetailScreenProps = {
 
 function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
   const { remove, isDeleting } = useRouteDeletion(route.id);
+  const { pace, setPace, weightKg } = useRunEstimateInputs();
   const { directions, isLoading, error } = useGoogleMapDirectionQuery(
     route.points,
     { enabled: true },
@@ -72,6 +75,13 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
           <p className="mb-6 text-sm text-gray-600">
             地図上の位置を選んで、Street Viewで下見できます。
           </p>
+          <RunMetricsPanel
+            distanceMeters={directions?.distanceMeters}
+            isLoading={isLoading}
+            pace={pace}
+            onPaceChange={setPace}
+            weightKg={weightKg}
+          />
         </>
       }
     >

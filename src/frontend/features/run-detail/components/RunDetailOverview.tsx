@@ -1,19 +1,15 @@
 import type { TRPCClientErrorLike } from "@trpc/client";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
 import { Spinner } from "~/frontend/components/ui/spinner";
 import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
-import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import RouteCreateAction from "~/frontend/features/route/components/RouteCreateAction";
-import { useCurrentUserQuery } from "~/frontend/features/user/api/useCurrentUserQuery";
 import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";
-import { metersToKilometers } from "~/frontend/lib/running";
-import type { Pace } from "~/frontend/types/pace";
 import type { AppRouter } from "~/server/api/root";
 import DirectionsWarningBanner from "./DirectionsWarningBanner";
-import { RouteCalculatedStats } from "./RouteCalculatedStats";
 import RoutePointList from "./RoutePointList";
+import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
+import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 
 interface RunDetailOverviewProps {
   routePoints: google.maps.LatLngLiteral[];
@@ -27,7 +23,7 @@ function RunDetailOverview({
   action,
 }: RunDetailOverviewProps) {
   const { isAuthenticated, permissions } = useAuthPermission();
-  const { user } = useCurrentUserQuery({ enabled: isAuthenticated });
+  const { pace, setPace, weightKg } = useRunEstimateInputs(isAuthenticated);
   const { directions, isLoading, error } = useGoogleMapDirectionQuery(
     routePoints,
     {
@@ -35,18 +31,6 @@ function RunDetailOverview({
     },
   );
   const moveStreetView = useMoveStreetView();
-
-  const [selectedPace, setSelectedPace] = useState<Pace>("5:00");
-
-  useEffect(() => {
-    if (user?.pace) {
-      setSelectedPace(user.pace as Pace);
-    }
-  }, [user?.pace]);
-
-  const kilometers = directions?.distanceMeters
-    ? metersToKilometers(directions.distanceMeters)
-    : 0;
 
   if (isLoading) {
     return (
@@ -66,18 +50,12 @@ function RunDetailOverview({
           />
         </div>
       )}
-      <div className="mb-6">
-        <p className="mb-2 font-bold text-base-gray">ペース</p>
-        <PaceSelect
-          value={selectedPace}
-          onChangeValue={setSelectedPace}
-          className="w-full"
-        />
-      </div>
-      <RouteCalculatedStats
-        pace={selectedPace}
-        distanceKm={kilometers}
-        weightKg={user?.weight}
+      <RunMetricsPanel
+        distanceMeters={directions?.distanceMeters}
+        isLoading={isLoading}
+        pace={pace}
+        onPaceChange={setPace}
+        weightKg={weightKg}
       />
       <RoutePointList
         routePoints={routePoints}

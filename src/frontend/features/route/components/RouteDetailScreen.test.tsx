@@ -11,6 +11,22 @@ const { directionsQuery, remove, deletionStatus } = vi.hoisted(() => ({
 vi.mock("~/frontend/features/googlemap/api/useGoogleMapDirectionQuery", () => ({
   useGoogleMapDirectionQuery: directionsQuery,
 }));
+vi.mock("~/frontend/features/user/api/useCurrentUserQuery", () => ({
+  useCurrentUserQuery: () => ({ user: { pace: "5:00", weight: 60 } }),
+}));
+vi.mock("~/frontend/features/pace/components/PaceSelect", () => ({
+  default: ({
+    value,
+    onChangeValue,
+  }: {
+    value: string;
+    onChangeValue: (pace: "6:00") => void;
+  }) => (
+    <button type="button" onClick={() => onChangeValue("6:00")}>
+      ペース {value}
+    </button>
+  ),
+}));
 vi.mock("../hooks/useRouteDeletion", () => ({
   useRouteDeletion: () => ({ remove, isDeleting: deletionStatus.isDeleting }),
 }));
@@ -83,6 +99,9 @@ describe("RouteDetailScreen", () => {
     expect(
       screen.getByRole("button", { name: "ルート情報を開く" }),
     ).toHaveTextContent("5.2 km");
+    expect(screen.getByText("5.2")).toBeInTheDocument();
+    expect(screen.getByText("予想時間")).toBeInTheDocument();
+    expect(screen.getByText("消費カロリー")).toBeInTheDocument();
   });
 
   it("経路取得中はSPメニューに計測中を表示する", () => {
@@ -159,6 +178,11 @@ describe("RouteDetailScreen", () => {
   });
 
   it("モバイルではルート情報を開いて確認できる", async () => {
+    directionsQuery.mockReturnValue({
+      directions: { path: route.points, distanceMeters: 5200 },
+      isLoading: false,
+      error: null,
+    });
     const user = userEvent.setup();
     render(<RouteDetailScreen route={route} />);
     await user.click(screen.getByRole("button", { name: "ルート情報を開く" }));
@@ -176,6 +200,11 @@ describe("RouteDetailScreen", () => {
         { name: "削除する" },
       ),
     ).toBeEnabled();
+    expect(
+      within(screen.getByRole("dialog", { name: "ルート情報" })).getByText(
+        "5.2",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("経路取得に失敗しても地図とStreet Viewを残し、警告を表示する", () => {

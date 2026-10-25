@@ -8,6 +8,8 @@ import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import RoutePointList from "~/frontend/features/run-detail/components/RoutePointList";
+import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
+import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";
 import { Button } from "~/frontend/components/ui/button";
 
@@ -35,6 +37,7 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
   const { directions, isLoading, error } = useGoogleMapDirectionQuery(points, {
     enabled: true,
   });
+  const { pace, setPace, weightKg } = useRunEstimateInputs();
   const moveStreetView = useMoveStreetView();
   return (
     <SidebarLayout
@@ -70,6 +73,13 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
           <p className="mt-2 text-sm text-gray-500">
             Street View下部のボタンで地点を追加・削除できます。
           </p>
+          <RunMetricsPanel
+            distanceMeters={directions?.distanceMeters}
+            isLoading={isLoading}
+            pace={pace}
+            onPaceChange={setPace}
+            weightKg={weightKg}
+          />
           <div className="my-6 flex gap-2">
             <Button
               type="button"

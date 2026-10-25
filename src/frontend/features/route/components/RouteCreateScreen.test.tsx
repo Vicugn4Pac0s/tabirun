@@ -16,6 +16,22 @@ vi.mock("../api/useCreateRoute", () => ({
 vi.mock("~/frontend/features/googlemap/api/useGoogleMapDirectionQuery", () => ({
   useGoogleMapDirectionQuery: directionsQuery,
 }));
+vi.mock("~/frontend/features/user/api/useCurrentUserQuery", () => ({
+  useCurrentUserQuery: () => ({ user: { pace: "5:00", weight: 60 } }),
+}));
+vi.mock("~/frontend/features/pace/components/PaceSelect", () => ({
+  default: ({
+    value,
+    onChangeValue,
+  }: {
+    value: string;
+    onChangeValue: (pace: "6:00") => void;
+  }) => (
+    <button type="button" onClick={() => onChangeValue("6:00")}>
+      ペース {value}
+    </button>
+  ),
+}));
 vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
   AuthUserMenu: () => null,
 }));
@@ -92,7 +108,9 @@ const defaultCenter = { lat: 35, lng: 135 };
 describe("RouteCreateScreen", () => {
   it("空の作成画面から地点を追加し、経路を再計算して保存する", async () => {
     const user = userEvent.setup();
-    render(<RouteCreateScreen defaultCenter={defaultCenter} />);
+    const { rerender } = render(
+      <RouteCreateScreen defaultCenter={defaultCenter} />,
+    );
     expect(
       screen.getByRole("heading", { name: "ルートを作成" }),
     ).toBeInTheDocument();
@@ -100,7 +118,9 @@ describe("RouteCreateScreen", () => {
     expect(
       screen.getByRole("button", { name: "ルートを保存する" }),
     ).toBeDisabled();
-    expect(screen.getByRole("status")).toHaveTextContent("2地点以上");
+    expect(
+      screen.getByText("保存するには2地点以上を登録してください。"),
+    ).toBeInTheDocument();
     await user.type(
       screen.getByRole("textbox", { name: "ルート名" }),
       "朝のルート",
@@ -118,6 +138,18 @@ describe("RouteCreateScreen", () => {
       [defaultCenter, { lat: 36, lng: 136 }],
       { enabled: true },
     );
+    directionsQuery.mockReturnValue({
+      directions: {
+        path: [defaultCenter, { lat: 36, lng: 136 }],
+        distanceMeters: 5200,
+      },
+      isLoading: false,
+      error: null,
+    });
+    rerender(<RouteCreateScreen defaultCenter={defaultCenter} />);
+    expect(screen.getByText("5.2")).toBeInTheDocument();
+    expect(screen.getByText("予想時間")).toBeInTheDocument();
+    expect(screen.getByText("消費カロリー")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "ルートを保存する" }));
     expect(createRoute).toHaveBeenCalledWith({
       title: "朝のルート",
