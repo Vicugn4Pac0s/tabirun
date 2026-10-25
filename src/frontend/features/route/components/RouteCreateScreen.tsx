@@ -7,7 +7,7 @@ import { Input } from "~/frontend/components/ui/input";
 import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
-import RoutePointList from "~/frontend/features/run-detail/components/RoutePointList";
+import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";

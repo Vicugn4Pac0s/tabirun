@@ -1,4 +1,4 @@
-import RoutePointListItem from "~/frontend/features/route-points/components/RoutePointListItem";
+import RoutePointListItem from "./RoutePointListItem";
 
 interface RoutePointListProps {
   routePoints: google.maps.LatLngLiteral[];

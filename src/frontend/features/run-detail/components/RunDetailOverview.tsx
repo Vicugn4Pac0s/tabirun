@@ -7,7 +7,7 @@ import RouteCreateAction from "~/frontend/features/route/components/RouteCreateA
 import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";
 import type { AppRouter } from "~/server/api/root";
 import DirectionsWarningBanner from "./DirectionsWarningBanner";
-import RoutePointList from "./RoutePointList";
+import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 

@@ -1,17 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import RoutePointList from "~/frontend/features/run-detail/components/RoutePointList";
+import RoutePointList from "./RoutePointList";
 
-vi.mock("~/frontend/features/route-points/components/RoutePointListItem", () => ({
+vi.mock("./RoutePointListItem", () => ({
   __esModule: true,
-  default: ({
-    index,
-    onClick,
-  }: {
-    index: number;
-    onClick?: () => void;
-  }) => (
+  default: ({ index, onClick }: { index: number; onClick?: () => void }) => (
     <button type="button" onClick={onClick}>
       項目{index + 1}
     </button>
