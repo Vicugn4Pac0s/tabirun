@@ -75,7 +75,7 @@ vi.mock("~/frontend/features/googlemap/components/StreetView", async () => {
     },
   };
 });
-vi.mock("~/frontend/features/googlemap/components/RoutePointMarker", () => ({
+vi.mock("./RoutePointMarker", () => ({
   default: ({ label, title }: { label: string; title: string }) => (
     <span role="img" aria-label={title}>
       {label}

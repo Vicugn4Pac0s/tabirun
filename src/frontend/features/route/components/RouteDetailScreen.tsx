@@ -9,7 +9,7 @@ import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
-import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
+import RouteMapView from "./RouteMapView";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";

@@ -1,19 +1,19 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useGoogleMap } from "../providers/GoogleMapProvider";
-import { useMoveStreetView } from "../hooks/useMoveStreetView";
-import { useFocusMapOnRoute } from "../hooks/useFocusMapOnRoute";
+import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
+import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
+import { useFocusMapOnRoute } from "~/frontend/features/googlemap/hooks/useFocusMapOnRoute";
 import {
   GOOGLE_MAP_DEFAULT_ZOOM,
   GOOGLE_MAP_MAX_ZOOM,
   GOOGLE_MAP_MIN_ZOOM,
 } from "~/frontend/config";
-import GoogleMapView from "./GoogleMapView";
-import StreetView from "./StreetView";
+import GoogleMapView from "~/frontend/features/googlemap/components/GoogleMapView";
+import StreetView from "~/frontend/features/googlemap/components/StreetView";
 import RoutePointMarker from "./RoutePointMarker";
 import type { RouteMapMarker } from "../types";
-import StreetViewPointMarker from "./StreetViewPointMarker";
-import Polyline from "./Polyline";
+import StreetViewPointMarker from "~/frontend/features/googlemap/components/StreetViewPointMarker";
+import Polyline from "~/frontend/features/googlemap/components/Polyline";
 
 type RouteMapViewProps = {
   initialCenter: google.maps.LatLngLiteral;

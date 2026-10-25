@@ -2,7 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import RoutePointMarker from "./RoutePointMarker";
 
-vi.mock("./AdvancedMarker", () => ({
+vi.mock("~/frontend/features/googlemap/components/AdvancedMarker", () => ({
   default: ({
     content,
     options,

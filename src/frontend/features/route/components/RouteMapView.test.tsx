@@ -1,7 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GoogleMapProvider } from "../providers/GoogleMapProvider";
+import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import RouteMapView from "./RouteMapView";
 import type { RouteMapMarker } from "../types";
 
@@ -12,13 +12,13 @@ const { moveStreetView, focusMapOnRoute, renderStreetView } = vi.hoisted(
     focusMapOnRoute: vi.fn(),
   }),
 );
-vi.mock("../hooks/useMoveStreetView", () => ({
+vi.mock("~/frontend/features/googlemap/hooks/useMoveStreetView", () => ({
   useMoveStreetView: () => moveStreetView,
 }));
-vi.mock("../hooks/useFocusMapOnRoute", () => ({
+vi.mock("~/frontend/features/googlemap/hooks/useFocusMapOnRoute", () => ({
   useFocusMapOnRoute: () => ({ focusMapOnRoute }),
 }));
-vi.mock("./GoogleMapView", () => ({
+vi.mock("~/frontend/features/googlemap/components/GoogleMapView", () => ({
   default: ({
     children,
     isLoading,
@@ -42,7 +42,7 @@ vi.mock("./GoogleMapView", () => ({
     </div>
   ),
 }));
-vi.mock("./StreetView", () => ({
+vi.mock("~/frontend/features/googlemap/components/StreetView", () => ({
   default: ({
     onPositionChanged,
   }: {
@@ -77,7 +77,7 @@ vi.mock("./RoutePointMarker", () => ({
     </button>
   ),
 }));
-vi.mock("./Polyline", () => ({
+vi.mock("~/frontend/features/googlemap/components/Polyline", () => ({
   default: ({ path }: { path: google.maps.LatLngLiteral[] }) => (
     <span aria-label="描画する経路">{JSON.stringify(path)}</span>
   ),

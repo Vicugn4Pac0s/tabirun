@@ -1,4 +1,4 @@
-import type { RouteMapMarker } from "~/frontend/features/googlemap/types";
+import type { RouteMapMarker } from "../types";
 
 export function getRoutePreviewMarkers(
   start: google.maps.LatLngLiteral | undefined,

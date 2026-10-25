@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import AdvancedMarker from "./AdvancedMarker";
+import AdvancedMarker from "~/frontend/features/googlemap/components/AdvancedMarker";
 import type { RouteMapMarker } from "../types";
 
 type RoutePointMarkerProps = Omit<RouteMapMarker, "id"> & {

@@ -50,7 +50,7 @@ vi.mock("~/frontend/features/googlemap/components/GoogleMapView", () => ({
 vi.mock("~/frontend/features/googlemap/components/StreetView", () => ({
   default: () => <div>パノラマ</div>,
 }));
-vi.mock("~/frontend/features/googlemap/components/RoutePointMarker", () => ({
+vi.mock("./RoutePointMarker", () => ({
   default: ({ label, title }: { label: string; title: string }) => (
     <span role="img" aria-label={title}>
       {label}
