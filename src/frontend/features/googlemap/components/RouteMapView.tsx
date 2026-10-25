@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGoogleMap } from "../providers/GoogleMapProvider";
 import { useMoveStreetView } from "../hooks/useMoveStreetView";
 import { useFocusMapOnRoute } from "../hooks/useFocusMapOnRoute";
@@ -23,7 +23,6 @@ type RouteMapViewProps = {
   showStreetView?: boolean;
   fitToRoute?: boolean;
   onSelectedPointChange?: (point: google.maps.LatLngLiteral) => void;
-  notice?: ReactNode;
 };
 
 function RouteMapView({
@@ -34,7 +33,6 @@ function RouteMapView({
   showStreetView = false,
   fitToRoute = false,
   onSelectedPointChange,
-  notice,
 }: RouteMapViewProps) {
   const {
     map,
@@ -119,9 +117,6 @@ function RouteMapView({
       <div
         className={`relative ${showStreetView ? "order-1 h-[50vh] min-[1201px]:order-none min-[1201px]:h-screen" : "h-screen"}`}
       >
-        {notice && (
-          <div className="absolute left-3 right-3 top-3 z-30">{notice}</div>
-        )}
         <GoogleMapView
           className="h-full"
           map={map}

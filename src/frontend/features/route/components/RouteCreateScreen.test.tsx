@@ -177,7 +177,7 @@ describe("RouteCreateScreen", () => {
     ).toBeDisabled();
   });
 
-  it("利用上限に達したら登録地点を直線で結ぶ", async () => {
+  it("利用上限に達したら登録地点を直線で結び、警告をサイドバーで表示する", async () => {
     const user = userEvent.setup();
     const { rerender } = render(
       <RouteCreateScreen defaultCenter={defaultCenter} />,
@@ -200,7 +200,21 @@ describe("RouteCreateScreen", () => {
       "data-path",
       JSON.stringify(points),
     );
-    expect(screen.getByRole("alert")).toHaveTextContent("直線で結んで表示");
-    expect(screen.getByText("距離を表示できません。")).toBeInTheDocument();
+    expect(
+      within(
+        screen.getByRole("complementary", { name: "ルート作成" }),
+      ).getByRole("alert"),
+    ).toHaveTextContent("直線で結んで表示");
+    await user.click(screen.getByRole("button", { name: "ルート作成を開く" }));
+    expect(
+      within(screen.getByRole("dialog", { name: "ルート作成" })).getByRole(
+        "alert",
+      ),
+    ).toHaveTextContent("直線で結んで表示");
+    expect(
+      within(screen.getByRole("dialog", { name: "ルート作成" })).getByText(
+        "距離を表示できません。",
+      ),
+    ).toBeInTheDocument();
   });
 });

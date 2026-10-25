@@ -6,6 +6,7 @@ import RouteMenuButton from "~/frontend/features/route/components/RouteMenuButto
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import type { RouterOutputs } from "~/trpc/react";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
+import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
@@ -28,7 +29,7 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
     route.points,
     { canUseDirections: true },
   );
-  const isQuotaExceeded = error?.data?.code === "TOO_MANY_REQUESTS";
+  const warningMessage = getRouteCalculationWarningMessage(error, "saved");
   const start = route.points[0];
   const goal = route.points[route.points.length - 1];
   const markers = getRoutePreviewMarkers(start, goal);
@@ -76,6 +77,11 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
           <p className="mb-6 text-sm text-gray-600">
             地図上の位置を選んで、Street Viewで下見できます。
           </p>
+          {warningMessage && (
+            <div className="mb-4">
+              <WarningBanner>{warningMessage}</WarningBanner>
+            </div>
+          )}
           <RunMetricsPanel
             distanceMeters={directions?.distanceMeters}
             isLoading={isLoading}
@@ -93,15 +99,6 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
         markers={markers}
         isLoading={isLoading}
         fitToRoute
-        notice={
-          error ? (
-            <WarningBanner>
-              {isQuotaExceeded
-                ? "自動ルート生成の利用上限に達しました。登録地点を直線で結んで表示しています。"
-                : "経路を取得できませんでした。スタート・ゴールのみ表示しています。時間をおいて再度お試しください。"}
-            </WarningBanner>
-          ) : undefined
-        }
       />
     </SidebarLayout>
   );

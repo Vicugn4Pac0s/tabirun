@@ -216,9 +216,11 @@ describe("RouteDetailScreen", () => {
       error: new Error("failed"),
     });
     render(<RouteDetailScreen route={route} />);
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "スタート・ゴールのみ表示",
-    );
+    expect(
+      within(
+        screen.getByRole("complementary", { name: "ルート情報" }),
+      ).getByRole("alert"),
+    ).toHaveTextContent("スタート・ゴールのみ表示");
     expect(screen.queryByText("経路線")).not.toBeInTheDocument();
     expect(
       screen.getByRole("region", { name: "Street Viewで下見" }),
@@ -238,7 +240,11 @@ describe("RouteDetailScreen", () => {
       "data-path",
       JSON.stringify(route.points),
     );
-    expect(screen.getByRole("alert")).toHaveTextContent("直線で結んで表示");
+    expect(
+      within(
+        screen.getByRole("complementary", { name: "ルート情報" }),
+      ).getByRole("alert"),
+    ).toHaveTextContent("直線で結んで表示");
     expect(screen.getByText("距離を表示できません。")).toBeInTheDocument();
   });
 });

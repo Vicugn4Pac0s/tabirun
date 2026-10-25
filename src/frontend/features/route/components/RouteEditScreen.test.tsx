@@ -195,7 +195,11 @@ describe("RouteEditScreen", () => {
       error: new Error("failed"),
     });
     render(<RouteEditScreen route={route} />);
-    expect(screen.getByRole("alert")).toHaveTextContent("経由地点のみ表示");
+    expect(
+      within(
+        screen.getByRole("complementary", { name: "ルート編集" }),
+      ).getByRole("alert"),
+    ).toHaveTextContent("経由地点のみ表示");
     expect(screen.getByRole("textbox", { name: "ルート名" })).toHaveValue(
       route.title,
     );
@@ -214,7 +218,11 @@ describe("RouteEditScreen", () => {
       "data-path",
       JSON.stringify(route.points),
     );
-    expect(screen.getByRole("alert")).toHaveTextContent("直線で結んで表示");
+    expect(
+      within(
+        screen.getByRole("complementary", { name: "ルート編集" }),
+      ).getByRole("alert"),
+    ).toHaveTextContent("直線で結んで表示");
     expect(screen.getByText("距離を表示できません。")).toBeInTheDocument();
   });
   it("地点を削除して経路を再計算し、入力した名前と地点を保存する", async () => {

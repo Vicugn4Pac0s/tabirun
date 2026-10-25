@@ -18,6 +18,7 @@ import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/Googl
 import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
 import { RouteNavigation } from "~/frontend/features/route-points/components/RouteNavigation";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
+import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import type { RouterOutputs } from "~/trpc/react";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteEdit } from "../hooks/useRouteEdit";
@@ -45,7 +46,7 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
     points,
     { canUseDirections: true },
   );
-  const isQuotaExceeded = error?.data?.code === "TOO_MANY_REQUESTS";
+  const warningMessage = getRouteCalculationWarningMessage(error, "editable");
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const moveStreetView = useMoveStreetView();
   return (
@@ -82,6 +83,11 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
           <p className="mt-2 text-sm text-gray-500">
             Street View下部のボタンで地点を追加・削除できます。
           </p>
+          {warningMessage && (
+            <div className="mb-4">
+              <WarningBanner>{warningMessage}</WarningBanner>
+            </div>
+          )}
           <RunMetricsPanel
             distanceMeters={directions?.distanceMeters}
             isLoading={isLoading}
@@ -137,15 +143,6 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
           isLoading={isLoading}
           fitToRoute
           onSelectedPointChange={setSelectedPoint}
-          notice={
-            error ? (
-              <WarningBanner>
-                {isQuotaExceeded
-                  ? "自動ルート生成の利用上限に達しました。経由地点を直線で結んで表示しています。"
-                  : "経路を取得できませんでした。経由地点のみ表示しています。時間をおいて再度お試しください。"}
-              </WarningBanner>
-            ) : undefined
-          }
         />
         {selectedPoint && (
           <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 min-[1201px]:peer-data-[street-view=visible]:left-1/4">
