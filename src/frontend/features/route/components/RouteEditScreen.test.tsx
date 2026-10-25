@@ -156,6 +156,11 @@ describe("RouteEditScreen", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "更新する" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "地点を削除" })).toBeEnabled();
+    expect(
+      within(
+        screen.getByRole("region", { name: "Street Viewで下見" }),
+      ).queryByRole("button", { name: "地点を削除" }),
+    ).not.toBeInTheDocument();
   });
 
   it("名前を入力しても保存済みデータと経由地点は変えない", async () => {

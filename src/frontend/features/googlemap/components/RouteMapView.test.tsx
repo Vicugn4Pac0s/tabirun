@@ -43,9 +43,23 @@ vi.mock("./GoogleMapView", () => ({
   ),
 }));
 vi.mock("./StreetView", () => ({
-  default: () => {
+  default: ({
+    onPositionChanged,
+  }: {
+    onPositionChanged: (position: {
+      toJSON: () => google.maps.LatLngLiteral;
+    }) => void;
+  }) => {
     renderStreetView();
-    return null;
+    return (
+      <button
+        onClick={() =>
+          onPositionChanged({ toJSON: () => ({ lat: 35.5, lng: 135.5 }) })
+        }
+      >
+        下見地点を変更
+      </button>
+    );
   },
 }));
 vi.mock("./RoutePointMarker", () => ({
@@ -129,14 +143,14 @@ describe("RouteMapView", () => {
 
   it("省略時はStreet Viewを初期化せず、地図やマーカーを押しても下見を開始しない", async () => {
     const user = userEvent.setup();
-    const renderNavigation = vi.fn();
+    const onSelectedPointChange = vi.fn();
     render(
       <GoogleMapProvider>
         <RouteMapView
           initialCenter={start}
           path={savedPath}
           markers={markers}
-          renderNavigation={renderNavigation}
+          onSelectedPointChange={onSelectedPointChange}
         />
       </GoogleMapProvider>,
     );
@@ -147,7 +161,28 @@ describe("RouteMapView", () => {
     await user.click(screen.getByTestId("map"));
     await user.click(screen.getByRole("button", { name: "スタート" }));
     expect(moveStreetView).not.toHaveBeenCalled();
-    expect(renderNavigation).not.toHaveBeenCalled();
+    expect(onSelectedPointChange).not.toHaveBeenCalled();
+  });
+
+  it("Street Viewで確定した表示位置を選択地点として通知する", async () => {
+    const user = userEvent.setup();
+    const onSelectedPointChange = vi.fn();
+    render(
+      <GoogleMapProvider>
+        <RouteMapView
+          showStreetView
+          initialCenter={start}
+          path={null}
+          markers={markers}
+          onSelectedPointChange={onSelectedPointChange}
+        />
+      </GoogleMapProvider>,
+    );
+    await user.click(screen.getByRole("button", { name: "下見地点を変更" }));
+    expect(onSelectedPointChange).toHaveBeenCalledWith({
+      lat: 35.5,
+      lng: 135.5,
+    });
   });
 
   it("Street Viewが無効でも、画面側で指定したマーカー操作は維持する", async () => {
@@ -184,6 +219,9 @@ describe("RouteMapView", () => {
     expect(
       screen.getByRole("region", { name: "Street Viewで下見" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("map").closest("[data-street-view]"),
+    ).toHaveAttribute("data-street-view", "visible");
     await user.click(screen.getByTestId("map"));
     expect(moveStreetView).toHaveBeenCalledWith(start);
     moveStreetView.mockClear();
@@ -200,6 +238,9 @@ describe("RouteMapView", () => {
     expect(
       screen.queryByRole("region", { name: "Street Viewで下見" }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("map").closest("[data-street-view]"),
+    ).toHaveAttribute("data-street-view", "hidden");
     await user.click(screen.getByTestId("map"));
     await user.click(screen.getByRole("button", { name: "スタート" }));
     expect(moveStreetView).not.toHaveBeenCalled();

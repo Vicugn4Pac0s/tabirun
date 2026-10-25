@@ -123,6 +123,11 @@ describe("RouteCreateScreen", () => {
     expect(
       screen.getByText("保存するには2地点以上を登録してください。"),
     ).toBeInTheDocument();
+    expect(
+      within(
+        screen.getByRole("region", { name: "Street Viewで下見" }),
+      ).queryByRole("button", { name: "地点を追加" }),
+    ).not.toBeInTheDocument();
     await user.type(
       screen.getByRole("textbox", { name: "ルート名" }),
       "朝のルート",

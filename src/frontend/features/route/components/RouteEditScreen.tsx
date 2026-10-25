@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import RouteMenuButton from "~/frontend/features/route/components/RouteMenuButton";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
@@ -26,6 +27,8 @@ type RouteEditScreenProps = {
 };
 
 function RouteEditScreenContent({ route }: RouteEditScreenProps) {
+  const [selectedPoint, setSelectedPoint] =
+    useState<google.maps.LatLngLiteral | null>(null);
   const {
     title,
     points,
@@ -120,39 +123,44 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
         </>
       }
     >
-      <RouteMapView
-        showStreetView
-        initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
-        path={polylinePath}
-        markers={points.map((point, index) => ({
-          id: String(index),
-          position: point,
-          label: String(index + 1),
-          title: `地点 ${index + 1}`,
-        }))}
-        isLoading={isLoading}
-        fitToRoute
-        renderNavigation={(point) => (
-          <RouteNavigation
-            points={points}
-            currentPoint={point}
-            onMove={(target) => {
-              void moveStreetView(target).catch(() => undefined);
-            }}
-            onToggle={() => togglePoint(point)}
-            disabled={isUpdating}
-          />
+      <div className="relative flex min-w-0 flex-1">
+        <RouteMapView
+          showStreetView
+          initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
+          path={polylinePath}
+          markers={points.map((point, index) => ({
+            id: String(index),
+            position: point,
+            label: String(index + 1),
+            title: `地点 ${index + 1}`,
+          }))}
+          isLoading={isLoading}
+          fitToRoute
+          onSelectedPointChange={setSelectedPoint}
+          notice={
+            error ? (
+              <WarningBanner>
+                {isQuotaExceeded
+                  ? "自動ルート生成の利用上限に達しました。経由地点を直線で結んで表示しています。"
+                  : "経路を取得できませんでした。経由地点のみ表示しています。時間をおいて再度お試しください。"}
+              </WarningBanner>
+            ) : undefined
+          }
+        />
+        {selectedPoint && (
+          <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 min-[1201px]:peer-data-[street-view=visible]:left-1/4">
+            <RouteNavigation
+              points={points}
+              currentPoint={selectedPoint}
+              onMove={(target) => {
+                void moveStreetView(target).catch(() => undefined);
+              }}
+              onToggle={() => togglePoint(selectedPoint)}
+              disabled={isUpdating}
+            />
+          </div>
         )}
-        notice={
-          error ? (
-            <WarningBanner>
-              {isQuotaExceeded
-                ? "自動ルート生成の利用上限に達しました。経由地点を直線で結んで表示しています。"
-                : "経路を取得できませんでした。経由地点のみ表示しています。時間をおいて再度お試しください。"}
-            </WarningBanner>
-          ) : undefined
-        }
-      />
+      </div>
     </SidebarLayout>
   );
 }

@@ -22,7 +22,7 @@ type RouteMapViewProps = {
   isLoading?: boolean;
   showStreetView?: boolean;
   fitToRoute?: boolean;
-  renderNavigation?: (point: google.maps.LatLngLiteral) => ReactNode;
+  onSelectedPointChange?: (point: google.maps.LatLngLiteral) => void;
   notice?: ReactNode;
 };
 
@@ -33,7 +33,7 @@ function RouteMapView({
   isLoading = false,
   showStreetView = false,
   fitToRoute = false,
-  renderNavigation,
+  onSelectedPointChange,
   notice,
 }: RouteMapViewProps) {
   const {
@@ -71,7 +71,8 @@ function RouteMapView({
 
   return (
     <div
-      className={`relative grid min-w-0 flex-1 grid-cols-1 ${showStreetView ? "min-[1201px]:grid-cols-2" : ""}`}
+      data-street-view={showStreetView ? "visible" : "hidden"}
+      className={`peer relative grid min-w-0 flex-1 grid-cols-1 ${showStreetView ? "min-[1201px]:grid-cols-2" : ""}`}
     >
       {showStreetView && (
         <div
@@ -93,7 +94,9 @@ function RouteMapView({
               void previewPoint(initialCenter);
             }}
             onPositionChanged={(position) => {
-              setStreetViewCenter(position.toJSON());
+              const point = position.toJSON();
+              setStreetViewCenter(point);
+              onSelectedPointChange?.(point);
             }}
             onPovChanged={(pov) => {
               setStreetViewPov(pov);
@@ -111,9 +114,6 @@ function RouteMapView({
               </div>
             </div>
           )}
-          <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2">
-            {streetViewCenter && renderNavigation?.(streetViewCenter)}
-          </div>
         </div>
       )}
       <div
