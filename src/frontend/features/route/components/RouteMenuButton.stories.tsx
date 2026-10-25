@@ -8,7 +8,7 @@ const meta = {
   component: RouteMenuButton,
   parameters: { layout: "centered" },
   tags: ["autodocs"],
-  args: { className: "md:flex", onClick: fn() },
+  args: { onClick: fn() },
   decorators: [
     (Story) => (
       <div className="relative h-80 w-80 rounded-lg border bg-gray-50">

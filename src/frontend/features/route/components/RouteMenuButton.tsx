@@ -18,7 +18,6 @@ const RouteMenuButton = forwardRef<HTMLButtonElement, RouteMenuButtonProps>(
         ref={ref}
         variant="outline"
         className={cn(
-          "absolute bottom-28 right-0 z-50 md:hidden",
           "flex h-auto w-10 flex-col items-center gap-2",
           "rounded-r-none rounded-tl-md border-r-0 px-0 py-3 shadow-md",
           className,

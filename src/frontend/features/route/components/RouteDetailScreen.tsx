@@ -2,13 +2,10 @@
 
 import Link from "next/link";
 import { Button } from "~/frontend/components/ui/button";
-import RouteMenuButton from "~/frontend/features/route/components/RouteMenuButton";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import type { RouterOutputs } from "~/trpc/react";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
-import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
-import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import RouteMapView from "./RouteMapView";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
@@ -17,6 +14,7 @@ import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useR
 import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteDeletion } from "../hooks/useRouteDeletion";
+import { RouteScreenLayout } from "./RouteScreenLayout";
 
 type RouteDetailScreenProps = {
   route: Pick<RouterOutputs["route"]["getById"], "id" | "title" | "points">;
@@ -34,16 +32,13 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
   const goal = route.points[route.points.length - 1];
   const markers = getRoutePreviewMarkers(start, goal);
   return (
-    <SidebarLayout
-      sidebarTitle="ルート情報"
-      mobileTrigger={
-        <RouteMenuButton
-          label={getRouteMenuLabel(directions?.distanceMeters, isLoading)}
-          aria-label="ルート情報を開く"
-        />
-      }
-      topRight={<AuthUserMenu />}
-      sidebar={
+    <RouteScreenLayout
+      panelTitle="ルート情報"
+      menuTriggerLabel={getRouteMenuLabel(
+        directions?.distanceMeters,
+        isLoading,
+      )}
+      panel={
         <>
           <Link href="/" className="mb-5 inline-block font-medium underline">
             ホームへ戻る
@@ -100,7 +95,7 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
         isLoading={isLoading}
         fitToRoute
       />
-    </SidebarLayout>
+    </RouteScreenLayout>
   );
 }
 

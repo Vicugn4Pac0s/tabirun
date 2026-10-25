@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import RouteMenuButton from "~/frontend/features/route/components/RouteMenuButton";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import { Input } from "~/frontend/components/ui/input";
-import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
-import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
@@ -22,6 +19,7 @@ import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWar
 import type { RouterOutputs } from "~/trpc/react";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteEdit } from "../hooks/useRouteEdit";
+import { RouteScreenLayout } from "./RouteScreenLayout";
 
 type RouteEditScreenProps = {
   route: Pick<RouterOutputs["route"]["getById"], "id" | "title" | "points">;
@@ -50,16 +48,13 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const moveStreetView = useMoveStreetView();
   return (
-    <SidebarLayout
-      sidebarTitle="ルート編集"
-      mobileTrigger={
-        <RouteMenuButton
-          label={getRouteMenuLabel(directions?.distanceMeters, isLoading)}
-          aria-label="ルート編集を開く"
-        />
-      }
-      topRight={<AuthUserMenu />}
-      sidebar={
+    <RouteScreenLayout
+      panelTitle="ルート編集"
+      menuTriggerLabel={getRouteMenuLabel(
+        directions?.distanceMeters,
+        isLoading,
+      )}
+      panel={
         <>
           <Link
             href={`/routes/${route.id}`}
@@ -158,7 +153,7 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
           </div>
         )}
       </div>
-    </SidebarLayout>
+    </RouteScreenLayout>
   );
 }
 

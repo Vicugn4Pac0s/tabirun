@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import RouteMenuButton from "~/frontend/features/route/components/RouteMenuButton";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import { Input } from "~/frontend/components/ui/input";
-import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
-import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
@@ -20,6 +17,7 @@ import { RouteNavigation } from "~/frontend/features/route-points/components/Rou
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { useRouteCreation } from "../hooks/useRouteCreation";
+import { RouteScreenLayout } from "./RouteScreenLayout";
 
 type RouteCreateScreenProps = { defaultCenter: google.maps.LatLngLiteral };
 
@@ -46,16 +44,13 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const moveStreetView = useMoveStreetView();
   return (
-    <SidebarLayout
-      sidebarTitle="ルート作成"
-      mobileTrigger={
-        <RouteMenuButton
-          label={getRouteMenuLabel(directions?.distanceMeters, isLoading)}
-          aria-label="ルート作成を開く"
-        />
-      }
-      topRight={<AuthUserMenu />}
-      sidebar={
+    <RouteScreenLayout
+      panelTitle="ルート作成"
+      menuTriggerLabel={getRouteMenuLabel(
+        directions?.distanceMeters,
+        isLoading,
+      )}
+      panel={
         <>
           <Link
             href="/"
@@ -153,7 +148,7 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
           </div>
         )}
       </div>
-    </SidebarLayout>
+    </RouteScreenLayout>
   );
 }
 
