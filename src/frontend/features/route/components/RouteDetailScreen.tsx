@@ -9,7 +9,7 @@ import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
-import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
+import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";
 import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 
@@ -18,7 +18,7 @@ type RouteDetailScreenProps = {
 };
 
 function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
-  const { directions, isLoading, error } = useGooglemapDirectionQuery(
+  const { directions, isLoading, error } = useGoogleMapDirectionQuery(
     route.points,
     { enabled: true },
   );

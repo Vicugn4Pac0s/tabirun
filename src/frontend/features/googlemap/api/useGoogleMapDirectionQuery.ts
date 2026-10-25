@@ -1,12 +1,12 @@
 import { api } from "~/trpc/react";
 
-type UseGooglemapDirectionQueryOptions = {
+type UseGoogleMapDirectionQueryOptions = {
   enabled: boolean;
 };
 
-export const useGooglemapDirectionQuery = (
+export const useGoogleMapDirectionQuery = (
   routePoints: google.maps.LatLngLiteral[],
-  options: UseGooglemapDirectionQueryOptions,
+  options: UseGoogleMapDirectionQueryOptions,
 ) => {
   const enabled = options.enabled && routePoints.length >= 2;
 
@@ -27,5 +27,3 @@ export const useGooglemapDirectionQuery = (
     enabled,
   };
 };
-
-export default useGooglemapDirectionQuery;

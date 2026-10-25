@@ -5,7 +5,7 @@ import { useFocusMapOnRoute } from "~/frontend/features/googlemap/hooks/useFocus
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import { useRouteDiscardGuard } from "../hooks/useRouteDiscardGuard";
-import { useRoutesQuery } from "../hooks/useRoutesQuery";
+import { useRoutesQuery } from "../api/useRoutesQuery";
 import { useSelectedRouteStore } from "../stores/selectedRouteStore";
 
 function RouteList() {

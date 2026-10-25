@@ -11,12 +11,12 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "~/frontend/components/ui/avatar";
-import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
+import { useCurrentUserQuery } from "~/frontend/features/user/api/useCurrentUserQuery";
 import { UserProfileDialog } from "~/frontend/features/user/components/UserProfileDialog";
-import { useRoutesQuery } from "~/frontend/features/route/hooks/useRoutesQuery";
+import { useRoutesQuery } from "~/frontend/features/route/api/useRoutesQuery";
 
 function PersonalDashboard() {
-  const { user, isLoading, error } = useUserQuery();
+  const { user, isLoading, error } = useCurrentUserQuery();
   const {
     routes,
     isLoading: routesLoading,

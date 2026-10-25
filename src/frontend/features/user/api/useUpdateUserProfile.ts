@@ -5,9 +5,9 @@ import {
 import type { UserProfileUpdateInput } from "~/shared/schemas";
 import { api } from "~/trpc/react";
 
-type UpdateUserCallbacks = MutationCallbacks;
+type UpdateUserProfileCallbacks = MutationCallbacks;
 
-export const useUpdateUser = () => {
+export const useUpdateUserProfile = () => {
   const utils = api.useUtils();
 
   const mutation = api.user.updateProfile.useMutation({
@@ -16,15 +16,15 @@ export const useUpdateUser = () => {
     },
   });
 
-  const updateUser = async (
+  const updateUserProfile = async (
     input: UserProfileUpdateInput,
-    cb?: UpdateUserCallbacks,
+    cb?: UpdateUserProfileCallbacks,
   ) => {
     return executeMutationWithCallbacks(mutation, input, cb);
   };
 
   return {
-    updateUser,
+    updateUserProfile,
     isUpdating: mutation.isPending,
     error: mutation.error,
     reset: mutation.reset,

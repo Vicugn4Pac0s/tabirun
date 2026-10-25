@@ -6,8 +6,8 @@ import { useAuthPermission } from "~/frontend/features/auth/components/hooks/use
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import RouteCreateAction from "~/frontend/features/route/components/RouteCreateAction";
-import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
-import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
+import { useCurrentUserQuery } from "~/frontend/features/user/api/useCurrentUserQuery";
+import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";
 import { metersToKilometers } from "~/frontend/lib/running";
 import type { Pace } from "~/frontend/types/pace";
 import type { AppRouter } from "~/server/api/root";
@@ -27,8 +27,8 @@ function RunDetailOverview({
   action,
 }: RunDetailOverviewProps) {
   const { isAuthenticated, permissions } = useAuthPermission();
-  const { user } = useUserQuery({ enabled: isAuthenticated });
-  const { directions, isLoading, error } = useGooglemapDirectionQuery(
+  const { user } = useCurrentUserQuery({ enabled: isAuthenticated });
+  const { directions, isLoading, error } = useGoogleMapDirectionQuery(
     routePoints,
     {
       enabled: permissions.canUseDirections,

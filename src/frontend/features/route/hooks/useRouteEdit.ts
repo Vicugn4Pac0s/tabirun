@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { RouteUpdateInput } from "~/shared/schemas";
-import { useUpdateRoute } from "./useUpdateRoute";
+import { useUpdateRoute } from "../api/useUpdateRoute";
 import { useRouteDraft } from "./useRouteDraft";
 
 type EditableRoute = Omit<RouteUpdateInput, "title"> & { title: string | null };

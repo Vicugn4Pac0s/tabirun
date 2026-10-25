@@ -10,11 +10,11 @@ const { directionsQuery, updateRoute, push, refresh } = vi.hoisted(() => ({
   refresh: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, refresh }) }));
-vi.mock("../hooks/useUpdateRoute", () => ({
+vi.mock("../api/useUpdateRoute", () => ({
   useUpdateRoute: () => ({ updateRoute, isUpdating: false }),
 }));
-vi.mock("~/frontend/hooks/googlemap/useGooglemapDirectionQuery", () => ({
-  default: directionsQuery,
+vi.mock("~/frontend/features/googlemap/api/useGoogleMapDirectionQuery", () => ({
+  useGoogleMapDirectionQuery: directionsQuery,
 }));
 vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
   AuthUserMenu: () => null,

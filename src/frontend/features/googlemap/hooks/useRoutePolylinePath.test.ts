@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useRoutePolylinePath } from "~/frontend/hooks/googlemap/useRoutePolylinePath";
+import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
 
 type MockDirectionQueryResult = {
   directions: { path: google.maps.LatLngLiteral[] } | null;
@@ -9,18 +9,15 @@ type MockDirectionQueryResult = {
   enabled: boolean;
 };
 
-const mockUseGooglemapDirectionQuery = vi.fn<
+const mockUseGoogleMapDirectionQuery = vi.fn<
   (...args: unknown[]) => MockDirectionQueryResult
 >();
 
-vi.mock("./useGooglemapDirectionQuery", () => ({
-  __esModule: true,
-  default: (...args: Parameters<typeof mockUseGooglemapDirectionQuery>) =>
-    mockUseGooglemapDirectionQuery(...args),
-  useGooglemapDirectionQuery: (
-    ...args: Parameters<typeof mockUseGooglemapDirectionQuery>
+vi.mock("~/frontend/features/googlemap/api/useGoogleMapDirectionQuery", () => ({
+  useGoogleMapDirectionQuery: (
+    ...args: Parameters<typeof mockUseGoogleMapDirectionQuery>
   ) =>
-    mockUseGooglemapDirectionQuery(...args),
+    mockUseGoogleMapDirectionQuery(...args),
 }));
 
 const routePoints = [
@@ -30,7 +27,7 @@ const routePoints = [
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockUseGooglemapDirectionQuery.mockReturnValue({
+  mockUseGoogleMapDirectionQuery.mockReturnValue({
     directions: null,
     error: null,
     isLoading: false,
@@ -44,7 +41,7 @@ describe("useRoutePolylinePath", () => {
       { lat: 35.0, lng: 139.0 },
       { lat: 35.05, lng: 139.05 },
     ];
-    mockUseGooglemapDirectionQuery.mockReturnValue({
+    mockUseGoogleMapDirectionQuery.mockReturnValue({
       directions: { path },
       error: null,
       isLoading: false,
@@ -67,7 +64,7 @@ describe("useRoutePolylinePath", () => {
   });
 
   it("quota 超過時は直線 polyline にフォールバックする", () => {
-    mockUseGooglemapDirectionQuery.mockReturnValue({
+    mockUseGoogleMapDirectionQuery.mockReturnValue({
       directions: null,
       error: {
         data: {

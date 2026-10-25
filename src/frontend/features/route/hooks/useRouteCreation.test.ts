@@ -9,7 +9,7 @@ const { createRoute, push, refresh, errorToast, status } = vi.hoisted(() => ({
   status: { isCreating: false },
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, refresh }) }));
-vi.mock("./useCreateRoute", () => ({
+vi.mock("../api/useCreateRoute", () => ({
   useCreateRoute: () => ({ createRoute, isCreating: status.isCreating }),
 }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: errorToast } }));

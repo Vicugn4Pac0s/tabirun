@@ -7,7 +7,7 @@ import RunDetailOverview from "~/frontend/features/run-detail/components/RunDeta
 import { toast } from "sonner";
 import { useRouteDiscardGuard } from "../hooks/useRouteDiscardGuard";
 import { useRouteEditorState } from "../hooks/useRouteEditorState";
-import { useUpdateRoute } from "../hooks/useUpdateRoute";
+import { useUpdateRoute } from "../api/useUpdateRoute";
 import type { SelectedRoute } from "../stores/selectedRouteStore";
 import { useSelectedRouteStore } from "../stores/selectedRouteStore";
 import RouteDetailHeader from "./RouteDetailHeader";

@@ -1,6 +1,6 @@
 import { type TRPCClientErrorLike } from "@trpc/client";
 import { type AppRouter } from "~/server/api/root";
-import useGooglemapDirectionQuery from "./useGooglemapDirectionQuery";
+import { useGoogleMapDirectionQuery } from "../api/useGoogleMapDirectionQuery";
 
 type UseRoutePolylinePathOptions = {
   canUseDirections: boolean;
@@ -10,7 +10,7 @@ export const useRoutePolylinePath = (
   routePoints: google.maps.LatLngLiteral[],
   options: UseRoutePolylinePathOptions,
 ) => {
-  const { directions, error, ...query } = useGooglemapDirectionQuery(routePoints, {
+  const { directions, error, ...query } = useGoogleMapDirectionQuery(routePoints, {
     enabled: options.canUseDirections,
   });
 
@@ -35,5 +35,3 @@ export const useRoutePolylinePath = (
     ...query,
   };
 };
-
-export default useRoutePolylinePath;

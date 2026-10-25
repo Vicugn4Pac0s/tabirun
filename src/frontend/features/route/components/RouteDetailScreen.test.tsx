@@ -6,8 +6,8 @@ import { RouteDetailScreen } from "./RouteDetailScreen";
 const { directionsQuery } = vi.hoisted(() => ({
   directionsQuery: vi.fn(),
 }));
-vi.mock("~/frontend/hooks/googlemap/useGooglemapDirectionQuery", () => ({
-  default: directionsQuery,
+vi.mock("~/frontend/features/googlemap/api/useGoogleMapDirectionQuery", () => ({
+  useGoogleMapDirectionQuery: directionsQuery,
 }));
 vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
   AuthUserMenu: () => null,

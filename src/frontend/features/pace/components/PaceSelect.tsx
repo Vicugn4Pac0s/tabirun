@@ -1,5 +1,5 @@
 import { type Pace } from "~/frontend/types/pace";
-import { usePacesQuery } from "../hooks/usePacesQuery";
+import { usePacesQuery } from "../api/usePacesQuery";
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 
 interface PaceSelectProps {

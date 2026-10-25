@@ -1,4 +1,4 @@
-import { useCreateRoute } from "../hooks/useCreateRoute";
+import { useCreateRoute } from "../api/useCreateRoute";
 import { useState } from "react";
 import type { RouteCreateInput } from "~/shared/schemas";
 import { routeCreateSchema } from "~/shared/schemas";

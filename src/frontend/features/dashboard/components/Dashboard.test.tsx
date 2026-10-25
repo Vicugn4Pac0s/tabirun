@@ -13,14 +13,14 @@ vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
 vi.mock("~/frontend/features/user/components/UserProfileDialog", () => ({
   UserProfileDialog: () => null,
 }));
-vi.mock("~/frontend/features/user/hooks/useUserQuery", () => ({
-  useUserQuery: () => ({
+vi.mock("~/frontend/features/user/api/useCurrentUserQuery", () => ({
+  useCurrentUserQuery: () => ({
     user: { name: "ランナー" },
     isLoading: false,
     error: null,
   }),
 }));
-vi.mock("~/frontend/features/route/hooks/useRoutesQuery", () => ({
+vi.mock("~/frontend/features/route/api/useRoutesQuery", () => ({
   useRoutesQuery: routesQuery,
 }));
 beforeEach(() => {

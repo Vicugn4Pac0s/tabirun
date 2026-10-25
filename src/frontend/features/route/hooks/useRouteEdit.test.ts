@@ -8,7 +8,7 @@ const { updateRoute, push, refresh, status } = vi.hoisted(() => ({
   status: { isUpdating: false },
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, refresh }) }));
-vi.mock("./useUpdateRoute", () => ({
+vi.mock("../api/useUpdateRoute", () => ({
   useUpdateRoute: () => ({ updateRoute, isUpdating: status.isUpdating }),
 }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));

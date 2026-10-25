@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouteEditorState } from "~/frontend/features/route/hooks/useRouteEditorState";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
-import useRoutePolylinePath from "~/frontend/hooks/googlemap/useRoutePolylinePath";
+import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
 import { useAuthPermission } from "~/frontend/features/auth/components/hooks/useAuthPermission";
 import MapRouteNavigation from "./MapRouteNavigation";
 import RouteMapView from "~/frontend/features/googlemap/components/RouteMapView";

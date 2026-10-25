@@ -18,7 +18,7 @@ type MockSelectboxProps = {
   value?: string;
 };
 
-vi.mock("../hooks/usePacesQuery", () => ({
+vi.mock("../api/usePacesQuery", () => ({
   usePacesQuery: () => mockUsePacesQuery(),
 }));
 

@@ -4,7 +4,7 @@ import { Button } from "~/frontend/components/ui/button";
 import { useRoutePointsStore } from "~/frontend/features/route-points/stores/routePointsStore";
 import RunDetailOverview from "~/frontend/features/run-detail/components/RunDetailOverview";
 import { toast } from "sonner";
-import { useDeleteRoute } from "../hooks/useDeleteRoute";
+import { useDeleteRoute } from "../api/useDeleteRoute";
 import { useRouteDiscardGuard } from "../hooks/useRouteDiscardGuard";
 import type { SelectedRoute } from "../stores/selectedRouteStore";
 import { useSelectedRouteStore } from "../stores/selectedRouteStore";

@@ -8,7 +8,7 @@ import { SidebarLayout } from "~/frontend/components/layout/SidebarLayout";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import RoutePointList from "~/frontend/features/run-detail/components/RoutePointList";
-import useGooglemapDirectionQuery from "~/frontend/hooks/googlemap/useGooglemapDirectionQuery";
+import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";
 import { Button } from "~/frontend/components/ui/button";
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
@@ -36,7 +36,7 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
     reset,
     confirmDiscard,
   } = useRouteEdit(route);
-  const { directions, isLoading, error } = useGooglemapDirectionQuery(points, {
+  const { directions, isLoading, error } = useGoogleMapDirectionQuery(points, {
     enabled: true,
   });
   const moveStreetView = useMoveStreetView();
