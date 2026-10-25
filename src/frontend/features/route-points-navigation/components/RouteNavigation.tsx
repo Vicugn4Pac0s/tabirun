@@ -10,7 +10,6 @@ type RouteNavigationProps = {
   onMove: (point: google.maps.LatLngLiteral) => void;
   onToggle: () => void;
   disabled?: boolean;
-  canEdit?: boolean;
 };
 
 export function RouteNavigation({
@@ -19,7 +18,6 @@ export function RouteNavigation({
   onMove,
   onToggle,
   disabled = false,
-  canEdit = true,
 }: RouteNavigationProps) {
   const index = points.findIndex(
     (point) => point.lat === currentPoint.lat && point.lng === currentPoint.lng,
@@ -30,7 +28,7 @@ export function RouteNavigation({
     const point = points[targetIndex];
     if (point) onMove(point);
   };
-  useEnterKey(onToggle, { enabled: canEdit && !disabled });
+  useEnterKey(onToggle, { enabled: !disabled });
 
   return (
     <div className="relative flex gap-16 bg-white">
@@ -50,7 +48,7 @@ export function RouteNavigation({
         <MainActionButton
           type={index >= 0 ? "delete" : "add"}
           onClick={onToggle}
-          disabled={disabled || !canEdit}
+          disabled={disabled}
         />
       </div>
       <div className="flex">

@@ -54,22 +54,6 @@ describe("RouteNavigation", () => {
     fireEvent.keyDown(screen.getByRole("textbox"), { key: "Enter" });
     expect(onToggle).toHaveBeenCalledOnce();
   });
-  it("閲覧時は地点を変えられず、既存の移動操作は使える", () => {
-    const onToggle = vi.fn();
-    render(
-      <RouteNavigation
-        points={points}
-        currentPoint={points[0]!}
-        onMove={vi.fn()}
-        onToggle={onToggle}
-        canEdit={false}
-      />,
-    );
-    expect(screen.getByRole("button", { name: "地点を削除" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "次へ" })).toBeEnabled();
-    fireEvent.keyDown(window, { key: "Enter" });
-    expect(onToggle).not.toHaveBeenCalled();
-  });
   it("保存中はすべての操作とEnterを無効にする", () => {
     const onToggle = vi.fn();
     render(

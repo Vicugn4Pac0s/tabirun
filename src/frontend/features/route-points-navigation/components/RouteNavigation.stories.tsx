@@ -30,7 +30,6 @@ export const NewPoint: Story = {
   args: { currentPoint: { lat: 38, lng: 138 } },
 };
 export const Saving: Story = { args: { disabled: true } };
-export const ReadOnly: Story = { args: { canEdit: false } };
 
 export const EmptyRoute: Story = {
   args: { points: [] },
