@@ -133,9 +133,7 @@ describe("RouteCreateScreen", () => {
       "朝のルート",
     );
     await user.click(screen.getByRole("button", { name: "地点を追加" }));
-    expect(
-      screen.getByRole("heading", { name: "経由地点（1 地点）" }),
-    ).toBeInTheDocument();
+    expect(screen.getByText("経由地点（1 地点）")).toBeInTheDocument();
     await user.click(
       screen.getByRole("button", { name: "Street Viewを次の地点へ" }),
     );

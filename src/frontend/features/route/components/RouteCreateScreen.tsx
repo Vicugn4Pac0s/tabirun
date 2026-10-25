@@ -110,7 +110,6 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
               保存するには2地点以上を登録してください。
             </p>
           )}
-          <h2 className="mb-3 font-bold">経由地点（{points.length} 地点）</h2>
           <RoutePointList
             routePoints={points}
             onRoutePointClick={(point) => {

@@ -3,20 +3,12 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RoutePointList from "./RoutePointList";
 
-vi.mock("./RoutePointListItem", () => ({
-  __esModule: true,
-  default: ({ index, onClick }: { index: number; onClick?: () => void }) => (
-    <button type="button" onClick={onClick}>
-      項目{index + 1}
-    </button>
-  ),
-}));
-
 describe("RoutePointList", () => {
-  it("routePoints が空なら何も描画しない", () => {
-    const { container } = render(<RoutePointList routePoints={[]} />);
+  it("routePoints が空でも件数を表示し、リストは描画しない", () => {
+    render(<RoutePointList routePoints={[]} />);
 
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByText("経由地点（0 地点）")).toBeInTheDocument();
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 
   it("routePoints の件数分だけ項目を描画する", () => {
@@ -29,8 +21,14 @@ describe("RoutePointList", () => {
       />,
     );
 
-    expect(screen.getByText("項目1")).toBeInTheDocument();
-    expect(screen.getByText("項目2")).toBeInTheDocument();
+    expect(screen.getByText("経由地点（2 地点）")).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "経由地点" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "地点1に移動" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "地点2に移動" }),
+    ).toBeInTheDocument();
   });
 
   it("項目クリック時に point と index を渡して onRoutePointClick を呼ぶ", async () => {
@@ -48,7 +46,7 @@ describe("RoutePointList", () => {
       />,
     );
 
-    await user.click(screen.getByText("項目2"));
+    await user.click(screen.getByRole("button", { name: "地点2に移動" }));
 
     expect(onRoutePointClick).toHaveBeenCalledWith(routePoints[1], 1);
   });
