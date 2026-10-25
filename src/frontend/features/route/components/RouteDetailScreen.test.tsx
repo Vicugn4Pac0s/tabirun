@@ -3,11 +3,16 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteDetailScreen } from "./RouteDetailScreen";
 
-const { directionsQuery } = vi.hoisted(() => ({
+const { directionsQuery, remove, deletionStatus } = vi.hoisted(() => ({
   directionsQuery: vi.fn(),
+  remove: vi.fn(),
+  deletionStatus: { isDeleting: false },
 }));
 vi.mock("~/frontend/features/googlemap/api/useGoogleMapDirectionQuery", () => ({
   useGoogleMapDirectionQuery: directionsQuery,
+}));
+vi.mock("../hooks/useRouteDeletion", () => ({
+  useRouteDeletion: () => ({ remove, isDeleting: deletionStatus.isDeleting }),
 }));
 vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
   AuthUserMenu: () => null,
@@ -51,6 +56,7 @@ const route = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  deletionStatus.isDeleting = false;
   vi.stubGlobal(
     "matchMedia",
     vi.fn(() => ({ matches: false })),
@@ -111,6 +117,9 @@ describe("RouteDetailScreen", () => {
     expect(
       within(sidebar).getByRole("link", { name: "編集する" }),
     ).toHaveAttribute("href", "/routes/1/edit");
+    expect(
+      within(sidebar).getByRole("button", { name: "削除する" }),
+    ).toBeEnabled();
     expect(screen.getByText("経路線")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "スタート" })).toHaveTextContent(
       "S",
@@ -118,8 +127,23 @@ describe("RouteDetailScreen", () => {
     expect(screen.getByRole("img", { name: "ゴール" })).toHaveTextContent("G");
     expect(screen.getAllByRole("img")).toHaveLength(2);
     expect(
-      screen.queryByRole("button", { name: /追加|削除|保存|編集/ }),
+      screen.queryByRole("button", { name: /追加|保存|編集/ }),
     ).not.toBeInTheDocument();
+  });
+
+  it("削除ボタンから削除処理を実行し、実行中は操作を無効にする", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<RouteDetailScreen route={route} />);
+    await user.click(screen.getByRole("button", { name: "削除する" }));
+    expect(remove).toHaveBeenCalledOnce();
+
+    deletionStatus.isDeleting = true;
+    rerender(<RouteDetailScreen route={route} />);
+    expect(screen.getByRole("button", { name: "削除中..." })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "編集する" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
   });
 
   it("周回コースではS/Gのマーカー1つだけを渡す", () => {
@@ -146,6 +170,12 @@ describe("RouteDetailScreen", () => {
         },
       ),
     ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("dialog", { name: "ルート情報" })).getByRole(
+        "button",
+        { name: "削除する" },
+      ),
+    ).toBeEnabled();
   });
 
   it("経路取得に失敗しても地図とStreet Viewを残し、警告を表示する", () => {

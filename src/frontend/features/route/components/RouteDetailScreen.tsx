@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Button } from "~/frontend/components/ui/button";
 import RouteMenuButton from "~/frontend/features/route/components/RouteMenuButton";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import type { RouterOutputs } from "~/trpc/react";
@@ -12,12 +13,14 @@ import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/Googl
 import { useGoogleMapDirectionQuery } from "~/frontend/features/googlemap/api/useGoogleMapDirectionQuery";
 import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
+import { useRouteDeletion } from "../hooks/useRouteDeletion";
 
 type RouteDetailScreenProps = {
   route: Pick<RouterOutputs["route"]["getById"], "id" | "title" | "points">;
 };
 
 function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
+  const { remove, isDeleting } = useRouteDeletion(route.id);
   const { directions, isLoading, error } = useGoogleMapDirectionQuery(
     route.points,
     { enabled: true },
@@ -44,12 +47,28 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
           <h1 className="mb-4 mt-2 break-words text-xl font-bold">
             {route.title?.trim() ? route.title : "無題のルート"}
           </h1>
-          <Link
-            href={`/routes/${route.id}/edit`}
-            className="mb-4 inline-block rounded-md border px-3 py-2 text-sm font-medium hover:bg-gray-50"
-          >
-            編集する
-          </Link>
+          <div className="mb-4 flex gap-2">
+            <Link
+              href={`/routes/${route.id}/edit`}
+              className="inline-block rounded-md border px-3 py-2 text-sm font-medium hover:bg-gray-50"
+              aria-disabled={isDeleting}
+              onClick={(event) => {
+                if (isDeleting) event.preventDefault();
+              }}
+            >
+              編集する
+            </Link>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={() => {
+                void remove();
+              }}
+            >
+              {isDeleting ? "削除中..." : "削除する"}
+            </Button>
+          </div>
           <p className="mb-6 text-sm text-gray-600">
             地図上の位置を選んで、Street Viewで下見できます。
           </p>

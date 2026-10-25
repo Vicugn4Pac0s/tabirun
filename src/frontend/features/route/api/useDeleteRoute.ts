@@ -11,12 +11,18 @@ export const useDeleteRoute = () => {
   const utils = api.useUtils();
 
   const mutation = api.route.delete.useMutation({
-    onSuccess: async () => {
-      await utils.route.getByUser.invalidate();
+    onSuccess: async (_data, input) => {
+      await Promise.all([
+        utils.route.getByUser.invalidate(),
+        utils.route.getById.invalidate({ id: input.id }),
+      ]);
     },
   });
 
-  const deleteRoute = async (input: RouteDeleteInput, cb?: DeleteRouteCallbacks) => {
+  const deleteRoute = async (
+    input: RouteDeleteInput,
+    cb?: DeleteRouteCallbacks,
+  ) => {
     return executeMutationWithCallbacks(mutation, input, cb);
   };
 
