@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
@@ -10,8 +9,6 @@ import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useR
 import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
-import RouteMapView from "./RouteMapView";
-import { RouteNavigation } from "~/frontend/features/route-points/components/RouteNavigation";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
@@ -19,14 +16,13 @@ import { useRouteEdit } from "../hooks/useRouteEdit";
 import type { RouteUpdateInput } from "~/shared/schemas";
 import { RouteScreenLayout } from "./RouteScreenLayout";
 import { RouteForm } from "./RouteForm";
+import { RouteEditorMap } from "./RouteEditorMap";
 
 type RouteEditScreenProps = {
   route: RouteUpdateInput;
 };
 
 function RouteEditScreenContent({ route }: RouteEditScreenProps) {
-  const [selectedPoint, setSelectedPoint] =
-    useState<google.maps.LatLngLiteral | null>(null);
   const draft = useRouteEdit(route);
   const { points, togglePoint, isUpdating, save, confirmDiscard } = draft;
   const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
@@ -92,35 +88,15 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
         </>
       }
     >
-      <div className="relative flex min-w-0 flex-1">
-        <RouteMapView
-          showStreetView
-          initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
-          path={polylinePath}
-          markers={points.map((point, index) => ({
-            id: String(index),
-            position: point,
-            label: String(index + 1),
-            title: `地点 ${index + 1}`,
-          }))}
-          isLoading={isLoading}
-          fitToRoute
-          onSelectedPointChange={setSelectedPoint}
-        />
-        {selectedPoint && (
-          <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 min-[1201px]:peer-data-[street-view=visible]:left-1/4">
-            <RouteNavigation
-              points={points}
-              currentPoint={selectedPoint}
-              onMove={(target) => {
-                void moveStreetView(target).catch(() => undefined);
-              }}
-              onToggle={() => togglePoint(selectedPoint)}
-              disabled={isUpdating}
-            />
-          </div>
-        )}
-      </div>
+      <RouteEditorMap
+        initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
+        points={points}
+        polylinePath={polylinePath}
+        isLoading={isLoading}
+        disabled={isUpdating}
+        fitToRoute
+        onTogglePoint={togglePoint}
+      />
     </RouteScreenLayout>
   );
 }
