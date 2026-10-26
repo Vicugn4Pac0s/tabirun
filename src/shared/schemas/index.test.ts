@@ -63,6 +63,22 @@ describe("route schemas", () => {
     );
   });
 
+  it("ルート名はDBの上限である256文字まで受け入れる", () => {
+    const input = {
+      title: "あ".repeat(256),
+      points: [
+        { lat: 35.0, lng: 139.0 },
+        { lat: 35.1, lng: 139.1 },
+      ],
+    };
+
+    expect(routeCreateSchema.safeParse(input).success).toBe(true);
+    expect(
+      routeCreateSchema.safeParse({ ...input, title: "あ".repeat(257) })
+        .success,
+    ).toBe(false);
+  });
+
   it("正の整数 id を持つルート更新入力を受け入れる", () => {
     const result = routeUpdateSchema.safeParse({
       id: 1,

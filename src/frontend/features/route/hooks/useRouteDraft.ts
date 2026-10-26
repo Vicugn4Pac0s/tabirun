@@ -1,66 +1,42 @@
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFormState, useWatch } from "react-hook-form";
 import { routeCreateSchema, type RouteCreateInput } from "~/shared/schemas";
 
-const routeFormSchema = routeCreateSchema.pick({ title: true });
-
-export type RouteFormValues = Pick<RouteCreateInput, "title">;
-
-type InitialRoute = {
-  title: string | null;
-  points: google.maps.LatLngLiteral[];
-};
-
-export function useRouteDraft(route: InitialRoute, isSaving: boolean) {
+export function useRouteDraft(route: RouteCreateInput, isSaving: boolean) {
   const [initial] = useState(() => ({
-    title: route.title ?? "",
+    title: route.title,
     points: route.points.map((point) => ({ ...point })),
   }));
-  const form = useForm<RouteFormValues>({
-    resolver: zodResolver(routeFormSchema),
-    defaultValues: { title: initial.title },
+  const form = useForm<RouteCreateInput>({
+    resolver: zodResolver(routeCreateSchema),
+    defaultValues: initial,
     mode: "onChange",
   });
-  const { trigger } = form;
-  useEffect(() => {
-    void trigger("title");
-  }, [trigger]);
-
-  const [points, setPoints] = useState(initial.points);
-  const pointsDirty =
-    points.length !== initial.points.length ||
-    points.some(
-      (point, index) =>
-        point.lat !== initial.points[index]?.lat ||
-        point.lng !== initial.points[index]?.lng,
-    );
-  const isDirty = form.formState.isDirty || pointsDirty;
-  const canSave = isDirty && form.formState.isValid && points.length >= 2;
-  const canSubmit = () =>
-    isDirty &&
-    routeFormSchema.safeParse(form.getValues()).success &&
-    points.length >= 2;
+  const points = useWatch({ control: form.control, name: "points" });
+  const { isDirty, isValid } = useFormState({ control: form.control });
+  const canSave = isDirty && isValid;
 
   const togglePoint = (point: google.maps.LatLngLiteral) => {
-    setPoints((previous) => {
-      const exists = previous.some(
-        (item) => item.lat === point.lat && item.lng === point.lng,
-      );
-      return exists
-        ? previous.filter(
-            (item) => item.lat !== point.lat || item.lng !== point.lng,
-          )
-        : [...previous, { ...point }];
+    const current = form.getValues("points");
+    const exists = current.some(
+      (item) => item.lat === point.lat && item.lng === point.lng,
+    );
+    const next = exists
+      ? current.filter(
+          (item) => item.lat !== point.lat || item.lng !== point.lng,
+        )
+      : [...current, { ...point }];
+    form.setValue("points", next, {
+      shouldDirty: true,
+      shouldValidate: true,
     });
   };
 
   const reset = () => {
     if (isSaving || !isDirty) return;
     if (window.confirm("編集中の変更を破棄してリセットしますか？")) {
-      form.reset({ title: initial.title });
-      setPoints(initial.points.map((point) => ({ ...point })));
-      void trigger("title");
+      form.reset(initial);
     }
   };
   const confirmDiscard = () =>
@@ -80,7 +56,6 @@ export function useRouteDraft(route: InitialRoute, isSaving: boolean) {
     points,
     isDirty,
     canSave,
-    canSubmit,
     togglePoint,
     reset,
     confirmDiscard,

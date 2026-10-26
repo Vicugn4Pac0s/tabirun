@@ -45,11 +45,9 @@ const initialRoute = {
 };
 
 describe("useRouteEdit", () => {
-  it("保存済みルートを初期値にして、タイトル未設定は空欄にする", () => {
-    const { result } = renderHook(() =>
-      useRouteEdit({ ...initialRoute, title: null }),
-    );
-    expect(result.current.form.getValues("title")).toBe("");
+  it("保存済みルートを初期値にする", () => {
+    const { result } = renderHook(() => useRouteEdit(initialRoute));
+    expect(result.current.form.getValues("title")).toBe(initialRoute.title);
     expect(result.current.points).toEqual(initialRoute.points);
   });
 
@@ -76,11 +74,18 @@ describe("useRouteEdit", () => {
     const point = { lat: 37, lng: 137 };
     act(() => result.current.togglePoint(point));
     expect(result.current.points).toEqual([...initialRoute.points, point]);
+    expect(result.current.form.getValues("points")).toEqual([
+      ...initialRoute.points,
+      point,
+    ]);
     await waitFor(() => expect(result.current.canSave).toBe(true));
     act(() => result.current.togglePoint(initialRoute.points[0]!));
     expect(result.current.points).toEqual([initialRoute.points[1], point]);
     act(() => result.current.reset());
     expect(result.current.points).toEqual(initialRoute.points);
+    expect(result.current.form.getValues("points")).toEqual(
+      initialRoute.points,
+    );
     expect(result.current.isDirty).toBe(false);
     expect(initialRoute.points).toHaveLength(2);
   });
@@ -92,7 +97,7 @@ describe("useRouteEdit", () => {
     act(() => setTitle(result.current.form, "変更"));
     await waitFor(() => expect(result.current.canSave).toBe(true));
     act(() => result.current.togglePoint(initialRoute.points[0]!));
-    expect(result.current.canSave).toBe(false);
+    await waitFor(() => expect(result.current.canSave).toBe(false));
   });
   it("保存前の連続操作を1回の更新にまとめる", async () => {
     let finish: (() => void) | undefined;
@@ -110,7 +115,7 @@ describe("useRouteEdit", () => {
       pending = result.current.save();
       void result.current.save();
     });
-    expect(updateRoute).toHaveBeenCalledOnce();
+    await waitFor(() => expect(updateRoute).toHaveBeenCalledOnce());
     await act(async () => {
       finish?.();
       await pending;

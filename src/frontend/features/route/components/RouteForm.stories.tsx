@@ -4,6 +4,12 @@ import { useRouteDraft } from "../hooks/useRouteDraft";
 import { RouteForm } from "./RouteForm";
 
 function RouteFormPreview({ editing = false }: { editing?: boolean }) {
+  return (
+    <RouteFormExample key={editing ? "edit" : "create"} editing={editing} />
+  );
+}
+
+function RouteFormExample({ editing }: { editing: boolean }) {
   const draft = useRouteDraft(
     editing
       ? {
@@ -67,6 +73,9 @@ export const Edit: Story = {
     await userEvent.type(
       canvas.getByRole("textbox", { name: "ルート名" }),
       "変更",
+    );
+    await expect(canvas.getByRole("textbox", { name: "ルート名" })).toHaveValue(
+      "朝のルート変更",
     );
     await waitFor(() =>
       expect(canvas.getByRole("button", { name: "更新する" })).toBeEnabled(),

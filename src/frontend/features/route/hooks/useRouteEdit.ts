@@ -5,21 +5,18 @@ import type { RouteUpdateInput } from "~/shared/schemas";
 import { useUpdateRoute } from "../api/useUpdateRoute";
 import { useRouteDraft } from "./useRouteDraft";
 
-type EditableRoute = Omit<RouteUpdateInput, "title"> & { title: string | null };
-
-export function useRouteEdit(route: EditableRoute) {
+export function useRouteEdit(route: RouteUpdateInput) {
   const router = useRouter();
   const { updateRoute, isUpdating } = useUpdateRoute();
   const draft = useRouteDraft(route, isUpdating);
   const submitting = useRef(false);
-  const save = async () => {
-    if (!draft.canSubmit() || isUpdating || submitting.current) return;
+  const save = draft.form.handleSubmit(async (values) => {
+    if (!draft.isDirty || isUpdating || submitting.current) return;
     submitting.current = true;
     try {
       await updateRoute({
         id: route.id,
-        title: draft.form.getValues("title").trim(),
-        points: draft.points,
+        ...values,
       });
       toast.success("ルートを更新しました。");
       router.push(`/routes/${route.id}`);
@@ -31,7 +28,7 @@ export function useRouteEdit(route: EditableRoute) {
     } finally {
       submitting.current = false;
     }
-  };
+  });
 
   return { ...draft, isUpdating, save };
 }

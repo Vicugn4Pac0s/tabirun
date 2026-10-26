@@ -1,5 +1,6 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
+  check,
   doublePrecision,
   index,
   integer,
@@ -18,7 +19,7 @@ export const routes = createTable(
   "route",
   {
     id: serial("id").primaryKey(),
-    title: varchar("title", { length: 256 }),
+    title: varchar("title", { length: 256 }).notNull(),
     points: text("points").notNull(),
     createdById: varchar("created_by", { length: 255 })
       .notNull()
@@ -29,6 +30,7 @@ export const routes = createTable(
     ),
   },
   (route) => [
+    check("route_title_not_blank", sql`${route.title} ~ '[^[:space:]]'`),
     index("created_by_idx").on(route.createdById),
     index("title_idx").on(route.title),
   ],

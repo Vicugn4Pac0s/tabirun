@@ -88,7 +88,7 @@ describe("useRouteCreation", () => {
       pending = result.current.save();
       void result.current.save();
     });
-    expect(createRoute).toHaveBeenCalledOnce();
+    await waitFor(() => expect(createRoute).toHaveBeenCalledOnce());
     await act(async () => {
       finish?.();
       await pending;

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { Button } from "~/frontend/components/ui/button";
 import { Input } from "~/frontend/components/ui/input";
 import type { useRouteDraft } from "../hooks/useRouteDraft";
@@ -8,7 +8,7 @@ type RouteFormProps = {
     ReturnType<typeof useRouteDraft>,
     "form" | "isDirty" | "canSave" | "reset"
   >;
-  onSubmit: () => Promise<void>;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   isSaving: boolean;
   submitText: { idle: string; pending: string };
   children: ReactNode;
@@ -30,7 +30,7 @@ export function RouteForm({
   return (
     <form
       onSubmit={(event) => {
-        void form.handleSubmit(onSubmit)(event);
+        void onSubmit(event);
       }}
     >
       <label className="block text-sm font-medium">

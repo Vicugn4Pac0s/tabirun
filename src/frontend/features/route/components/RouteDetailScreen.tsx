@@ -45,7 +45,7 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
           </Link>
           <p className="text-sm text-gray-500">保存済みルート</p>
           <h1 className="mb-4 mt-2 break-words text-xl font-bold">
-            {route.title?.trim() ? route.title : "無題のルート"}
+            {route.title}
           </h1>
           <div className="mb-4 flex gap-2">
             <Link

@@ -14,14 +14,14 @@ import RouteMapView from "./RouteMapView";
 import { RouteNavigation } from "~/frontend/features/route-points/components/RouteNavigation";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
-import type { RouterOutputs } from "~/trpc/react";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteEdit } from "../hooks/useRouteEdit";
+import type { RouteUpdateInput } from "~/shared/schemas";
 import { RouteScreenLayout } from "./RouteScreenLayout";
 import { RouteForm } from "./RouteForm";
 
 type RouteEditScreenProps = {
-  route: Pick<RouterOutputs["route"]["getById"], "id" | "title" | "points">;
+  route: RouteUpdateInput;
 };
 
 function RouteEditScreenContent({ route }: RouteEditScreenProps) {

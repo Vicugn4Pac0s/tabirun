@@ -123,7 +123,7 @@ function PersonalDashboard() {
                     />
                   </div>
                   <h3 className="break-words text-lg font-bold">
-                    {route.title?.trim() ? route.title : "無題のルート"}
+                    {route.title}
                   </h3>
                   <p className="mt-2 text-sm text-gray-500">
                     {route.points.length} 地点
