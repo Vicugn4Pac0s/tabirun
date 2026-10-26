@@ -19,8 +19,8 @@ import {
   UserProfileFormFields,
 } from "~/frontend/features/user/components/UserProfileFormFields";
 import { useCurrentStreetViewPosition } from "~/frontend/features/googlemap/hooks/useCurrentStreetViewPosition";
-import { useUpdateUser } from "~/frontend/features/user/hooks/useUpdateUser";
-import { useUserQuery } from "~/frontend/features/user/hooks/useUserQuery";
+import { useUpdateUserProfile } from "~/frontend/features/user/api/useUpdateUserProfile";
+import { useCurrentUserQuery } from "~/frontend/features/user/api/useCurrentUserQuery";
 import { userProfileUpdateSchema } from "~/shared/schemas";
 
 type UserProfileDialogProps = {
@@ -32,8 +32,8 @@ export const UserProfileDialog = ({
   open,
   onOpenChange,
 }: UserProfileDialogProps) => {
-  const { user, isLoading, error } = useUserQuery();
-  const { updateUser, isUpdating } = useUpdateUser();
+  const { user, isLoading, error } = useCurrentUserQuery();
+  const { updateUserProfile, isUpdating } = useUpdateUserProfile();
   const {
     canReadCurrentStreetViewPosition,
     getCurrentStreetViewPosition,
@@ -81,7 +81,7 @@ export const UserProfileDialog = ({
   const submitProfile = async (data: UserProfileFormValues) => {
     const parsedData = userProfileUpdateSchema.parse(data);
 
-    await updateUser(parsedData, {
+    await updateUserProfile(parsedData, {
       onSuccess: () => {
         toast.success("プロフィールを更新しました");
         onOpenChange(false);

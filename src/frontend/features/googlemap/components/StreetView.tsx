@@ -4,6 +4,7 @@ interface StreetViewProps {
   map: google.maps.Map | null;
   streetView: MutableRefObject<google.maps.StreetViewPanorama | null>;
   options: google.maps.StreetViewPanoramaOptions;
+  onInit?: () => void;
   onPositionChanged?: (position: google.maps.LatLng) => void;
   onPovChanged?: (position: google.maps.StreetViewPov) => void;
 }
@@ -12,20 +13,21 @@ const StreetView = ({
   map,
   streetView,
   options,
+  onInit,
   onPositionChanged,
   onPovChanged,
 }: StreetViewProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const optionsRef = useRef(options);
-  const callbacksRef = useRef({ onPositionChanged, onPovChanged });
+  const callbacksRef = useRef({ onInit, onPositionChanged, onPovChanged });
 
   useEffect(() => {
     optionsRef.current = options;
   }, [options]);
 
   useEffect(() => {
-    callbacksRef.current = { onPositionChanged, onPovChanged };
-  }, [onPositionChanged, onPovChanged]);
+    callbacksRef.current = { onInit, onPositionChanged, onPovChanged };
+  }, [onInit, onPositionChanged, onPovChanged]);
 
   useEffect(() => {
     if (!ref.current || !map) {
@@ -58,8 +60,10 @@ const StreetView = ({
     // 初期値の設定時に発生したイベントは、リスナー登録後には届かない。
     notifyPosition();
     notifyPov();
+    callbacksRef.current.onInit?.();
 
     return () => {
+      panorama.setVisible(false);
       positionChangedListener.remove();
       povChangedListener.remove();
 

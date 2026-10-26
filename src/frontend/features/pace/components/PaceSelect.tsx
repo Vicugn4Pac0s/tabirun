@@ -1,5 +1,5 @@
 import { type Pace } from "~/frontend/types/pace";
-import { usePacesQuery } from "../hooks/usePacesQuery";
+import { usePacesQuery } from "../api/usePacesQuery";
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 
 interface PaceSelectProps {
@@ -32,6 +32,7 @@ function PaceSelect({
   return (
     <div className={`w-full ${className ?? ""}`}>
       <Selectbox
+        ariaLabel="ペース"
         items={paceOptions}
         value={value}
         onValueChange={(value) => {

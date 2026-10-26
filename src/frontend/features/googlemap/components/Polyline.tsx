@@ -1,33 +1,30 @@
-import { useEffect, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef } from "react";
 
-interface PolylineProps {
+type PolylineProps = {
   map: google.maps.Map | null;
-  polyline: google.maps.Polyline | null;
-  setPolyline: Dispatch<SetStateAction<google.maps.Polyline | null>>;
-  options: google.maps.PolylineOptions;
-}
+  path: google.maps.LatLngLiteral[];
+  options?: Omit<google.maps.PolylineOptions, "map" | "path">;
+};
 
-function Polyline({ map, polyline, setPolyline, options }: PolylineProps) {
+export function Polyline({ map, path, options }: PolylineProps) {
+  const polylineRef = useRef<google.maps.Polyline | null>(null);
+
   useEffect(() => {
-    if (!polyline) {
-      setPolyline(new window.google.maps.Polyline());
-    }
+    if (!map) return;
+
+    const polyline = new google.maps.Polyline({ map });
+    polylineRef.current = polyline;
 
     return () => {
-      if (polyline) {
-        polyline.setMap(null);
-      }
+      polyline.setMap(null);
+      polylineRef.current = null;
     };
-  }, [polyline, setPolyline]);
+  }, [map]);
 
   useEffect(() => {
-    if (polyline) {
-      polyline.setOptions({
-        map,
-        ...options,
-      });
-    }
-  }, [map, polyline, options]);
+    polylineRef.current?.setOptions({ ...options, map, path });
+  }, [map, path, options]);
+
   return null;
 }
 

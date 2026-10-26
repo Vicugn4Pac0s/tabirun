@@ -1,8 +1,8 @@
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 
-import {
-  createTRPCRouter,
-} from "~/server/api/trpc";
+import { createTRPCRouter } from "~/server/api/trpc";
 import { protectedProcedure } from "../procedure";
 import { routes } from "~/server/db/schema";
 import {
@@ -13,6 +13,25 @@ import {
 } from "~/shared/schemas";
 
 export const routeRouter = createTRPCRouter({
+  getById: protectedProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .query(async ({ ctx, input }) => {
+      const route = await ctx.db.query.routes.findFirst({
+        where: and(
+          eq(routes.id, input.id),
+          eq(routes.createdById, ctx.session.user.id),
+        ),
+      });
+
+      if (!route) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      return {
+        ...route,
+        points: routePointsSchema.parse(JSON.parse(route.points)),
+      };
+    }),
 
   create: protectedProcedure
     .input(routeCreateSchema)
@@ -54,14 +73,14 @@ export const routeRouter = createTRPCRouter({
           ),
         );
     }),
-  
+
   getByUser: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db
       .select()
       .from(routes)
       .where(eq(routes.createdById, ctx.session.user.id));
 
-    return res.map(route => ({
+    return res.map((route) => ({
       ...route,
       points: routePointsSchema.parse(JSON.parse(route.points)),
     }));

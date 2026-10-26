@@ -8,7 +8,6 @@ export const calcTimeFromDistanceAndPace = (
   pace: Pace,
 ): string => {
   const [paceMin, paceSec] = pace.split(":").map(Number);
-  console.log({ paceMin, paceSec });
   if (paceMin === undefined || paceSec === undefined) return "0:00";
   const paceInSeconds = paceMin * 60 + paceSec;
   const totalSeconds = Math.round(distanceKm * paceInSeconds);

@@ -11,6 +11,7 @@ const mockUsePacesQuery = vi.fn<() => MockPacesQueryResult>();
 const mockSelectbox = vi.fn();
 
 type MockSelectboxProps = {
+  ariaLabel?: string;
   items?: Array<{ value: string; label: string }>;
   disabled?: boolean;
   onValueChange?: (value: string) => void;
@@ -18,7 +19,7 @@ type MockSelectboxProps = {
   value?: string;
 };
 
-vi.mock("../hooks/usePacesQuery", () => ({
+vi.mock("../api/usePacesQuery", () => ({
   usePacesQuery: () => mockUsePacesQuery(),
 }));
 
@@ -55,6 +56,7 @@ describe("PaceSelect", () => {
 
     expect(mockSelectbox).toHaveBeenCalledWith(
       expect.objectContaining({
+        ariaLabel: "ペース",
         items: [
           { value: "5:00", label: "5:00" },
           { value: "6:00", label: "6:00" },

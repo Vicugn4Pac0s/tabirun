@@ -1,13 +1,10 @@
 import { SessionProvider } from "next-auth/react";
 import { redirect } from "next/navigation";
 
-import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { auth } from "~/server/auth";
 import { getUserHomePageSettings } from "~/server/features/user/queries";
 import { HydrateClient } from "~/trpc/server";
-import { getDefaultCenter } from "~/app/_lib/getDefaultCenter";
-import Root from "./_components/Root";
-import Providers from "./providers";
+import { Dashboard } from "~/frontend/features/dashboard/components/Dashboard";
 
 export default async function Home() {
   const session = await auth();
@@ -20,15 +17,11 @@ export default async function Home() {
     redirect("/setup-profile");
   }
 
-  const defaultCenter = getDefaultCenter(user, GOOGLE_MAP_DEFAULT_CENTER);
-
   return (
     <HydrateClient>
       <SessionProvider session={session}>
         <main>
-          <Providers>
-            <Root defaultCenter={defaultCenter} />
-          </Providers>
+          <Dashboard />
         </main>
       </SessionProvider>
     </HydrateClient>
