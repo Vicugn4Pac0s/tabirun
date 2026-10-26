@@ -36,6 +36,33 @@ describe("route schemas", () => {
     expect(result.success).toBe(true);
   });
 
+  it("ルート作成時に名前の前後の空白を除去する", () => {
+    const result = routeCreateSchema.parse({
+      title: " Morning Run ",
+      points: [
+        { lat: 35.0, lng: 139.0 },
+        { lat: 35.1, lng: 139.1 },
+      ],
+    });
+
+    expect(result.title).toBe("Morning Run");
+  });
+
+  it("空白のみのルート名を作成・更新で拒否する", () => {
+    const input = {
+      title: "   ",
+      points: [
+        { lat: 35.0, lng: 139.0 },
+        { lat: 35.1, lng: 139.1 },
+      ],
+    };
+
+    expect(routeCreateSchema.safeParse(input).success).toBe(false);
+    expect(routeUpdateSchema.safeParse({ ...input, id: 1 }).success).toBe(
+      false,
+    );
+  });
+
   it("正の整数 id を持つルート更新入力を受け入れる", () => {
     const result = routeUpdateSchema.safeParse({
       id: 1,

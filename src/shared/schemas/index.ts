@@ -12,7 +12,7 @@ export const routePointsSchema = z
   .min(2);
 
 export const routeCreateSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().trim().min(1, "ルート名を入力してください。"),
   points: routePointsSchema,
 });
 

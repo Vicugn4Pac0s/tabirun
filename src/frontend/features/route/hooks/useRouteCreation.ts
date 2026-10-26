@@ -10,10 +10,13 @@ export function useRouteCreation() {
   const draft = useRouteDraft({ title: "", points: [] }, isCreating);
   const submitting = useRef(false);
   const save = async () => {
-    if (!draft.canSave || isCreating || submitting.current) return;
+    if (!draft.canSubmit() || isCreating || submitting.current) return;
     submitting.current = true;
     try {
-      await createRoute({ title: draft.title.trim(), points: draft.points });
+      await createRoute({
+        title: draft.form.getValues("title").trim(),
+        points: draft.points,
+      });
       toast.success("ルートを保存しました。");
       router.push("/");
       router.refresh();

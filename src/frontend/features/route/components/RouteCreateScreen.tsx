@@ -3,13 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
-import { Input } from "~/frontend/components/ui/input";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
-import { Button } from "~/frontend/components/ui/button";
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import RouteMapView from "./RouteMapView";
@@ -18,24 +16,15 @@ import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { useRouteCreation } from "../hooks/useRouteCreation";
 import { RouteScreenLayout } from "./RouteScreenLayout";
+import { RouteForm } from "./RouteForm";
 
 type RouteCreateScreenProps = { defaultCenter: google.maps.LatLngLiteral };
 
 function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
   const [selectedPoint, setSelectedPoint] =
     useState<google.maps.LatLngLiteral | null>(null);
-  const {
-    title,
-    points,
-    setTitle,
-    togglePoint,
-    isDirty,
-    canSave,
-    isCreating,
-    save,
-    reset,
-    confirmDiscard,
-  } = useRouteCreation();
+  const draft = useRouteCreation();
+  const { points, togglePoint, isCreating, save, confirmDiscard } = draft;
   const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
     points,
     { canUseDirections: true },
@@ -63,48 +52,28 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
             ホームへ戻る
           </Link>
           <h1 className="mb-4 text-xl font-bold">ルートを作成</h1>
-          <label className="block text-sm font-medium">
-            <span className="mb-2 block">ルート名</span>
-            <Input
-              disabled={isCreating}
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
+          <RouteForm
+            draft={draft}
+            onSubmit={save}
+            isSaving={isCreating}
+            submitText={{ idle: "ルートを保存する", pending: "保存中..." }}
+          >
+            <p className="mt-2 text-sm text-gray-500">
+              Street View下部のボタンで地点を追加・削除できます。
+            </p>
+            {warningMessage && (
+              <div className="mb-4">
+                <WarningBanner>{warningMessage}</WarningBanner>
+              </div>
+            )}
+            <RunMetricsPanel
+              distanceMeters={directions?.distanceMeters}
+              isLoading={isLoading}
+              pace={pace}
+              onPaceChange={setPace}
+              weightKg={weightKg}
             />
-          </label>
-          <p className="mt-2 text-sm text-gray-500">
-            Street View下部のボタンで地点を追加・削除できます。
-          </p>
-          {warningMessage && (
-            <div className="mb-4">
-              <WarningBanner>{warningMessage}</WarningBanner>
-            </div>
-          )}
-          <RunMetricsPanel
-            distanceMeters={directions?.distanceMeters}
-            isLoading={isLoading}
-            pace={pace}
-            onPaceChange={setPace}
-            weightKg={weightKg}
-          />
-          <div className="my-6 flex gap-2">
-            <Button
-              type="button"
-              disabled={!canSave || isCreating}
-              onClick={() => {
-                void save();
-              }}
-            >
-              {isCreating ? "保存中..." : "ルートを保存する"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!isDirty || isCreating}
-              onClick={reset}
-            >
-              リセット
-            </Button>
-          </div>
+          </RouteForm>
           {points.length < 2 && (
             <p role="status" className="mb-3 text-sm text-gray-500">
               保存するには2地点以上を登録してください。

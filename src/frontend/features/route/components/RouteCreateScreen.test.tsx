@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteCreateScreen } from "./RouteCreateScreen";
 
@@ -163,15 +163,70 @@ describe("RouteCreateScreen", () => {
     expect(push).toHaveBeenCalledWith("/");
   });
   it("SPメニューでも名前入力と保存ボタンを表示する", async () => {
+    let onViewportChange: (() => void) | undefined;
+    const viewport = {
+      matches: false,
+      addEventListener: (_: string, listener: () => void) => {
+        onViewportChange = listener;
+      },
+      removeEventListener: vi.fn(),
+    };
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) =>
+        query === "(max-width: 767px)"
+          ? viewport
+          : {
+              matches: false,
+              addEventListener: vi.fn(),
+              removeEventListener: vi.fn(),
+            },
+      ),
+    );
     const user = userEvent.setup();
     render(<RouteCreateScreen defaultCenter={defaultCenter} />);
+    await user.type(
+      screen.getByRole("textbox", { name: "ルート名" }),
+      "入力中",
+    );
+    act(() => {
+      viewport.matches = true;
+      onViewportChange?.();
+    });
     await user.click(screen.getByRole("button", { name: "ルート作成を開く" }));
     const dialog = screen.getByRole("dialog", { name: "ルート作成" });
     expect(
       within(dialog).getByRole("textbox", { name: "ルート名" }),
-    ).toHaveValue("");
+    ).toHaveValue("入力中");
+    expect(screen.getAllByRole("textbox", { name: "ルート名" })).toHaveLength(
+      1,
+    );
     expect(
       within(dialog).getByRole("button", { name: "ルートを保存する" }),
+    ).toBeDisabled();
+    act(() => {
+      viewport.matches = false;
+      onViewportChange?.();
+    });
+    expect(
+      within(
+        screen.getByRole("complementary", { name: "ルート作成" }),
+      ).getByRole("textbox", { name: "ルート名" }),
+    ).toHaveValue("入力中");
+    expect(screen.queryByRole("dialog", { name: "ルート作成" })).toBeNull();
+  });
+
+  it("空白のみのルート名を入力するとエラーを表示して保存できない", async () => {
+    const user = userEvent.setup();
+    render(<RouteCreateScreen defaultCenter={defaultCenter} />);
+    const title = screen.getByRole("textbox", { name: "ルート名" });
+    await user.type(title, "   ");
+    await user.tab();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "ルート名を入力してください。",
+    );
+    expect(
+      screen.getByRole("button", { name: "ルートを保存する" }),
     ).toBeDisabled();
   });
 
@@ -203,16 +258,5 @@ describe("RouteCreateScreen", () => {
         screen.getByRole("complementary", { name: "ルート作成" }),
       ).getByRole("alert"),
     ).toHaveTextContent("直線で結んで表示");
-    await user.click(screen.getByRole("button", { name: "ルート作成を開く" }));
-    expect(
-      within(screen.getByRole("dialog", { name: "ルート作成" })).getByRole(
-        "alert",
-      ),
-    ).toHaveTextContent("直線で結んで表示");
-    expect(
-      within(screen.getByRole("dialog", { name: "ルート作成" })).getByText(
-        "距離を表示できません。",
-      ),
-    ).toBeInTheDocument();
   });
 });

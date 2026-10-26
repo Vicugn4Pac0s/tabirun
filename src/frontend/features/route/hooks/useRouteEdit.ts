@@ -13,12 +13,12 @@ export function useRouteEdit(route: EditableRoute) {
   const draft = useRouteDraft(route, isUpdating);
   const submitting = useRef(false);
   const save = async () => {
-    if (!draft.canSave || isUpdating || submitting.current) return;
+    if (!draft.canSubmit() || isUpdating || submitting.current) return;
     submitting.current = true;
     try {
       await updateRoute({
         id: route.id,
-        title: draft.title.trim(),
+        title: draft.form.getValues("title").trim(),
         points: draft.points,
       });
       toast.success("ルートを更新しました。");

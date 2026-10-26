@@ -72,6 +72,16 @@ const route = {
     { lat: 36, lng: 136 },
   ],
 };
+const setMobileViewport = () => {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn((query: string) => ({
+      matches: query === "(max-width: 767px)",
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })),
+  );
+};
 beforeEach(() => {
   vi.clearAllMocks();
   deletionStatus.isDeleting = false;
@@ -92,6 +102,7 @@ afterEach(() => {
 
 describe("RouteDetailScreen", () => {
   it("取得済みの経路距離をSPメニューボタンに表示する", () => {
+    setMobileViewport();
     directionsQuery.mockReturnValue({
       directions: { path: route.points, distanceMeters: 5200 },
       isLoading: false,
@@ -101,12 +112,10 @@ describe("RouteDetailScreen", () => {
     expect(
       screen.getByRole("button", { name: "ルート情報を開く" }),
     ).toHaveTextContent("5.2 km");
-    expect(screen.getByText("5.2")).toBeInTheDocument();
-    expect(screen.getByText("予想時間")).toBeInTheDocument();
-    expect(screen.getByText("消費カロリー")).toBeInTheDocument();
   });
 
   it("経路取得中はSPメニューに計測中を表示する", () => {
+    setMobileViewport();
     directionsQuery.mockReturnValue({
       directions: null,
       isLoading: true,
@@ -180,6 +189,7 @@ describe("RouteDetailScreen", () => {
   });
 
   it("モバイルではルート情報を開いて確認できる", async () => {
+    setMobileViewport();
     directionsQuery.mockReturnValue({
       directions: { path: route.points, distanceMeters: 5200 },
       isLoading: false,

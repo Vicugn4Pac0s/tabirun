@@ -1,5 +1,11 @@
 import userEvent from "@testing-library/user-event";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteEditScreen } from "./RouteEditScreen";
 
@@ -89,6 +95,16 @@ const route = {
     { lat: 36, lng: 136 },
   ],
 };
+const setMobileViewport = () => {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn((query: string) => ({
+      matches: query === "(max-width: 767px)",
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })),
+  );
+};
 beforeEach(() => {
   vi.clearAllMocks();
   updateRoute.mockResolvedValue(undefined);
@@ -110,6 +126,7 @@ afterEach(() => {
 
 describe("RouteEditScreen", () => {
   it("取得済みの経路距離をSPメニューボタンに表示する", () => {
+    setMobileViewport();
     directionsQuery.mockReturnValue({
       directions: { path: route.points, distanceMeters: 5200 },
       isLoading: false,
@@ -119,12 +136,10 @@ describe("RouteEditScreen", () => {
     expect(
       screen.getByRole("button", { name: "ルート編集を開く" }),
     ).toHaveTextContent("5.2 km");
-    expect(screen.getByText("5.2")).toBeInTheDocument();
-    expect(screen.getByText("予想時間")).toBeInTheDocument();
-    expect(screen.getByText("消費カロリー")).toBeInTheDocument();
   });
 
   it("経路取得中はSPメニューに計測中を表示する", () => {
+    setMobileViewport();
     directionsQuery.mockReturnValue({
       directions: null,
       isLoading: true,
@@ -177,6 +192,7 @@ describe("RouteEditScreen", () => {
   });
 
   it("モバイルでも編集用のサイドバーを開ける", async () => {
+    setMobileViewport();
     const user = userEvent.setup();
     render(<RouteEditScreen route={route} />);
     await user.click(screen.getByRole("button", { name: "ルート編集を開く" }));
@@ -245,6 +261,21 @@ describe("RouteEditScreen", () => {
     expect(push).toHaveBeenCalledWith("/routes/1");
     expect(refresh).toHaveBeenCalled();
     expect(route.points).toHaveLength(3);
+  });
+
+  it("ルート名を変えずに地点だけ変更して更新できる", async () => {
+    const user = userEvent.setup();
+    render(<RouteEditScreen route={route} />);
+    await user.click(screen.getByRole("button", { name: "地点を削除" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "更新する" })).toBeEnabled(),
+    );
+    await user.click(screen.getByRole("button", { name: "更新する" }));
+    expect(updateRoute).toHaveBeenCalledWith({
+      id: route.id,
+      title: route.title,
+      points: route.points.slice(1),
+    });
   });
 
   it("更新失敗時は入力と地点を保持して再試行できる", async () => {

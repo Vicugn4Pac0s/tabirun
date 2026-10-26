@@ -1,4 +1,4 @@
-import { act, cleanup, renderHook } from "@testing-library/react";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useRouteCreation } from "./useRouteCreation";
 const { createRoute, push, refresh, errorToast, status } = vi.hoisted(() => ({
@@ -15,6 +15,12 @@ vi.mock("../api/useCreateRoute", () => ({
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: errorToast } }));
 const first = { lat: 35, lng: 135 };
 const second = { lat: 36, lng: 136 };
+const setTitle = (
+  form: ReturnType<typeof useRouteCreation>["form"],
+  title: string,
+) => {
+  form.setValue("title", title, { shouldDirty: true, shouldValidate: true });
+};
 beforeEach(() => {
   vi.clearAllMocks();
   createRoute.mockResolvedValue(undefined);
@@ -27,17 +33,17 @@ afterEach(() => {
 describe("useRouteCreation", () => {
   it("空欄・0地点から始め、名前と2地点で保存してホームに戻る", async () => {
     const { result } = renderHook(() => useRouteCreation());
-    expect(result.current.title).toBe("");
+    expect(result.current.form.getValues("title")).toBe("");
     expect(result.current.points).toEqual([]);
     await act(() => result.current.save());
     expect(createRoute).not.toHaveBeenCalled();
     act(() => {
-      result.current.setTitle(" 朝 ");
+      setTitle(result.current.form, " 朝 ");
       result.current.togglePoint(first);
     });
     expect(result.current.canSave).toBe(false);
     act(() => result.current.togglePoint(second));
-    expect(result.current.canSave).toBe(true);
+    await waitFor(() => expect(result.current.canSave).toBe(true));
     await act(() => result.current.save());
     expect(createRoute).toHaveBeenCalledWith({
       title: "朝",
@@ -50,10 +56,11 @@ describe("useRouteCreation", () => {
     createRoute.mockRejectedValueOnce(new Error("failed"));
     const { result } = renderHook(() => useRouteCreation());
     act(() => {
-      result.current.setTitle("朝");
+      setTitle(result.current.form, "朝");
       result.current.togglePoint(first);
       result.current.togglePoint(second);
     });
+    await waitFor(() => expect(result.current.canSave).toBe(true));
     await act(() => result.current.save());
     expect(errorToast).toHaveBeenCalled();
     expect(push).not.toHaveBeenCalled();
@@ -71,10 +78,11 @@ describe("useRouteCreation", () => {
     );
     const { result, rerender } = renderHook(() => useRouteCreation());
     act(() => {
-      result.current.setTitle("朝");
+      setTitle(result.current.form, "朝");
       result.current.togglePoint(first);
       result.current.togglePoint(second);
     });
+    await waitFor(() => expect(result.current.canSave).toBe(true));
     let pending: Promise<void> | undefined;
     act(() => {
       pending = result.current.save();
@@ -94,15 +102,15 @@ describe("useRouteCreation", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const { result } = renderHook(() => useRouteCreation());
     act(() => {
-      result.current.setTitle("朝");
+      setTitle(result.current.form, "朝");
       result.current.togglePoint(first);
     });
     expect(result.current.confirmDiscard()).toBe(false);
     act(() => result.current.reset());
-    expect(result.current.title).toBe("朝");
+    expect(result.current.form.getValues("title")).toBe("朝");
     confirm.mockReturnValue(true);
     act(() => result.current.reset());
-    expect(result.current.title).toBe("");
+    expect(result.current.form.getValues("title")).toBe("");
     expect(result.current.points).toEqual([]);
     expect(result.current.isDirty).toBe(false);
   });
