@@ -7,11 +7,10 @@ import { useRouteDraft } from "./useRouteDraft";
 export function useRouteCreation() {
   const router = useRouter();
   const { createRoute, isCreating } = useCreateRoute();
-  const draft = useRouteDraft({ title: "", points: [] }, isCreating);
+  const draft = useRouteDraft({ title: "", points: [] });
   const submitting = useRef(false);
-  const save = draft.form.handleSubmit(async (values) => {
-    if (!draft.isDirty || isCreating || submitting.current) return;
-    submitting.current = true;
+  const submit = draft.form.handleSubmit(async (values) => {
+    if (!draft.isDirty) return;
     try {
       await createRoute(values);
       toast.success("ルートを保存しました。");
@@ -21,9 +20,17 @@ export function useRouteCreation() {
       toast.error(
         "ルートを保存できませんでした。時間をおいて再度お試しください。",
       );
-    } finally {
-      submitting.current = false;
     }
   });
-  return { ...draft, isCreating, save };
+  const save: typeof submit = (event) => {
+    if (submitting.current || isCreating) {
+      event?.preventDefault();
+      return Promise.resolve();
+    }
+    submitting.current = true;
+    return submit(event).finally(() => {
+      submitting.current = false;
+    });
+  };
+  return { draft, isCreating, save };
 }

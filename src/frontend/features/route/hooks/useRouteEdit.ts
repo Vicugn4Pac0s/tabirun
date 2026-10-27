@@ -8,11 +8,10 @@ import { useRouteDraft } from "./useRouteDraft";
 export function useRouteEdit(route: RouteUpdateInput) {
   const router = useRouter();
   const { updateRoute, isUpdating } = useUpdateRoute();
-  const draft = useRouteDraft(route, isUpdating);
+  const draft = useRouteDraft(route);
   const submitting = useRef(false);
-  const save = draft.form.handleSubmit(async (values) => {
-    if (!draft.isDirty || isUpdating || submitting.current) return;
-    submitting.current = true;
+  const submit = draft.form.handleSubmit(async (values) => {
+    if (!draft.isDirty) return;
     try {
       await updateRoute({
         id: route.id,
@@ -25,10 +24,18 @@ export function useRouteEdit(route: RouteUpdateInput) {
       toast.error(
         "ルートを更新できませんでした。時間をおいて再度お試しください。",
       );
-    } finally {
-      submitting.current = false;
     }
   });
+  const save: typeof submit = (event) => {
+    if (submitting.current || isUpdating) {
+      event?.preventDefault();
+      return Promise.resolve();
+    }
+    submitting.current = true;
+    return submit(event).finally(() => {
+      submitting.current = false;
+    });
+  };
 
-  return { ...draft, isUpdating, save };
+  return { draft, isUpdating, save };
 }

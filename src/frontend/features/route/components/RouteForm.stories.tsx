@@ -20,15 +20,13 @@ function RouteFormExample({ editing }: { editing: boolean }) {
           ],
         }
       : { title: "", points: [] },
-    false,
   );
 
   return (
     <div className="w-72 max-w-full">
       <RouteForm
         draft={draft}
-        onSubmit={async () => undefined}
-        isSaving={false}
+        onSubmit={draft.form.handleSubmit(async () => undefined)}
         submitText={
           editing
             ? { idle: "更新する", pending: "更新中..." }

@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFormState, useWatch } from "react-hook-form";
 import { routeCreateSchema, type RouteCreateInput } from "~/shared/schemas";
 
-export function useRouteDraft(route: RouteCreateInput, isSaving: boolean) {
+export function useRouteDraft(route: RouteCreateInput) {
   const [initial] = useState(() => ({
     title: route.title,
     points: route.points.map((point) => ({ ...point })),
@@ -14,7 +14,9 @@ export function useRouteDraft(route: RouteCreateInput, isSaving: boolean) {
     mode: "onChange",
   });
   const points = useWatch({ control: form.control, name: "points" });
-  const { isDirty, isValid } = useFormState({ control: form.control });
+  const { isDirty, isValid, isSubmitting } = useFormState({
+    control: form.control,
+  });
   const canSave = isDirty && isValid;
 
   const togglePoint = (point: google.maps.LatLngLiteral) => {
@@ -34,7 +36,7 @@ export function useRouteDraft(route: RouteCreateInput, isSaving: boolean) {
   };
 
   const reset = () => {
-    if (isSaving || !isDirty) return;
+    if (isSubmitting || !isDirty) return;
     if (window.confirm("編集中の変更を破棄してリセットしますか？")) {
       form.reset(initial);
     }
@@ -56,6 +58,7 @@ export function useRouteDraft(route: RouteCreateInput, isSaving: boolean) {
     points,
     isDirty,
     canSave,
+    isSubmitting,
     togglePoint,
     reset,
     confirmDiscard,

@@ -19,8 +19,8 @@ import { RouteEditorMap } from "./RouteEditorMap";
 type RouteCreateScreenProps = { defaultCenter: google.maps.LatLngLiteral };
 
 function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
-  const draft = useRouteCreation();
-  const { points, togglePoint, isCreating, save, confirmDiscard } = draft;
+  const { draft, isCreating, save } = useRouteCreation();
+  const { points, togglePoint, confirmDiscard } = draft;
   const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
     points,
     { canUseDirections: true },
@@ -51,7 +51,6 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
           <RouteForm
             draft={draft}
             onSubmit={save}
-            isSaving={isCreating}
             submitText={{ idle: "ルートを保存する", pending: "保存中..." }}
           >
             <p className="mt-2 text-sm text-gray-500">

@@ -23,8 +23,8 @@ type RouteEditScreenProps = {
 };
 
 function RouteEditScreenContent({ route }: RouteEditScreenProps) {
-  const draft = useRouteEdit(route);
-  const { points, togglePoint, isUpdating, save, confirmDiscard } = draft;
+  const { draft, isUpdating, save } = useRouteEdit(route);
+  const { points, togglePoint, confirmDiscard } = draft;
   const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
     points,
     { canUseDirections: true },
@@ -55,7 +55,6 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
           <RouteForm
             draft={draft}
             onSubmit={save}
-            isSaving={isUpdating}
             submitText={{ idle: "更新する", pending: "更新中..." }}
           >
             <p className="mt-2 text-sm text-gray-500">
