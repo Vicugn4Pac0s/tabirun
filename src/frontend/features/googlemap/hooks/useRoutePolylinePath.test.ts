@@ -9,15 +9,13 @@ type MockDirectionQueryResult = {
   enabled: boolean;
 };
 
-const mockUseGoogleMapDirectionQuery = vi.fn<
-  (...args: unknown[]) => MockDirectionQueryResult
->();
+const mockUseGoogleMapDirectionQuery =
+  vi.fn<(...args: unknown[]) => MockDirectionQueryResult>();
 
 vi.mock("~/frontend/features/googlemap/api/useGoogleMapDirectionQuery", () => ({
   useGoogleMapDirectionQuery: (
     ...args: Parameters<typeof mockUseGoogleMapDirectionQuery>
-  ) =>
-    mockUseGoogleMapDirectionQuery(...args),
+  ) => mockUseGoogleMapDirectionQuery(...args),
 }));
 
 const routePoints = [

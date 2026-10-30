@@ -42,10 +42,7 @@ vi.mock("~/frontend/components/app-ui/Selectbox", () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   mockUsePacesQuery.mockReturnValue({
-    paces: [
-      { value: "5:00" },
-      { value: "6:00" },
-    ],
+    paces: [{ value: "5:00" }, { value: "6:00" }],
     error: null,
   });
 });

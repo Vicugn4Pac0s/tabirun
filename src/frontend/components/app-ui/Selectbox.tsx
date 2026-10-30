@@ -6,23 +6,23 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "~/frontend/components/ui/select"
+} from "~/frontend/components/ui/select";
 
 type SelectItemOption = {
-  value: string
-  label: string
-}
+  value: string;
+  label: string;
+};
 
 type SelectboxProps = {
-  items: SelectItemOption[]
-  value?: string
-  onValueChange?: (value: string) => void
-  placeholder?: string
-  label?: string
-  ariaLabel?: string
-  disabled?: boolean
-  className?: string
-}
+  items: SelectItemOption[];
+  value?: string;
+  onValueChange?: (value: string) => void;
+  placeholder?: string;
+  label?: string;
+  ariaLabel?: string;
+  disabled?: boolean;
+  className?: string;
+};
 
 export function Selectbox({
   items,
@@ -53,5 +53,5 @@ export function Selectbox({
         </SelectGroup>
       </SelectContent>
     </Select>
-  )
+  );
 }

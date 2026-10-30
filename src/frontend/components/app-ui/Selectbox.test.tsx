@@ -31,7 +31,9 @@ vi.mock("~/frontend/components/ui/select", () => ({
   SelectContent: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),
-  SelectGroup: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SelectGroup: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
   SelectItem: ({
     children,
     value,
@@ -97,12 +99,7 @@ describe("Selectbox", () => {
   });
 
   it("label 指定時は SelectLabel を描画する", () => {
-    render(
-      <Selectbox
-        items={[{ value: "a", label: "A" }]}
-        label="Pace"
-      />,
-    );
+    render(<Selectbox items={[{ value: "a", label: "A" }]} label="Pace" />);
 
     expect(mockLabel).toHaveBeenCalledWith("Pace");
   });

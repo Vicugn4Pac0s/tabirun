@@ -6,7 +6,7 @@ const MAX_STREET_VIEW_SNAP_DISTANCE_METERS = 30;
 
 function getDistanceMeters(
   from: google.maps.LatLngLiteral,
-  to: google.maps.LatLngLiteral
+  to: google.maps.LatLngLiteral,
 ) {
   const earthRadiusMeters = 6371000;
   const latDiff = ((to.lat - from.lat) * Math.PI) / 180;
@@ -39,27 +39,28 @@ export const useMoveStreetView = () => {
           : position;
 
       const streetViewService = new window.google.maps.StreetViewService();
-      const panorama = await new Promise<google.maps.StreetViewPanoramaData | null>(
-        (resolve) => {
-          void streetViewService.getPanorama(
-            {
-              location: requestedPosition,
-              radius: STREET_VIEW_SEARCH_RADIUS_METERS,
-            },
-            (data, status) => {
-              if (
-                status === window.google.maps.StreetViewStatus.OK &&
-                data?.location?.latLng
-              ) {
-                resolve(data);
-                return;
-              }
+      const panorama =
+        await new Promise<google.maps.StreetViewPanoramaData | null>(
+          (resolve) => {
+            void streetViewService.getPanorama(
+              {
+                location: requestedPosition,
+                radius: STREET_VIEW_SEARCH_RADIUS_METERS,
+              },
+              (data, status) => {
+                if (
+                  status === window.google.maps.StreetViewStatus.OK &&
+                  data?.location?.latLng
+                ) {
+                  resolve(data);
+                  return;
+                }
 
-              resolve(null);
-            }
-          );
-        }
-      );
+                resolve(null);
+              },
+            );
+          },
+        );
 
       const resolvedPosition = panorama?.location?.latLng?.toJSON();
       if (
@@ -76,7 +77,7 @@ export const useMoveStreetView = () => {
       streetView.current.setVisible(true);
       return true;
     },
-    [setStreetViewUnavailable, streetView]
+    [setStreetViewUnavailable, streetView],
   );
 
   return moveStreetView;

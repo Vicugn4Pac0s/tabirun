@@ -11,15 +11,15 @@ import {
   UserProfileFormFields,
 } from "~/frontend/features/user/components/UserProfileFormFields";
 import { useCompleteInitialProfile } from "~/frontend/features/user/api/useCompleteInitialProfile";
-import {
-  userInitialProfileSchema,
-} from "~/shared/schemas";
+import { userInitialProfileSchema } from "~/shared/schemas";
 
 type InitialProfileFormProps = {
   initialValues: UserProfileFormValues;
 };
 
-export const InitialProfileForm = ({ initialValues }: InitialProfileFormProps) => {
+export const InitialProfileForm = ({
+  initialValues,
+}: InitialProfileFormProps) => {
   const router = useRouter();
   const { completeInitialProfile, isCompleting } = useCompleteInitialProfile();
 

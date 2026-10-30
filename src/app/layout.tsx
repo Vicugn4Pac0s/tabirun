@@ -1,11 +1,11 @@
 import "~/frontend/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
-import { Inter } from "next/font/google"
+import { Inter } from "next/font/google";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { Toaster } from "~/frontend/components/ui/sonner"
+import { Toaster } from "~/frontend/components/ui/sonner";
 
 /**
  * Inter フォント設定オブジェクト。
@@ -21,7 +21,7 @@ import { Toaster } from "~/frontend/components/ui/sonner"
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-})
+});
 
 export const metadata: Metadata = {
   title: "TABIRUN",

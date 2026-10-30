@@ -16,7 +16,10 @@ export const useCreateRoute = () => {
     },
   });
 
-  const createRoute = async (input: RouteCreateInput, cb?: CreateRouteCallbacks) => {
+  const createRoute = async (
+    input: RouteCreateInput,
+    cb?: CreateRouteCallbacks,
+  ) => {
     return executeMutationWithCallbacks(mutation, input, cb);
   };
 

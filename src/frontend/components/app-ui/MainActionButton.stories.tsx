@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import MainActionButton from "./MainActionButton";
 
-import { fn } from 'storybook/test';
+import { fn } from "storybook/test";
 
 const meta = {
-  title: 'Atoms/MainActionButton',
+  title: "Atoms/MainActionButton",
   component: MainActionButton,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
     onClick: fn(),
     onMouseOver: fn(),
@@ -22,25 +22,25 @@ type Story = StoryObj<typeof meta>;
 
 export const Add: Story = {
   args: {
-    type: 'add',
+    type: "add",
   },
 };
 
 export const Delete: Story = {
   args: {
-    type: 'delete',
+    type: "delete",
   },
 };
 
 export const Play: Story = {
   args: {
-    type: 'play',
+    type: "play",
   },
 };
 
 export const Disabled: Story = {
   args: {
-    type: 'add',
+    type: "add",
     disabled: true,
   },
 };

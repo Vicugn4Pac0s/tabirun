@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import SubActionButton from "./SubActionButton";
 
-import { fn } from 'storybook/test';
+import { fn } from "storybook/test";
 
 const meta = {
-  title: 'Atoms/SubActionButton',
+  title: "Atoms/SubActionButton",
   component: SubActionButton,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   args: {
     onClick: fn(),
     onMouseOver: fn(),
@@ -22,31 +22,31 @@ type Story = StoryObj<typeof meta>;
 
 export const First: Story = {
   args: {
-    type: 'first',
+    type: "first",
   },
 };
 
 export const Prev: Story = {
   args: {
-    type: 'prev',
+    type: "prev",
   },
 };
 
 export const Next: Story = {
   args: {
-    type: 'next',
+    type: "next",
   },
 };
 
 export const Last: Story = {
   args: {
-    type: 'last',
+    type: "last",
   },
 };
 
 export const Disabled: Story = {
   args: {
-    type: 'prev',
+    type: "prev",
     disabled: true,
   },
 };

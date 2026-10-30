@@ -10,15 +10,14 @@ export const useGoogleMapDirectionQuery = (
 ) => {
   const enabled = options.enabled && routePoints.length >= 2;
 
-  const { data, ...query } =
-    api.googlemap.getDirection.useQuery(
-      { routePoints },
-      {
-        enabled,
-        staleTime: Infinity,
-        retry: false,
-      },
-    );
+  const { data, ...query } = api.googlemap.getDirection.useQuery(
+    { routePoints },
+    {
+      enabled,
+      staleTime: Infinity,
+      retry: false,
+    },
+  );
 
   return {
     directions: data ?? null,
