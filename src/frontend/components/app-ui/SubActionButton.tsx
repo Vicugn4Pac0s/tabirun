@@ -1,4 +1,9 @@
-import { ArrowLeft, ArrowLeftToLine, ArrowRight, ArrowRightToLine } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowLeftToLine,
+  ArrowRight,
+  ArrowRightToLine,
+} from "lucide-react";
 import { motion } from "motion/react";
 
 type Props = {
@@ -41,7 +46,7 @@ const SubActionButton = ({
   }
   return (
     <motion.button
-      className={`flex flex-col gap-1 items-center justify-center h-16 w-16 bg-white ${className} disabled:opacity-50`}
+      className={`flex h-16 w-16 flex-col items-center justify-center gap-1 bg-white ${className} disabled:opacity-50`}
       disabled={disabled}
       onClick={onClick}
       onMouseOver={onMouseOver}
@@ -52,9 +57,7 @@ const SubActionButton = ({
       }}
     >
       <Icon className="h-6 w-6" />
-      <span>
-        {text}
-      </span>
+      <span>{text}</span>
     </motion.button>
   );
 };

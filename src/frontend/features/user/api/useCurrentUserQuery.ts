@@ -4,7 +4,9 @@ type UseCurrentUserQueryOptions = {
   enabled?: boolean;
 };
 
-export const useCurrentUserQuery = ({ enabled = true }: UseCurrentUserQueryOptions = {}) => {
+export const useCurrentUserQuery = ({
+  enabled = true,
+}: UseCurrentUserQueryOptions = {}) => {
   const { data, ...query } = api.user.getCurrent.useQuery(undefined, {
     staleTime: Infinity,
     enabled,

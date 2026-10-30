@@ -10,9 +10,12 @@ export const useRoutePolylinePath = (
   routePoints: google.maps.LatLngLiteral[],
   options: UseRoutePolylinePathOptions,
 ) => {
-  const { directions, error, ...query } = useGoogleMapDirectionQuery(routePoints, {
-    enabled: options.canUseDirections,
-  });
+  const { directions, error, ...query } = useGoogleMapDirectionQuery(
+    routePoints,
+    {
+      enabled: options.canUseDirections,
+    },
+  );
 
   const hasEnoughRoutePoints = routePoints.length >= 2;
   const isQuotaExceeded =
@@ -21,12 +24,11 @@ export const useRoutePolylinePath = (
   const shouldFallbackToStraightPolyline =
     hasEnoughRoutePoints && (!options.canUseDirections || isQuotaExceeded);
 
-  const polylinePath =
-    directions?.path.length
-      ? directions.path
-      : shouldFallbackToStraightPolyline
-        ? routePoints
-        : null;
+  const polylinePath = directions?.path.length
+    ? directions.path
+    : shouldFallbackToStraightPolyline
+      ? routePoints
+      : null;
 
   return {
     polylinePath,

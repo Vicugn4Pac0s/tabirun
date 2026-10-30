@@ -6,6 +6,11 @@ interface StatValueProps {
 
 export function StatValue({ value, unit, className }: StatValueProps) {
   return (
-    <p className={`font-inter font-black inline-flex items-baseline gap-1 ${className ?? ""}`}>{value}{unit && <span className="text-[50%]">{unit}</span>}</p>
-  )
+    <p
+      className={`inline-flex items-baseline gap-1 font-inter font-black ${className ?? ""}`}
+    >
+      {value}
+      {unit && <span className="text-[50%]">{unit}</span>}
+    </p>
+  );
 }

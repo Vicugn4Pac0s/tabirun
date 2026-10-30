@@ -58,7 +58,10 @@ export const googlemapRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const key = process.env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY;
       if (!key) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "NO_API_KEY" });
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "NO_API_KEY",
+        });
       }
 
       const pts = input.routePoints;
@@ -66,22 +69,37 @@ export const googlemapRouter = createTRPCRouter({
       const destination = pts[pts.length - 1]!;
       const intermediates = pts.slice(1, -1);
 
-      const res = await fetch("https://routes.googleapis.com/directions/v2:computeRoutes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": key,
-          "X-Goog-FieldMask": "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline",
+      const res = await fetch(
+        "https://routes.googleapis.com/directions/v2:computeRoutes",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": key,
+            "X-Goog-FieldMask":
+              "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline",
+          },
+          body: JSON.stringify({
+            origin: {
+              location: {
+                latLng: { latitude: origin.lat, longitude: origin.lng },
+              },
+            },
+            destination: {
+              location: {
+                latLng: {
+                  latitude: destination.lat,
+                  longitude: destination.lng,
+                },
+              },
+            },
+            intermediates: intermediates.map((p) => ({
+              location: { latLng: { latitude: p.lat, longitude: p.lng } },
+            })),
+            travelMode: input.travelMode,
+          }),
         },
-        body: JSON.stringify({
-          origin: { location: { latLng: { latitude: origin.lat, longitude: origin.lng } } },
-          destination: { location: { latLng: { latitude: destination.lat, longitude: destination.lng } } },
-          intermediates: intermediates.map((p) => ({
-            location: { latLng: { latitude: p.lat, longitude: p.lng } },
-          })),
-          travelMode: input.travelMode,
-        }),
-      });
+      );
 
       if (!res.ok) {
         throw new TRPCError({ code: "BAD_REQUEST", message: await res.text() });
@@ -91,14 +109,19 @@ export const googlemapRouter = createTRPCRouter({
       const parsed = ComputeRoutesResponseSchema.safeParse(raw);
 
       if (!parsed.success) {
-        throw new TRPCError({ code: "PARSE_ERROR", message: "INVALID_ROUTES_API_RESPONSE" });
+        throw new TRPCError({
+          code: "PARSE_ERROR",
+          message: "INVALID_ROUTES_API_RESPONSE",
+        });
       }
 
       const r = parsed.data.routes?.[0];
       if (!r) throw new TRPCError({ code: "NOT_FOUND", message: "NO_ROUTE" });
 
       const encodedPolyline = r.polyline?.encodedPolyline ?? null;
-      const path = encodedPolyline ? decodePolylineToLatLngLiteral(encodedPolyline) : [];
+      const path = encodedPolyline
+        ? decodePolylineToLatLngLiteral(encodedPolyline)
+        : [];
 
       await incrementQuota(ctx.db, ctx.session.user.id, "direction");
 

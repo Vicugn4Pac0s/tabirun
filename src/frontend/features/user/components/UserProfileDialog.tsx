@@ -34,10 +34,8 @@ export const UserProfileDialog = ({
 }: UserProfileDialogProps) => {
   const { user, isLoading, error } = useCurrentUserQuery();
   const { updateUserProfile, isUpdating } = useUpdateUserProfile();
-  const {
-    canReadCurrentStreetViewPosition,
-    getCurrentStreetViewPosition,
-  } = useCurrentStreetViewPosition();
+  const { canReadCurrentStreetViewPosition, getCurrentStreetViewPosition } =
+    useCurrentStreetViewPosition();
 
   const {
     register,
@@ -75,7 +73,9 @@ export const UserProfileDialog = ({
 
   useEffect(() => {
     if (!open || !error) return;
-    toast.error("プロフィール情報を取得できませんでした。時間をおいて再度お試しください。");
+    toast.error(
+      "プロフィール情報を取得できませんでした。時間をおいて再度お試しください。",
+    );
   }, [error, open]);
 
   const submitProfile = async (data: UserProfileFormValues) => {
@@ -87,7 +87,9 @@ export const UserProfileDialog = ({
         onOpenChange(false);
       },
       onError: () => {
-        toast.error("プロフィールを更新できませんでした。時間をおいて再度お試しください。");
+        toast.error(
+          "プロフィールを更新できませんでした。時間をおいて再度お試しください。",
+        );
       },
     });
   };
@@ -132,9 +134,7 @@ export const UserProfileDialog = ({
               errors={errors}
               disabled={isLoading || isUpdating}
               showHomeLocationFields
-              canUseCurrentStreetViewPosition={
-                canReadCurrentStreetViewPosition
-              }
+              canUseCurrentStreetViewPosition={canReadCurrentStreetViewPosition}
               onUseCurrentStreetViewPosition={applyCurrentStreetViewPosition}
             />
           </div>

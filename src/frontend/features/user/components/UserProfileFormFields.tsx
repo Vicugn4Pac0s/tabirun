@@ -1,7 +1,13 @@
 "use client";
 
 import { MapPinned } from "lucide-react";
-import { Controller, type Control, type FieldErrors, type FieldError, type UseFormRegister } from "react-hook-form";
+import {
+  Controller,
+  type Control,
+  type FieldErrors,
+  type FieldError,
+  type UseFormRegister,
+} from "react-hook-form";
 
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
@@ -78,7 +84,9 @@ export const UserProfileFormFields = ({
             setValueAs: toOptionalString,
           })}
         />
-        {birthDateError && <p className="text-sm text-red-500">{birthDateError}</p>}
+        {birthDateError && (
+          <p className="text-sm text-red-500">{birthDateError}</p>
+        )}
       </div>
 
       <div className="space-y-1">
@@ -151,7 +159,8 @@ export const UserProfileFormFields = ({
             <div className="space-y-1">
               <p className="text-sm font-medium">地図の初期位置</p>
               <p className="text-xs leading-relaxed text-base-gray">
-                現在Street Viewで表示している地点をホーム地点として保存できます。
+                現在Street
+                Viewで表示している地点をホーム地点として保存できます。
               </p>
             </div>
             {onUseCurrentStreetViewPosition ? (
@@ -181,7 +190,9 @@ export const UserProfileFormFields = ({
                   setValueAs: toNullableFloat,
                 })}
               />
-              {homeLatError && <p className="text-sm text-red-500">{homeLatError}</p>}
+              {homeLatError && (
+                <p className="text-sm text-red-500">{homeLatError}</p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -195,7 +206,9 @@ export const UserProfileFormFields = ({
                   setValueAs: toNullableFloat,
                 })}
               />
-              {homeLngError && <p className="text-sm text-red-500">{homeLngError}</p>}
+              {homeLngError && (
+                <p className="text-sm text-red-500">{homeLngError}</p>
+              )}
             </div>
           </div>
         </div>

@@ -47,10 +47,7 @@ class MockLatLng {
 class MockStreetViewService {
   getPanorama(
     request: unknown,
-    callback: (
-      data: typeof panoramaData,
-      status: string,
-    ) => void,
+    callback: (data: typeof panoramaData, status: string) => void,
   ) {
     getPanorama(request);
     callback(panoramaData, panoramaStatus);
@@ -98,7 +95,9 @@ describe("useMoveStreetView", () => {
 
     const { result } = renderHook(() => useMoveStreetView());
 
-    await expect(result.current({ lat: 35.0, lng: 139.0 })).resolves.toBe(false);
+    await expect(result.current({ lat: 35.0, lng: 139.0 })).resolves.toBe(
+      false,
+    );
     expect(getPanorama).not.toHaveBeenCalled();
   });
 
@@ -115,7 +114,9 @@ describe("useMoveStreetView", () => {
     const { result } = renderHook(() => useMoveStreetView());
 
     await expect(
-      result.current(new MockLatLng(35.0, 139.0) as unknown as google.maps.LatLng),
+      result.current(
+        new MockLatLng(35.0, 139.0) as unknown as google.maps.LatLng,
+      ),
     ).resolves.toBe(true);
 
     expect(getPanorama).toHaveBeenCalledWith({
@@ -133,7 +134,9 @@ describe("useMoveStreetView", () => {
 
     const { result } = renderHook(() => useMoveStreetView());
 
-    await expect(result.current({ lat: 35.0, lng: 139.0 })).resolves.toBe(false);
+    await expect(result.current({ lat: 35.0, lng: 139.0 })).resolves.toBe(
+      false,
+    );
 
     expect(setStreetViewUnavailable).toHaveBeenCalledWith(true);
     expect(setPosition).not.toHaveBeenCalled();
@@ -152,7 +155,9 @@ describe("useMoveStreetView", () => {
 
     const { result } = renderHook(() => useMoveStreetView());
 
-    await expect(result.current({ lat: 35.0, lng: 139.0 })).resolves.toBe(false);
+    await expect(result.current({ lat: 35.0, lng: 139.0 })).resolves.toBe(
+      false,
+    );
 
     expect(setStreetViewUnavailable).toHaveBeenCalledWith(true);
     expect(setPosition).not.toHaveBeenCalled();

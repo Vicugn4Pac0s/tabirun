@@ -131,7 +131,9 @@ describe("user profile schemas", () => {
     const result = userProfileUpdateSchema.safeParse({});
 
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0]?.message).toBe("At least one field is required");
+    expect(result.error?.issues[0]?.message).toBe(
+      "At least one field is required",
+    );
   });
 
   it("ホーム地点の緯度・経度をセットで受け入れる", () => {
@@ -150,7 +152,7 @@ describe("user profile schemas", () => {
 
     expect(result.success).toBe(false);
     expect(result.error?.issues[0]?.message).toBe(
-      "ホーム地点の緯度・経度はセットで入力してください"
+      "ホーム地点の緯度・経度はセットで入力してください",
     );
   });
 
@@ -185,7 +187,9 @@ describe("user profile schemas", () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0]?.message).toBe("身長は1以上で入力してください");
+    expect(result.error?.issues[0]?.message).toBe(
+      "身長は1以上で入力してください",
+    );
   });
 
   it("生年月日が空の初期プロフィール入力を拒否する", () => {
