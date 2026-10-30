@@ -78,3 +78,15 @@
 - 完了時はbranch名、commit hash、検証結果、`git diff <base-branch>...HEAD` によるローカル差分確認方法を報告する。mergeはユーザーが明示的に依頼した場合だけ行う。
 - 不要なcommitを作らず、作業前に履歴と差分を確認する。merge後は不要になったローカル作業branchとlocal remote-tracking refを削除する。
 - commitの削除、squash、rebaseなど履歴を書き換える操作は、対象と影響を計画に明記し、明示的に承認された場合だけ行う。必要な変更を含むcommitを不要と推測して削除しない。
+
+## Cloud Agent
+
+Cloud Agent は、`.env.example` の Supabase 接続先ではなく、VM 内の PostgreSQL 16 で開発する。
+
+- npm は `package.json` の `packageManager`（npm 11.0.0）。依存関係のインストールは `corepack npm ci`。
+- 起動時に PostgreSQL を開始し、ロールとデータベース `tabirun` を用意する。接続先は `postgresql://tabirun:tabirun@127.0.0.1:5432/tabirun`。
+- `.env` が無いときだけ、起動スクリプトがローカル用の値を書く。`AUTH_SECRET`、`GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`、`DATABASE_URL`、`NEXT_PRIVATE_GOOGLE_MAP_API_KEY`、`NEXT_PUBLIC_GOOGLE_MAP_API_KEY` が環境変数にあればそれを使う。無ければ Google の ID と Secret はアプリ起動用のプレースホルダ、Maps のキーは空、`AUTH_SECRET` は都度生成する。Google ログインと Routes API による経路取得には実キーが必要。
+- 起動のたびに `npm run db:migrate` を実行する。`tabirun_pace` が空のときだけ `npm run db:seed` する。
+- 開発サーバーは `npm run dev -- --hostname 0.0.0.0 --port 3000`。ポート 3000 が既に開いていれば再起動しない。
+- Storybook のブラウザテストは Playwright Chromium を使う。コマンドは `npm run test:storybook`。
+- `npm run format:check` は、既存ファイルの Prettier 差分で失敗することがある。依存関係の導入失敗とは限らない。
