@@ -79,7 +79,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/eslint": "^8.56.10",
     "@types/google.maps": "^3.58.1",
-    "@types/node": "^20.14.10",
+    "@types/node": "^24.0.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
@@ -106,5 +106,8 @@
   "ct3aMetadata": {
     "initVersion": "7.38.1"
   },
-  "packageManager": "npm@11.0.0"
+  "packageManager": "npm@11.0.0",
+  "engines": {
+    "node": "24.x"
+  }
 }
