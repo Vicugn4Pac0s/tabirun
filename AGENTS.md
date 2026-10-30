@@ -89,4 +89,3 @@ Cloud Agent は、`.env.example` の Supabase 接続先ではなく、VM 内の 
 - 起動のたびに `npm run db:migrate` を実行する。`tabirun_pace` が空のときだけ `npm run db:seed` する。
 - 開発サーバーは `npm run dev -- --hostname 0.0.0.0 --port 3000`。ポート 3000 が既に開いていれば再起動しない。
 - Storybook のブラウザテストは Playwright Chromium を使う。コマンドは `npm run test:storybook`。
-- `npm run format:check` は、既存ファイルの Prettier 差分で失敗することがある。依存関係の導入失敗とは限らない。
