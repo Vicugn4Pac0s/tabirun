@@ -65,6 +65,7 @@
 - 正常系だけでなく、境界値、異常系、認可、回帰リスクをテストする。
 - コード変更後は原則としてformat、lint、型チェック、unit test、buildを実行する。UI/Story変更ではStorybook testも行う。
 - 実行できない検証は、理由と未確認項目を最終報告へ明記する。
+- CI（`.github/workflows/ci.yml`）は `main` と `staging` 向けの pull request、および `main` への push で `npm ci` のあと `format:check`、`check`、`test:run`、`build` を実行する。Node は `.nvmrc` の 24 系。build はダミー環境変数のみを使い、DB には接続しない。`test:storybook` は CI に含めない。
 
 ## セキュリティとGit
 

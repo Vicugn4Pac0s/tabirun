@@ -75,6 +75,17 @@ npm run db:seed
 
 `db:migrate` はスキーマをデータベースへ適用します。`db:seed` は初期ペースデータを登録するため、新規データベースに対して一度だけ実行してください。
 
+## CI
+
+GitHub Actions（`.github/workflows/ci.yml`）は、`main` と `staging` への pull request、および `main` への push で次を実行します。Node.js は `.nvmrc` の 24 系です。
+
+- `npm run format:check`
+- `npm run check`（lint と型チェック）
+- `npm run test:run`
+- `npm run build`
+
+build は検証用のダミー環境変数を使い、データベースには接続しません。Storybook テストは CI の対象外です。
+
 ## ディレクトリ概要
 
 - `src/app`: App Router のページとレイアウト
