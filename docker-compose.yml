@@ -1,0 +1,17 @@
+# ローカル開発用 PostgreSQL（スキーマ試行など）。Preview 用 DB の代わりに使う。
+# 起動: docker compose up -d
+# DATABASE_URL 例: postgresql://tabirun:tabirun@127.0.0.1:5432/tabirun
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: tabirun
+      POSTGRES_PASSWORD: tabirun
+      POSTGRES_DB: tabirun
+    ports:
+      - "5432:5432"
+    volumes:
+      - tabirun_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  tabirun_postgres_data:
