@@ -4,11 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { quotaProtectedProcedure } from "../procedure";
 import { incrementQuota } from "~/server/quota/service";
-
-const LatLngLiteral = z.object({
-  lat: z.number(),
-  lng: z.number(),
-});
+import { routePointsSchema } from "~/shared/schemas";
 
 const decodePolylineToLatLngLiteral = (encoded: string) => {
   return decode(encoded).map(([lat, lng]) => ({
@@ -50,7 +46,7 @@ export const googlemapRouter = createTRPCRouter({
   getDirection: quotaProtectedProcedure("direction")
     .input(
       z.object({
-        routePoints: z.array(LatLngLiteral).min(2),
+        routePoints: routePointsSchema,
         travelMode: z.enum(["WALK", "DRIVE", "BICYCLE"]).default("WALK"),
       }),
     )
