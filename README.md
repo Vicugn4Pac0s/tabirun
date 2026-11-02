@@ -35,10 +35,10 @@ npm install
 
 ### 環境変数
 
-`.env.example` をコピーして **`.env.local` を推奨**（`.env` でも可）し、各サービスで発行した値を設定します。これらのファイルは Git に登録しません。
+`.env.example` をコピーして `.env` を作成し、各サービスで発行した値を設定します。`.env` は Git に登録しません。`npm run db:migrate` や `db:seed` など DB 系コマンドは `.env` を読み込みます（詳細は [docs/ENVIRONMENTS.md](docs/ENVIRONMENTS.md)）。
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
 変数名の一覧と、本番・Preview・ローカルでの設定方針は [docs/ENVIRONMENTS.md](docs/ENVIRONMENTS.md) を参照してください。
