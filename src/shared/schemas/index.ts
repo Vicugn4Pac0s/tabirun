@@ -7,9 +7,13 @@ const homeLocationSchema = z.object({
   homeLng: homeCoordinateSchema.min(-180).max(180).nullable().optional(),
 });
 
+/** 地図クリックで増える経由点の上限（DoS 緩和。実利用は数十点程度） */
+export const ROUTE_POINTS_MAX = 1000;
+
 export const routePointsSchema = z
   .array(z.object({ lat: z.number(), lng: z.number() }))
-  .min(2);
+  .min(2)
+  .max(ROUTE_POINTS_MAX);
 
 export const routeCreateSchema = z.object({
   title: z

@@ -6,6 +6,7 @@ import {
   routeUpdateSchema,
   userInitialProfileSchema,
   userProfileUpdateSchema,
+  ROUTE_POINTS_MAX,
 } from "~/shared/schemas";
 
 describe("route schemas", () => {
@@ -22,6 +23,28 @@ describe("route schemas", () => {
     const result = routePointsSchema.safeParse([{ lat: 35.0, lng: 139.0 }]);
 
     expect(result.success).toBe(false);
+  });
+
+  it(`${ROUTE_POINTS_MAX + 1} 点以上のルートポイントを拒否する`, () => {
+    const points = Array.from({ length: ROUTE_POINTS_MAX + 1 }, (_, index) => ({
+      lat: 35 + index * 0.0001,
+      lng: 139,
+    }));
+
+    const result = routePointsSchema.safeParse(points);
+
+    expect(result.success).toBe(false);
+  });
+
+  it(`${ROUTE_POINTS_MAX} 点のルートポイントを受け入れる`, () => {
+    const points = Array.from({ length: ROUTE_POINTS_MAX }, (_, index) => ({
+      lat: 35 + index * 0.0001,
+      lng: 139,
+    }));
+
+    const result = routePointsSchema.safeParse(points);
+
+    expect(result.success).toBe(true);
   });
 
   it("タイトルとポイントを含むルート作成入力を受け入れる", () => {

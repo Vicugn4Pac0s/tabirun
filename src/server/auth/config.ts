@@ -1,6 +1,5 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import type { Adapter } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
 
 import { db } from "~/server/db";
@@ -59,7 +58,7 @@ export const authConfig = {
     accountsTable: accounts,
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
-  }) as Adapter,
+  }),
   callbacks: {
     session: ({ session, user }) => ({
       ...session,
