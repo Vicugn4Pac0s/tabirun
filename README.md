@@ -4,6 +4,8 @@ TABIRUN は、走りたいルートを地図上で自由に作成できるアプ
 
 プロダクト方針・ロードマップ: [docs/ROADMAP.md](docs/ROADMAP.md)
 
+デプロイ環境（本番 / staging / PR プレビュー / ローカル）と DB・環境変数: [docs/ENVIRONMENTS.md](docs/ENVIRONMENTS.md)
+
 ## 技術スタック
 
 - Next.js
@@ -33,17 +35,13 @@ npm install
 
 ### 環境変数
 
-`.env.example` をコピーして `.env` を作成し、各サービスで発行した値を設定します。`.env` はGitに登録しないでください。
+`.env.example` をコピーして **`.env.local` を推奨**（`.env` でも可）し、各サービスで発行した値を設定します。これらのファイルは Git に登録しません。
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-- `AUTH_SECRET`: NextAuth.js のシークレット
-- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: Googleログイン用のOAuth認証情報
-- `DATABASE_URL`: Supabase PostgreSQLの接続文字列
-- `NEXT_PRIVATE_GOOGLE_MAP_API_KEY`: サーバー側のRoutes API用キー
-- `NEXT_PUBLIC_GOOGLE_MAP_API_KEY`: ブラウザ側のMaps JavaScript API用キー
+変数名の一覧と、本番・Preview・ローカルでの設定方針は [docs/ENVIRONMENTS.md](docs/ENVIRONMENTS.md) を参照してください。
 
 ### 開発サーバー起動
 
@@ -75,7 +73,9 @@ npm run db:studio
 npm run db:seed
 ```
 
-`db:migrate` はスキーマをデータベースへ適用します。`db:seed` は初期ペースデータを登録するため、新規データベースに対して一度だけ実行してください。
+`db:migrate` はスキーマをデータベースへ適用します。`db:seed` は初期ペースデータを登録するため、新規データベースに対して一度だけ実行してください。Preview 用 DB への適用手順と注意（本番 DB を誤って触らないこと）は [docs/ENVIRONMENTS.md](docs/ENVIRONMENTS.md) を参照してください。
+
+ローカル専用 DB を Docker で立てる例は、リポジトリ直下の `docker-compose.yml` を参照してください。
 
 ## CI
 
