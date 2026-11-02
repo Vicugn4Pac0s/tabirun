@@ -119,7 +119,7 @@ Cloud Agent など VM 内開発では、PostgreSQL をホスト上で用意し `
 | `NEXT_PUBLIC_GOOGLE_MAP_API_KEY` | 本番用 Maps JS API キー | 開発用キー（リファラー制限あり） | 通常は開発用キー |
 | `NEXT_PRIVATE_GOOGLE_MAP_API_KEY` | サーバー Routes API 用 | 本番と共用 | 本番と同じキーを設定することが多い |
 
-Supabase の接続文字列（`DATABASE_URL`）は、サーバーレス向けに **Transaction pooler**（ポート `6543`、`postgres.<project-ref>` 形式のユーザー名、`?sslmode=require`）を使う構成を推奨します。プールャーのホスト名プレフィックス（`aws-0` / `aws-1` など）はプロジェクトごとに異なるため、**正確な URI は Supabase ダッシュボードの Connect → Transaction pooler からコピー**してください。形式の例は `.env.example` を参照してください。
+Supabase の接続文字列（`DATABASE_URL`）は、サーバーレス向けに **Transaction pooler**（ポート `6543`、`postgres.<project-ref>` 形式のユーザー名、`?sslmode=require`）を使う構成を推奨します。poolerのホスト名プレフィックス（`aws-0` / `aws-1` など）はプロジェクトごとに異なるため、**正確な URI は Supabase ダッシュボードの Connect → Transaction pooler からコピー**してください。形式の例は `.env.example` を参照してください。
 
 Vercel では、本番デプロイに **Production** 環境変数、staging と PR プレビューに **Preview** 環境変数を設定します。
 
