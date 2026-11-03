@@ -1,4 +1,4 @@
-# ローカル引き渡しテンプレート
+# PR 引き渡しテンプレート
 
 ## 背景と目的
 
@@ -10,19 +10,19 @@
 
 ## 実行したテスト・検証
 
-- 実行したコマンドと結果
+- 実行したコマンドと結果（CI相当: `npm run format:check && npm run check && npm run test:run && npm run build`）
 - 未実施項目と理由
 
 ## 手動確認
 
-## ローカルGit情報
+## Git / PR 情報
 
 - ベースbranch:
 - 作業branch:
 - commit:
+- PR URL:
 - 差分確認: `git diff <base-branch>...<work-branch>`
-- cleanupした不要branch/ref:
 
-mergeはユーザーが明示的に依頼した場合だけ行う。
+merge はユーザーが行う（`main` / `staging` への直接 push・merge はエージェントが行わない）。
 
 ## 残っている課題・制約
