@@ -51,7 +51,7 @@
 ## 3. 命名とファイル構成
 
 - `components/ui` だけは shadcn 生成の kebab-case（例: `dropdown-menu.tsx`）。
-- hook ファイルは `useXxx.ts`。query は `useXxxQuery`、画面ロジック hook は `use<Feature><名詞>`（`useRouteCreation`, `useRouteDraft`）。
+- hook ファイルは `useXxx.ts`。query は `useXxxQuery`、画面ロジック hook は `use<Feature><Action>`（例: `useRouteCreation`, `useRouteDraft`）。
 - lib: 1関数1ファイル、`camelCase` の動詞始まり（`getRouteMenuLabel.ts`）。汎用の計算群は1ファイルにまとめてよい（`frontend/lib/running.ts`）。
 - feature の型は `features/<feature>/types.ts`、Context は `features/<feature>/providers/XxxProvider.tsx`（例: `GoogleMapProvider`、`useGoogleMap` を同ファイルから export）。
 - イベント props は `onXxx`（`onTogglePoint`, `onPaceChange`, `onOpenChange`）。boolean は `is/can/show/has` か HTML 属性名（`disabled`）。
