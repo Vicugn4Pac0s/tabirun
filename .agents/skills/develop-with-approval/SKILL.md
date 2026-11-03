@@ -48,7 +48,9 @@ PR作成・更新前には文書/Skillのみの変更でもCI相当の確認を�
 
 作業前に `git log --oneline --decorate` と差分を確認し、不要なcheckpoint commitを作らない。自分が変更したパスだけを明示してstageし、`git diff --cached` を確認してからcommitする。件名は `AGENTS.md` の commit メッセージ規約に従う。
 
-検証後、作業branchを push し、`main` 向け PR を作成する。既存PRがある場合は同じbranchへのpushで更新し、重複作成しない（`main` / `staging` への直接 push・merge・force push はしない）。PR 本文は日本語で、変更内容、設計判断、実行した検証、未確認事項を書く。
+**確認モード**（`AGENTS.md` の作業モード）のときは、検証と自己レビューまで行い、stage・commit・push・PR は行わない。変更ファイル、`git diff` の要点、検証結果を報告して次の指示を待つ。
+
+**PRモード**では、検証後に作業branchを push し、`main` 向け PR を作成する。既存PRがある場合は同じbranchへのpushで更新し、重複作成しない（`main` / `staging` への直接 push・merge・force push はしない）。PR 本文は日本語で、変更内容、設計判断、実行した検証、未確認事項を書く。
 
 commitの削除、squash、rebaseは、対象と影響を示した明示的承認なしに行わない。
 
