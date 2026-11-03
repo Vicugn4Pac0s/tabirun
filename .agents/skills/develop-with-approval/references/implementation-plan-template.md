@@ -8,7 +8,9 @@
 
 ## 作業モード
 
-- PRモード（デフォルト） / 確認モード（依頼に「commitしないで」「確認モード」等がある場合）— `AGENTS.md` の「作業モード」に従う
+- 既定: ローカルエージェントは **確認モード**、Cloud Agent は **PRモード**（`AGENTS.md` の「作業モード」）
+- 依頼に「commitして」「PRにして」「PRモード」がある場合、または Cloud Agent 起動指示で PR まで求められている場合は **PRモード**
+- 確認モード中にユーザーが PR 操作を指示したら PRモードに切り替える
 
 ## 現状の関連実装
 
@@ -42,7 +44,7 @@
 ## Gitと前提
 
 - ベースbranch、作業branch候補、commit方針
-- `main` / `staging` への直接 push・merge は行わない（作業branch の push と main 向け PR は `AGENTS.md` に従う）
+- `main` / `staging` への直接 push・merge は行わない。**PRモード**のときだけ作業branch の push と main 向け PR を行う（`AGENTS.md`）
 - コードから推測した前提とユーザー判断が必要な事項
 
 ## 承認依頼

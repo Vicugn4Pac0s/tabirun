@@ -20,9 +20,11 @@
 - 計画の詳細手順とテンプレートは `$develop-with-approval` Skillに従う。
 
 ## 作業モード
-- **PRモード（デフォルト）**: 作業branchで commit → push → `main` 向け PR 作成まで行う。
-- **確認モード**: 依頼に「commitしないで」「確認しながら」「確認モード」などとある場合は、作業ツリーのファイル編集だけ行う。stage・commit・push・branch作成/切替・PR操作はしない。編集ごとに変更ファイル、`git diff` の要点、実行した検証結果を報告して次の指示を待つ。ユーザーが「commitして」「PRにして」と言ったら PRモードに切り替える。
-- 確認モードは主にローカルエージェント向け。Cloud Agent は手元に変更が残らないため通常 PRモード。
+- 既定値は実行環境で決まる:
+  - **ローカルエージェント**（Codex、Cursor ローカルなど）: **確認モード**が既定。依頼に「commitして」「PRにして」「PRモード」などとある場合だけ **PRモード**。
+  - **Cloud Agent**: **PRモード**が既定（手元に変更が残らないため）。
+- **確認モード**: 作業ツリーのファイル編集だけ行う。stage・commit・push・branch作成/切替・PR操作はしない。編集ごとに変更ファイル、`git diff` の要点、実行した検証結果を報告して次の指示を待つ。ユーザーが「commitして」「PRにして」「PRモード」と言ったら PRモードに切り替える。
+- **PRモード**: 作業branchで commit → push → `main` 向け PR 作成まで行う（既存 PR があれば同じ branch で更新）。
 - どちらのモードでも承認ゲートとセキュリティのルールは同じ。
 
 ## コマンド
@@ -87,12 +89,13 @@
 - force push は禁止。rebase、squash、commit削除など履歴を書き換える操作やファイル・branchの削除は、対象と影響を示して個別に承認を得る。
 
 ## Git（ローカル・Cloud Agent 共通の remote 操作）
-- 作業branch（例: `cursor/...`, `codex/...`）への push と、`main` 向けの PR 作成までは承認なしで行ってよい（確認モードでは行わない）。
+- **PRモード**のとき、作業branch（例: `cursor/...`, `codex/...`）への push と、`main` 向けの PR 作成までは承認なしで行ってよい。確認モードでは push・PR 操作は行わない。
 - `main` / `staging` への直接 push、merge、force push、PR以外への外部コメントはしない。merge はユーザーが行う。
 - PR 本文に変更内容、設計判断、実行した検証（CI相当コマンドの結果）、未確認事項を書く。CI チェック名は `CI`。
 - ユーザーの未コミット変更がある状態で branch 切り替えや push をしない。
 
 ## Cloud Agent 環境
+- 作業モードの既定は **PRモード**（「作業モード」参照）。
 - DB は VM 内の PostgreSQL 16（`tabirun`、`127.0.0.1:5432`）。起動時に `db:migrate` が実行され、空なら `db:seed` される。
 - `.env` が無ければ起動スクリプトがローカル用の値を生成する。Google ログインと Routes API には実キーが必要で、無い場合は手動確認できない旨を報告する。
 - dev サーバーは `npm run dev -- --hostname 0.0.0.0 --port 3000`。Storybook テストは Playwright Chromium で行う。
