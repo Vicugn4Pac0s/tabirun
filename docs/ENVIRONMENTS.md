@@ -15,13 +15,15 @@ TABIRUN の実行環境（本番・staging・PR プレビュー・ローカル�
 - staging と PR プレビューは Vercel **Preview** デプロイで、Vercel 上の **Preview** 環境変数を共有します。
 - staging サイトは Vercel のデプロイ保護（Vercel アカウントへのログイン）が有効です。
 - PR プレビューも staging と同様に Preview 環境変数を使いますが、URL は PR ごとに異なります。
+- **PR プレビューでは Google ログインができないことがあります。** Google OAuth のリダイレクト URI は、本番と staging（`https://tabirun-staging.vercel.app/api/auth/callback/google`）の固定 URL のみ Cloud Console に登録しており、PR ごとに変わる Preview URL は登録できないため、ログイン試行時に `redirect_uri_mismatch` になります。ログインが必要な確認は、`main` を取り込んだ staging またはローカルで行ってください。未ログインで閲覧できる画面は PR プレビューで問題なく確認できます。
 
-## 本番のリージョン
+## リージョン
 
-本番の Vercel Functions と Supabase を東京に揃え、DB との往復レイテンシを抑えます。
+本番および Preview 用 Supabase（`tabirun-preview`）の DB を東京に揃え、Vercel Functions も東京で実行し、DB との往復レイテンシを抑えます。
 
-- **Vercel Functions**: `hnd1`（東京）— リポジトリ直下の `vercel.json` の `regions` で指定
+- **Vercel Functions**: `hnd1`（東京）— リポジトリ直下の `vercel.json` の `regions` で指定。この設定は Preview デプロイ（staging・PR プレビュー）にも適用されます。
 - **本番 DB**: Supabase `ap-northeast-1`（東京）
+- **Preview 用 DB**（`tabirun-preview`）: Supabase `ap-northeast-1`（東京）
 
 ## staging の使い方
 
