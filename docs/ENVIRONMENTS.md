@@ -16,6 +16,13 @@ TABIRUN の実行環境（本番・staging・PR プレビュー・ローカル�
 - staging サイトは Vercel のデプロイ保護（Vercel アカウントへのログイン）が有効です。
 - PR プレビューも staging と同様に Preview 環境変数を使いますが、URL は PR ごとに異なります。
 
+## 本番のリージョン
+
+本番の Vercel Functions と Supabase を東京に揃え、DB との往復レイテンシを抑えます。
+
+- **Vercel Functions**: `hnd1`（東京）— リポジトリ直下の `vercel.json` の `regions` で指定
+- **本番 DB**: Supabase `ap-northeast-1`（東京）
+
 ## staging の使い方
 
 `main` の内容を staging に早送りして push すると、staging 用 URL へ自動デプロイされます。
