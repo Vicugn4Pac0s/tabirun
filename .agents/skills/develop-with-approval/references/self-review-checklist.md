@@ -9,5 +9,5 @@
 - 正常系、境界値、異常系、回帰リスクをテストし、文書更新要否を確認した
 - `git diff --check`、staged/unstaged差分、lockfile、不要ファイル、自分以外の変更混入を確認した
 - `git log --oneline --decorate` を確認し、不要なcheckpoint commitやmerge commitを作っていない
-- merge後に不要なlocal branch/refを削除し、必要なcommitだけが残っている
+- main/stagingへの直接push・merge・force pushを行わず、削除・履歴書き換えは対象と影響の個別承認を得ている
 - 問題を見つけた場合は修正、再検証、再レビューを実施した

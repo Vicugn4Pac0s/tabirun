@@ -21,24 +21,24 @@ description: リポジトリ内の機能追加、バグ修正、リファクタ�
 
 提示した計画への明確な実装許可、または初回依頼での「承認不要」「そのまま実装してよい」、Cloud Agent 起動指示での具体的な完了条件だけを承認として扱う。曖昧な返答を推測しない。
 
-承認後に変更範囲、依存追加、migration、外部操作が重大に変わる場合は、更新計画を示して再承認を得る。本番DB・Preview DB、デプロイ、Vercel/Supabase/Google Cloud 設定は常に別途明示承認を得る。
+依存の追加・更新、schema変更・migration生成、`src/env.js` 変更、範囲外の変更、削除・履歴書き換えは、計画省略条件にかかわらず対象と影響を示して個別に承認を得る。承認済みの対象・影響が重大に変わる場合は、更新計画を示して再承認を得る。本番DB・Preview DB、デプロイ、Vercel/Supabase/Google Cloud 設定は常に別途明示承認を得る。
 
 ## 承認後の実装
 
 1. Git状態を再確認し、ユーザーの未コミット変更を上書き、破棄、自動stashしない。
 2. 計画に沿って作業branchを作成する。Cloud Agent では `cursor/<descriptive-name>-<suffix>` などリポジトリ指示に従う。
 3. 計画に沿って小さく実装する。責務分離・命名・依存方向は `AGENTS.md` に従う。
-4. 計画外の依存追加、schema変更、migration生成、`src/env.js` 変更、破壊的変更が必要になったら停止して承認を得る。
+4. 個別承認が必要な操作は、対象と影響について承認が得られていることを確認する。未承認なら停止して承認を得る。
 5. 正常系、境界値、異常系、回帰リスクをテストする。
 
 ## 検証と自己レビュー
 
-変更範囲に応じて次を実行する。
+PR作成・更新前には文書/Skillのみの変更でもCI相当の確認を実行する。変更範囲に応じて追加検証を行う。
 
-- 原則（アプリコード変更）: `npm run format:check && npm run check && npm run test:run && npm run build`
+- 必須（文書/Skillのみの変更も含む）: `npm run format:check && npm run check && npm run test:run && npm run build`
 - UI/Story 変更: 上記に加え `npm run test:storybook`、必要なら `npm run build-storybook`
-- DB: schemaと生成migrationを確認する。`db:generate` は計画済みの場合だけ実行する。`db:migrate` / `db:push` / `db:seed` の Preview・本番向け実行は `AGENTS.md` の承認ゲートに従う
-- 文書/Skillのみ: `git diff --check` と対象固有の検証を行い、無関係なアプリ検証を省略した理由を記録する
+- DB: schemaと生成migrationを確認する。`db:generate` は対象と影響の個別承認を得た場合だけ実行する。`db:migrate` / `db:push` / `db:seed` の Preview・本番向け実行は `AGENTS.md` の承認ゲートに従う
+- 文書/Skillのみ: 上記の必須コマンドに加え、`git diff --check` と対象固有の検証を行う
 
 失敗を成功扱いにしない。実行できない場合は原因、試した内容、未確認項目を記録する。
 
@@ -48,7 +48,7 @@ description: リポジトリ内の機能追加、バグ修正、リファクタ�
 
 作業前に `git log --oneline --decorate` と差分を確認し、不要なcheckpoint commitを作らない。自分が変更したパスだけを明示してstageし、`git diff --cached` を確認してからcommitする。件名は `AGENTS.md` の commit メッセージ規約に従う。
 
-検証後、作業branchを push し、`main` 向け PR を作成する（`main` / `staging` への直接 push・merge・force push はしない）。PR 本文は日本語で、変更内容、設計判断、実行した検証、未確認事項を書く。
+検証後、作業branchを push し、`main` 向け PR を作成する。既存PRがある場合は同じbranchへのpushで更新し、重複作成しない（`main` / `staging` への直接 push・merge・force push はしない）。PR 本文は日本語で、変更内容、設計判断、実行した検証、未確認事項を書く。
 
 commitの削除、squash、rebaseは、対象と影響を示した明示的承認なしに行わない。
 

@@ -15,17 +15,17 @@
   - 依頼文が「承認不要」「そのまま実装して」と明示している。
   - Cloud Agentの起動指示が、変更範囲と完了条件を具体的に示している。
   - typo・文言・コメントのみの軽微な修正（ローカル・Cloud共通）。
-- 上記でも次は必ず止めて承認を得る: 依存の追加・更新、DB schema変更とmigration生成、`src/env.js`の変更、指示範囲を超える変更、削除・履歴書き換え。
+- 上記の計画省略条件にかかわらず、次は対象と影響を示して個別に承認を得る: 依存の追加・更新、DB schema変更とmigration生成、`src/env.js`の変更、指示範囲を超える変更、削除・履歴書き換え。
 - 本番DB・Preview DBへの操作、デプロイ、Vercel/Supabase/Google Cloudの設定変更は、実装承認とは別に毎回明示承認を得る。
 - 計画の詳細手順とテンプレートは `$develop-with-approval` Skillに従う。
 
 ## コマンド
 - Node 24（`.nvmrc`）、npm（`packageManager`）、lockfileは `package-lock.json`。install はローカル `npm install`、Cloud/CI は `npm ci`。
-- CI相当の確認（PR前に必須）: `npm run format:check && npm run check && npm run test:run && npm run build`
+- CI相当の確認（文書・Skillのみの変更も含め、PR作成・更新前に必須）: `npm run format:check && npm run check && npm run test:run && npm run build`
   - `check` = lint + 型チェック。lintの実体はscripts側で管理する（Next 16 で `next lint` 廃止予定）。
 - UI/story を変えたら追加で `npm run test:storybook`（CI対象外）。
 - 整形: `npm run format:write`（変更ファイルのみに効かせる。無関係なファイルの差分はcommitしない）
-- DB: `npm run db:generate` で `drizzle/` にmigrationを生成してcommitする。`db:migrate` / `db:push` / `db:seed` はローカルDB（docker-compose か Cloud Agent VM）に対してだけ自由に実行してよい。Preview・本番DBには承認なしで実行しない。
+- DB: schema変更・migration生成の個別承認を得た後、`npm run db:generate` で `drizzle/` にmigrationを生成してcommitする。`db:migrate` / `db:push` / `db:seed` はローカルDB（docker-compose か Cloud Agent VM）に対してだけ自由に実行してよい。Preview・本番DBには承認なしで実行しない。
 
 ## アーキテクチャと依存の向き
 - `src/app`: page / layout / route handler。認証チェックとredirect、サーバーでのデータ取得、featureの画面コンポーネントの配置だけを行う。UIロジックは書かない。
@@ -46,7 +46,7 @@
 - 「見た目が似ている」ではなく「同じ理由で同時に変わる」ものだけを共通化する。
 - 共通化のために boolean / variant / type props を増やさない。props の分岐が増えるなら別コンポーネントに分ける。
 - 差分は children / slot（`panel` などのReactNode props）で受ける合成を優先する（例: `WarningBanner`, `RouteScreenLayout`, `RouteForm`）。
-- 共通部品の props は少なく保つ（目安5〜7個）。超えそうなら、分割・children/slot化・共通化しない案を比べてから決める。
+- 共通部品の props は5〜7個を目安に少なく保つ。個数だけで一律にNGとはしないが、異なる責務の混在、利用箇所ごとの boolean / variant 分岐、同時に成立しない props の組み合わせが必要になる設計はNG。目安を超える場合は、分割・children/slot化・共通化しない案を比較し、採用理由を示す。
 - 共通化・リファクタを提案するときは、計画に必ず次を書く: 共通化しない案、変更後の props 一覧と数、利用箇所の数、将来の変更でどちらが楽か。
 - feature内でしか使わないものは feature内に置く。`components/app-ui` に上げるのは2feature以上で使ってから。
 
@@ -78,7 +78,7 @@
 ## Git（共通）
 - `git add .` を使わず、自分が変えたパスだけを stage し、`git diff --cached` を確認してから commit する。
 - commit メッセージは `feat:` / `fix:` / `refactor:` / `test:` / `docs:` / `chore:` + 短い要約。
-- force push、rebase、squash、commit削除など履歴を書き換える操作は明示承認があるときだけ行う。
+- force push は禁止。rebase、squash、commit削除など履歴を書き換える操作やファイル・branchの削除は、対象と影響を示して個別に承認を得る。
 
 ## Git（ローカル・Cloud Agent 共通の remote 操作）
 - 作業branch（例: `cursor/...`, `codex/...`）への push と、`main` 向けの PR 作成までは承認なしで行ってよい。
