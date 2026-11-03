@@ -109,7 +109,7 @@ afterEach(() => {
 const defaultCenter = { lat: 35, lng: 135 };
 describe("RouteCreateScreen", () => {
   it("空の作成画面から地点を追加し、経路を再計算して保存する", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const { rerender } = render(
       <RouteCreateScreen defaultCenter={defaultCenter} />,
     );
@@ -161,7 +161,8 @@ describe("RouteCreateScreen", () => {
       points: [defaultCenter, { lat: 36, lng: 136 }],
     });
     expect(push).toHaveBeenCalledWith("/");
-  });
+    // CI では入力〜保存まで通しで実行するため、デフォルト 5s では不足することがある
+  }, 15_000);
   it("SPメニューでも名前入力と保存ボタンを表示する", async () => {
     let onViewportChange: (() => void) | undefined;
     const viewport = {
@@ -183,7 +184,7 @@ describe("RouteCreateScreen", () => {
             },
       ),
     );
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<RouteCreateScreen defaultCenter={defaultCenter} />);
     await user.type(
       screen.getByRole("textbox", { name: "ルート名" }),
@@ -217,7 +218,7 @@ describe("RouteCreateScreen", () => {
   });
 
   it("空白のみのルート名を入力するとエラーを表示して保存できない", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     render(<RouteCreateScreen defaultCenter={defaultCenter} />);
     const title = screen.getByRole("textbox", { name: "ルート名" });
     await user.type(title, "   ");
@@ -231,7 +232,7 @@ describe("RouteCreateScreen", () => {
   });
 
   it("利用上限に達したら登録地点を直線で結び、警告をサイドバーで表示する", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const { rerender } = render(
       <RouteCreateScreen defaultCenter={defaultCenter} />,
     );
