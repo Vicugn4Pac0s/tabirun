@@ -1,7 +1,7 @@
 # TABIRUN Agent Instructions
 
 走りたいルートを地図上で作るアプリ。Next.js 15 App Router / React 18 / TypeScript strict / NextAuth v5 / tRPC / Drizzle + Postgres(Supabase) / TanStack Query / Tailwind + shadcn/ui / Vitest / Storybook 9 / Google Maps。
-環境・DB・環境変数の詳細は `docs/ENVIRONMENTS.md`、プロダクト方針は `docs/ROADMAP.md`。
+環境・DB・環境変数の詳細は `docs/ENVIRONMENTS.md`、プロダクト方針は `docs/ROADMAP.md`、フロントエンドの書き方は `docs/FRONTEND_GUIDE.md`。
 
 ## 基本方針
 - 日本語で、結論 → 理由 → 必要なら例 の順に報告する。
@@ -37,7 +37,7 @@
 
 ## アーキテクチャと依存の向き
 - `src/app`: page / layout / route handler。認証チェックとredirect、サーバーでのデータ取得、featureの画面コンポーネントの配置だけを行う。UIロジックは書かない。
-- `src/frontend/features/<feature>/`: `api/`（tRPC hookのラッパー: `useXxxQuery` / `useXxxMutation`）、`hooks/`（画面ロジック）、`components/`、`lib/`（純粋関数）、`types.ts`。
+- `src/frontend/features/<feature>/`: `api/`（tRPC hookのラッパー: `useXxxQuery` / `use<動詞><名詞>`）、`hooks/`（画面ロジック）、`components/`、`lib/`（純粋関数）、`types.ts`。
 - `src/frontend/components/ui`: shadcn/ui の生成物。追加は shadcn CLI（`components.json`）で行い、手での大改造はしない。
 - `src/frontend/components/app-ui`: 2つ以上のfeatureで使う見た目だけの部品。feature・tRPC・業務知識に依存しない。
 - `src/frontend/hooks/shared`, `src/frontend/lib`: feature非依存の汎用処理。
@@ -57,6 +57,13 @@
 - 共通部品の props は5〜7個を目安に少なく保つ。個数だけで一律にNGとはしないが、異なる責務の混在、利用箇所ごとの boolean / variant 分岐、同時に成立しない props の組み合わせが必要になる設計はNG。目安を超える場合は、分割・children/slot化・共通化しない案を比較し、採用理由を示す。
 - 共通化・リファクタを提案するときは、計画に必ず次を書く: 共通化しない案、変更後の props 一覧と数、利用箇所の数、将来の変更でどちらが楽か。
 - feature内でしか使わないものは feature内に置く。`components/app-ui` に上げるのは2feature以上で使ってから。
+
+## フロントエンド
+- 詳細は `docs/FRONTEND_GUIDE.md`。ここには要点だけを書く。
+- page は認証・redirect・初期データ取得だけを行い、`<Feature><Action>Screen` に props で渡す。画面ロジック（送信・遷移・toast）は `hooks/use<Feature><Action>` に置く。
+- client の取得は `features/*/api` の hook から行う。query は `useXxxQuery`、mutation は `use<動詞><名詞>`（例: `useUpdateRoute`）で、成功時に invalidate する。
+- エラーは `TRPCError` の code だけで分岐し、server の `message` を表示しない。mutation の結果は toast、query の失敗は inline（`role="alert"`）、page では `NOT_FOUND` だけ `notFound()` にする。
+- 新規 component は `PascalCase.tsx` で named export にし、型は `type XxxProps` で書く。テストと story は同じディレクトリに置く。
 
 ## 実装規約
 - TypeScript strict と `noUncheckedIndexedAccess` を維持する。`any`・不要な `as`・`!` を増やさない。
