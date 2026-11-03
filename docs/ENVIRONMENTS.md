@@ -29,6 +29,8 @@ TABIRUN の実行環境（本番・staging・PR プレビュー・ローカル�
 
 `main` の内容を staging に早送りして push すると、staging 用 URL へ自動デプロイされます。
 
+以下は **リポジトリ管理者（ユーザー）がローカルで行う操作** です。エージェントは `AGENTS.md` に従い、`staging` への直接 push や merge は行いません。
+
 ```bash
 git fetch origin
 git checkout staging
