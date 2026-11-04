@@ -71,6 +71,26 @@ npm run db:seed
 
 参考コマンド: `npm run db:studio`（Drizzle Studio）、`npm run db:generate`、`npm run db:push`。
 
+## 本番用データベースのmigration
+
+普段の `.env` の `DATABASE_URL` は書き換えず、本番用の接続先はリポジトリ直下の `.env.db-production.local` に `DATABASE_URL` として設定します。値は Supabase ダッシュボードまたは Vercel の Production 環境変数で確認し、Git・PR・ログ・シェル履歴には残さないでください。このファイルは既存の `.gitignore` の `.env*.local` で除外されます。Next.js が自動で読む `.env.production.local` とは別のファイルです。
+
+1. 対象の変更を本番へデプロイし、Vercel のデプロイ完了と動作を確認します。コードとDBの互換性に応じた適用順は、変更ごとに事前確認してください。
+2. 本番DBへの適用について、対象migrationと影響を示して個別に承認を得ます。
+3. リポジトリルートで次を実行します。
+
+```bash
+npm run db:migrate:prod
+```
+
+4. 表示されたホストを確認します。Supabase の pooler は複数プロジェクトでホストを共有することがあるため、ホスト名だけで本番とは断定せず、本番用ファイルの接続先が正しいことも管理画面と照合してください。
+5. 確認に `y` を入力した場合だけ適用します。`n`、Enter、その他の回答では適用せず終了します。
+6. 完了メッセージと終了コードを確認し、対象migrationの適用状況と本番の動作を確認します。
+
+本番用ファイルがない、または `DATABASE_URL` が未設定・不正な場合はエラーで停止します。通常の `.env` や親プロセスの `DATABASE_URL` へはフォールバックしません。通常の `npm run db:migrate` の動作は変更していません。
+
+内部CLIの標準出力・標準エラーは、接続文字列と接続先パスワードを伏せて表示します。NOTICEやエラーの理由を確認でき、専用コマンドも開始・完了・失敗と終了コードを通知します。表示内容はDrizzle CLIが出力する情報に限られるため、適用履歴は別途確認してください。失敗時は一部が適用された可能性もあるため、再実行や `db:push` をせず、DBの状態とmigration履歴を確認してください。
+
 ## ローカル開発
 
 ### 環境変数ファイル
