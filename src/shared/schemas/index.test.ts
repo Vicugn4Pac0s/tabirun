@@ -159,33 +159,8 @@ describe("user profile schemas", () => {
     );
   });
 
-  it("ホーム地点の緯度・経度をセットで受け入れる", () => {
-    const result = userProfileUpdateSchema.safeParse({
-      homeLat: 34.682952,
-      homeLng: 135.532147,
-    });
-
-    expect(result.success).toBe(true);
-  });
-
-  it("ホーム地点の緯度だけの入力を拒否する", () => {
-    const result = userProfileUpdateSchema.safeParse({
-      homeLat: 34.682952,
-    });
-
-    expect(result.success).toBe(false);
-    expect(result.error?.issues[0]?.message).toBe(
-      "ホーム地点の緯度・経度はセットで入力してください",
-    );
-  });
-
-  it("範囲外のホーム地点を拒否する", () => {
-    const result = userProfileUpdateSchema.safeParse({
-      homeLat: 91,
-      homeLng: 181,
-    });
-
-    expect(result.success).toBe(false);
+  it.each([0, -1, 1.5])("不正な身長 %s の更新を拒否する", (height) => {
+    expect(userProfileUpdateSchema.safeParse({ height }).success).toBe(false);
   });
 
   it("正の身長と体重を持つ初期プロフィール入力を受け入れる", () => {

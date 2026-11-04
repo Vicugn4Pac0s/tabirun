@@ -18,7 +18,6 @@ import {
   type UserProfileFormValues,
   UserProfileFormFields,
 } from "~/frontend/features/user/components/UserProfileFormFields";
-import { useCurrentStreetViewPosition } from "~/frontend/features/googlemap/hooks/useCurrentStreetViewPosition";
 import { useUpdateUserProfile } from "~/frontend/features/user/api/useUpdateUserProfile";
 import { useCurrentUserQuery } from "~/frontend/features/user/api/useCurrentUserQuery";
 import { userProfileUpdateSchema } from "~/shared/schemas";
@@ -34,15 +33,11 @@ export const UserProfileDialog = ({
 }: UserProfileDialogProps) => {
   const { user, isLoading, error } = useCurrentUserQuery();
   const { updateUserProfile, isUpdating } = useUpdateUserProfile();
-  const { canReadCurrentStreetViewPosition, getCurrentStreetViewPosition } =
-    useCurrentStreetViewPosition();
-
   const {
     register,
     control,
     handleSubmit,
     reset,
-    setValue,
     formState: { errors },
   } = useForm<UserProfileFormValues>({
     resolver: zodResolver(userProfileUpdateSchema),
@@ -52,8 +47,6 @@ export const UserProfileDialog = ({
       pace: undefined,
       height: undefined,
       weight: undefined,
-      homeLat: undefined,
-      homeLng: undefined,
     },
   });
 
@@ -66,8 +59,6 @@ export const UserProfileDialog = ({
       pace: user?.pace ?? undefined,
       height: user?.height ?? undefined,
       weight: user?.weight ?? undefined,
-      homeLat: user?.homeLat ?? null,
-      homeLng: user?.homeLng ?? null,
     });
   }, [open, reset, user]);
 
@@ -94,25 +85,6 @@ export const UserProfileDialog = ({
     });
   };
 
-  const applyCurrentStreetViewPosition = () => {
-    const position = getCurrentStreetViewPosition();
-
-    if (!position) {
-      toast.error("表示中の地点を取得できませんでした。");
-      return;
-    }
-
-    setValue("homeLat", Number(position.lat.toFixed(6)), {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue("homeLng", Number(position.lng.toFixed(6)), {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    toast.success("表示中の地点をホーム地点に設定しました");
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
@@ -133,9 +105,6 @@ export const UserProfileDialog = ({
               control={control}
               errors={errors}
               disabled={isLoading || isUpdating}
-              showHomeLocationFields
-              canUseCurrentStreetViewPosition={canReadCurrentStreetViewPosition}
-              onUseCurrentStreetViewPosition={applyCurrentStreetViewPosition}
             />
           </div>
 

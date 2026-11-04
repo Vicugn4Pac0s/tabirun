@@ -26,27 +26,21 @@ beforeEach(() => {
   auth.mockResolvedValue({ user: { id: "owner" } });
   getUserHomePageSettings.mockResolvedValue({
     profileCompletedAt: new Date(),
-    homeLat: 35,
-    homeLng: 135,
   });
 });
 afterEach(cleanup);
 describe("RouteCreatePage", () => {
-  it("ユーザー設定の位置で作成画面を開く", async () => {
+  it("既定の大阪の位置で作成画面を開く", async () => {
     render(await RouteCreatePage());
     expect(
       screen.getByRole("heading", { name: "ルートを作成" }),
     ).toBeInTheDocument();
     expect(screenProps).toHaveBeenCalledWith({
-      defaultCenter: { lat: 35, lng: 135 },
+      defaultCenter: GOOGLE_MAP_DEFAULT_CENTER,
     });
   });
-  it("初期位置未設定では既定位置を使う", async () => {
-    getUserHomePageSettings.mockResolvedValue({
-      profileCompletedAt: new Date(),
-      homeLat: null,
-      homeLng: null,
-    });
+  it("ユーザー情報がない場合も既定位置を使う", async () => {
+    getUserHomePageSettings.mockResolvedValue(undefined);
     render(await RouteCreatePage());
     expect(screenProps).toHaveBeenCalledWith({
       defaultCenter: GOOGLE_MAP_DEFAULT_CENTER,

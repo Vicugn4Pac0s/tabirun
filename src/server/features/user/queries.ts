@@ -10,8 +10,6 @@ export function getUserHomePageSettings(userId: string) {
     where: eq(users.id, userId),
     columns: {
       profileCompletedAt: true,
-      homeLat: true,
-      homeLng: true,
     },
   });
 }
