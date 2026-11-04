@@ -1,6 +1,5 @@
 "use client";
 
-import { MapPinned } from "lucide-react";
 import {
   Controller,
   type Control,
@@ -11,7 +10,6 @@ import {
 
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
-import { Button } from "~/frontend/components/ui/button";
 import { Input } from "~/frontend/components/ui/input";
 
 type SelectOption = {
@@ -32,8 +30,6 @@ export type UserProfileFormValues = {
   pace?: string;
   height?: number;
   weight?: number;
-  homeLat?: number | null;
-  homeLng?: number | null;
 };
 
 type UserProfileFormFieldsProps = {
@@ -41,18 +37,12 @@ type UserProfileFormFieldsProps = {
   control: Control<UserProfileFormValues>;
   errors: FieldErrors<UserProfileFormValues>;
   disabled: boolean;
-  showHomeLocationFields?: boolean;
-  canUseCurrentStreetViewPosition?: boolean;
-  onUseCurrentStreetViewPosition?: () => void;
 };
 
 const toOptionalString = (value: string) => (value === "" ? undefined : value);
 
 const toOptionalInt = (value: string) =>
   value === "" ? undefined : Number.parseInt(value, 10);
-
-const toNullableFloat = (value: string) =>
-  value === "" ? null : Number.parseFloat(value);
 
 const getErrorMessage = (error: FieldError | undefined) => error?.message;
 
@@ -61,17 +51,12 @@ export const UserProfileFormFields = ({
   control,
   errors,
   disabled,
-  showHomeLocationFields = false,
-  canUseCurrentStreetViewPosition = false,
-  onUseCurrentStreetViewPosition,
 }: UserProfileFormFieldsProps) => {
   const birthDateError = getErrorMessage(errors.birthDate);
   const genderError = getErrorMessage(errors.gender);
   const paceError = getErrorMessage(errors.pace);
   const heightError = getErrorMessage(errors.height);
   const weightError = getErrorMessage(errors.weight);
-  const homeLatError = getErrorMessage(errors.homeLat);
-  const homeLngError = getErrorMessage(errors.homeLng);
 
   return (
     <>
@@ -152,67 +137,6 @@ export const UserProfileFormFields = ({
           {weightError && <p className="text-sm text-red-500">{weightError}</p>}
         </div>
       </div>
-
-      {showHomeLocationFields ? (
-        <div className="space-y-3 rounded-lg border border-base-gray-light bg-white/70 p-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <p className="text-sm font-medium">地図の初期位置</p>
-              <p className="text-xs leading-relaxed text-base-gray">
-                現在Street
-                Viewで表示している地点をホーム地点として保存できます。
-              </p>
-            </div>
-            {onUseCurrentStreetViewPosition ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full sm:w-auto"
-                disabled={disabled || !canUseCurrentStreetViewPosition}
-                onClick={onUseCurrentStreetViewPosition}
-              >
-                <MapPinned />
-                表示中の地点を使う
-              </Button>
-            ) : null}
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">緯度</label>
-              <Input
-                type="number"
-                inputMode="decimal"
-                step="any"
-                disabled={disabled}
-                {...register("homeLat", {
-                  setValueAs: toNullableFloat,
-                })}
-              />
-              {homeLatError && (
-                <p className="text-sm text-red-500">{homeLatError}</p>
-              )}
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium">経度</label>
-              <Input
-                type="number"
-                inputMode="decimal"
-                step="any"
-                disabled={disabled}
-                {...register("homeLng", {
-                  setValueAs: toNullableFloat,
-                })}
-              />
-              {homeLngError && (
-                <p className="text-sm text-red-500">{homeLngError}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      ) : null}
     </>
   );
 };
