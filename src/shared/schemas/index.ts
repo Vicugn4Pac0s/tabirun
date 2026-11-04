@@ -1,12 +1,5 @@
 import { z } from "zod";
 
-const homeCoordinateSchema = z.number().finite();
-
-const homeLocationSchema = z.object({
-  homeLat: homeCoordinateSchema.min(-90).max(90).nullable().optional(),
-  homeLng: homeCoordinateSchema.min(-180).max(180).nullable().optional(),
-});
-
 /** 地図クリックで増える経由点の上限（DoS 緩和。実利用は数十点程度） */
 export const ROUTE_POINTS_MAX = 1000;
 
@@ -45,19 +38,6 @@ export const userProfileUpdateSchema = z
     pace: z.string().max(255).optional(),
     height: z.number().int().positive().optional(),
     weight: z.number().int().positive().optional(),
-  })
-  .merge(homeLocationSchema)
-  .superRefine((value, ctx) => {
-    const hasLat = value.homeLat != null;
-    const hasLng = value.homeLng != null;
-
-    if (hasLat !== hasLng) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: hasLat ? ["homeLng"] : ["homeLat"],
-        message: "ホーム地点の緯度・経度はセットで入力してください",
-      });
-    }
   })
   .refine((value) => Object.keys(value).length > 0, {
     message: "At least one field is required",

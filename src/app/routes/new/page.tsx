@@ -10,14 +10,10 @@ export default async function RouteCreatePage() {
   if (!session?.user?.id) redirect("/");
   const user = await getUserHomePageSettings(session.user.id);
   if (user && !user.profileCompletedAt) redirect("/setup-profile");
-  const defaultCenter =
-    user?.homeLat != null && user.homeLng != null
-      ? { lat: user.homeLat, lng: user.homeLng }
-      : GOOGLE_MAP_DEFAULT_CENTER;
   return (
     <SessionProvider session={session}>
       <main>
-        <RouteCreateScreen defaultCenter={defaultCenter} />
+        <RouteCreateScreen defaultCenter={GOOGLE_MAP_DEFAULT_CENTER} />
       </main>
     </SessionProvider>
   );

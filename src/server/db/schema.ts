@@ -1,7 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
   check,
-  doublePrecision,
   index,
   integer,
   primaryKey,
@@ -50,8 +49,6 @@ export const users = createTable("user", {
   pace: varchar("pace", { length: 255 }),
   height: integer("height"),
   weight: integer("weight"),
-  homeLat: doublePrecision("home_lat"),
-  homeLng: doublePrecision("home_lng"),
   profileCompletedAt: timestamp("profile_completed_at", { mode: "date" }),
 });
 
