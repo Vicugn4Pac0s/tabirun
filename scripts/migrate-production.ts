@@ -2,7 +2,8 @@ import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
-import { stdin, stdout } from "node:process";
+import { createInterface as createOutputLines } from "node:readline";
+import { stdin, stdout, stderr } from "node:process";
 import { parse } from "dotenv";
 import { z } from "zod";
 
@@ -20,6 +21,34 @@ const databaseUrlSchema = z
       ["postgres:", "postgresql:"].includes(url.protocol) && !!url.hostname
     );
   });
+
+function createRedactor(databaseUrl: string) {
+  const url = new URL(databaseUrl);
+  const secrets = new Set([databaseUrl, url.href, url.password]);
+  try {
+    secrets.add(decodeURIComponent(url.password));
+  } catch {
+    // 不正なpercent encodingでも元の表記を伏せる。
+  }
+  for (const secret of [...secrets]) {
+    if (secret) {
+      secrets.add(encodeURIComponent(secret));
+      secrets.add(JSON.stringify(secret).slice(1, -1));
+    }
+  }
+  const values = [...secrets]
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length);
+  return (line: string) => {
+    let redacted = line.replace(
+      /postgres(?:ql)?:\/\/[^\s"'<>]+/gi,
+      "[REDACTED_DATABASE_URL]",
+    );
+    for (const value of values)
+      redacted = redacted.replaceAll(value, "[REDACTED]");
+    return redacted;
+  };
+}
 
 async function main() {
   let contents: string;
@@ -76,10 +105,19 @@ async function main() {
       cwd: projectRoot,
       // CLI起動時の境界でのみ環境を渡す。通常の.envや親の接続先では上書きさせない。
       env: { ...process.env, DATABASE_URL: result.data },
-      // ドライバーのエラーに接続文字列が含まれる可能性があるため転送しない。
-      stdio: "ignore",
+      stdio: ["ignore", "pipe", "pipe"],
     },
   );
+  const redact = createRedactor(result.data);
+  for (const [input, output] of [
+    [child.stdout, stdout],
+    [child.stderr, stderr],
+  ] as const) {
+    if (!input) continue;
+    // chunkの境界で秘密値が分かれても漏れないよう、行単位で伏せる。
+    const lines = createOutputLines({ input, crlfDelay: Infinity });
+    lines.on("line", (line) => output.write(`${redact(line)}\n`));
+  }
   child.on("error", () => {
     console.error("migrationコマンドを起動できませんでした。");
     process.exitCode = 1;
