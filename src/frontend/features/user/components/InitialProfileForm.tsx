@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useController, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "~/frontend/components/ui/button";
@@ -11,7 +11,10 @@ import {
   UserProfileFormFields,
 } from "~/frontend/features/user/components/UserProfileFormFields";
 import { useCompleteInitialProfile } from "~/frontend/features/user/api/useCompleteInitialProfile";
-import { userInitialProfileSchema } from "~/shared/schemas";
+import {
+  userInitialProfileSchema,
+  type UserInitialProfileInput,
+} from "~/shared/schemas";
 
 type InitialProfileFormProps = {
   initialValues: UserProfileFormValues;
@@ -28,7 +31,7 @@ export const InitialProfileForm = ({
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<UserProfileFormValues>({
+  } = useForm<UserInitialProfileInput>({
     resolver: zodResolver(userInitialProfileSchema),
     defaultValues: {
       birthDate: initialValues.birthDate,
@@ -39,24 +42,28 @@ export const InitialProfileForm = ({
     },
   });
 
-  const submitProfile = async (data: UserProfileFormValues) => {
+  const { field: gender } = useController({ control, name: "gender" });
+  const { field: pace } = useController({ control, name: "pace" });
+
+  const submitProfile = async (data: UserInitialProfileInput) => {
     try {
-      const parsedData = userInitialProfileSchema.parse(data);
-      await completeInitialProfile(parsedData);
-      toast.success("初期設定を保存しました。");
-      router.replace("/");
+      await completeInitialProfile(data);
     } catch {
       toast.error(
         "初期設定を保存できませんでした。時間をおいて再度お試しください。",
       );
+      return;
     }
+    toast.success("初期設定を保存しました。");
+    router.replace("/");
   };
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(submitProfile)}>
       <UserProfileFormFields
         register={register}
-        control={control}
+        gender={gender}
+        pace={pace}
         errors={errors}
         disabled={isCompleting}
       />

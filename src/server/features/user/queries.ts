@@ -13,3 +13,17 @@ export function getUserHomePageSettings(userId: string) {
     },
   });
 }
+
+export function getUserProfileSettings(userId: string) {
+  return db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: {
+      profileCompletedAt: true,
+      birthDate: true,
+      gender: true,
+      pace: true,
+      height: true,
+      weight: true,
+    },
+  });
+}

@@ -32,9 +32,26 @@ vi.mock("~/frontend/features/pace/components/PaceSelect", () => ({
     </button>
   ),
 }));
-vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
-  AuthUserMenu: () => null,
-}));
+vi.mock("~/frontend/features/auth/components/AuthUserMenu", async () => {
+  const { useNavigationGuard } = await import(
+    "~/frontend/providers/NavigationGuardProvider"
+  );
+  return {
+    AuthUserMenu: function TestUserMenu() {
+      const confirmNavigation = useNavigationGuard();
+      return (
+        <button
+          onClick={() => {
+            if (!confirmNavigation || confirmNavigation())
+              push("/settings/profile");
+          }}
+        >
+          プロフィールへ移動
+        </button>
+      );
+    },
+  };
+});
 vi.mock("~/frontend/features/googlemap/components/GoogleMapView", () => ({
   default: ({
     children,
@@ -259,5 +276,30 @@ describe("RouteCreateScreen", () => {
         screen.getByRole("complementary", { name: "ルート作成" }),
       ).getByRole("alert"),
     ).toHaveTextContent("直線で結んで表示");
+  });
+  it("プロフィールへ移動するとき未変更なら確認せず、編集中は許可した場合だけ移動する", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    const user = userEvent.setup();
+    render(<RouteCreateScreen defaultCenter={defaultCenter} />);
+    await user.click(
+      screen.getByRole("button", { name: "プロフィールへ移動" }),
+    );
+    expect(confirm).not.toHaveBeenCalled();
+    expect(push).toHaveBeenCalledWith("/settings/profile");
+    push.mockClear();
+    await user.type(screen.getByRole("textbox", { name: "ルート名" }), "変更");
+    await user.click(
+      screen.getByRole("button", { name: "プロフィールへ移動" }),
+    );
+    expect(confirm).toHaveBeenCalledWith(
+      "未保存の変更があります。破棄して移動しますか？",
+    );
+    expect(push).not.toHaveBeenCalled();
+    confirm.mockReturnValue(true);
+    await user.click(
+      screen.getByRole("button", { name: "プロフィールへ移動" }),
+    );
+    expect(push).toHaveBeenCalledWith("/settings/profile");
+    confirm.mockRestore();
   });
 });

@@ -18,7 +18,7 @@
 - props にデータ取得の hook を渡さない。取得は使う側（画面 or 葉の部品）で `features/*/api` の hook を呼ぶ（例: `PaceSelect` が `usePacesQuery` を内部で呼ぶ）。
 - `src/frontend/components/app-ui` の部品は tRPC・feature・業務文言を持たない（例: `WarningBanner`, `StatValue`, `Selectbox`）。
 - フォームは react-hook-form + `zodResolver(shared/schemas の schema)`。フォーム値の型は schema から推論する（例: `z.input<typeof userProfileUpdateSchema>`）。
-  - 単純なフォームは component 内で `useForm`（例: `InitialProfileForm`, `UserProfileDialog`）。
+  - 単純なフォームは component 内で `useForm`（例: `InitialProfileForm`）。
   - dirty 管理・離脱確認・地点操作など画面ロジックを伴うものは hook に入れる（例: `useRouteDraft`）。
   - 送信ボタンは `disabled={!canSave || isSubmitting}`、ラベルは pending 中に「〜中...」へ切替。
 - フィールドエラーは `RouteForm` 方式: `aria-invalid` + `aria-describedby` + `role="alert"`、色は **`text-destructive`**。共通 `FieldError` 部品は作らない。

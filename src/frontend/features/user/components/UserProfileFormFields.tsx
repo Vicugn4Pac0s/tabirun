@@ -1,12 +1,15 @@
 "use client";
 
 import {
-  Controller,
-  type Control,
   type FieldErrors,
   type FieldError,
   type UseFormRegister,
 } from "react-hook-form";
+
+import type {
+  UserInitialProfileInput,
+  UserProfileUpdateInput,
+} from "~/shared/schemas";
 
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
@@ -24,17 +27,19 @@ const genderOptions: SelectOption[] = [
   { value: "prefer_not_to_say", label: "回答しない" },
 ];
 
-export type UserProfileFormValues = {
-  birthDate?: string;
-  gender?: string;
-  pace?: string;
-  height?: number;
-  weight?: number;
+export type UserProfileFormValues = UserProfileUpdateInput;
+
+type SelectField = {
+  value?: string;
+  onChange: (value: string) => void;
 };
 
 type UserProfileFormFieldsProps = {
-  register: UseFormRegister<UserProfileFormValues>;
-  control: Control<UserProfileFormValues>;
+  register:
+    | UseFormRegister<UserProfileUpdateInput>
+    | UseFormRegister<UserInitialProfileInput>;
+  gender: SelectField;
+  pace: SelectField;
   errors: FieldErrors<UserProfileFormValues>;
   disabled: boolean;
 };
@@ -48,7 +53,8 @@ const getErrorMessage = (error: FieldError | undefined) => error?.message;
 
 export const UserProfileFormFields = ({
   register,
-  control,
+  gender,
+  pace,
   errors,
   disabled,
 }: UserProfileFormFieldsProps) => {
@@ -76,36 +82,24 @@ export const UserProfileFormFields = ({
 
       <div className="space-y-1">
         <label className="text-sm font-medium">性別</label>
-        <Controller
-          control={control}
-          name="gender"
-          render={({ field }) => (
-            <Selectbox
-              items={genderOptions}
-              value={field.value ?? undefined}
-              onValueChange={(value) => field.onChange(value)}
-              placeholder="選択してください"
-              className="w-full"
-              disabled={disabled}
-            />
-          )}
+        <Selectbox
+          items={genderOptions}
+          value={gender.value}
+          onValueChange={gender.onChange}
+          placeholder="選択してください"
+          className="w-full"
+          disabled={disabled}
         />
         {genderError && <p className="text-sm text-red-500">{genderError}</p>}
       </div>
 
       <div className="space-y-1">
         <label className="text-sm font-medium">ランニングのペース</label>
-        <Controller
-          control={control}
-          name="pace"
-          render={({ field }) => (
-            <PaceSelect
-              value={field.value ?? undefined}
-              onChangeValue={field.onChange}
-              placeholder="選択してください"
-              disabled={disabled}
-            />
-          )}
+        <PaceSelect
+          value={pace.value}
+          onChangeValue={pace.onChange}
+          placeholder="選択してください"
+          disabled={disabled}
         />
         {paceError && <p className="text-sm text-red-500">{paceError}</p>}
       </div>
