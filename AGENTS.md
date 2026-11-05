@@ -102,6 +102,14 @@
 - commit メッセージは `feat:` / `fix:` / `refactor:` / `test:` / `docs:` / `chore:` + 短い要約。
 - force push は禁止。rebase、squash、commit削除など履歴を書き換える操作やファイル・branchの削除は、対象と影響を示して個別に承認を得る。
 
+## Git（stagingで確認した変更をmainへ出す）
+
+staging で確認済みの変更を `main` に出すときは、次の順で検討する。
+
+1. まず元の作業branchを使えるか確認する。最新の `main` を取り込んだあとの差分が今回のタスクの変更だけになるなら使えると判断する。`main` より遅れていることだけを理由に「使えない」にはしない。使えるなら、最新の `main` を取り込んでそのbranchから `main` 向けにPRを出す。取り込みは merge で行う。rebase や force push は履歴の書き換えなので、上記「Git（共通）」と同様に個別承認を得る。
+2. staging に入っているものを全部出すなら、`staging` から `main` に PR を出す。
+3. 新しい branch や cherry-pick は、1 も 2 も使えないときだけにする。その場合は、作業する前に YOSHIKI（ユーザー）に理由（1 と 2 が使えない根拠）と影響（増える branch・commit・PR、staging と main で履歴が分かれること）を説明して OK をもらってから行う。理由は PR 本文にも書く。
+
 ## Git（ローカル・Cloud Agent 共通の remote 操作）
 - **PRモード**のとき、作業branch（例: `cursor/...`, `codex/...`）への push と、指定されたベース向けの PR 作成までは承認なしで行ってよい。確認モードでは push・PR 操作は行わない。
 - `main` / `staging` への直接 push、merge、force push、PR以外への外部コメントはしない。merge はユーザーが行う。
