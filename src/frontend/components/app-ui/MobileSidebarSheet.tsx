@@ -28,7 +28,11 @@ function MobileSidebarSheet({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-      <DrawerContent className="h-[72vh] max-h-[72vh] gap-0 rounded-t-2xl border-x-0 border-b-0">
+      {/* 見出しだけで足りる。未指定だと Radix が Description 不足を警告する */}
+      <DrawerContent
+        aria-describedby={undefined}
+        className="h-[72vh] max-h-[72vh] gap-0 rounded-t-2xl border-x-0 border-b-0"
+      >
         <DrawerHeader className="sr-only">
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>
