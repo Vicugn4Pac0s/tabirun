@@ -43,6 +43,7 @@
 
 ### Git / PR 情報
 
+- staging 確認済みを `main` へ出す場合: `AGENTS.md` の「Git（stagingで確認した変更をmainへ出す）」に従ったか
 - ベースbranch（main / staging。依頼に合わせ、未指定なら main）:
 - staging向けの場合、mainの未取り込みの有無と、未取り込みがあれば継続方針・理由:
 - 作業branch:
