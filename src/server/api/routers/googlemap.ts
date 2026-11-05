@@ -98,7 +98,14 @@ export const googlemapRouter = createTRPCRouter({
       );
 
       if (!res.ok) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: await res.text() });
+        // 応答本文に外部APIの詳細が含まれるため、クライアントには返さずログだけ残す。
+        const detail = (await res.text()).replaceAll(key, "[redacted]");
+        console.error("Google Routes API request failed", res.status, detail);
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "経路を取得できませんでした。時間をおいて再度お試しください。",
+        });
       }
 
       const raw = (await res.json()) as unknown;
@@ -106,7 +113,7 @@ export const googlemapRouter = createTRPCRouter({
 
       if (!parsed.success) {
         throw new TRPCError({
-          code: "PARSE_ERROR",
+          code: "INTERNAL_SERVER_ERROR",
           message: "INVALID_ROUTES_API_RESPONSE",
         });
       }

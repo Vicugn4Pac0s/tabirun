@@ -4,9 +4,21 @@ import { db } from "~/server/db";
 import { routes } from "~/server/db/schema";
 import { routeRouter } from "./route";
 
-const { findFirst } = vi.hoisted(() => ({ findFirst: vi.fn() }));
+const { findFirst, update, updateSet, updateWhere, remove, removeWhere } =
+  vi.hoisted(() => ({
+    findFirst: vi.fn(),
+    update: vi.fn(),
+    updateSet: vi.fn(),
+    updateWhere: vi.fn(),
+    remove: vi.fn(),
+    removeWhere: vi.fn(),
+  }));
 vi.mock("~/server/db", () => ({
-  db: { query: { routes: { findFirst } } },
+  db: {
+    query: { routes: { findFirst } },
+    update,
+    delete: remove,
+  },
 }));
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
 
@@ -33,7 +45,14 @@ function createCaller(userId: string | null = "owner") {
   });
 }
 
-beforeEach(() => vi.resetAllMocks());
+const updateInput = { id: 1, title: "夕方のルート", points };
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  update.mockReturnValue({ set: updateSet });
+  updateSet.mockReturnValue({ where: updateWhere });
+  remove.mockReturnValue({ where: removeWhere });
+});
 
 describe("route.getById", () => {
   it("IDとログインユーザーの両方を条件に取得し、地点JSONを検証して返す", async () => {
@@ -86,5 +105,97 @@ describe("route.getById", () => {
     await expect(createCaller().getById({ id: 1 })).rejects.toMatchObject({
       code: "INTERNAL_SERVER_ERROR",
     });
+  });
+});
+
+describe("route.update", () => {
+  it("自分のルートはIDと所有者の両方を条件に更新する", async () => {
+    updateWhere.mockResolvedValue({ count: 1 });
+
+    await expect(createCaller().update(updateInput)).resolves.toBeUndefined();
+
+    expect(update).toHaveBeenCalledWith(routes);
+    expect(updateSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "夕方のルート",
+        points: JSON.stringify(points),
+      }),
+    );
+    expect(updateWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 1), eq(routes.createdById, "owner")),
+    );
+  });
+
+  it("他人のルートは所有者条件で更新せず NOT_FOUND を返す", async () => {
+    updateWhere.mockResolvedValue({ count: 0 });
+
+    await expect(
+      createCaller("other").update(updateInput),
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(updateWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 1), eq(routes.createdById, "other")),
+    );
+    expect(updateWhere).toHaveBeenCalledOnce();
+  });
+
+  it("存在しないルートは NOT_FOUND を返す", async () => {
+    updateWhere.mockResolvedValue({ count: 0 });
+
+    await expect(
+      createCaller().update({ ...updateInput, id: 999 }),
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(updateWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 999), eq(routes.createdById, "owner")),
+    );
+  });
+
+  it("未ログインでは更新しない", async () => {
+    await expect(createCaller(null).update(updateInput)).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+    expect(update).not.toHaveBeenCalled();
+  });
+});
+
+describe("route.delete", () => {
+  it("自分のルートはIDと所有者の両方を条件に削除する", async () => {
+    removeWhere.mockResolvedValue({ count: 1 });
+
+    await expect(createCaller().delete({ id: 1 })).resolves.toBeUndefined();
+
+    expect(remove).toHaveBeenCalledWith(routes);
+    expect(removeWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 1), eq(routes.createdById, "owner")),
+    );
+  });
+
+  it("他人のルートは所有者条件で削除せず NOT_FOUND を返す", async () => {
+    removeWhere.mockResolvedValue({ count: 0 });
+
+    await expect(createCaller("other").delete({ id: 1 })).rejects.toMatchObject(
+      { code: "NOT_FOUND" },
+    );
+    expect(removeWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 1), eq(routes.createdById, "other")),
+    );
+    expect(removeWhere).toHaveBeenCalledOnce();
+  });
+
+  it("存在しないルートは NOT_FOUND を返す", async () => {
+    removeWhere.mockResolvedValue({ count: 0 });
+
+    await expect(createCaller().delete({ id: 999 })).rejects.toMatchObject({
+      code: "NOT_FOUND",
+    });
+    expect(removeWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 999), eq(routes.createdById, "owner")),
+    );
+  });
+
+  it("未ログインでは削除しない", async () => {
+    await expect(createCaller(null).delete({ id: 1 })).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+    expect(remove).not.toHaveBeenCalled();
   });
 });
