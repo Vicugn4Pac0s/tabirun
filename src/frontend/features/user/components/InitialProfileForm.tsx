@@ -40,17 +40,16 @@ export const InitialProfileForm = ({
   });
 
   const submitProfile = async (data: UserProfileFormValues) => {
-    const parsedData = userInitialProfileSchema.parse(data);
-
-    await completeInitialProfile(parsedData, {
-      onSuccess: () => {
-        toast.success("初期設定を保存しました");
-        router.replace("/");
-      },
-      onError: () => {
-        toast.error("初期設定の保存に失敗しました");
-      },
-    });
+    try {
+      const parsedData = userInitialProfileSchema.parse(data);
+      await completeInitialProfile(parsedData);
+      toast.success("初期設定を保存しました。");
+      router.replace("/");
+    } catch {
+      toast.error(
+        "初期設定を保存できませんでした。時間をおいて再度お試しください。",
+      );
+    }
   };
 
   return (

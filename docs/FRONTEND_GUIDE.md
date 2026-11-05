@@ -35,7 +35,7 @@
 - クライアント: 更新・共有するデータは `features/*/api/useXxxQuery` 経由。戻り値は `{ <名前付きデータ>, isLoading, error }` で、一覧は `?? []`、単体は `?? null`（例: `useRoutesQuery`, `useCurrentUserQuery`）。
 - `staleTime: Infinity` を既定にし、鮮度は mutation 側の invalidate で保つ。外部 API 課金系は `retry: false`（例: `useGoogleMapDirectionQuery`）。
 - mutation hook 名は **`use<動詞><名詞>`**（例: `useUpdateRoute`）。戻り値は `{ <動詞>, is<動詞ing>, error, reset }`（例: `updateRoute`, `isUpdating`）。`onSuccess` で影響する query を `Promise.all` で invalidate する。
-- mutation の結果は **`try { await ... } catch { toast.error(...) }`** で受ける。`executeMutationWithCallbacks` は **新規では使わない**（既存利用の整理は別 Issue）。
+- mutation の結果は **`try { await ... } catch { toast.error(...) }`** で受ける。
 - toast の文言は **「。」で終える**。mutation の成否は toast、**query の失敗は inline**（`role="alert"`）。
 - 保存・削除後に一覧が RSC 由来の画面へ戻るときは `router.push|replace` の後に `router.refresh()`（例: `useRouteCreation`）。
 

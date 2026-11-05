@@ -1,11 +1,5 @@
-import {
-  executeMutationWithCallbacks,
-  type MutationCallbacks,
-} from "~/frontend/lib/executeMutationWithCallbacks";
 import type { UserInitialProfileInput } from "~/shared/schemas";
 import { api } from "~/trpc/react";
-
-type CompleteInitialProfileCallbacks = MutationCallbacks;
 
 export const useCompleteInitialProfile = () => {
   const utils = api.useUtils();
@@ -16,11 +10,8 @@ export const useCompleteInitialProfile = () => {
     },
   });
 
-  const completeInitialProfile = async (
-    input: UserInitialProfileInput,
-    cb?: CompleteInitialProfileCallbacks,
-  ) => {
-    return executeMutationWithCallbacks(mutation, input, cb);
+  const completeInitialProfile = (input: UserInitialProfileInput) => {
+    return mutation.mutateAsync(input);
   };
 
   return {

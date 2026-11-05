@@ -70,19 +70,16 @@ export const UserProfileDialog = ({
   }, [error, open]);
 
   const submitProfile = async (data: UserProfileFormValues) => {
-    const parsedData = userProfileUpdateSchema.parse(data);
-
-    await updateUserProfile(parsedData, {
-      onSuccess: () => {
-        toast.success("プロフィールを更新しました");
-        onOpenChange(false);
-      },
-      onError: () => {
-        toast.error(
-          "プロフィールを更新できませんでした。時間をおいて再度お試しください。",
-        );
-      },
-    });
+    try {
+      const parsedData = userProfileUpdateSchema.parse(data);
+      await updateUserProfile(parsedData);
+      toast.success("プロフィールを更新しました。");
+      onOpenChange(false);
+    } catch {
+      toast.error(
+        "プロフィールを更新できませんでした。時間をおいて再度お試しください。",
+      );
+    }
   };
 
   return (
