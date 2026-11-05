@@ -46,7 +46,7 @@ export const routeRouter = createTRPCRouter({
   update: protectedProcedure
     .input(routeUpdateSchema)
     .mutation(async ({ ctx, input }) => {
-      await ctx.db
+      const updated = await ctx.db
         .update(routes)
         .set({
           title: input.title,
@@ -59,12 +59,17 @@ export const routeRouter = createTRPCRouter({
             eq(routes.createdById, ctx.session.user.id),
           ),
         );
+
+      // 所有者条件で一致しない、または既に削除済みのときは成功にしない。
+      if (updated.count === 0) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
     }),
 
   delete: protectedProcedure
     .input(routeDeleteSchema)
     .mutation(async ({ ctx, input }) => {
-      await ctx.db
+      const deleted = await ctx.db
         .delete(routes)
         .where(
           and(
@@ -72,6 +77,11 @@ export const routeRouter = createTRPCRouter({
             eq(routes.createdById, ctx.session.user.id),
           ),
         );
+
+      // 所有者条件で一致しない、または既に削除済みのときは成功にしない。
+      if (deleted.count === 0) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
     }),
 
   getByUser: protectedProcedure.query(async ({ ctx }) => {
