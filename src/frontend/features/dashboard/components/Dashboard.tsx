@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { ArrowRight, MapPin, Plus, Route, UserRound } from "lucide-react";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
@@ -12,7 +11,6 @@ import {
   AvatarImage,
 } from "~/frontend/components/ui/avatar";
 import { useCurrentUserQuery } from "~/frontend/features/user/api/useCurrentUserQuery";
-import { UserProfileDialog } from "~/frontend/features/user/components/UserProfileDialog";
 import { useRoutesQuery } from "~/frontend/features/route/api/useRoutesQuery";
 
 function PersonalDashboard() {
@@ -22,7 +20,6 @@ function PersonalDashboard() {
     isLoading: routesLoading,
     error: routesError,
   } = useRoutesQuery();
-  const [profileOpen, setProfileOpen] = useState(false);
 
   return (
     <>
@@ -60,8 +57,8 @@ function PersonalDashboard() {
               )}
             </div>
           </div>
-          <Button variant="outline" onClick={() => setProfileOpen(true)}>
-            プロフィールを編集
+          <Button variant="outline" asChild>
+            <Link href="/settings/profile">プロフィールを編集</Link>
           </Button>
         </div>
       </section>
@@ -140,7 +137,6 @@ function PersonalDashboard() {
           </ul>
         )}
       </section>
-      <UserProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />
     </>
   );
 }

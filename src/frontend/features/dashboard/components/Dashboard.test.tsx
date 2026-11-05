@@ -10,9 +10,6 @@ vi.mock("next-auth/react", () => ({
 vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
   AuthUserMenu: () => null,
 }));
-vi.mock("~/frontend/features/user/components/UserProfileDialog", () => ({
-  UserProfileDialog: () => null,
-}));
 vi.mock("~/frontend/features/user/api/useCurrentUserQuery", () => ({
   useCurrentUserQuery: () => ({
     user: { name: "ランナー" },
@@ -51,6 +48,9 @@ describe("Dashboard", () => {
       "href",
       "/routes/123",
     );
+    expect(
+      screen.getByRole("link", { name: "プロフィールを編集" }),
+    ).toHaveAttribute("href", "/settings/profile");
     expect(
       screen.getByRole("link", { name: "新しいルートを作る" }),
     ).toHaveAttribute("href", "/routes/new");

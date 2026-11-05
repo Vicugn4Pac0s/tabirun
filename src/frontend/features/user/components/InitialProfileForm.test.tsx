@@ -70,4 +70,14 @@ describe("InitialProfileForm", () => {
     expect(save).toHaveBeenCalledTimes(2);
     expect(replace).toHaveBeenCalledWith("/");
   });
+  it("初回設定の必須項目が未入力なら送信しない", async () => {
+    const user = userEvent.setup();
+    render(<InitialProfileForm initialValues={{}} />);
+    await user.click(screen.getByRole("button", { name: "初期設定を完了" }));
+    await waitFor(() =>
+      expect(screen.getAllByText("Required").length).toBeGreaterThan(0),
+    );
+    expect(save).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
+  });
 });
