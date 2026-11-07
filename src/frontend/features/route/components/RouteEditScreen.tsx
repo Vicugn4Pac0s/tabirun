@@ -1,6 +1,6 @@
 "use client";
 
-import { GuardedLink } from "~/frontend/components/app-ui/GuardedLink";
+import { GuardedLink } from "~/frontend/providers/GuardedLink";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";

@@ -1,6 +1,6 @@
 "use client";
 
-import { GuardedLink } from "~/frontend/components/app-ui/GuardedLink";
+import { GuardedLink } from "~/frontend/providers/GuardedLink";
 
 import {
   Avatar,

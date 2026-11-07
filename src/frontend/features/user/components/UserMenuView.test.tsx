@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { GuardedLink } from "~/frontend/components/app-ui/GuardedLink";
+import { GuardedLink } from "~/frontend/providers/GuardedLink";
 import { NavigationGuardProvider } from "~/frontend/providers/NavigationGuardProvider";
 import { UserMenuView } from "./UserMenuView";
 
@@ -13,7 +13,7 @@ vi.mock("next/link", async () => {
   type LinkProps = ComponentPropsWithoutRef<typeof Link>;
   return {
     default: forwardRef<HTMLAnchorElement, LinkProps>(function TestLink(
-      { href, onClick, children, ...props },
+      { href, onClick, onNavigate, children, ...props },
       ref,
     ) {
       return (
@@ -23,7 +23,15 @@ vi.mock("next/link", async () => {
           href={typeof href === "string" ? href : (href.pathname ?? undefined)}
           onClick={(event) => {
             onClick?.(event);
-            if (!event.defaultPrevented) navigate(href);
+            if (!event.defaultPrevented) {
+              let prevented = false;
+              onNavigate?.({
+                preventDefault: () => {
+                  prevented = true;
+                },
+              });
+              if (!prevented) navigate(href);
+            }
             event.preventDefault();
           }}
         >
