@@ -17,14 +17,15 @@ export function useRouteEdit(route: RouteUpdateInput) {
         id: route.id,
         ...values,
       });
-      toast.success("ルートを更新しました。");
-      router.push(`/routes/${route.id}`);
-      router.refresh();
     } catch {
       toast.error(
         "ルートを更新できませんでした。時間をおいて再度お試しください。",
       );
+      return;
     }
+    toast.success("ルートを更新しました。");
+    router.push(`/routes/${route.id}`);
+    router.refresh();
   });
   const save: typeof submit = (event) => {
     if (submitting.current || isUpdating) {

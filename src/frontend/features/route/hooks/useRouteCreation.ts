@@ -13,14 +13,15 @@ export function useRouteCreation() {
     if (!draft.isDirty) return;
     try {
       await createRoute(values);
-      toast.success("ルートを保存しました。");
-      router.push("/");
-      router.refresh();
     } catch {
       toast.error(
         "ルートを保存できませんでした。時間をおいて再度お試しください。",
       );
+      return;
     }
+    toast.success("ルートを保存しました。");
+    router.push("/");
+    router.refresh();
   });
   const save: typeof submit = (event) => {
     if (submitting.current || isCreating) {

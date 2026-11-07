@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -15,9 +16,10 @@ export function useUserProfileEdit(initialValues: UserProfileUpdateInput) {
     resolver: zodResolver(userProfileUpdateSchema),
     defaultValues: initialValues,
   });
-  const save = form.handleSubmit(async (data) => {
+  const submitting = useRef(false);
+  const submit = form.handleSubmit(async (values) => {
     try {
-      await updateUserProfile(data);
+      await updateUserProfile(values);
     } catch {
       toast.error(
         "プロフィールを更新できませんでした。時間をおいて再度お試しください。",
@@ -28,5 +30,15 @@ export function useUserProfileEdit(initialValues: UserProfileUpdateInput) {
     router.push("/");
     router.refresh();
   });
+  const save: typeof submit = (event) => {
+    if (submitting.current || isUpdating) {
+      event?.preventDefault();
+      return Promise.resolve();
+    }
+    submitting.current = true;
+    return submit(event).finally(() => {
+      submitting.current = false;
+    });
+  };
   return { form, save, isUpdating: isUpdating || form.formState.isSubmitting };
 }

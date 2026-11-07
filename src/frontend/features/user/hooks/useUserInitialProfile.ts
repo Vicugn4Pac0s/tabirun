@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -18,9 +19,10 @@ export function useUserInitialProfile(initialValues: UserProfileUpdateInput) {
     defaultValues: initialValues,
   });
 
-  const submitProfile = async (data: UserInitialProfileInput) => {
+  const submitting = useRef(false);
+  const submit = form.handleSubmit(async (values) => {
     try {
-      await completeInitialProfile(data);
+      await completeInitialProfile(values);
     } catch {
       toast.error(
         "初期設定を保存できませんでした。時間をおいて再度お試しください。",
@@ -29,7 +31,21 @@ export function useUserInitialProfile(initialValues: UserProfileUpdateInput) {
     }
     toast.success("初期設定を保存しました。");
     router.replace("/");
+  });
+  const save: typeof submit = (event) => {
+    if (submitting.current || isCompleting) {
+      event?.preventDefault();
+      return Promise.resolve();
+    }
+    submitting.current = true;
+    return submit(event).finally(() => {
+      submitting.current = false;
+    });
   };
 
-  return { form, save: form.handleSubmit(submitProfile), isCompleting };
+  return {
+    form,
+    save,
+    isCompleting: isCompleting || form.formState.isSubmitting,
+  };
 }
