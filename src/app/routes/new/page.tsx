@@ -7,9 +7,10 @@ import { getUserHomePageSettings } from "~/server/features/user/queries";
 
 export default async function RouteCreatePage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/");
+  if (!session?.user?.id) redirect("/login?returnTo=%2Froutes%2Fnew");
   const user = await getUserHomePageSettings(session.user.id);
-  if (user && !user.profileCompletedAt) redirect("/setup-profile");
+  if (user && !user.profileCompletedAt)
+    redirect("/setup-profile?returnTo=%2Froutes%2Fnew");
   return (
     <SessionProvider session={session}>
       <main>

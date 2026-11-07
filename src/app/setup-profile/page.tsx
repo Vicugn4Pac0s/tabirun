@@ -1,3 +1,4 @@
+import { parseReturnTo } from "~/shared/schemas/auth";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
@@ -6,11 +7,18 @@ import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { users } from "~/server/db/schema";
 
-export default async function SetupProfilePage() {
+type SetupProfilePageProps = {
+  searchParams: Promise<{ returnTo?: string | string[] }>;
+};
+
+export default async function SetupProfilePage({
+  searchParams,
+}: SetupProfilePageProps) {
+  const returnTo = parseReturnTo((await searchParams).returnTo);
   const session = await auth();
 
   if (!session?.user?.id) {
-    redirect("/");
+    redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
   const user = await db.query.users.findFirst({
@@ -30,12 +38,13 @@ export default async function SetupProfilePage() {
   }
 
   if (user.profileCompletedAt) {
-    redirect("/");
+    redirect(returnTo);
   }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-lg items-center px-4 py-10">
       <UserInitialProfileScreen
+        returnTo={returnTo}
         initialValues={{
           birthDate: user.birthDate ?? undefined,
           gender: user.gender ?? undefined,

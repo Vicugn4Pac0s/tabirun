@@ -46,13 +46,17 @@ describe("RouteCreatePage", () => {
       defaultCenter: GOOGLE_MAP_DEFAULT_CENTER,
     });
   });
-  it("未ログインではホームへ戻す", async () => {
+  it("未ログインではログイン案内へ移動する", async () => {
     auth.mockResolvedValue(null);
-    await expect(RouteCreatePage()).rejects.toThrow("REDIRECT:/");
+    await expect(RouteCreatePage()).rejects.toThrow(
+      "REDIRECT:/login?returnTo=%2Froutes%2Fnew",
+    );
     expect(getUserHomePageSettings).not.toHaveBeenCalled();
   });
   it("プロフィール未登録では設定へ戻す", async () => {
     getUserHomePageSettings.mockResolvedValue({ profileCompletedAt: null });
-    await expect(RouteCreatePage()).rejects.toThrow("REDIRECT:/setup-profile");
+    await expect(RouteCreatePage()).rejects.toThrow(
+      "REDIRECT:/setup-profile?returnTo=%2Froutes%2Fnew",
+    );
   });
 });

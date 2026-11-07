@@ -70,15 +70,19 @@ describe("RouteDetailPage", () => {
     });
   });
 
-  it("未ログインではホームへ戻す", async () => {
+  it("未ログインではログイン案内へ移動する", async () => {
     auth.mockResolvedValue(null);
-    await expect(openPage()).rejects.toThrow("REDIRECT:/");
+    await expect(openPage()).rejects.toThrow(
+      "REDIRECT:/login?returnTo=%2Froutes%2F1",
+    );
     expect(getById).not.toHaveBeenCalled();
   });
 
   it("初期プロフィール未登録なら初期設定へ移動する", async () => {
     getUserHomePageSettings.mockResolvedValue({ profileCompletedAt: null });
-    await expect(openPage()).rejects.toThrow("REDIRECT:/setup-profile");
+    await expect(openPage()).rejects.toThrow(
+      "REDIRECT:/setup-profile?returnTo=%2Froutes%2F1",
+    );
     expect(getById).not.toHaveBeenCalled();
   });
 
@@ -89,6 +93,12 @@ describe("RouteDetailPage", () => {
       expect(getById).not.toHaveBeenCalled();
     },
   );
+
+  it("未ログインでも不正IDは404にする", async () => {
+    auth.mockResolvedValue(null);
+    await expect(openPage("abc")).rejects.toThrow("NOT_FOUND_PAGE");
+    expect(getUserHomePageSettings).not.toHaveBeenCalled();
+  });
 
   it("取得対象がなければ404にする", async () => {
     getById.mockRejectedValue(new TRPCError({ code: "NOT_FOUND" }));

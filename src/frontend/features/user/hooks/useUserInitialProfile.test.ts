@@ -30,6 +30,15 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 describe("useUserInitialProfile", () => {
+  it("保存後に指定された元ページへ戻す", async () => {
+    const { result } = renderHook(() =>
+      useUserInitialProfile(profile, "/routes/12/edit"),
+    );
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(navigate).toHaveBeenCalledWith("/routes/12/edit");
+  });
   it("再描画前の連続送信とuseCompleteInitialProfile処理中の送信を防ぐ", async () => {
     let finish: () => void = vi.fn();
     saveApi.mockImplementation(

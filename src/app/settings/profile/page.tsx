@@ -5,10 +5,11 @@ import { getUserProfileSettings } from "~/server/features/user/queries";
 
 export default async function UserProfileEditPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/");
+  if (!session?.user?.id) redirect("/login?returnTo=%2Fsettings%2Fprofile");
   const user = await getUserProfileSettings(session.user.id);
   if (!user) redirect("/");
-  if (!user.profileCompletedAt) redirect("/setup-profile");
+  if (!user.profileCompletedAt)
+    redirect("/setup-profile?returnTo=%2Fsettings%2Fprofile");
 
   return (
     <main className="mx-auto w-full max-w-lg px-4 py-10">

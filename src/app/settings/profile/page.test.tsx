@@ -69,19 +69,21 @@ describe("UserProfileEditPage", () => {
       },
     });
   });
-  it("未ログインならホームへ戻し、取得しない", async () => {
+  it("未ログインならログイン案内へ移動し、取得しない", async () => {
     auth.mockResolvedValue(null);
-    await expect(UserProfileEditPage()).rejects.toThrow("REDIRECT:/");
+    await expect(UserProfileEditPage()).rejects.toThrow(
+      "REDIRECT:/login?returnTo=%2Fsettings%2Fprofile",
+    );
     expect(getUserProfileSettings).not.toHaveBeenCalled();
   });
-  it("ユーザーが存在しなければホームへ戻す", async () => {
+  it("ユーザーが存在しなければログイン案内へ移動する", async () => {
     getUserProfileSettings.mockResolvedValue(undefined);
     await expect(UserProfileEditPage()).rejects.toThrow("REDIRECT:/");
   });
   it("プロフィール未完了なら初回設定へ戻す", async () => {
     getUserProfileSettings.mockResolvedValue({ profileCompletedAt: null });
     await expect(UserProfileEditPage()).rejects.toThrow(
-      "REDIRECT:/setup-profile",
+      "REDIRECT:/setup-profile?returnTo=%2Fsettings%2Fprofile",
     );
   });
 });

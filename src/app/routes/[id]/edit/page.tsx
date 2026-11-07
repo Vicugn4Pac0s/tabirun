@@ -13,12 +13,6 @@ type RouteEditPageProps = {
 };
 
 export default async function RouteEditPage({ params }: RouteEditPageProps) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/");
-
-  const user = await getUserHomePageSettings(session.user.id);
-  if (user && !user.profileCompletedAt) redirect("/setup-profile");
-
   const { id } = await params;
   const parsedId = z
     .string()
@@ -27,6 +21,14 @@ export default async function RouteEditPage({ params }: RouteEditPageProps) {
     .pipe(z.number().int().positive().safe())
     .safeParse(id);
   if (!parsedId.success) notFound();
+  const returnTo = `/routes/${id}/edit`;
+  const session = await auth();
+  if (!session?.user?.id)
+    redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
+
+  const user = await getUserHomePageSettings(session.user.id);
+  if (user && !user.profileCompletedAt)
+    redirect(`/setup-profile?returnTo=${encodeURIComponent(returnTo)}`);
 
   const route = await api.route
     .getById({ id: parsedId.data })
