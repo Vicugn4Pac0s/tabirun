@@ -6,6 +6,7 @@ const { auth, getUserProfileSettings, screenProps } = vi.hoisted(() => ({
   getUserProfileSettings: vi.fn(),
   screenProps: vi.fn(),
 }));
+vi.mock("server-only", () => ({}));
 vi.mock("~/server/auth", () => ({ auth }));
 vi.mock("~/server/features/user/queries", () => ({ getUserProfileSettings }));
 vi.mock("next/navigation", () => ({

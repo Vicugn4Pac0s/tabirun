@@ -22,6 +22,7 @@ const {
     throw new Error(`REDIRECT:${path}`);
   }),
 }));
+vi.mock("server-only", () => ({}));
 vi.mock("~/frontend/features/route/components/RouteEditScreen", () => ({
   RouteEditScreen: ({
     route,

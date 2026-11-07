@@ -12,6 +12,7 @@ const { auth, getUserHomePageSettings, screenProps, redirect } = vi.hoisted(
     }),
   }),
 );
+vi.mock("server-only", () => ({}));
 vi.mock("~/server/auth", () => ({ auth }));
 vi.mock("~/server/features/user/queries", () => ({ getUserHomePageSettings }));
 vi.mock("next/navigation", () => ({ redirect }));

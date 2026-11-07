@@ -1,16 +1,17 @@
 import { SessionProvider } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { RouteCreateScreen } from "~/frontend/features/route/components/RouteCreateScreen";
-import { auth } from "~/server/auth";
+import {
+  requireUserSession,
+  redirectIfProfileIncomplete,
+} from "~/server/auth/guards";
 import { getUserHomePageSettings } from "~/server/features/user/queries";
 
 export default async function RouteCreatePage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login?returnTo=%2Froutes%2Fnew");
+  const returnTo = "/routes/new";
+  const session = await requireUserSession(returnTo);
   const user = await getUserHomePageSettings(session.user.id);
-  if (user && !user.profileCompletedAt)
-    redirect("/setup-profile?returnTo=%2Froutes%2Fnew");
+  redirectIfProfileIncomplete(user, returnTo);
   return (
     <SessionProvider session={session}>
       <main>

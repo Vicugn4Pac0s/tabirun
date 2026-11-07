@@ -1,15 +1,17 @@
 import { redirect } from "next/navigation";
 import { UserProfileEditScreen } from "~/frontend/features/user/components/UserProfileEditScreen";
-import { auth } from "~/server/auth";
+import {
+  requireUserSession,
+  redirectIfProfileIncomplete,
+} from "~/server/auth/guards";
 import { getUserProfileSettings } from "~/server/features/user/queries";
 
 export default async function UserProfileEditPage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login?returnTo=%2Fsettings%2Fprofile");
+  const returnTo = "/settings/profile";
+  const session = await requireUserSession(returnTo);
   const user = await getUserProfileSettings(session.user.id);
   if (!user) redirect("/");
-  if (!user.profileCompletedAt)
-    redirect("/setup-profile?returnTo=%2Fsettings%2Fprofile");
+  redirectIfProfileIncomplete(user, returnTo);
 
   return (
     <main className="mx-auto w-full max-w-lg px-4 py-10">

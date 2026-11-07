@@ -1,10 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { SessionProvider } from "next-auth/react";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { z } from "zod";
 
 import { RouteDetailScreen } from "~/frontend/features/route/components/RouteDetailScreen";
-import { auth } from "~/server/auth";
+import {
+  requireUserSession,
+  redirectIfProfileIncomplete,
+} from "~/server/auth/guards";
 import { getUserHomePageSettings } from "~/server/features/user/queries";
 import { api } from "~/trpc/server";
 
@@ -24,13 +27,10 @@ export default async function RouteDetailPage({
     .safeParse(id);
   if (!parsedId.success) notFound();
   const returnTo = `/routes/${id}`;
-  const session = await auth();
-  if (!session?.user?.id)
-    redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
+  const session = await requireUserSession(returnTo);
 
   const user = await getUserHomePageSettings(session.user.id);
-  if (user && !user.profileCompletedAt)
-    redirect(`/setup-profile?returnTo=${encodeURIComponent(returnTo)}`);
+  redirectIfProfileIncomplete(user, returnTo);
 
   const route = await api.route
     .getById({ id: parsedId.data })
