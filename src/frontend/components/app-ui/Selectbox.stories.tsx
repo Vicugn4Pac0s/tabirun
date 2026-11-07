@@ -4,7 +4,7 @@ import { fn } from "storybook/test";
 import { Selectbox } from "./Selectbox";
 
 const meta = {
-  title: "Atoms/Selectbox",
+  title: "App UI/Selectbox",
   component: Selectbox,
   parameters: {
     layout: "centered",

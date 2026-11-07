@@ -4,7 +4,7 @@ import SubActionButton from "./SubActionButton";
 import { fn } from "storybook/test";
 
 const meta = {
-  title: "Atoms/SubActionButton",
+  title: "App UI/SubActionButton",
   component: SubActionButton,
   parameters: {
     layout: "centered",

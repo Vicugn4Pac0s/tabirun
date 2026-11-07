@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { StatValue } from "./StatValue";
 
 const meta = {
-  title: "Atoms/StatValue",
+  title: "App UI/StatValue",
   component: StatValue,
   parameters: {
     layout: "centered",
