@@ -1,3 +1,5 @@
+import type Link from "next/link";
+import type { ComponentPropsWithoutRef } from "react";
 import userEvent from "@testing-library/user-event";
 import {
   cleanup,
@@ -15,6 +17,39 @@ const { directionsQuery, updateRoute, push, refresh } = vi.hoisted(() => ({
   push: vi.fn(),
   refresh: vi.fn(),
 }));
+vi.mock("next/link", async () => {
+  const { forwardRef } = await import("react");
+  type LinkProps = ComponentPropsWithoutRef<typeof Link>;
+  return {
+    default: forwardRef<HTMLAnchorElement, LinkProps>(function TestLink(
+      { href, onClick, onNavigate, children, ...props },
+      ref,
+    ) {
+      return (
+        <a
+          {...props}
+          ref={ref}
+          href={typeof href === "string" ? href : (href.pathname ?? undefined)}
+          onClick={(event) => {
+            onClick?.(event);
+            if (!event.defaultPrevented) {
+              let prevented = false;
+              onNavigate?.({
+                preventDefault: () => {
+                  prevented = true;
+                },
+              });
+              if (!prevented) push(href);
+            }
+            event.preventDefault();
+          }}
+        >
+          {children}
+        </a>
+      );
+    }),
+  };
+});
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, refresh }) }));
 vi.mock("../api/useUpdateRoute", () => ({
   useUpdateRoute: () => ({ updateRoute, isUpdating: false }),

@@ -1,19 +1,11 @@
 "use client";
-
-import {
-  type FieldErrors,
-  type FieldError,
-  type UseFormRegister,
-} from "react-hook-form";
-
-import type {
-  UserInitialProfileInput,
-  UserProfileUpdateInput,
-} from "~/shared/schemas";
-
+import { useController, type UseFormReturn } from "react-hook-form";
+import type { FormEvent } from "react";
+import type { UserProfileUpdateInput } from "~/shared/schemas";
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import { Input } from "~/frontend/components/ui/input";
+import { Button } from "~/frontend/components/ui/button";
 
 type SelectOption = {
   value: string;
@@ -27,45 +19,41 @@ const genderOptions: SelectOption[] = [
   { value: "prefer_not_to_say", label: "回答しない" },
 ];
 
-export type UserProfileFormValues = UserProfileUpdateInput;
-
-type SelectField = {
-  value?: string;
-  onChange: (value: string) => void;
+type UserProfileEditFormProps = {
+  form: UseFormReturn<UserProfileUpdateInput>;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  isSubmitting: boolean;
 };
-
-type UserProfileFormFieldsProps = {
-  register:
-    | UseFormRegister<UserProfileUpdateInput>
-    | UseFormRegister<UserInitialProfileInput>;
-  gender: SelectField;
-  pace: SelectField;
-  errors: FieldErrors<UserProfileFormValues>;
-  disabled: boolean;
-};
-
 const toOptionalString = (value: string) => (value === "" ? undefined : value);
 
 const toOptionalInt = (value: string) =>
   value === "" ? undefined : Number.parseInt(value, 10);
 
-const getErrorMessage = (error: FieldError | undefined) => error?.message;
-
-export const UserProfileFormFields = ({
-  register,
-  gender,
-  pace,
-  errors,
-  disabled,
-}: UserProfileFormFieldsProps) => {
-  const birthDateError = getErrorMessage(errors.birthDate);
-  const genderError = getErrorMessage(errors.gender);
-  const paceError = getErrorMessage(errors.pace);
-  const heightError = getErrorMessage(errors.height);
-  const weightError = getErrorMessage(errors.weight);
-
+export function UserProfileEditForm({
+  form,
+  onSubmit,
+  isSubmitting,
+}: UserProfileEditFormProps) {
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = form;
+  const { field: gender } = useController({ control, name: "gender" });
+  const { field: pace } = useController({ control, name: "pace" });
+  const disabled = isSubmitting;
+  const birthDateError = errors.birthDate?.message;
+  const genderError = errors.gender?.message;
+  const paceError = errors.pace?.message;
+  const heightError = errors.height?.message;
+  const weightError = errors.weight?.message;
   return (
-    <>
+    <form
+      className="space-y-4"
+      onSubmit={(event) => {
+        void onSubmit(event);
+      }}
+    >
       <div className="space-y-1">
         <label className="text-sm font-medium">生年月日</label>
         <Input
@@ -131,6 +119,10 @@ export const UserProfileFormFields = ({
           {weightError && <p className="text-sm text-red-500">{weightError}</p>}
         </div>
       </div>
-    </>
+
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? "更新中..." : "保存する"}
+      </Button>
+    </form>
   );
-};
+}

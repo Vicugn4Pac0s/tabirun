@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
-import { InitialProfileForm } from "~/frontend/features/user/components/InitialProfileForm";
+import { UserInitialProfileScreen } from "~/frontend/features/user/components/UserInitialProfileScreen";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { users } from "~/server/db/schema";
@@ -35,24 +35,15 @@ export default async function SetupProfilePage() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-lg items-center px-4 py-10">
-      <section className="w-full space-y-6 rounded-xl border bg-white p-6 shadow-sm">
-        <header className="space-y-2">
-          <h1 className="text-2xl font-semibold">初期設定</h1>
-          <p className="text-sm text-muted-foreground">
-            TABIRUNを利用するためにプロフィールを設定してください。
-          </p>
-        </header>
-
-        <InitialProfileForm
-          initialValues={{
-            birthDate: user.birthDate ?? undefined,
-            gender: user.gender ?? undefined,
-            pace: user.pace ?? undefined,
-            height: user.height ?? undefined,
-            weight: user.weight ?? undefined,
-          }}
-        />
-      </section>
+      <UserInitialProfileScreen
+        initialValues={{
+          birthDate: user.birthDate ?? undefined,
+          gender: user.gender ?? undefined,
+          pace: user.pace ?? undefined,
+          height: user.height ?? undefined,
+          weight: user.weight ?? undefined,
+        }}
+      />
     </main>
   );
 }
