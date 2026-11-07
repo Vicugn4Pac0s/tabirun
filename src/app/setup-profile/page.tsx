@@ -1,24 +1,21 @@
-import { getSafeReturnTo } from "~/shared/schemas/auth";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
+import { LoginScreen } from "~/frontend/features/auth/components/LoginScreen";
 import { UserInitialProfileScreen } from "~/frontend/features/user/components/UserInitialProfileScreen";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { users } from "~/server/db/schema";
 
-type SetupProfilePageProps = {
-  searchParams: Promise<{ returnTo?: string | string[] }>;
-};
-
-export default async function SetupProfilePage({
-  searchParams,
-}: SetupProfilePageProps) {
-  const returnTo = getSafeReturnTo((await searchParams).returnTo);
+export default async function SetupProfilePage() {
   const session = await auth();
 
   if (!session?.user?.id) {
-    redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
+    return (
+      <main className="mx-auto w-full max-w-lg px-4 py-10">
+        <LoginScreen />
+      </main>
+    );
   }
 
   const user = await db.query.users.findFirst({
@@ -38,13 +35,12 @@ export default async function SetupProfilePage({
   }
 
   if (user.profileCompletedAt) {
-    redirect(returnTo);
+    redirect("/");
   }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-lg items-center px-4 py-10">
       <UserInitialProfileScreen
-        returnTo={returnTo}
         initialValues={{
           birthDate: user.birthDate ?? undefined,
           gender: user.gender ?? undefined,

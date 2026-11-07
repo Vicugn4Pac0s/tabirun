@@ -6,6 +6,9 @@ const { auth, getUserProfileSettings, screenProps } = vi.hoisted(() => ({
   getUserProfileSettings: vi.fn(),
   screenProps: vi.fn(),
 }));
+vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
+  UserInitialProfileScreen: () => <h1>初期設定</h1>,
+}));
 vi.mock("server-only", () => ({}));
 vi.mock("~/server/auth", () => ({ auth }));
 vi.mock("~/server/features/user/queries", () => ({ getUserProfileSettings }));
@@ -70,21 +73,23 @@ describe("UserProfileEditPage", () => {
       },
     });
   });
-  it("未ログインならログイン案内へ移動し、取得しない", async () => {
+  it("未ログインならログイン案内を表示し、取得しない", async () => {
     auth.mockResolvedValue(null);
-    await expect(UserProfileEditPage()).rejects.toThrow(
-      "REDIRECT:/login?returnTo=%2Fsettings%2Fprofile",
-    );
+    render(await UserProfileEditPage());
+    expect(
+      screen.getByRole("heading", { name: "ログインが必要です" }),
+    ).toBeInTheDocument();
     expect(getUserProfileSettings).not.toHaveBeenCalled();
   });
-  it("ユーザーが存在しなければログイン案内へ移動する", async () => {
+  it("ユーザーが存在しなければホームへ戻す", async () => {
     getUserProfileSettings.mockResolvedValue(undefined);
     await expect(UserProfileEditPage()).rejects.toThrow("REDIRECT:/");
   });
-  it("プロフィール未完了なら初回設定へ戻す", async () => {
+  it("プロフィール未完了なら初回設定を表示する", async () => {
     getUserProfileSettings.mockResolvedValue({ profileCompletedAt: null });
-    await expect(UserProfileEditPage()).rejects.toThrow(
-      "REDIRECT:/setup-profile?returnTo=%2Fsettings%2Fprofile",
-    );
+    render(await UserProfileEditPage());
+    expect(
+      screen.getByRole("heading", { name: "初期設定" }),
+    ).toBeInTheDocument();
   });
 });

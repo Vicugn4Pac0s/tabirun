@@ -3,24 +3,21 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import RouteEditPage from "./page";
 
-const {
-  auth,
-  getUserHomePageSettings,
-  getById,
-  notFound,
-  redirect,
-  workspace,
-} = vi.hoisted(() => ({
-  workspace: vi.fn(),
-  auth: vi.fn(),
-  getUserHomePageSettings: vi.fn(),
-  getById: vi.fn(),
-  notFound: vi.fn(() => {
-    throw new Error("NOT_FOUND_PAGE");
-  }),
-  redirect: vi.fn((path: string) => {
-    throw new Error(`REDIRECT:${path}`);
-  }),
+const { auth, getUserProfileSettings, getById, notFound, redirect, workspace } =
+  vi.hoisted(() => ({
+    workspace: vi.fn(),
+    auth: vi.fn(),
+    getUserProfileSettings: vi.fn(),
+    getById: vi.fn(),
+    notFound: vi.fn(() => {
+      throw new Error("NOT_FOUND_PAGE");
+    }),
+    redirect: vi.fn((path: string) => {
+      throw new Error(`REDIRECT:${path}`);
+    }),
+  }));
+vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
+  UserInitialProfileScreen: () => <h1>初期設定</h1>,
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("~/frontend/features/route/components/RouteEditScreen", () => ({
@@ -34,7 +31,7 @@ vi.mock("~/frontend/features/route/components/RouteEditScreen", () => ({
   },
 }));
 vi.mock("~/server/auth", () => ({ auth }));
-vi.mock("~/server/features/user/queries", () => ({ getUserHomePageSettings }));
+vi.mock("~/server/features/user/queries", () => ({ getUserProfileSettings }));
 vi.mock("~/trpc/server", () => ({ api: { route: { getById } } }));
 vi.mock("next/navigation", () => ({ notFound, redirect }));
 
@@ -44,7 +41,7 @@ const openPage = (id = "1") =>
 beforeEach(() => {
   vi.clearAllMocks();
   auth.mockResolvedValue({ user: { id: "owner" } });
-  getUserHomePageSettings.mockResolvedValue({ profileCompletedAt: new Date() });
+  getUserProfileSettings.mockResolvedValue({ profileCompletedAt: new Date() });
   getById.mockResolvedValue({
     id: 1,
     title: "朝のルート",
@@ -73,19 +70,21 @@ describe("RouteEditPage", () => {
     });
   });
 
-  it("未ログインではログイン案内へ移動する", async () => {
+  it("未ログインではログイン案内をその場で表示する", async () => {
     auth.mockResolvedValue(null);
-    await expect(openPage()).rejects.toThrow(
-      "REDIRECT:/login?returnTo=%2Froutes%2F1%2Fedit",
-    );
+    render(await openPage());
+    expect(
+      screen.getByRole("heading", { name: "ログインが必要です" }),
+    ).toBeInTheDocument();
     expect(getById).not.toHaveBeenCalled();
   });
 
-  it("初期プロフィール未登録なら初期設定へ移動する", async () => {
-    getUserHomePageSettings.mockResolvedValue({ profileCompletedAt: null });
-    await expect(openPage()).rejects.toThrow(
-      "REDIRECT:/setup-profile?returnTo=%2Froutes%2F1%2Fedit",
-    );
+  it("初期プロフィール未登録なら初期設定をその場で表示する", async () => {
+    getUserProfileSettings.mockResolvedValue({ profileCompletedAt: null });
+    render(await openPage());
+    expect(
+      screen.getByRole("heading", { name: "初期設定" }),
+    ).toBeInTheDocument();
     expect(getById).not.toHaveBeenCalled();
   });
 
@@ -100,7 +99,7 @@ describe("RouteEditPage", () => {
   it("未ログインでも不正IDは404にする", async () => {
     auth.mockResolvedValue(null);
     await expect(openPage("abc")).rejects.toThrow("NOT_FOUND_PAGE");
-    expect(getUserHomePageSettings).not.toHaveBeenCalled();
+    expect(getUserProfileSettings).not.toHaveBeenCalled();
   });
 
   it("取得対象がなければ404にする", async () => {

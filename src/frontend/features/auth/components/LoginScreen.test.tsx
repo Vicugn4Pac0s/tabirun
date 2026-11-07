@@ -9,14 +9,12 @@ afterEach(() => {
   vi.resetAllMocks();
 });
 describe("LoginScreen", () => {
-  it("戻り先を引き継いでログインを開始し、処理中は無効にする", async () => {
+  it("現在のページでログインを開始し、処理中は無効にする", async () => {
     signIn.mockImplementation(() => new Promise(() => undefined));
     const user = userEvent.setup();
-    render(<LoginScreen returnTo="/routes/12/edit" />);
+    render(<LoginScreen />);
     await user.click(screen.getByRole("button", { name: "Googleでログイン" }));
-    expect(signIn).toHaveBeenCalledWith("google", {
-      redirectTo: "/login?returnTo=%2Froutes%2F12%2Fedit",
-    });
+    expect(signIn).toHaveBeenCalledWith("google");
     expect(
       screen.getByRole("button", { name: "ログイン中..." }),
     ).toBeDisabled();
@@ -24,7 +22,7 @@ describe("LoginScreen", () => {
   it("開始に失敗したら案内を表示して再試行できる", async () => {
     signIn.mockRejectedValueOnce(new Error("failure"));
     const user = userEvent.setup();
-    render(<LoginScreen returnTo="/routes/new" />);
+    render(<LoginScreen />);
     await user.click(screen.getByRole("button", { name: "Googleでログイン" }));
     await waitFor(() => expect(screen.getByRole("alert")).toBeVisible());
     expect(

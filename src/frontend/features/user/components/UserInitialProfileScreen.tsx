@@ -4,16 +4,11 @@ import { useUserInitialProfile } from "~/frontend/features/user/hooks/useUserIni
 import { InitialProfileForm } from "~/frontend/features/user/components/InitialProfileForm";
 type UserInitialProfileScreenProps = {
   initialValues: UserProfileUpdateInput;
-  returnTo?: string;
 };
 export function UserInitialProfileScreen({
   initialValues,
-  returnTo,
 }: UserInitialProfileScreenProps) {
-  const { form, save, isCompleting } = useUserInitialProfile(
-    initialValues,
-    returnTo,
-  );
+  const { form, save, isCompleting } = useUserInitialProfile(initialValues);
   return (
     <section className="w-full space-y-6 rounded-xl border bg-white p-6 shadow-sm">
       <header className="space-y-2">

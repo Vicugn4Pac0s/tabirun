@@ -1,4 +1,3 @@
-import { getSafeReturnTo } from "~/shared/schemas/auth";
 import { useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -11,10 +10,7 @@ import {
   type UserProfileUpdateInput,
 } from "~/shared/schemas";
 
-export function useUserInitialProfile(
-  initialValues: UserProfileUpdateInput,
-  returnTo?: string,
-) {
+export function useUserInitialProfile(initialValues: UserProfileUpdateInput) {
   const router = useRouter();
   const { completeInitialProfile, isCompleting } = useCompleteInitialProfile();
 
@@ -34,7 +30,7 @@ export function useUserInitialProfile(
       return;
     }
     toast.success("初期設定を保存しました。");
-    router.replace(getSafeReturnTo(returnTo));
+    router.refresh();
   });
   const save: typeof submit = (event) => {
     if (submitting.current || isCompleting) {

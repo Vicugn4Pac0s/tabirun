@@ -4,11 +4,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 
 import { RouteEditScreen } from "~/frontend/features/route/components/RouteEditScreen";
-import {
-  requireUserSession,
-  redirectIfProfileIncomplete,
-} from "~/server/auth/guards";
-import { getUserHomePageSettings } from "~/server/features/user/queries";
+import { renderProtectedPage } from "~/server/auth/renderProtectedPage";
 import { api } from "~/trpc/server";
 
 type RouteEditPageProps = {
@@ -24,24 +20,21 @@ export default async function RouteEditPage({ params }: RouteEditPageProps) {
     .pipe(z.number().int().positive().safe())
     .safeParse(id);
   if (!parsedId.success) notFound();
-  const returnTo = `/routes/${id}/edit`;
-  const session = await requireUserSession(returnTo);
+  return renderProtectedPage(async (session) => {
+    const route = await api.route
+      .getById({ id: parsedId.data })
+      .catch((error: unknown) => {
+        if (error instanceof TRPCError && error.code === "NOT_FOUND")
+          notFound();
+        throw error;
+      });
 
-  const user = await getUserHomePageSettings(session.user.id);
-  redirectIfProfileIncomplete(user, returnTo);
-
-  const route = await api.route
-    .getById({ id: parsedId.data })
-    .catch((error: unknown) => {
-      if (error instanceof TRPCError && error.code === "NOT_FOUND") notFound();
-      throw error;
-    });
-
-  return (
-    <SessionProvider session={session}>
-      <main>
-        <RouteEditScreen key={route.id} route={route} />
-      </main>
-    </SessionProvider>
-  );
+    return (
+      <SessionProvider session={session}>
+        <main>
+          <RouteEditScreen key={route.id} route={route} />
+        </main>
+      </SessionProvider>
+    );
+  });
 }

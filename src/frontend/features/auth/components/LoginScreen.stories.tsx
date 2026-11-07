@@ -5,7 +5,6 @@ import { LoginScreen } from "./LoginScreen";
 const meta = {
   title: "Features/Auth/LoginScreen",
   component: LoginScreen,
-  args: { returnTo: "/routes/new" },
   decorators: [
     (Story) => (
       <main className="mx-auto w-full max-w-lg px-4 py-10">

@@ -4,11 +4,8 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { Button } from "~/frontend/components/ui/button";
-import { getSafeReturnTo } from "~/shared/schemas/auth";
 
-type LoginScreenProps = { returnTo: string };
-
-export function LoginScreen({ returnTo }: LoginScreenProps) {
+export function LoginScreen() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [hasError, setHasError] = useState(false);
   const login = async () => {
@@ -16,9 +13,7 @@ export function LoginScreen({ returnTo }: LoginScreenProps) {
     setIsSigningIn(true);
     setHasError(false);
     try {
-      await signIn("google", {
-        redirectTo: `/login?returnTo=${encodeURIComponent(getSafeReturnTo(returnTo))}`,
-      });
+      await signIn("google");
     } catch {
       setHasError(true);
       setIsSigningIn(false);
@@ -29,7 +24,7 @@ export function LoginScreen({ returnTo }: LoginScreenProps) {
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold">ログインが必要です</h1>
         <p className="text-sm text-muted-foreground">
-          このページを開くにはログインしてください。ログイン後、元のページへ戻ります。
+          このページを開くにはログインしてください。ログイン後、このページを表示します。
         </p>
       </header>
       {hasError && (

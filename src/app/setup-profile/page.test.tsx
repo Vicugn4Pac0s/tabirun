@@ -12,12 +12,8 @@ vi.mock("~/server/auth", () => ({ auth }));
 vi.mock("~/server/db", () => ({ db: { query: { users: { findFirst } } } }));
 vi.mock("next/navigation", () => ({ redirect }));
 vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
-  UserInitialProfileScreen: ({ returnTo }: { returnTo: string }) => (
-    <p>戻り先:{returnTo}</p>
-  ),
+  UserInitialProfileScreen: () => <h1>初期設定</h1>,
 }));
-const openPage = (returnTo = "/routes/new") =>
-  SetupProfilePage({ searchParams: Promise.resolve({ returnTo }) });
 beforeEach(() => {
   vi.clearAllMocks();
   auth.mockResolvedValue({ user: { id: "owner" } });
@@ -25,24 +21,23 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 describe("SetupProfilePage", () => {
-  it("未ログインなら戻り先を保持してログイン案内へ送る", async () => {
+  it("未ログインなら現在のページでログインを案内する", async () => {
     auth.mockResolvedValue(null);
-    await expect(openPage()).rejects.toThrow(
-      "REDIRECT:/login?returnTo=%2Froutes%2Fnew",
-    );
+    render(await SetupProfilePage());
+    expect(
+      screen.getByRole("heading", { name: "ログインが必要です" }),
+    ).toBeInTheDocument();
     expect(findFirst).not.toHaveBeenCalled();
   });
-  it("未設定ならフォームへ戻り先を渡す", async () => {
-    render(await openPage());
-    expect(screen.getByText("戻り先:/routes/new")).toBeInTheDocument();
+  it("未設定なら初回設定を表示する", async () => {
+    render(await SetupProfilePage());
+    expect(
+      screen.getByRole("heading", { name: "初期設定" }),
+    ).toBeInTheDocument();
   });
-  it("設定済みなら元ページに戻す", async () => {
+  it("設定完了後の再取得では従来どおりホームへ戻す", async () => {
     findFirst.mockResolvedValue({ profileCompletedAt: new Date() });
-    await expect(openPage()).rejects.toThrow("REDIRECT:/routes/new");
-  });
-  it("設定済みで循環する戻り先ならホームに戻す", async () => {
-    findFirst.mockResolvedValue({ profileCompletedAt: new Date() });
-    await expect(openPage("/setup-profile")).rejects.toThrow("REDIRECT:/");
+    await expect(SetupProfilePage()).rejects.toThrow("REDIRECT:/");
     expect(redirect).toHaveBeenCalledWith("/");
   });
 });
