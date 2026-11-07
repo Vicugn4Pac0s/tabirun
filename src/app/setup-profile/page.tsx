@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
+import { PageContainer } from "~/frontend/components/app-ui/PageContainer";
 import { LoginScreen } from "~/frontend/features/auth/components/LoginScreen";
 import { UserInitialProfileScreen } from "~/frontend/features/user/components/UserInitialProfileScreen";
 import { auth } from "~/server/auth";
@@ -12,8 +13,10 @@ export default async function SetupProfilePage() {
 
   if (!session?.user?.id) {
     return (
-      <main className="mx-auto w-full max-w-lg px-4 py-10">
-        <LoginScreen />
+      <main>
+        <PageContainer>
+          <LoginScreen />
+        </PageContainer>
       </main>
     );
   }
@@ -39,16 +42,18 @@ export default async function SetupProfilePage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-lg items-center px-4 py-10">
-      <UserInitialProfileScreen
-        initialValues={{
-          birthDate: user.birthDate ?? undefined,
-          gender: user.gender ?? undefined,
-          pace: user.pace ?? undefined,
-          height: user.height ?? undefined,
-          weight: user.weight ?? undefined,
-        }}
-      />
+    <main>
+      <PageContainer className="flex min-h-screen items-center">
+        <UserInitialProfileScreen
+          initialValues={{
+            birthDate: user.birthDate ?? undefined,
+            gender: user.gender ?? undefined,
+            pace: user.pace ?? undefined,
+            height: user.height ?? undefined,
+            weight: user.weight ?? undefined,
+          }}
+        />
+      </PageContainer>
     </main>
   );
 }
