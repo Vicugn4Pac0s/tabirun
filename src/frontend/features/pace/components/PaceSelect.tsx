@@ -1,14 +1,18 @@
+import type { ComponentPropsWithoutRef } from "react";
 import { type Pace } from "~/frontend/types/pace";
 import { usePacesQuery } from "../api/usePacesQuery";
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 
-interface PaceSelectProps {
+type PaceSelectProps = {
   value?: string;
   onChangeValue: (pace: Pace) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
-}
+} & Pick<
+  ComponentPropsWithoutRef<"button">,
+  "id" | "onBlur" | "aria-invalid" | "aria-describedby"
+>;
 
 function PaceSelect({
   value,
@@ -16,6 +20,8 @@ function PaceSelect({
   placeholder = "選択してください",
   className,
   disabled,
+  id,
+  ...triggerProps
 }: PaceSelectProps) {
   const { paces, error } = usePacesQuery();
 
@@ -32,7 +38,9 @@ function PaceSelect({
   return (
     <div className={`w-full ${className ?? ""}`}>
       <Selectbox
-        ariaLabel="ペース"
+        {...triggerProps}
+        id={id}
+        ariaLabel={id ? undefined : "ペース"}
         items={paceOptions}
         value={value}
         onValueChange={(value) => {
@@ -45,7 +53,7 @@ function PaceSelect({
         className="w-full"
       />
       {error && (
-        <p className="mt-2 text-sm text-red-500">
+        <p role="alert" className="mt-2 text-sm text-destructive">
           ペース一覧を取得できませんでした。時間をおいて再度お試しください。
         </p>
       )}

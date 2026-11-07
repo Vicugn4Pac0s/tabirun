@@ -106,6 +106,16 @@ describe("UserProfileEditScreen", () => {
         screen.getByText("Number must be greater than 0"),
       ).toBeInTheDocument(),
     );
+    const height = screen.getByRole("spinbutton", { name: "身長(cm)" });
+    expect(height).toHaveAttribute("aria-invalid", "true");
+    expect(height).toHaveAccessibleDescription("Number must be greater than 0");
+    expect(screen.getByRole("alert")).toHaveClass("text-destructive");
+    await user.clear(height);
+    await user.type(height, "170");
+    await waitFor(() =>
+      expect(height).toHaveAttribute("aria-invalid", "false"),
+    );
+    expect(height).not.toHaveAttribute("aria-describedby");
     expect(save).not.toHaveBeenCalled();
     expect(error).not.toHaveBeenCalled();
   });

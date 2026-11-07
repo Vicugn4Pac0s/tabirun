@@ -77,6 +77,18 @@ describe("UserInitialProfileScreen", () => {
     await waitFor(() =>
       expect(screen.getAllByText("Required").length).toBeGreaterThan(0),
     );
+    for (const label of [
+      "生年月日",
+      "性別",
+      "ランニングのペース",
+      "身長(cm)",
+      "体重(kg)",
+    ]) {
+      const input = screen.getByLabelText(label);
+      expect(input).toHaveAttribute("aria-invalid", "true");
+      expect(input).toHaveAccessibleDescription("Required");
+    }
+    expect(screen.getAllByRole("alert")).toHaveLength(5);
     expect(save).not.toHaveBeenCalled();
     expect(refresh).not.toHaveBeenCalled();
   });

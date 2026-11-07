@@ -44,7 +44,7 @@ export function RouteForm({
         <p
           id="route-title-error"
           role="alert"
-          className="mt-1 text-sm text-red-600"
+          className="mt-1 text-sm text-destructive"
         >
           {titleError}
         </p>
