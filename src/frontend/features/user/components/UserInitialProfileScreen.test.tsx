@@ -1,7 +1,7 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { InitialProfileForm } from "./InitialProfileForm";
+import { UserInitialProfileScreen } from "./UserInitialProfileScreen";
 
 const { save, replace, success, error } = vi.hoisted(() => ({
   save: vi.fn(),
@@ -36,10 +36,10 @@ afterEach(() => {
   vi.resetAllMocks();
 });
 
-describe("InitialProfileForm", () => {
+describe("UserInitialProfileScreen", () => {
   it("保存成功時に通知し、既存の画面遷移を行う", async () => {
     const user = userEvent.setup();
-    render(<InitialProfileForm initialValues={profile} />);
+    render(<UserInitialProfileScreen initialValues={profile} />);
     await user.click(screen.getByRole("button", { name: "初期設定を完了" }));
     await waitFor(() =>
       expect(success).toHaveBeenCalledWith("初期設定を保存しました。"),
@@ -51,7 +51,7 @@ describe("InitialProfileForm", () => {
   it("保存失敗を処理して画面を残し、再送信できる", async () => {
     save.mockRejectedValueOnce(new Error("server detail"));
     const user = userEvent.setup();
-    render(<InitialProfileForm initialValues={profile} />);
+    render(<UserInitialProfileScreen initialValues={profile} />);
     await user.click(screen.getByRole("button", { name: "初期設定を完了" }));
     await waitFor(() =>
       expect(error).toHaveBeenCalledWith(
@@ -72,7 +72,7 @@ describe("InitialProfileForm", () => {
   });
   it("初回設定の必須項目が未入力なら送信しない", async () => {
     const user = userEvent.setup();
-    render(<InitialProfileForm initialValues={{}} />);
+    render(<UserInitialProfileScreen initialValues={{}} />);
     await user.click(screen.getByRole("button", { name: "初期設定を完了" }));
     await waitFor(() =>
       expect(screen.getAllByText("Required").length).toBeGreaterThan(0),
