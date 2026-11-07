@@ -1,13 +1,13 @@
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useUserInitialProfile } from "./useUserInitialProfile";
-const { saveApi, navigate, status } = vi.hoisted(() => ({
+const { saveApi, refresh, status } = vi.hoisted(() => ({
   saveApi: vi.fn(),
-  navigate: vi.fn(),
+  refresh: vi.fn(),
   status: { pending: false },
 }));
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: navigate, refresh: vi.fn() }),
+  useRouter: () => ({ refresh }),
 }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("~/frontend/features/user/api/useCompleteInitialProfile", () => ({
@@ -56,7 +56,7 @@ describe("useUserInitialProfile", () => {
       finish();
       await pending;
     });
-    expect(navigate).toHaveBeenCalledOnce();
+    expect(refresh).toHaveBeenCalledOnce();
     status.pending = true;
     rerender();
     await act(async () => {
@@ -76,11 +76,11 @@ describe("useUserInitialProfile", () => {
     await act(async () => {
       await result.current.save();
     });
-    expect(navigate).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
     await act(async () => {
       await result.current.save();
     });
     expect(saveApi).toHaveBeenCalledTimes(2);
-    expect(navigate).toHaveBeenCalledOnce();
+    expect(refresh).toHaveBeenCalledOnce();
   });
 });

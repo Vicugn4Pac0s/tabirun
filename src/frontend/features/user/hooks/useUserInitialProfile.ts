@@ -30,7 +30,7 @@ export function useUserInitialProfile(initialValues: UserProfileUpdateInput) {
       return;
     }
     toast.success("初期設定を保存しました。");
-    router.replace("/");
+    router.refresh();
   });
   const save: typeof submit = (event) => {
     if (submitting.current || isCompleting) {

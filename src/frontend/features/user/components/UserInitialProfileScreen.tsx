@@ -2,7 +2,9 @@
 import type { UserProfileUpdateInput } from "~/shared/schemas";
 import { useUserInitialProfile } from "~/frontend/features/user/hooks/useUserInitialProfile";
 import { InitialProfileForm } from "~/frontend/features/user/components/InitialProfileForm";
-type UserInitialProfileScreenProps = { initialValues: UserProfileUpdateInput };
+type UserInitialProfileScreenProps = {
+  initialValues: UserProfileUpdateInput;
+};
 export function UserInitialProfileScreen({
   initialValues,
 }: UserInitialProfileScreenProps) {

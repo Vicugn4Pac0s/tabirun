@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
+import { LoginScreen } from "~/frontend/features/auth/components/LoginScreen";
 import { UserInitialProfileScreen } from "~/frontend/features/user/components/UserInitialProfileScreen";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
@@ -10,7 +11,11 @@ export default async function SetupProfilePage() {
   const session = await auth();
 
   if (!session?.user?.id) {
-    redirect("/");
+    return (
+      <main className="mx-auto w-full max-w-lg px-4 py-10">
+        <LoginScreen />
+      </main>
+    );
   }
 
   const user = await db.query.users.findFirst({

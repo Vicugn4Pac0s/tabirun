@@ -3,9 +3,9 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { UserInitialProfileScreen } from "./UserInitialProfileScreen";
 
-const { save, replace, success, error } = vi.hoisted(() => ({
+const { save, refresh, success, error } = vi.hoisted(() => ({
   save: vi.fn(),
-  replace: vi.fn(),
+  refresh: vi.fn(),
   success: vi.fn(),
   error: vi.fn(),
 }));
@@ -16,7 +16,7 @@ const profile = {
   height: 170,
   weight: 60,
 };
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 vi.mock("sonner", () => ({ toast: { success, error } }));
 vi.mock("~/frontend/features/user/api/useCompleteInitialProfile", () => ({
   useCompleteInitialProfile: () => ({
@@ -37,7 +37,7 @@ afterEach(() => {
 });
 
 describe("UserInitialProfileScreen", () => {
-  it("保存成功時に通知し、既存の画面遷移を行う", async () => {
+  it("保存成功時に通知し、現在のページを再取得する", async () => {
     const user = userEvent.setup();
     render(<UserInitialProfileScreen initialValues={profile} />);
     await user.click(screen.getByRole("button", { name: "初期設定を完了" }));
@@ -45,7 +45,7 @@ describe("UserInitialProfileScreen", () => {
       expect(success).toHaveBeenCalledWith("初期設定を保存しました。"),
     );
     expect(save).toHaveBeenCalledWith(profile);
-    expect(replace).toHaveBeenCalledWith("/");
+    expect(refresh).toHaveBeenCalledOnce();
     expect(error).not.toHaveBeenCalled();
   });
   it("保存失敗を処理して画面を残し、再送信できる", async () => {
@@ -58,7 +58,7 @@ describe("UserInitialProfileScreen", () => {
         "初期設定を保存できませんでした。時間をおいて再度お試しください。",
       ),
     );
-    expect(replace).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
     expect(success).not.toHaveBeenCalled();
     expect(
       screen.getByRole("button", { name: "初期設定を完了" }),
@@ -68,7 +68,7 @@ describe("UserInitialProfileScreen", () => {
       expect(success).toHaveBeenCalledWith("初期設定を保存しました。"),
     );
     expect(save).toHaveBeenCalledTimes(2);
-    expect(replace).toHaveBeenCalledWith("/");
+    expect(refresh).toHaveBeenCalledOnce();
   });
   it("初回設定の必須項目が未入力なら送信しない", async () => {
     const user = userEvent.setup();
@@ -78,6 +78,6 @@ describe("UserInitialProfileScreen", () => {
       expect(screen.getAllByText("Required").length).toBeGreaterThan(0),
     );
     expect(save).not.toHaveBeenCalled();
-    expect(replace).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
   });
 });
