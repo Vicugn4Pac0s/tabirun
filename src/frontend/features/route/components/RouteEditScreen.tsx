@@ -1,7 +1,6 @@
 "use client";
 
 import { GuardedLink } from "~/frontend/components/app-ui/GuardedLink";
-import { NavigationGuardProvider } from "~/frontend/providers/NavigationGuardProvider";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";
@@ -34,71 +33,68 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const moveStreetView = useMoveStreetView();
   return (
-    <NavigationGuardProvider
+    <RouteScreenLayout
       confirmNavigation={() => !isUpdating && confirmDiscard()}
-    >
-      <RouteScreenLayout
-        panelTitle="ルート編集"
-        menuTriggerLabel={getRouteMenuLabel(
-          directions?.distanceMeters,
-          isLoading,
-        )}
-        panel={
-          <>
-            <GuardedLink
-              href={`/routes/${route.id}`}
-              className="mb-5 inline-block font-medium underline"
-              aria-disabled={isUpdating}
-            >
-              ルートに戻る
-            </GuardedLink>
-            <h1 className="mb-4 text-xl font-bold">ルートを編集</h1>
-            <RouteForm
-              draft={draft}
-              onSubmit={save}
-              submitText={{ idle: "更新する", pending: "更新中..." }}
-            >
-              <p className="mt-2 text-sm text-gray-500">
-                Street View下部のボタンで地点を追加・削除できます。
-              </p>
-              {warningMessage && (
-                <div className="mb-4">
-                  <WarningBanner>{warningMessage}</WarningBanner>
-                </div>
-              )}
-              <RunMetricsPanel
-                distanceMeters={directions?.distanceMeters}
-                isLoading={isLoading}
-                pace={pace}
-                onPaceChange={setPace}
-                weightKg={weightKg}
-              />
-            </RouteForm>
-            {points.length < 2 && (
-              <p role="status" className="mb-3 text-sm text-gray-500">
-                保存するには2地点以上を登録してください。
-              </p>
+      panelTitle="ルート編集"
+      menuTriggerLabel={getRouteMenuLabel(
+        directions?.distanceMeters,
+        isLoading,
+      )}
+      panel={
+        <>
+          <GuardedLink
+            href={`/routes/${route.id}`}
+            className="mb-5 inline-block font-medium underline"
+            aria-disabled={isUpdating}
+          >
+            ルートに戻る
+          </GuardedLink>
+          <h1 className="mb-4 text-xl font-bold">ルートを編集</h1>
+          <RouteForm
+            draft={draft}
+            onSubmit={save}
+            submitText={{ idle: "更新する", pending: "更新中..." }}
+          >
+            <p className="mt-2 text-sm text-gray-500">
+              Street View下部のボタンで地点を追加・削除できます。
+            </p>
+            {warningMessage && (
+              <div className="mb-4">
+                <WarningBanner>{warningMessage}</WarningBanner>
+              </div>
             )}
-            <RoutePointList
-              routePoints={points}
-              onRoutePointClick={(point) => {
-                void moveStreetView(point).catch(() => undefined);
-              }}
+            <RunMetricsPanel
+              distanceMeters={directions?.distanceMeters}
+              isLoading={isLoading}
+              pace={pace}
+              onPaceChange={setPace}
+              weightKg={weightKg}
             />
-          </>
-        }
-      >
-        <RouteEditorMap
-          initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
-          points={points}
-          polylinePath={polylinePath}
-          isLoading={isLoading}
-          disabled={isUpdating}
-          fitToRoute
-          onTogglePoint={togglePoint}
-        />
-      </RouteScreenLayout>
-    </NavigationGuardProvider>
+          </RouteForm>
+          {points.length < 2 && (
+            <p role="status" className="mb-3 text-sm text-gray-500">
+              保存するには2地点以上を登録してください。
+            </p>
+          )}
+          <RoutePointList
+            routePoints={points}
+            onRoutePointClick={(point) => {
+              void moveStreetView(point).catch(() => undefined);
+            }}
+          />
+        </>
+      }
+    >
+      <RouteEditorMap
+        initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
+        points={points}
+        polylinePath={polylinePath}
+        isLoading={isLoading}
+        disabled={isUpdating}
+        fitToRoute
+        onTogglePoint={togglePoint}
+      />
+    </RouteScreenLayout>
   );
 }
 

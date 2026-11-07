@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { NavigationGuardProvider } from "~/frontend/providers/NavigationGuardProvider";
 import MobileSidebarSheet from "~/frontend/components/app-ui/MobileSidebarSheet";
 import { useIsMobile } from "~/frontend/hooks/shared/useIsMobile";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
@@ -11,6 +12,7 @@ type RouteScreenLayoutProps = {
   menuTriggerLabel: string;
   panel: ReactNode;
   children: ReactNode;
+  confirmNavigation?: () => boolean;
 };
 
 export function RouteScreenLayout({
@@ -18,10 +20,11 @@ export function RouteScreenLayout({
   menuTriggerLabel,
   panel,
   children,
+  confirmNavigation,
 }: RouteScreenLayoutProps) {
   const isMobile = useIsMobile();
 
-  return (
+  const content = (
     <div className="relative flex min-h-screen">
       <aside
         aria-label={panelTitle}
@@ -49,5 +52,13 @@ export function RouteScreenLayout({
         <AuthUserMenu />
       </div>
     </div>
+  );
+
+  return confirmNavigation ? (
+    <NavigationGuardProvider confirmNavigation={confirmNavigation}>
+      {content}
+    </NavigationGuardProvider>
+  ) : (
+    content
   );
 }
