@@ -1,6 +1,6 @@
 "use client";
 import { useController, type UseFormReturn } from "react-hook-form";
-import type { FormEvent } from "react";
+import { useId, type FormEvent } from "react";
 import type { UserInitialProfileInput } from "~/shared/schemas";
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
@@ -34,6 +34,7 @@ export function InitialProfileForm({
   onSubmit,
   isSubmitting,
 }: InitialProfileFormProps) {
+  const formId = useId();
   const {
     register,
     control,
@@ -55,8 +56,15 @@ export function InitialProfileForm({
       }}
     >
       <div className="space-y-1">
-        <label className="text-sm font-medium">生年月日</label>
+        <label htmlFor={`${formId}-birthDate`} className="text-sm font-medium">
+          生年月日
+        </label>
         <Input
+          id={`${formId}-birthDate`}
+          aria-invalid={Boolean(birthDateError)}
+          aria-describedby={
+            birthDateError ? `${formId}-birthDate-error` : undefined
+          }
           type="date"
           disabled={disabled}
           {...register("birthDate", {
@@ -64,13 +72,25 @@ export function InitialProfileForm({
           })}
         />
         {birthDateError && (
-          <p className="text-sm text-red-500">{birthDateError}</p>
+          <p
+            id={`${formId}-birthDate-error`}
+            role="alert"
+            className="mt-1 text-sm text-destructive"
+          >
+            {birthDateError}
+          </p>
         )}
       </div>
 
       <div className="space-y-1">
-        <label className="text-sm font-medium">性別</label>
+        <label htmlFor={`${formId}-gender`} className="text-sm font-medium">
+          性別
+        </label>
         <Selectbox
+          id={`${formId}-gender`}
+          aria-invalid={Boolean(genderError)}
+          aria-describedby={genderError ? `${formId}-gender-error` : undefined}
+          onBlur={gender.onBlur}
           items={genderOptions}
           value={gender.value}
           onValueChange={gender.onChange}
@@ -78,24 +98,53 @@ export function InitialProfileForm({
           className="w-full"
           disabled={disabled}
         />
-        {genderError && <p className="text-sm text-red-500">{genderError}</p>}
+        {genderError && (
+          <p
+            id={`${formId}-gender-error`}
+            role="alert"
+            className="mt-1 text-sm text-destructive"
+          >
+            {genderError}
+          </p>
+        )}
       </div>
 
       <div className="space-y-1">
-        <label className="text-sm font-medium">ランニングのペース</label>
+        <label htmlFor={`${formId}-pace`} className="text-sm font-medium">
+          ランニングのペース
+        </label>
         <PaceSelect
+          id={`${formId}-pace`}
+          aria-invalid={Boolean(paceError)}
+          aria-describedby={paceError ? `${formId}-pace-error` : undefined}
+          onBlur={pace.onBlur}
           value={pace.value}
           onChangeValue={pace.onChange}
           placeholder="選択してください"
           disabled={disabled}
         />
-        {paceError && <p className="text-sm text-red-500">{paceError}</p>}
+        {paceError && (
+          <p
+            id={`${formId}-pace-error`}
+            role="alert"
+            className="mt-1 text-sm text-destructive"
+          >
+            {paceError}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1">
-          <label className="text-sm font-medium">身長(cm)</label>
+          <label htmlFor={`${formId}-height`} className="text-sm font-medium">
+            身長(cm)
+          </label>
           <Input
+            id={`${formId}-height`}
+            aria-invalid={Boolean(heightError)}
+            aria-describedby={
+              heightError ? `${formId}-height-error` : undefined
+            }
             type="number"
             inputMode="numeric"
             disabled={disabled}
@@ -103,12 +152,27 @@ export function InitialProfileForm({
               setValueAs: toOptionalInt,
             })}
           />
-          {heightError && <p className="text-sm text-red-500">{heightError}</p>}
+          {heightError && (
+            <p
+              id={`${formId}-height-error`}
+              role="alert"
+              className="mt-1 text-sm text-destructive"
+            >
+              {heightError}
+            </p>
+          )}
         </div>
 
         <div className="space-y-1">
-          <label className="text-sm font-medium">体重(kg)</label>
+          <label htmlFor={`${formId}-weight`} className="text-sm font-medium">
+            体重(kg)
+          </label>
           <Input
+            id={`${formId}-weight`}
+            aria-invalid={Boolean(weightError)}
+            aria-describedby={
+              weightError ? `${formId}-weight-error` : undefined
+            }
             type="number"
             inputMode="numeric"
             disabled={disabled}
@@ -116,7 +180,15 @@ export function InitialProfileForm({
               setValueAs: toOptionalInt,
             })}
           />
-          {weightError && <p className="text-sm text-red-500">{weightError}</p>}
+          {weightError && (
+            <p
+              id={`${formId}-weight-error`}
+              role="alert"
+              className="mt-1 text-sm text-destructive"
+            >
+              {weightError}
+            </p>
+          )}
         </div>
       </div>
 

@@ -100,3 +100,22 @@ export const Mobile: Story = {
     await expect(mobile.scrollWidth).toBeLessThanOrEqual(mobile.clientWidth);
   },
 };
+
+export const RequiredFields: Story = {
+  args: { initialValues: {} },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole("button", { name: "初期設定を完了" }),
+    );
+    await expect(canvas.getAllByRole("alert")).toHaveLength(5);
+    await expect(
+      canvas.getByRole("combobox", { name: "性別" }),
+    ).toHaveAccessibleDescription("Required");
+    const gender = canvas.getByRole("combobox", { name: "性別" });
+    await userEvent.click(gender);
+    await userEvent.keyboard("{Home}{Enter}");
+    await expect(gender).toHaveTextContent("男性");
+    await expect(gender).toHaveFocus();
+  },
+};

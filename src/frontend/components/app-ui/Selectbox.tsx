@@ -1,3 +1,4 @@
+import type { ComponentPropsWithoutRef } from "react";
 import {
   Select,
   SelectContent,
@@ -22,7 +23,10 @@ type SelectboxProps = {
   ariaLabel?: string;
   disabled?: boolean;
   className?: string;
-};
+} & Pick<
+  ComponentPropsWithoutRef<"button">,
+  "id" | "onBlur" | "aria-invalid" | "aria-describedby"
+>;
 
 export function Selectbox({
   items,
@@ -33,10 +37,12 @@ export function Selectbox({
   ariaLabel,
   disabled,
   className,
+  ...triggerProps
 }: SelectboxProps) {
   return (
     <Select value={value} onValueChange={onValueChange} disabled={disabled}>
       <SelectTrigger
+        {...triggerProps}
         aria-label={ariaLabel}
         className={className ?? "w-full max-w-48"}
       >
