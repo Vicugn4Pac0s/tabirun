@@ -1,3 +1,4 @@
+import { env } from "~/env";
 import { Status, Wrapper } from "@googlemaps/react-wrapper";
 
 import GoogleMapCanvas from "./GoogleMapCanvas";
@@ -26,7 +27,7 @@ function GoogleMapView({
   isLoading = false,
   children,
 }: GoogleMapViewProps) {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY!;
+  const apiKey = env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY;
 
   const render = (status: Status) => {
     if (status === Status.LOADING) {

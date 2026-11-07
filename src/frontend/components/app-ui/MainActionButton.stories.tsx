@@ -4,7 +4,7 @@ import MainActionButton from "./MainActionButton";
 import { fn } from "storybook/test";
 
 const meta = {
-  title: "Atoms/MainActionButton",
+  title: "App UI/MainActionButton",
   component: MainActionButton,
   parameters: {
     layout: "centered",

@@ -26,6 +26,8 @@ jobs:
       AUTH_SECRET: ci-dummy
       GOOGLE_CLIENT_ID: dummy
       GOOGLE_CLIENT_SECRET: dummy
+      NEXT_PUBLIC_GOOGLE_MAP_API_KEY: dummy
+      NEXT_PRIVATE_GOOGLE_MAP_API_KEY: dummy
       DATABASE_URL: postgresql://user:pass@localhost:5432/dummy
     steps:
       - name: Checkout

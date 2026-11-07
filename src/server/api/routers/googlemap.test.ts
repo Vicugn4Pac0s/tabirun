@@ -3,10 +3,13 @@ import { db } from "~/server/db";
 import { incrementQuota } from "~/server/quota/service";
 import { googlemapRouter } from "./googlemap";
 
-const { checkQuota, incrementQuotaMock } = vi.hoisted(() => ({
+const { checkQuota, incrementQuotaMock, apiKey } = vi.hoisted(() => ({
+  apiKey: "test-google-maps-key",
   checkQuota: vi.fn(),
   incrementQuotaMock: vi.fn(),
 }));
+
+vi.mock("~/env", () => ({ env: { NEXT_PRIVATE_GOOGLE_MAP_API_KEY: apiKey } }));
 
 vi.mock("~/server/db", () => ({ db: {} }));
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
@@ -15,13 +18,11 @@ vi.mock("~/server/quota/service", () => ({
   incrementQuota: incrementQuotaMock,
 }));
 
-const apiKey = "test-google-maps-key";
 const providerDetail = `Waypoint 3 is invalid and key=${apiKey}`;
 const routePoints = [
   { lat: 35, lng: 135 },
   { lat: 36, lng: 136 },
 ];
-const originalApiKey = process.env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY;
 
 function createCaller() {
   return googlemapRouter.createCaller({
@@ -34,17 +35,11 @@ function createCaller() {
 beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn());
   vi.spyOn(console, "error").mockImplementation(() => undefined);
-  process.env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY = apiKey;
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
-  if (originalApiKey === undefined) {
-    delete process.env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY;
-  } else {
-    process.env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY = originalApiKey;
-  }
 });
 
 describe("googlemap.getDirection", () => {

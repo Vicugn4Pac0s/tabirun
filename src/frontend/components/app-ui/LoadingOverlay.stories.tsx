@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import LoadingOverlay from "./LoadingOverlay";
 
 const meta = {
-  title: "Atoms/LoadingOverlay",
+  title: "App UI/LoadingOverlay",
   component: LoadingOverlay,
   parameters: {
     layout: "centered",

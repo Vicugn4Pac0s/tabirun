@@ -1,3 +1,4 @@
+import { env } from "~/env";
 import { z } from "zod";
 import { decode } from "@googlemaps/polyline-codec";
 import { TRPCError } from "@trpc/server";
@@ -52,7 +53,7 @@ export const googlemapRouter = createTRPCRouter({
     )
     .output(DirectionOutputSchema)
     .query(async ({ input, ctx }) => {
-      const key = process.env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY;
+      const key = env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY;
       if (!key) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

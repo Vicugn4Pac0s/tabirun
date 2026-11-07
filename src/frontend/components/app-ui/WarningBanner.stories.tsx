@@ -7,7 +7,7 @@ const defaultMessage =
   "情報を取得できませんでした。時間をおいて再度お試しください。";
 
 const meta = {
-  title: "Atoms/WarningBanner",
+  title: "App UI/WarningBanner",
   component: WarningBanner,
   parameters: { layout: "centered" },
   tags: ["autodocs"],

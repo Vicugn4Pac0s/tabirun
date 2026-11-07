@@ -5,7 +5,7 @@ import { Button } from "~/frontend/components/ui/button";
 import MobileSidebarSheet from "./MobileSidebarSheet";
 
 const meta = {
-  title: "Molecules/MobileSidebarSheet",
+  title: "App UI/MobileSidebarSheet",
   component: MobileSidebarSheet,
   parameters: { layout: "centered" },
   tags: ["autodocs"],
