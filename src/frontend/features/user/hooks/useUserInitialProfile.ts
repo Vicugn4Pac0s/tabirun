@@ -1,4 +1,4 @@
-import { parseReturnTo } from "~/shared/schemas/auth";
+import { getSafeReturnTo } from "~/shared/schemas/auth";
 import { useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -34,7 +34,7 @@ export function useUserInitialProfile(
       return;
     }
     toast.success("初期設定を保存しました。");
-    router.replace(parseReturnTo(returnTo));
+    router.replace(getSafeReturnTo(returnTo));
   });
   const save: typeof submit = (event) => {
     if (submitting.current || isCompleting) {

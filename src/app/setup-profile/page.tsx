@@ -1,4 +1,4 @@
-import { parseReturnTo } from "~/shared/schemas/auth";
+import { getSafeReturnTo } from "~/shared/schemas/auth";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
@@ -14,7 +14,7 @@ type SetupProfilePageProps = {
 export default async function SetupProfilePage({
   searchParams,
 }: SetupProfilePageProps) {
-  const returnTo = parseReturnTo((await searchParams).returnTo);
+  const returnTo = getSafeReturnTo((await searchParams).returnTo);
   const session = await auth();
 
   if (!session?.user?.id) {

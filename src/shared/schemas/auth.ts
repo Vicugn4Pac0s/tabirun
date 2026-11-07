@@ -1,15 +1,41 @@
 import { z } from "zod";
 
-// 戻り先を既存の画面に限定し、外部遷移とログイン・初期設定の循環を防ぐ。
-export const returnToSchema = z.string().refine((path) => {
-  if (["/", "/routes/new", "/settings/profile"].includes(path)) return true;
-  const match = /^\/routes\/([1-9]\d*)(?:\/edit)?$/.exec(path);
-  return Boolean(
-    match && match[0] === path && Number.isSafeInteger(Number(match[1])),
-  );
-});
+// URLの解析専用。実際のホスト名やページ一覧の設定は不要。
+const validationOrigin = "https://return-to.invalid";
+const unsafeCharacters = /[\\\u0000-\u0020\u007f]/;
 
-export function parseReturnTo(value: unknown): string {
-  const result = returnToSchema.safeParse(value);
-  return result.success ? result.data : "/";
+export function getSafeReturnTo(value: unknown): string {
+  const result = z.string().safeParse(value);
+  if (!result.success) return "/";
+  const path = result.data;
+
+  // 相対パスだけを受け付け、ブラウザによる外部URLへの解釈を防ぐ。
+  if (
+    !path.startsWith("/") ||
+    path.startsWith("//") ||
+    unsafeCharacters.test(path)
+  ) {
+    return "/";
+  }
+
+  try {
+    const url = new URL(path, validationOrigin);
+    const decodedPath = decodeURIComponent(url.pathname);
+    if (unsafeCharacters.test(decodedPath) || decodedPath.includes("%"))
+      return "/";
+    const destination = new URL(decodedPath, validationOrigin);
+    if (
+      url.origin !== validationOrigin ||
+      destination.origin !== validationOrigin
+    )
+      return "/";
+
+    // エンコードや末尾スラッシュで迂回しても、認証画面の循環は許可しない。
+    const pathname = destination.pathname.replace(/\/+$/, "");
+    if (pathname === "/login" || pathname === "/setup-profile") return "/";
+
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return "/";
+  }
 }

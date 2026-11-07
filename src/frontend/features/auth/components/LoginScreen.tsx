@@ -4,7 +4,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { Button } from "~/frontend/components/ui/button";
-import { parseReturnTo } from "~/shared/schemas/auth";
+import { getSafeReturnTo } from "~/shared/schemas/auth";
 
 type LoginScreenProps = { returnTo: string };
 
@@ -17,7 +17,7 @@ export function LoginScreen({ returnTo }: LoginScreenProps) {
     setHasError(false);
     try {
       await signIn("google", {
-        redirectTo: `/login?returnTo=${encodeURIComponent(parseReturnTo(returnTo))}`,
+        redirectTo: `/login?returnTo=${encodeURIComponent(getSafeReturnTo(returnTo))}`,
       });
     } catch {
       setHasError(true);

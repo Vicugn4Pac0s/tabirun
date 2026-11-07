@@ -1,31 +1,46 @@
 import { describe, expect, it } from "vitest";
-import { parseReturnTo } from "./auth";
+import { getSafeReturnTo } from "./auth";
 
-describe("parseReturnTo", () => {
+describe("getSafeReturnTo", () => {
   it.each([
     "/",
     "/routes/new",
-    "/routes/123",
     "/routes/123/edit",
     "/settings/profile",
-  ])("アプリ内の戻り先 %s を保持する", (path) => {
-    expect(parseReturnTo(path)).toBe(path);
+    "/future-page",
+    "/future-page?tab=recent#section",
+    "/routes/abc",
+    "/routes/new?returnTo=//example.com",
+  ])("ページ一覧への登録なしでアプリ内URL %s を保持する", (path) => {
+    expect(getSafeReturnTo(path)).toBe(path);
   });
   it.each([
     undefined,
     ["/routes/new"],
+    "",
+    "routes/new",
     "https://example.com",
     "//example.com",
     "/\\example.com",
-    "/login",
-    "/setup-profile",
-    "/routes",
-    "/routes/abc",
-    "/routes/0",
-    "/routes/9007199254740992",
-    "/routes/new?returnTo=//example.com",
+    "/%2fexample.com",
+    "/%5cexample.com",
     "/routes/1\n",
-  ])("不正な戻り先 %j はホームにする", (value) => {
-    expect(parseReturnTo(value)).toBe("/");
+    "/%0aexample.com",
+    "/%zz",
+    "/%252fexample.com",
+  ])("外部URL・不正値 %j はホームにする", (value) => {
+    expect(getSafeReturnTo(value)).toBe("/");
+  });
+  it.each([
+    "/login",
+    "/login/",
+    "/login?returnTo=/routes/new",
+    "/setup-profile",
+    "/setup-profile/#section",
+    "/%6cogin",
+    "/a/../login",
+    "/a%2f..%2flogin",
+  ])("認証画面への循環 %s はホームにする", (path) => {
+    expect(getSafeReturnTo(path)).toBe("/");
   });
 });
