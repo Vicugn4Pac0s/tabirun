@@ -156,5 +156,6 @@ Vercel では、本番デプロイに **Production** 環境変数、staging と 
 
 ## 関連ドキュメント
 
+- 経路計算結果の定期削除: [ROUTE_DIRECTION_CACHE.md](./ROUTE_DIRECTION_CACHE.md)
 - セットアップの概要: [README](../README.md)
 - プロダクト方針: [ROADMAP.md](./ROADMAP.md)
