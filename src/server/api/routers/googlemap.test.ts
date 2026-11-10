@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";
 import { incrementQuota } from "~/server/quota/service";
 import { googlemapRouter } from "./googlemap";
@@ -8,6 +9,8 @@ const { checkQuota, incrementQuotaMock, apiKey } = vi.hoisted(() => ({
   checkQuota: vi.fn(),
   incrementQuotaMock: vi.fn(),
 }));
+
+vi.mock("server-only", () => ({}));
 
 vi.mock("~/env", () => ({ env: { NEXT_PRIVATE_GOOGLE_MAP_API_KEY: apiKey } }));
 
@@ -33,6 +36,8 @@ function createCaller() {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks();
+  checkQuota.mockResolvedValue(undefined);
   vi.stubGlobal("fetch", vi.fn());
   vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
@@ -43,6 +48,94 @@ afterEach(() => {
 });
 
 describe("googlemap.getDirection", () => {
+  it("上限到達時はGoogle APIを呼ばず、クォータも加算しない", async () => {
+    checkQuota.mockRejectedValue(new TRPCError({ code: "TOO_MANY_REQUESTS" }));
+
+    await expect(
+      createCaller().getDirection({ routePoints }),
+    ).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+    expect(fetch).not.toHaveBeenCalled();
+    expect(incrementQuota).not.toHaveBeenCalled();
+  });
+
+  it("2地点未満の入力はGoogle APIへ送らない", async () => {
+    await expect(
+      createCaller().getDirection({ routePoints: [{ lat: 35, lng: 135 }] }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    expect(fetch).not.toHaveBeenCalled();
+    expect(incrementQuota).not.toHaveBeenCalled();
+  });
+
+  it("始点・経由点・終点を順番どおり送り、polylineを復元する", async () => {
+    const points = [
+      { lat: 38.5, lng: -120.2 },
+      { lat: 40.7, lng: -120.95 },
+      { lat: 43.252, lng: -126.453 },
+    ];
+    const encodedPolyline = "_p~iF~ps|U_ulLnnqC_mqNvxq`@";
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          routes: [
+            {
+              distanceMeters: 1200,
+              duration: "600s",
+              polyline: { encodedPolyline },
+            },
+          ],
+        }),
+      ),
+    );
+
+    await expect(
+      createCaller().getDirection({ routePoints: points }),
+    ).resolves.toEqual({
+      distanceMeters: 1200,
+      duration: "600s",
+      encodedPolyline,
+      path: points,
+    });
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(fetch).toHaveBeenCalledWith(
+      "https://routes.googleapis.com/directions/v2:computeRoutes",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask":
+            "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline",
+        },
+        body: JSON.stringify({
+          origin: {
+            location: { latLng: { latitude: 38.5, longitude: -120.2 } },
+          },
+          destination: {
+            location: { latLng: { latitude: 43.252, longitude: -126.453 } },
+          },
+          intermediates: [
+            { location: { latLng: { latitude: 40.7, longitude: -120.95 } } },
+          ],
+          travelMode: "WALK",
+        }),
+      },
+    );
+    expect(incrementQuota).toHaveBeenCalledOnce();
+  });
+
+  it("経路がない応答はNOT_FOUNDとし、クォータを加算しない", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ routes: [] })),
+    );
+
+    await expect(
+      createCaller().getDirection({ routePoints }),
+    ).rejects.toMatchObject({
+      code: "NOT_FOUND",
+    });
+    expect(incrementQuota).not.toHaveBeenCalled();
+  });
+
   it.each([400, 500])(
     "HTTP %s のGoogle API本文は返さず、詳細だけをサーバーログに残す",
     async (status) => {
