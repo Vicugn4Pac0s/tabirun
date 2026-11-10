@@ -4,18 +4,31 @@ import { db } from "~/server/db";
 import { routes } from "~/server/db/schema";
 import { routeRouter } from "./route";
 
-const { findFirst, update, updateSet, updateWhere, remove, removeWhere } =
-  vi.hoisted(() => ({
-    findFirst: vi.fn(),
-    update: vi.fn(),
-    updateSet: vi.fn(),
-    updateWhere: vi.fn(),
-    remove: vi.fn(),
-    removeWhere: vi.fn(),
-  }));
+const {
+  findFirst,
+  select,
+  selectFrom,
+  selectWhere,
+  update,
+  updateSet,
+  updateWhere,
+  remove,
+  removeWhere,
+} = vi.hoisted(() => ({
+  findFirst: vi.fn(),
+  select: vi.fn(),
+  selectFrom: vi.fn(),
+  selectWhere: vi.fn(),
+  update: vi.fn(),
+  updateSet: vi.fn(),
+  updateWhere: vi.fn(),
+  remove: vi.fn(),
+  removeWhere: vi.fn(),
+}));
 vi.mock("~/server/db", () => ({
   db: {
     query: { routes: { findFirst } },
+    select,
     update,
     delete: remove,
   },
@@ -49,9 +62,62 @@ const updateInput = { id: 1, title: "夕方のルート", points };
 
 beforeEach(() => {
   vi.resetAllMocks();
+  select.mockReturnValue({ from: selectFrom });
+  selectFrom.mockReturnValue({ where: selectWhere });
   update.mockReturnValue({ set: updateSet });
   updateSet.mockReturnValue({ where: updateWhere });
   remove.mockReturnValue({ where: removeWhere });
+});
+
+describe("route.getByUser", () => {
+  it("経路計算結果を取得せず、既存の一覧項目だけを返す", async () => {
+    selectWhere.mockResolvedValue([savedRoute]);
+
+    await expect(createCaller().getByUser()).resolves.toEqual([
+      { ...savedRoute, points },
+    ]);
+    expect(select).toHaveBeenCalledWith({
+      id: routes.id,
+      title: routes.title,
+      points: routes.points,
+      createdById: routes.createdById,
+      createdAt: routes.createdAt,
+      updatedAt: routes.updatedAt,
+    });
+    expect(selectFrom).toHaveBeenCalledWith(routes);
+    expect(selectWhere).toHaveBeenCalledWith(eq(routes.createdById, "owner"));
+  });
+
+  it("別のユーザーでも、そのログインユーザーの所有者条件で取得する", async () => {
+    selectWhere.mockResolvedValue([]);
+
+    await expect(createCaller("other").getByUser()).resolves.toEqual([]);
+    expect(selectWhere).toHaveBeenCalledWith(eq(routes.createdById, "other"));
+  });
+
+  it("ルート未登録なら空の一覧を返す", async () => {
+    selectWhere.mockResolvedValue([]);
+
+    await expect(createCaller().getByUser()).resolves.toEqual([]);
+  });
+
+  it("未ログインでは一覧を取得しない", async () => {
+    await expect(createCaller(null).getByUser()).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+    expect(select).not.toHaveBeenCalled();
+  });
+
+  it.each(["invalid-json", JSON.stringify([{ lat: "invalid", lng: 135 }])])(
+    "不正な地点データ %s は返さない",
+    async (invalidPoints) => {
+      selectWhere.mockResolvedValue([{ ...savedRoute, points: invalidPoints }]);
+
+      await expect(createCaller().getByUser()).rejects.toMatchObject({
+        code: "INTERNAL_SERVER_ERROR",
+      });
+    },
+  );
 });
 
 describe("route.getById", () => {

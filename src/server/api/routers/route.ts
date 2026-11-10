@@ -86,7 +86,14 @@ export const routeRouter = createTRPCRouter({
 
   getByUser: protectedProcedure.query(async ({ ctx }) => {
     const res = await ctx.db
-      .select()
+      .select({
+        id: routes.id,
+        title: routes.title,
+        points: routes.points,
+        createdById: routes.createdById,
+        createdAt: routes.createdAt,
+        updatedAt: routes.updatedAt,
+      })
       .from(routes)
       .where(eq(routes.createdById, ctx.session.user.id));
 
