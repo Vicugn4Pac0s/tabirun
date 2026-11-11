@@ -3,7 +3,10 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "~/server/db";
 import { routes } from "~/server/db/schema";
-import { getOrComputeRouteDirection } from "./getOrComputeRouteDirection";
+import {
+  getOrComputeRouteDirection,
+  RouteDirectionCalculationError,
+} from "./getOrComputeRouteDirection";
 import {
   getRoutePointsHash,
   ROUTE_DIRECTION_CACHE_MAX_AGE_MS,
@@ -287,9 +290,9 @@ describe("getOrComputeRouteDirection", () => {
       { ...savedRoute, directionCalculatedAt: null },
     ]);
     mocks.computeRoute.mockRejectedValue(error);
-    await expect(getOrComputeRouteDirection(db, "owner", 1)).rejects.toBe(
-      error,
-    );
+    await expect(
+      getOrComputeRouteDirection(db, "owner", 1),
+    ).rejects.toMatchObject({ cause: error });
     expect(mocks.update).not.toHaveBeenCalled();
     expect(mocks.incrementQuota).not.toHaveBeenCalled();
   });
@@ -306,7 +309,7 @@ describe("getOrComputeRouteDirection", () => {
     });
     await expect(
       getOrComputeRouteDirection(db, "owner", 1),
-    ).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
+    ).rejects.toBeInstanceOf(RouteDirectionCalculationError);
     expect(mocks.update).not.toHaveBeenCalled();
     expect(mocks.incrementQuota).not.toHaveBeenCalled();
   });

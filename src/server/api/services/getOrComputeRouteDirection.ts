@@ -13,7 +13,29 @@ import {
   type SavedRouteDirection,
 } from "./routeDirectionCache";
 
-// APIへの接続は、両環境のCron設定と成功履歴の確認後に行う。
+export class RouteDirectionCalculationError extends Error {}
+
+export async function getRouteDirectionResult(
+  db: Pick<typeof Database, "transaction">,
+  userId: string,
+  routeId: number,
+): Promise<
+  | { direction: SavedRouteDirection; directionErrorCode: null }
+  | { direction: null; directionErrorCode: "INTERNAL_SERVER_ERROR" }
+> {
+  try {
+    const direction = await getOrComputeRouteDirection(db, userId, routeId);
+    return { direction, directionErrorCode: null };
+  } catch (error) {
+    // 経路の取得失敗と、ルート自体が存在しないNOT_FOUNDを区別する。
+    if (!(error instanceof RouteDirectionCalculationError)) throw error;
+    return {
+      direction: null,
+      directionErrorCode: "INTERNAL_SERVER_ERROR",
+    };
+  }
+}
+
 export async function getOrComputeRouteDirection(
   db: Pick<typeof Database, "transaction">,
   userId: string,
@@ -61,27 +83,33 @@ export async function getOrComputeRouteDirection(
         path: points,
       };
     } else {
-      const direction = await computeRoute({
-        routePoints: points,
-        travelMode: "WALK",
-      });
-      const calculatedAt = new Date();
-      const validated = getReusableRouteDirection(
-        {
-          directionSource: "routes_api",
-          encodedPolyline: direction.encodedPolyline,
-          distanceMeters: direction.distanceMeters,
-          duration: direction.duration,
-          directionCalculatedAt: calculatedAt,
-          directionPointsHash: pointsHash,
-        },
-        points,
-        calculatedAt,
-      );
-      if (!validated) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      try {
+        const direction = await computeRoute({
+          routePoints: points,
+          travelMode: "WALK",
+        });
+        const calculatedAt = new Date();
+        const validated = getReusableRouteDirection(
+          {
+            directionSource: "routes_api",
+            encodedPolyline: direction.encodedPolyline,
+            distanceMeters: direction.distanceMeters,
+            duration: direction.duration,
+            directionCalculatedAt: calculatedAt,
+            directionPointsHash: pointsHash,
+          },
+          points,
+          calculatedAt,
+        );
+        if (!validated) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        }
+        result = validated;
+      } catch (cause) {
+        throw new RouteDirectionCalculationError("ROUTE_CALCULATION_FAILED", {
+          cause,
+        });
       }
-      result = validated;
       await incrementQuota(tx, userId, "direction");
     }
 
