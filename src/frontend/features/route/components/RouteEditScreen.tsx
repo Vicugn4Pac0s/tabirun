@@ -6,30 +6,29 @@ import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveSt
 import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
-import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
+import { useRouteEditDirection } from "../hooks/useRouteEditDirection";
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
-import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteEdit } from "../hooks/useRouteEdit";
-import type { RouteUpdateInput } from "~/shared/schemas";
+import type { RouterOutputs } from "~/trpc/react";
 import { RouteScreenLayout } from "./RouteScreenLayout";
 import { RouteForm } from "./RouteForm";
 import { RouteEditorMap } from "./RouteEditorMap";
 
 type RouteEditScreenProps = {
-  route: RouteUpdateInput;
+  route: Pick<
+    RouterOutputs["route"]["getById"],
+    "id" | "title" | "points" | "direction" | "directionErrorCode"
+  >;
 };
 
 function RouteEditScreenContent({ route }: RouteEditScreenProps) {
   const { draft, isUpdating, save } = useRouteEdit(route);
   const { points, togglePoint, confirmDiscard } = draft;
-  const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
-    points,
-    { canUseDirections: true },
-  );
-  const warningMessage = getRouteCalculationWarningMessage(error, "editable");
+  const { polylinePath, directions, isLoading, warningMessage } =
+    useRouteEditDirection(route, points);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const moveStreetView = useMoveStreetView();
   return (
