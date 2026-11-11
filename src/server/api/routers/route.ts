@@ -19,34 +19,34 @@ export const routeRouter = createTRPCRouter({
     .input(z.object({ id: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
       return ctx.db.transaction(async (tx) => {
-        const directionResult = await getRouteDirectionResult(
-          tx,
-          ctx.session.user.id,
-          input.id,
-        );
-        // 経路の取得とルート情報の読み取りを同じトランザクションで行い、地点の不一致を防ぐ。
-        const route = await tx.query.routes.findFirst({
-          columns: {
-            id: true,
-            title: true,
-            points: true,
-            createdById: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-          where: and(
-            eq(routes.id, input.id),
-            eq(routes.createdById, ctx.session.user.id),
-          ),
-        });
+        const [route] = await tx
+          .select()
+          .from(routes)
+          .where(
+            and(
+              eq(routes.id, input.id),
+              eq(routes.createdById, ctx.session.user.id),
+            ),
+          )
+          .for("update");
 
         if (!route) {
           throw new TRPCError({ code: "NOT_FOUND" });
         }
 
+        // 最初に取得した行を経路処理と返却に使い、ロックはこのトランザクションの終了まで保持する。
+        const directionResult = await getRouteDirectionResult(
+          tx,
+          ctx.session.user.id,
+          route,
+        );
         return {
-          ...route,
+          id: route.id,
+          title: route.title,
           points: routePointsSchema.parse(JSON.parse(route.points)),
+          createdById: route.createdById,
+          createdAt: route.createdAt,
+          updatedAt: route.updatedAt,
           ...directionResult,
         };
       });
@@ -63,10 +63,10 @@ export const routeRouter = createTRPCRouter({
             points: JSON.stringify(input.points),
             createdById: ctx.session.user.id,
           })
-          .returning({ id: routes.id });
+          .returning();
         if (!created) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
         // 計算に失敗しても登録地点は保存し、詳細取得時に再試行できるようにする。
-        await getRouteDirectionResult(tx, ctx.session.user.id, created.id);
+        await getRouteDirectionResult(tx, ctx.session.user.id, created);
       });
     }),
 
@@ -90,23 +90,24 @@ export const routeRouter = createTRPCRouter({
         const pointsChanged =
           getRoutePointsHash(previousPoints) !==
           getRoutePointsHash(input.points);
+        const changes = {
+          title: input.title,
+          points: JSON.stringify(input.points),
+          updatedAt: new Date(),
+          ...(pointsChanged
+            ? {
+                encodedPolyline: null,
+                distanceMeters: null,
+                duration: null,
+                directionSource: null,
+                directionCalculatedAt: null,
+                directionPointsHash: null,
+              }
+            : {}),
+        };
         const updated = await tx
           .update(routes)
-          .set({
-            title: input.title,
-            points: JSON.stringify(input.points),
-            updatedAt: new Date(),
-            ...(pointsChanged
-              ? {
-                  encodedPolyline: null,
-                  distanceMeters: null,
-                  duration: null,
-                  directionSource: null,
-                  directionCalculatedAt: null,
-                  directionPointsHash: null,
-                }
-              : {}),
-          })
+          .set(changes)
           .where(
             and(
               eq(routes.id, input.id),
@@ -119,7 +120,10 @@ export const routeRouter = createTRPCRouter({
           throw new TRPCError({ code: "NOT_FOUND" });
         }
         if (pointsChanged)
-          await getRouteDirectionResult(tx, ctx.session.user.id, input.id);
+          await getRouteDirectionResult(tx, ctx.session.user.id, {
+            ...existing,
+            ...changes,
+          });
       });
     }),
 

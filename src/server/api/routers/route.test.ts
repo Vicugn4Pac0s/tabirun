@@ -127,7 +127,7 @@ beforeEach(() => {
   remove.mockReturnValue({ where: removeWhere });
   insert.mockReturnValue({ values: insertValues });
   insertValues.mockReturnValue({ returning: insertReturning });
-  insertReturning.mockResolvedValue([{ id: 1 }]);
+  insertReturning.mockResolvedValue([routeWithoutCache]);
   computeRoute.mockResolvedValue({
     encodedPolyline: snapshot.encodedPolyline,
     distanceMeters: 1500,
@@ -189,6 +189,33 @@ describe("route.getByUser", () => {
 });
 
 describe("route.getById", () => {
+  it("ロック取得を待ってから、その1回で読んだ最新の行を返す", async () => {
+    let release: ((rows: (typeof routeWithCache)[]) => void) | undefined;
+    let notifyEntered: (() => void) | undefined;
+    const entered = new Promise<void>((resolve) => {
+      notifyEntered = resolve;
+    });
+    const waiting = new Promise<(typeof routeWithCache)[]>((resolve) => {
+      release = resolve;
+    });
+    lock.mockImplementation(() => {
+      notifyEntered?.();
+      return waiting;
+    });
+    const pending = createCaller().getById({ id: 1 });
+    await entered;
+    expect(computeRoute).not.toHaveBeenCalled();
+    release?.([{ ...routeWithCache, title: "ロック取得後のルート" }]);
+    await expect(pending).resolves.toMatchObject({
+      title: "ロック取得後のルート",
+      direction: { distanceMeters: 1200 },
+    });
+    expect(select).toHaveBeenCalledOnce();
+    expect(transaction).toHaveBeenCalledOnce();
+    expect(findFirst).not.toHaveBeenCalled();
+    expect(computeRoute).not.toHaveBeenCalled();
+  });
+
   it("IDと所有者の条件で取得し、保存済みの経路を返す", async () => {
     await expect(createCaller().getById({ id: 1 })).resolves.toEqual({
       ...savedRoute,
@@ -200,17 +227,9 @@ describe("route.getById", () => {
       and(eq(routes.id, 1), eq(routes.createdById, "owner")),
     );
     expect(lock).toHaveBeenCalledWith("update");
-    expect(findFirst).toHaveBeenCalledWith({
-      columns: {
-        id: true,
-        title: true,
-        points: true,
-        createdById: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      where: and(eq(routes.id, 1), eq(routes.createdById, "owner")),
-    });
+    expect(select).toHaveBeenCalledOnce();
+    expect(transaction).toHaveBeenCalledOnce();
+    expect(findFirst).not.toHaveBeenCalled();
     expect(computeRoute).not.toHaveBeenCalled();
     expect(checkQuota).not.toHaveBeenCalled();
     expect(incrementQuota).not.toHaveBeenCalled();
@@ -365,6 +384,8 @@ describe("route.create", () => {
       travelMode: "WALK",
     });
     expect(incrementQuota).toHaveBeenCalledOnce();
+    expect(select).not.toHaveBeenCalled();
+    expect(transaction).toHaveBeenCalledOnce();
   });
 
   it("上限到達時もルートを保存し、直線として扱う", async () => {
@@ -438,11 +459,7 @@ describe("route.update", () => {
 
   it("地点変更時は古い保存値を消し、新しい地点で計算して保存する", async () => {
     const changed = [...points].reverse();
-    lock
-      .mockResolvedValueOnce([routeWithCache])
-      .mockResolvedValueOnce([
-        { ...routeWithoutCache, points: JSON.stringify(changed) },
-      ]);
+    lock.mockResolvedValueOnce([routeWithCache]);
     await expect(
       createCaller().update({ ...updateInput, points: changed }),
     ).resolves.toBeUndefined();
@@ -464,15 +481,14 @@ describe("route.update", () => {
       travelMode: "WALK",
     });
     expect(incrementQuota).toHaveBeenCalledOnce();
+    expect(select).toHaveBeenCalledOnce();
+    expect(lock).toHaveBeenCalledOnce();
+    expect(transaction).toHaveBeenCalledOnce();
   });
 
   it("地点変更後の計算失敗時も変更は保存し、旧経路は残さない", async () => {
     const changed = [...points].reverse();
-    lock
-      .mockResolvedValueOnce([routeWithCache])
-      .mockResolvedValueOnce([
-        { ...routeWithoutCache, points: JSON.stringify(changed) },
-      ]);
+    lock.mockResolvedValueOnce([routeWithCache]);
     computeRoute.mockRejectedValue(new TRPCError({ code: "NOT_FOUND" }));
     await expect(
       createCaller().update({ ...updateInput, points: changed }),
