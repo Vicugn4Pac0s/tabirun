@@ -3,10 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "~/server/db";
 import { routes } from "~/server/db/schema";
-import {
-  getOrComputeRouteDirection,
-  RouteDirectionCalculationError,
-} from "./getOrComputeRouteDirection";
+import { ensureRouteDirection } from "./ensureRouteDirection";
 import {
   getRoutePointsHash,
   ROUTE_DIRECTION_CACHE_MAX_AGE_MS,
@@ -42,7 +39,7 @@ const now = new Date("2026-11-10T12:00:00Z");
 const savedRoute = {
   id: 1,
   title: "朝のルート",
-  points: JSON.stringify(points),
+  points,
   createdById: "owner",
   createdAt: new Date("2026-10-01T00:00:00Z"),
   updatedAt: null,
@@ -52,9 +49,9 @@ const savedRoute = {
   duration: "600s",
   directionCalculatedAt: now,
   directionPointsHash: getRoutePointsHash(points),
-} satisfies typeof routes.$inferSelect;
+} satisfies Parameters<typeof ensureRouteDirection>[2];
 
-let route: typeof routes.$inferSelect;
+let route: Parameters<typeof ensureRouteDirection>[2];
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -73,11 +70,11 @@ beforeEach(() => {
 });
 afterEach(() => vi.useRealTimers());
 
-describe("getOrComputeRouteDirection", () => {
+describe("ensureRouteDirection", () => {
   it("有効な保存値はクォータを確認・消費せず、DBにも書き戻さない", async () => {
-    const result = await getOrComputeRouteDirection(db, "owner", route);
-    expect(result.distanceMeters).toBe(1200);
-    expect(result.path).toHaveLength(3);
+    const result = await ensureRouteDirection(db, "owner", route);
+    expect(result.direction?.distanceMeters).toBe(1200);
+    expect(result.direction?.path).toHaveLength(3);
     expect(mocks.checkQuota).not.toHaveBeenCalled();
     expect(mocks.computeRoute).not.toHaveBeenCalled();
     expect(mocks.incrementQuota).not.toHaveBeenCalled();
@@ -97,7 +94,7 @@ describe("getOrComputeRouteDirection", () => {
     "欠損・期限切れ・地点不一致・不正な保存値は1回計算して保存する（%#）",
     async (change) => {
       route = { ...savedRoute, ...change };
-      const result = await getOrComputeRouteDirection(db, "owner", route);
+      const result = await ensureRouteDirection(db, "owner", route);
       expect(mocks.computeRoute).toHaveBeenCalledExactlyOnceWith({
         routePoints: points,
         travelMode: "WALK",
@@ -120,14 +117,14 @@ describe("getOrComputeRouteDirection", () => {
       expect(mocks.updateWhere).toHaveBeenCalledWith(
         and(eq(routes.id, 1), eq(routes.createdById, "owner")),
       );
-      expect(result.distanceMeters).toBe(1500);
-      expect(result.path).toHaveLength(3);
+      expect(result.direction?.distanceMeters).toBe(1500);
+      expect(result.direction?.path).toHaveLength(3);
     },
   );
 
   it("他人のルートを渡された場合も計算・更新を拒否する", async () => {
     await expect(
-      getOrComputeRouteDirection(db, "other", route),
+      ensureRouteDirection(db, "other", route),
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
     expect(mocks.checkQuota).not.toHaveBeenCalled();
     expect(mocks.computeRoute).not.toHaveBeenCalled();
@@ -136,11 +133,11 @@ describe("getOrComputeRouteDirection", () => {
 
   it("一度保存した結果は次の取得で再計算しない", async () => {
     route = { ...savedRoute, directionCalculatedAt: null };
-    const first = await getOrComputeRouteDirection(db, "owner", route);
-    route = { ...savedRoute, ...first };
-    await expect(
-      getOrComputeRouteDirection(db, "owner", route),
-    ).resolves.toEqual(first);
+    const first = await ensureRouteDirection(db, "owner", route);
+    route = { ...savedRoute, ...first.direction };
+    await expect(ensureRouteDirection(db, "owner", route)).resolves.toEqual(
+      first,
+    );
     expect(mocks.computeRoute).toHaveBeenCalledOnce();
     expect(mocks.incrementQuota).toHaveBeenCalledOnce();
     expect(mocks.update).toHaveBeenCalledOnce();
@@ -148,13 +145,15 @@ describe("getOrComputeRouteDirection", () => {
 
   it("登録地点が変わっていれば、新しい地点を使って再計算する", async () => {
     const changed = [...points].reverse();
-    route = { ...savedRoute, points: JSON.stringify(changed) };
-    const result = await getOrComputeRouteDirection(db, "owner", route);
+    route = { ...savedRoute, points: changed };
+    const result = await ensureRouteDirection(db, "owner", route);
     expect(mocks.computeRoute).toHaveBeenCalledExactlyOnceWith({
       routePoints: changed,
       travelMode: "WALK",
     });
-    expect(result.directionPointsHash).toBe(getRoutePointsHash(changed));
+    expect(result.direction?.directionPointsHash).toBe(
+      getRoutePointsHash(changed),
+    );
   });
 
   it("上限到達時は直線結果を保存し、Googleも利用回数加算も呼ばない", async () => {
@@ -162,15 +161,18 @@ describe("getOrComputeRouteDirection", () => {
     mocks.checkQuota.mockRejectedValue(
       new TRPCError({ code: "TOO_MANY_REQUESTS" }),
     );
-    const result = await getOrComputeRouteDirection(db, "owner", route);
+    const result = await ensureRouteDirection(db, "owner", route);
     expect(result).toEqual({
-      directionSource: "straight_line",
-      encodedPolyline: null,
-      distanceMeters: null,
-      duration: null,
-      directionCalculatedAt: now,
-      directionPointsHash: getRoutePointsHash(points),
-      path: points,
+      direction: {
+        directionSource: "straight_line",
+        encodedPolyline: null,
+        distanceMeters: null,
+        duration: null,
+        directionCalculatedAt: now,
+        directionPointsHash: getRoutePointsHash(points),
+        path: points,
+      },
+      directionErrorCode: null,
     });
     expect(mocks.set).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -191,13 +193,15 @@ describe("getOrComputeRouteDirection", () => {
       duration: null,
     };
     await expect(
-      getOrComputeRouteDirection(db, "owner", route),
-    ).resolves.toMatchObject({ directionSource: "straight_line" });
+      ensureRouteDirection(db, "owner", route),
+    ).resolves.toMatchObject({
+      direction: { directionSource: "straight_line" },
+    });
     expect(mocks.checkQuota).not.toHaveBeenCalled();
     vi.setSystemTime(new Date("2026-11-11T00:00:00Z"));
     await expect(
-      getOrComputeRouteDirection(db, "owner", route),
-    ).resolves.toMatchObject({ directionSource: "routes_api" });
+      ensureRouteDirection(db, "owner", route),
+    ).resolves.toMatchObject({ direction: { directionSource: "routes_api" } });
     expect(mocks.computeRoute).toHaveBeenCalledOnce();
   });
 
@@ -208,14 +212,14 @@ describe("getOrComputeRouteDirection", () => {
       vi.setSystemTime(new Date("2026-11-11T00:00:00Z"));
       throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
     });
-    const first = await getOrComputeRouteDirection(db, "owner", route);
-    expect(first.directionCalculatedAt).toEqual(
+    const first = await ensureRouteDirection(db, "owner", route);
+    expect(first.direction?.directionCalculatedAt).toEqual(
       new Date("2026-11-10T23:59:59Z"),
     );
-    route = { ...savedRoute, ...first };
+    route = { ...savedRoute, ...first.direction };
     await expect(
-      getOrComputeRouteDirection(db, "owner", route),
-    ).resolves.toMatchObject({ directionSource: "routes_api" });
+      ensureRouteDirection(db, "owner", route),
+    ).resolves.toMatchObject({ direction: { directionSource: "routes_api" } });
     expect(mocks.computeRoute).toHaveBeenCalledOnce();
   });
 
@@ -223,18 +227,33 @@ describe("getOrComputeRouteDirection", () => {
     route = { ...savedRoute, directionCalculatedAt: null };
     mocks.updateWhere.mockResolvedValue({ count: 0 });
     await expect(
-      getOrComputeRouteDirection(db, "owner", route),
+      ensureRouteDirection(db, "owner", route),
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
   });
 
   it("クォータ取得の障害を上限到達として扱わない", async () => {
     route = { ...savedRoute, directionCalculatedAt: null };
     mocks.checkQuota.mockRejectedValue(new Error("database error"));
-    await expect(
-      getOrComputeRouteDirection(db, "owner", route),
-    ).rejects.toThrow("database error");
+    await expect(ensureRouteDirection(db, "owner", route)).rejects.toThrow(
+      "database error",
+    );
     expect(mocks.computeRoute).not.toHaveBeenCalled();
     expect(mocks.update).not.toHaveBeenCalled();
+  });
+
+  it("利用回数の加算に失敗した場合は例外を伝播させる", async () => {
+    route = { ...savedRoute, directionCalculatedAt: null };
+    const error = new Error("quota update failed");
+    mocks.incrementQuota.mockRejectedValue(error);
+    await expect(ensureRouteDirection(db, "owner", route)).rejects.toBe(error);
+    expect(mocks.update).not.toHaveBeenCalled();
+  });
+
+  it("経路の保存に失敗した場合は例外を伝播させる", async () => {
+    route = { ...savedRoute, directionCalculatedAt: null };
+    const error = new Error("route update failed");
+    mocks.updateWhere.mockRejectedValue(error);
+    await expect(ensureRouteDirection(db, "owner", route)).rejects.toBe(error);
   });
 
   it.each([
@@ -243,9 +262,10 @@ describe("getOrComputeRouteDirection", () => {
   ])("外部APIの失敗は保存せず、利用回数も加算しない（%#）", async (error) => {
     route = { ...savedRoute, directionCalculatedAt: null };
     mocks.computeRoute.mockRejectedValue(error);
-    await expect(
-      getOrComputeRouteDirection(db, "owner", route),
-    ).rejects.toMatchObject({ cause: error });
+    await expect(ensureRouteDirection(db, "owner", route)).resolves.toEqual({
+      direction: null,
+      directionErrorCode: "INTERNAL_SERVER_ERROR",
+    });
     expect(mocks.update).not.toHaveBeenCalled();
     expect(mocks.incrementQuota).not.toHaveBeenCalled();
   });
@@ -258,19 +278,11 @@ describe("getOrComputeRouteDirection", () => {
       duration: "600s",
       path: [],
     });
-    await expect(
-      getOrComputeRouteDirection(db, "owner", route),
-    ).rejects.toBeInstanceOf(RouteDirectionCalculationError);
+    await expect(ensureRouteDirection(db, "owner", route)).resolves.toEqual({
+      direction: null,
+      directionErrorCode: "INTERNAL_SERVER_ERROR",
+    });
     expect(mocks.update).not.toHaveBeenCalled();
     expect(mocks.incrementQuota).not.toHaveBeenCalled();
-  });
-
-  it("DBの不正な地点JSONはGoogleへ送らない", async () => {
-    route = { ...savedRoute, points: "invalid" };
-    await expect(
-      getOrComputeRouteDirection(db, "owner", route),
-    ).rejects.toThrow();
-    expect(mocks.computeRoute).not.toHaveBeenCalled();
-    expect(mocks.update).not.toHaveBeenCalled();
   });
 });

@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { protectedProcedure } from "../procedure";
 import { routes } from "~/server/db/schema";
-import { getRouteDirectionResult } from "~/server/api/services/getOrComputeRouteDirection";
+import { ensureRouteDirection } from "~/server/api/services/ensureRouteDirection";
 import { getRoutePointsHash } from "~/server/api/services/routeDirectionCache";
 import {
   routeCreateSchema,
@@ -34,16 +34,17 @@ export const routeRouter = createTRPCRouter({
           throw new TRPCError({ code: "NOT_FOUND" });
         }
 
-        // 最初に取得した行を経路処理と返却に使い、ロックはこのトランザクションの終了まで保持する。
-        const directionResult = await getRouteDirectionResult(
+        const points = routePointsSchema.parse(JSON.parse(route.points));
+        // 最初に取得・検証した行を使い、ロックはこのトランザクションの終了まで保持する。
+        const directionResult = await ensureRouteDirection(
           tx,
           ctx.session.user.id,
-          route,
+          { ...route, points },
         );
         return {
           id: route.id,
           title: route.title,
-          points: routePointsSchema.parse(JSON.parse(route.points)),
+          points,
           createdById: route.createdById,
           createdAt: route.createdAt,
           updatedAt: route.updatedAt,
@@ -66,7 +67,10 @@ export const routeRouter = createTRPCRouter({
           .returning();
         if (!created) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
         // 計算に失敗しても登録地点は保存し、詳細取得時に再試行できるようにする。
-        await getRouteDirectionResult(tx, ctx.session.user.id, created);
+        await ensureRouteDirection(tx, ctx.session.user.id, {
+          ...created,
+          points: routePointsSchema.parse(JSON.parse(created.points)),
+        });
       });
     }),
 
@@ -120,9 +124,10 @@ export const routeRouter = createTRPCRouter({
           throw new TRPCError({ code: "NOT_FOUND" });
         }
         if (pointsChanged)
-          await getRouteDirectionResult(tx, ctx.session.user.id, {
+          await ensureRouteDirection(tx, ctx.session.user.id, {
             ...existing,
             ...changes,
+            points: input.points,
           });
       });
     }),

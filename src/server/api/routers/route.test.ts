@@ -299,18 +299,21 @@ describe("route.getById", () => {
     expect(transaction).not.toHaveBeenCalled();
   });
 
-  it("不正な地点データは返さない", async () => {
-    lock.mockResolvedValue([
-      {
-        ...routeWithCache,
-        points: JSON.stringify([{ lat: "invalid", lng: 135 }]),
-      },
-    ]);
-    await expect(createCaller().getById({ id: 1 })).rejects.toMatchObject({
-      code: "INTERNAL_SERVER_ERROR",
-    });
-    expect(computeRoute).not.toHaveBeenCalled();
-  });
+  it.each(["invalid-json", JSON.stringify([{ lat: "invalid", lng: 135 }])])(
+    "不正な地点データは返さない（%#）",
+    async (invalidPoints) => {
+      lock.mockResolvedValue([
+        {
+          ...routeWithCache,
+          points: invalidPoints,
+        },
+      ]);
+      await expect(createCaller().getById({ id: 1 })).rejects.toMatchObject({
+        code: "INTERNAL_SERVER_ERROR",
+      });
+      expect(computeRoute).not.toHaveBeenCalled();
+    },
+  );
 
   it.each(["BAD_REQUEST", "NOT_FOUND", "INTERNAL_SERVER_ERROR"] as const)(
     "Googleの%sはルート自体の失敗にせず、詳細を隠した経路エラーとして返す",

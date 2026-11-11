@@ -4,7 +4,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import type { db as Database } from "~/server/db";
 import { routes } from "~/server/db/schema";
-import { routePointsSchema } from "~/shared/schemas";
+import type { RouteCreateInput } from "~/shared/schemas";
 import { computeRoute } from "~/server/features/googlemap/computeRoute";
 import { checkQuota, incrementQuota } from "~/server/quota/service";
 import {
@@ -14,45 +14,27 @@ import {
 } from "./routeDirectionCache";
 
 type RouteDirectionDb = Pick<typeof Database, "query" | "insert" | "update">;
-type SavedRoute = typeof routes.$inferSelect;
-
-export class RouteDirectionCalculationError extends Error {}
+type RouteForDirection = Omit<typeof routes.$inferSelect, "points"> & {
+  points: RouteCreateInput["points"];
+};
 
 // 呼出側のトランザクションで取得・ロック（新規作成はINSERT）した行を受け取る。
-export async function getRouteDirectionResult(
+export async function ensureRouteDirection(
   tx: RouteDirectionDb,
   userId: string,
-  route: SavedRoute,
+  route: RouteForDirection,
 ): Promise<
   | { direction: SavedRouteDirection; directionErrorCode: null }
   | { direction: null; directionErrorCode: "INTERNAL_SERVER_ERROR" }
 > {
-  try {
-    const direction = await getOrComputeRouteDirection(tx, userId, route);
-    return { direction, directionErrorCode: null };
-  } catch (error) {
-    // 経路の取得失敗と、ルート自体が存在しないNOT_FOUNDを区別する。
-    if (!(error instanceof RouteDirectionCalculationError)) throw error;
-    return {
-      direction: null,
-      directionErrorCode: "INTERNAL_SERVER_ERROR",
-    };
-  }
-}
-
-export async function getOrComputeRouteDirection(
-  tx: RouteDirectionDb,
-  userId: string,
-  route: SavedRoute,
-): Promise<SavedRouteDirection> {
   if (route.createdById !== userId) throw new TRPCError({ code: "NOT_FOUND" });
   const ownerCondition = and(
     eq(routes.id, route.id),
     eq(routes.createdById, userId),
   );
-  const points = routePointsSchema.parse(JSON.parse(route.points));
+  const points = route.points;
   const reusable = getReusableRouteDirection(route, points, new Date());
-  if (reusable) return reusable;
+  if (reusable) return { direction: reusable, directionErrorCode: null };
 
   const quotaCheckedAt = new Date();
   let isQuotaExceeded = false;
@@ -97,13 +79,12 @@ export async function getOrComputeRouteDirection(
         calculatedAt,
       );
       if (!validated) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        return { direction: null, directionErrorCode: "INTERNAL_SERVER_ERROR" };
       }
       result = validated;
-    } catch (cause) {
-      throw new RouteDirectionCalculationError("ROUTE_CALCULATION_FAILED", {
-        cause,
-      });
+    } catch {
+      // Google側のNOT_FOUNDをルート自体の404にせず、DB操作の失敗はこの外で伝播させる。
+      return { direction: null, directionErrorCode: "INTERNAL_SERVER_ERROR" };
     }
     await incrementQuota(tx, userId, "direction");
   }
@@ -123,5 +104,5 @@ export async function getOrComputeRouteDirection(
     .where(ownerCondition);
   if (updated.count === 0) throw new TRPCError({ code: "NOT_FOUND" });
 
-  return result;
+  return { direction: result, directionErrorCode: null };
 }
