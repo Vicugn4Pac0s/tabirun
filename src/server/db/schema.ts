@@ -20,6 +20,18 @@ export const routes = createTable(
     id: serial("id").primaryKey(),
     title: varchar("title", { length: 256 }).notNull(),
     points: text("points").notNull(),
+    encodedPolyline: text("encoded_polyline"),
+    distanceMeters: integer("distance_meters"),
+    duration: text("duration"),
+    directionSource: varchar("direction_source", {
+      length: 20,
+      enum: ["routes_api", "straight_line"],
+    }),
+    directionCalculatedAt: timestamp("direction_calculated_at", {
+      mode: "date",
+      withTimezone: true,
+    }),
+    directionPointsHash: varchar("direction_points_hash", { length: 64 }),
     createdById: varchar("created_by", { length: 255 })
       .notNull()
       .references(() => users.id),
@@ -32,6 +44,7 @@ export const routes = createTable(
     check("route_title_not_blank", sql`${route.title} ~ '[^[:space:]]'`),
     index("created_by_idx").on(route.createdById),
     index("title_idx").on(route.title),
+    index("route_direction_calculated_at_idx").on(route.directionCalculatedAt),
   ],
 );
 

@@ -8,7 +8,6 @@ import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import RouteMapView from "./RouteMapView";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
-import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
@@ -17,27 +16,31 @@ import { useRouteDeletion } from "../hooks/useRouteDeletion";
 import { RouteScreenLayout } from "./RouteScreenLayout";
 
 type RouteDetailScreenProps = {
-  route: Pick<RouterOutputs["route"]["getById"], "id" | "title" | "points">;
+  route: Pick<
+    RouterOutputs["route"]["getById"],
+    "id" | "title" | "points" | "direction" | "directionErrorCode"
+  >;
 };
 
 function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
   const { remove, isDeleting } = useRouteDeletion(route.id);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
-  const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
-    route.points,
-    { canUseDirections: true },
+  const { direction, directionErrorCode } = route;
+  const warningCode =
+    direction?.directionSource === "straight_line"
+      ? "TOO_MANY_REQUESTS"
+      : directionErrorCode;
+  const warningMessage = getRouteCalculationWarningMessage(
+    warningCode ? { data: { code: warningCode } } : null,
+    "saved",
   );
-  const warningMessage = getRouteCalculationWarningMessage(error, "saved");
   const start = route.points[0];
   const goal = route.points[route.points.length - 1];
   const markers = getRoutePreviewMarkers(start, goal);
   return (
     <RouteScreenLayout
       panelTitle="ルート情報"
-      menuTriggerLabel={getRouteMenuLabel(
-        directions?.distanceMeters,
-        isLoading,
-      )}
+      menuTriggerLabel={getRouteMenuLabel(direction?.distanceMeters, false)}
       panel={
         <>
           <Link href="/" className="mb-5 inline-block font-medium underline">
@@ -78,8 +81,8 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
             </div>
           )}
           <RunMetricsPanel
-            distanceMeters={directions?.distanceMeters}
-            isLoading={isLoading}
+            distanceMeters={direction?.distanceMeters}
+            isLoading={false}
             pace={pace}
             onPaceChange={setPace}
             weightKg={weightKg}
@@ -90,9 +93,8 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
       <RouteMapView
         showStreetView
         initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
-        path={polylinePath}
+        path={direction?.path ?? null}
         markers={markers}
-        isLoading={isLoading}
         fitToRoute
       />
     </RouteScreenLayout>

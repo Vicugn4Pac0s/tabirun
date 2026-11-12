@@ -4,7 +4,7 @@ import { type db as DbType } from "~/server/db";
 import { quotaUsages } from "~/server/db/schema";
 import { QUOTA_CONFIG, type QuotaFeature } from "./config";
 
-type Db = typeof DbType;
+type Db = Pick<typeof DbType, "query" | "insert" | "update">;
 
 const getToday = () => new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 

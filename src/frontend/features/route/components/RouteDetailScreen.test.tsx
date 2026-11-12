@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -63,15 +64,32 @@ vi.mock("~/frontend/features/googlemap/components/Polyline", () => ({
   ),
 }));
 
+const savedDirection = {
+  directionSource: "routes_api",
+  encodedPolyline: "saved-polyline",
+  distanceMeters: 5200,
+  duration: "1800s",
+  directionCalculatedAt: new Date("2026-11-11T00:00:00Z"),
+  directionPointsHash: "saved-hash",
+  path: [
+    { lat: 35, lng: 135 },
+    { lat: 35.25, lng: 135.1 },
+    { lat: 36, lng: 136 },
+  ],
+} satisfies NonNullable<
+  ComponentProps<typeof RouteDetailScreen>["route"]["direction"]
+>;
 const route = {
   id: 1,
   title: "朝のルート",
+  direction: savedDirection,
+  directionErrorCode: null,
   points: [
     { lat: 35, lng: 135 },
     { lat: 35.5, lng: 135.5 },
     { lat: 36, lng: 136 },
   ],
-};
+} satisfies ComponentProps<typeof RouteDetailScreen>["route"];
 const setMobileViewport = () => {
   vi.stubGlobal(
     "matchMedia",
@@ -89,11 +107,6 @@ beforeEach(() => {
     "matchMedia",
     vi.fn(() => ({ matches: false })),
   );
-  directionsQuery.mockReturnValue({
-    directions: { path: route.points },
-    isLoading: false,
-    error: null,
-  });
 });
 afterEach(() => {
   cleanup();
@@ -103,28 +116,24 @@ afterEach(() => {
 describe("RouteDetailScreen", () => {
   it("取得済みの経路距離をSPメニューボタンに表示する", () => {
     setMobileViewport();
-    directionsQuery.mockReturnValue({
-      directions: { path: route.points, distanceMeters: 5200 },
-      isLoading: false,
-      error: null,
-    });
     render(<RouteDetailScreen route={route} />);
     expect(
       screen.getByRole("button", { name: "ルート情報を開く" }),
     ).toHaveTextContent("5.2 km");
   });
 
-  it("経路取得中はSPメニューに計測中を表示する", () => {
-    setMobileViewport();
-    directionsQuery.mockReturnValue({
-      directions: null,
-      isLoading: true,
-      error: null,
-    });
-    render(<RouteDetailScreen route={route} />);
+  it("取得済みの経路を表示し、再表示でも経路計算を呼ばない", () => {
+    const { rerender } = render(<RouteDetailScreen route={route} />);
+    expect(screen.getByText("経路線")).toHaveAttribute(
+      "data-path",
+      JSON.stringify(savedDirection.path),
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "ルート情報を開く" }),
-    ).toHaveTextContent("MEASURING");
+      screen.queryByText(/計測中|経路を読み込み中/),
+    ).not.toBeInTheDocument();
+    rerender(<RouteDetailScreen route={{ ...route, title: "夜のルート" }} />);
+    expect(directionsQuery).not.toHaveBeenCalled();
   });
 
   it("既存mapと共通の外枠と表示部品で、ルート情報・地図・Street Viewを表示する", () => {
@@ -137,9 +146,7 @@ describe("RouteDetailScreen", () => {
     expect(
       within(sidebar).queryByRole("button", { name: "移動" }),
     ).not.toBeInTheDocument();
-    expect(directionsQuery).toHaveBeenCalledWith(route.points, {
-      enabled: true,
-    });
+    expect(directionsQuery).not.toHaveBeenCalled();
     expect(screen.getByLabelText("Google Map")).toBeInTheDocument();
     expect(
       screen.getByRole("region", { name: "Street Viewで下見" }),
@@ -190,11 +197,6 @@ describe("RouteDetailScreen", () => {
 
   it("モバイルではルート情報を開いて確認できる", async () => {
     setMobileViewport();
-    directionsQuery.mockReturnValue({
-      directions: { path: route.points, distanceMeters: 5200 },
-      isLoading: false,
-      error: null,
-    });
     const user = userEvent.setup();
     render(<RouteDetailScreen route={route} />);
     await user.click(screen.getByRole("button", { name: "ルート情報を開く" }));
@@ -220,31 +222,45 @@ describe("RouteDetailScreen", () => {
   });
 
   it("経路取得に失敗しても地図とStreet Viewを残し、警告を表示する", () => {
-    directionsQuery.mockReturnValue({
-      directions: null,
-      isLoading: false,
-      error: new Error("failed"),
-    });
-    render(<RouteDetailScreen route={route} />);
+    render(
+      <RouteDetailScreen
+        route={{
+          ...route,
+          direction: null,
+          directionErrorCode: "INTERNAL_SERVER_ERROR",
+        }}
+      />,
+    );
     expect(
       within(
         screen.getByRole("complementary", { name: "ルート情報" }),
       ).getByRole("alert"),
     ).toHaveTextContent("スタート・ゴールのみ表示");
     expect(screen.queryByText("経路線")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("img")).toHaveLength(2);
+    expect(screen.getByText("距離を表示できません。")).toBeInTheDocument();
+    expect(directionsQuery).not.toHaveBeenCalled();
     expect(
       screen.getByRole("region", { name: "Street Viewで下見" }),
     ).toBeInTheDocument();
   });
 
   it("利用上限に達したら保存済みの全地点を直線で結ぶ", () => {
-    directionsQuery.mockReturnValue({
-      directions: null,
-      isLoading: false,
-      error: { data: { code: "TOO_MANY_REQUESTS" } },
-    });
-
-    render(<RouteDetailScreen route={route} />);
+    render(
+      <RouteDetailScreen
+        route={{
+          ...route,
+          direction: {
+            ...savedDirection,
+            directionSource: "straight_line",
+            encodedPolyline: null,
+            distanceMeters: null,
+            duration: null,
+            path: route.points,
+          },
+        }}
+      />,
+    );
 
     expect(screen.getByText("経路線")).toHaveAttribute(
       "data-path",
@@ -256,5 +272,6 @@ describe("RouteDetailScreen", () => {
       ).getByRole("alert"),
     ).toHaveTextContent("直線で結んで表示");
     expect(screen.getByText("距離を表示できません。")).toBeInTheDocument();
+    expect(directionsQuery).not.toHaveBeenCalled();
   });
 });
