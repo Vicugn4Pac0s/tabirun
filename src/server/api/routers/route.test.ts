@@ -98,6 +98,15 @@ const emptyCache = {
 };
 const routeWithoutCache = { ...savedRoute, ...emptyCache };
 
+function failAfterRequest(error: Error) {
+  computeRoute.mockImplementation(
+    (_input: unknown, onRequestStarted?: () => void) => {
+      onRequestStarted?.();
+      throw error;
+    },
+  );
+}
+
 function createCaller(userId: string | null = "owner") {
   return routeRouter.createCaller({
     db,
@@ -257,10 +266,13 @@ describe("route.getById", () => {
       );
       lock.mockResolvedValue([{ ...savedRoute, ...first.direction }]);
       await expect(createCaller().getById({ id: 1 })).resolves.toEqual(first);
-      expect(computeRoute).toHaveBeenCalledExactlyOnceWith({
-        routePoints: points,
-        travelMode: "WALK",
-      });
+      expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
+        {
+          routePoints: points,
+          travelMode: "WALK",
+        },
+        expect.any(Function),
+      );
       expect(incrementQuota).toHaveBeenCalledOnce();
     },
   );
@@ -319,7 +331,7 @@ describe("route.getById", () => {
     "Googleの%sはルート自体の失敗にせず、詳細を隠した経路エラーとして返す",
     async (code) => {
       lock.mockResolvedValue([routeWithoutCache]);
-      computeRoute.mockRejectedValue(
+      failAfterRequest(
         new TRPCError({ code, message: "private-provider-detail" }),
       );
       const result = await createCaller().getById({ id: 1 });
@@ -331,7 +343,11 @@ describe("route.getById", () => {
       });
       expect(JSON.stringify(result)).not.toContain("private-provider-detail");
       expect(update).not.toHaveBeenCalled();
-      expect(incrementQuota).not.toHaveBeenCalled();
+      expect(incrementQuota).toHaveBeenCalledExactlyOnceWith(
+        db,
+        "owner",
+        "direction",
+      );
     },
   );
 
@@ -382,10 +398,13 @@ describe("route.create", () => {
         distanceMeters: 1500,
       }),
     );
-    expect(computeRoute).toHaveBeenCalledExactlyOnceWith({
-      routePoints: points,
-      travelMode: "WALK",
-    });
+    expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
+      {
+        routePoints: points,
+        travelMode: "WALK",
+      },
+      expect.any(Function),
+    );
     expect(incrementQuota).toHaveBeenCalledOnce();
     expect(select).not.toHaveBeenCalled();
     expect(transaction).toHaveBeenCalledOnce();
@@ -409,13 +428,17 @@ describe("route.create", () => {
 
   it("Googleの障害でも登録地点の保存は成功させ、不正な経路は保存しない", async () => {
     lock.mockResolvedValue([routeWithoutCache]);
-    computeRoute.mockRejectedValue(new TRPCError({ code: "BAD_REQUEST" }));
+    failAfterRequest(new TRPCError({ code: "BAD_REQUEST" }));
     await expect(
       createCaller().create({ title: "朝のルート", points }),
     ).resolves.toBeUndefined();
     expect(insertValues).toHaveBeenCalledOnce();
     expect(updateSet).not.toHaveBeenCalled();
-    expect(incrementQuota).not.toHaveBeenCalled();
+    expect(incrementQuota).toHaveBeenCalledExactlyOnceWith(
+      db,
+      "owner",
+      "direction",
+    );
   });
 
   it("未ログインでは作成も計算もしない", async () => {
@@ -479,10 +502,13 @@ describe("route.update", () => {
         encodedPolyline: snapshot.encodedPolyline,
       }),
     );
-    expect(computeRoute).toHaveBeenCalledExactlyOnceWith({
-      routePoints: changed,
-      travelMode: "WALK",
-    });
+    expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
+      {
+        routePoints: changed,
+        travelMode: "WALK",
+      },
+      expect.any(Function),
+    );
     expect(incrementQuota).toHaveBeenCalledOnce();
     expect(select).toHaveBeenCalledOnce();
     expect(lock).toHaveBeenCalledOnce();
@@ -492,7 +518,7 @@ describe("route.update", () => {
   it("地点変更後の計算失敗時も変更は保存し、旧経路は残さない", async () => {
     const changed = [...points].reverse();
     lock.mockResolvedValueOnce([routeWithCache]);
-    computeRoute.mockRejectedValue(new TRPCError({ code: "NOT_FOUND" }));
+    failAfterRequest(new TRPCError({ code: "NOT_FOUND" }));
     await expect(
       createCaller().update({ ...updateInput, points: changed }),
     ).resolves.toBeUndefined();
@@ -502,7 +528,11 @@ describe("route.update", () => {
       updatedAt: now,
       ...emptyCache,
     });
-    expect(incrementQuota).not.toHaveBeenCalled();
+    expect(incrementQuota).toHaveBeenCalledExactlyOnceWith(
+      db,
+      "owner",
+      "direction",
+    );
   });
 
   it("他人のルートは所有者条件で除外し、変更も計算もしない", async () => {

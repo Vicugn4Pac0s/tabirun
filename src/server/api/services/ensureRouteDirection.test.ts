@@ -95,10 +95,13 @@ describe("ensureRouteDirection", () => {
     async (change) => {
       route = { ...savedRoute, ...change };
       const result = await ensureRouteDirection(db, "owner", route);
-      expect(mocks.computeRoute).toHaveBeenCalledExactlyOnceWith({
-        routePoints: points,
-        travelMode: "WALK",
-      });
+      expect(mocks.computeRoute).toHaveBeenCalledExactlyOnceWith(
+        {
+          routePoints: points,
+          travelMode: "WALK",
+        },
+        expect.any(Function),
+      );
       expect(mocks.checkQuota).toHaveBeenCalledWith(db, "owner", "direction");
       expect(mocks.incrementQuota).toHaveBeenCalledExactlyOnceWith(
         db,
@@ -147,10 +150,13 @@ describe("ensureRouteDirection", () => {
     const changed = [...points].reverse();
     route = { ...savedRoute, points: changed };
     const result = await ensureRouteDirection(db, "owner", route);
-    expect(mocks.computeRoute).toHaveBeenCalledExactlyOnceWith({
-      routePoints: changed,
-      travelMode: "WALK",
-    });
+    expect(mocks.computeRoute).toHaveBeenCalledExactlyOnceWith(
+      {
+        routePoints: changed,
+        travelMode: "WALK",
+      },
+      expect.any(Function),
+    );
     expect(result.direction?.directionPointsHash).toBe(
       getRoutePointsHash(changed),
     );
@@ -258,8 +264,8 @@ describe("ensureRouteDirection", () => {
 
   it.each([
     new TRPCError({ code: "BAD_REQUEST" }),
-    new TRPCError({ code: "NOT_FOUND" }),
-  ])("外部APIの失敗は保存せず、利用回数も加算しない（%#）", async (error) => {
+    new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "NO_API_KEY" }),
+  ])("送信前の失敗は保存せず、利用回数も加算しない（%#）", async (error) => {
     route = { ...savedRoute, directionCalculatedAt: null };
     mocks.computeRoute.mockRejectedValue(error);
     await expect(ensureRouteDirection(db, "owner", route)).resolves.toEqual({
@@ -270,7 +276,7 @@ describe("ensureRouteDirection", () => {
     expect(mocks.incrementQuota).not.toHaveBeenCalled();
   });
 
-  it("保存に必要なpolylineがない応答は保存しない", async () => {
+  it("保存に必要なpolylineがない応答も利用回数を数え、保存はしない", async () => {
     route = { ...savedRoute, directionCalculatedAt: null };
     mocks.computeRoute.mockResolvedValue({
       encodedPolyline: null,
@@ -283,6 +289,75 @@ describe("ensureRouteDirection", () => {
       directionErrorCode: "INTERNAL_SERVER_ERROR",
     });
     expect(mocks.update).not.toHaveBeenCalled();
-    expect(mocks.incrementQuota).not.toHaveBeenCalled();
+    expect(mocks.incrementQuota).toHaveBeenCalledExactlyOnceWith(
+      db,
+      "owner",
+      "direction",
+    );
+  });
+});
+
+describe("送信開始後の利用回数", () => {
+  it.each([
+    new TRPCError({ code: "BAD_REQUEST" }),
+    new TRPCError({ code: "NOT_FOUND" }),
+    new TRPCError({ code: "INTERNAL_SERVER_ERROR" }),
+    new TypeError("network error"),
+    new DOMException("request timed out", "TimeoutError"),
+  ])(
+    "HTTPエラー・応答不正・通信例外・タイムアウトも1回数える（%#）",
+    async (error) => {
+      route = { ...savedRoute, directionCalculatedAt: null };
+      mocks.computeRoute.mockImplementation(
+        (_input: unknown, onRequestStarted?: () => void) => {
+          onRequestStarted?.();
+          throw error;
+        },
+      );
+      await expect(ensureRouteDirection(db, "owner", route)).resolves.toEqual({
+        direction: null,
+        directionErrorCode: "INTERNAL_SERVER_ERROR",
+      });
+      expect(mocks.incrementQuota).toHaveBeenCalledExactlyOnceWith(
+        db,
+        "owner",
+        "direction",
+      );
+      expect(mocks.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it("検証に入る前に利用回数を加算する", async () => {
+    route = { ...savedRoute, directionCalculatedAt: null };
+    const readPolyline = vi.fn(() => null);
+    mocks.computeRoute.mockResolvedValue({
+      get encodedPolyline() {
+        return readPolyline();
+      },
+      distanceMeters: 1200,
+      duration: "600s",
+      path: [],
+    });
+    await expect(
+      ensureRouteDirection(db, "owner", route),
+    ).resolves.toMatchObject({ direction: null });
+    expect(mocks.incrementQuota).toHaveBeenCalledOnce();
+    expect(readPolyline).toHaveBeenCalledOnce();
+    expect(mocks.incrementQuota.mock.invocationCallOrder[0]).toBeLessThan(
+      readPolyline.mock.invocationCallOrder[0] ?? Infinity,
+    );
+  });
+
+  it("送信失敗後の利用回数加算でDB障害が起きても握りつぶさない", async () => {
+    route = { ...savedRoute, directionCalculatedAt: null };
+    mocks.computeRoute.mockImplementation(
+      (_input: unknown, onRequestStarted?: () => void) => {
+        onRequestStarted?.();
+        throw new TypeError("network error");
+      },
+    );
+    const error = new Error("quota update failed");
+    mocks.incrementQuota.mockRejectedValue(error);
+    await expect(ensureRouteDirection(db, "owner", route)).rejects.toBe(error);
   });
 });

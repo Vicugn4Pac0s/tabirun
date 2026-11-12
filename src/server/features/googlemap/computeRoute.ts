@@ -49,6 +49,7 @@ const ComputeRoutesResponseSchema = z.object({
 
 export async function computeRoute(
   input: z.infer<typeof DirectionInputSchema>,
+  onRequestStarted?: () => void,
 ): Promise<GoogleRouteDirection> {
   const key = env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY;
   if (!key) {
@@ -66,10 +67,13 @@ export async function computeRoute(
   }
   const intermediates = pts.slice(1, -1);
 
+  // 通信例外では到達を断定できないため、送信試行の開始を呼出側へ知らせる。
+  onRequestStarted?.();
   const res = await fetch(
     "https://routes.googleapis.com/directions/v2:computeRoutes",
     {
       method: "POST",
+      signal: AbortSignal.timeout(10_000),
       headers: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": key,

@@ -5,7 +5,10 @@ import { TRPCError } from "@trpc/server";
 import type { db as Database } from "~/server/db";
 import { routes } from "~/server/db/schema";
 import type { RouteCreateInput } from "~/shared/schemas";
-import { computeRoute } from "~/server/features/googlemap/computeRoute";
+import {
+  computeRoute,
+  type GoogleRouteDirection,
+} from "~/server/features/googlemap/computeRoute";
 import { checkQuota, incrementQuota } from "~/server/quota/service";
 import {
   getReusableRouteDirection,
@@ -60,11 +63,24 @@ export async function ensureRouteDirection(
       path: points,
     };
   } else {
+    let requestStarted = false;
+    let direction: GoogleRouteDirection;
     try {
-      const direction = await computeRoute({
-        routePoints: points,
-        travelMode: "WALK",
-      });
+      direction = await computeRoute(
+        { routePoints: points, travelMode: "WALK" },
+        () => {
+          requestStarted = true;
+        },
+      );
+    } catch {
+      // 到達不明の通信例外も送信試行として数え、失敗の繰り返しで上限を回避させない。
+      if (requestStarted) await incrementQuota(tx, userId, "direction");
+      return { direction: null, directionErrorCode: "INTERNAL_SERVER_ERROR" };
+    }
+    // Googleの呼出結果を受け取った時点で数え、保存値の検証失敗も利用回数に含める。
+    // DB障害は経路エラーに変換せず、呼出側のトランザクションへ伝播させる。
+    await incrementQuota(tx, userId, "direction");
+    try {
       const calculatedAt = new Date();
       const validated = getReusableRouteDirection(
         {
@@ -83,10 +99,9 @@ export async function ensureRouteDirection(
       }
       result = validated;
     } catch {
-      // Google側のNOT_FOUNDをルート自体の404にせず、DB操作の失敗はこの外で伝播させる。
+      // 保存値の検証失敗は汎用エラーで返し、DB操作の失敗はこの外で伝播させる。
       return { direction: null, directionErrorCode: "INTERNAL_SERVER_ERROR" };
     }
-    await incrementQuota(tx, userId, "direction");
   }
 
   const updated = await tx

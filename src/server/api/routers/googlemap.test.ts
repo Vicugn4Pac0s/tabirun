@@ -96,10 +96,13 @@ describe("googlemap.getDirection", () => {
       path: points,
     });
     expect(fetch).toHaveBeenCalledOnce();
+    const signal = vi.mocked(fetch).mock.calls[0]?.[1]?.signal;
+    expect(signal).toBeInstanceOf(AbortSignal);
     expect(fetch).toHaveBeenCalledWith(
       "https://routes.googleapis.com/directions/v2:computeRoutes",
       {
         method: "POST",
+        signal,
         headers: {
           "Content-Type": "application/json",
           "X-Goog-Api-Key": apiKey,
