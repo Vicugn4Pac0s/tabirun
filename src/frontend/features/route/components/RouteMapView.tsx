@@ -87,6 +87,15 @@ function RouteMapView({
               zoomControl: false,
               addressControl: false,
               motionTrackingControl: false,
+              // 地図インスタンスがあるときだけ Maps API は読み込み済み。
+              // 右上のユーザーアイコンと全画面ボタンが重ならないよう左上に置く。
+              ...(map
+                ? {
+                    fullscreenControlOptions: {
+                      position: window.google.maps.ControlPosition.LEFT_TOP,
+                    },
+                  }
+                : {}),
             }}
             onInit={() => {
               void previewPoint(initialCenter);
