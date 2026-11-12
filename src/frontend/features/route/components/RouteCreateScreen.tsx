@@ -52,7 +52,7 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
             submitText={{ idle: "ルートを保存する", pending: "保存中..." }}
           >
             <p className="mt-2 text-sm text-gray-500">
-              Street View下部のボタンで地点を追加・削除できます。
+              画面下部のボタンで地点を追加・削除できます。
             </p>
             {warningMessage && (
               <div className="mb-4">

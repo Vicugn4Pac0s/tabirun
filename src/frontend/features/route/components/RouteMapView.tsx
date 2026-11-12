@@ -76,7 +76,7 @@ function RouteMapView({
         <div
           role="region"
           aria-label="Street Viewで下見"
-          className="relative order-2 h-[50vh] min-[1201px]:order-none min-[1201px]:h-screen"
+          className="relative h-[50vh] min-[1201px]:h-screen"
         >
           <StreetView
             map={map}
@@ -114,8 +114,9 @@ function RouteMapView({
           )}
         </div>
       )}
+      {/* スマホはDOM順（Street Viewが上）。PC幅だけ地図を左に出す */}
       <div
-        className={`relative ${showStreetView ? "order-1 h-[50vh] min-[1201px]:order-none min-[1201px]:h-screen" : "h-screen"}`}
+        className={`relative ${showStreetView ? "h-[50vh] min-[1201px]:order-first min-[1201px]:h-screen" : "h-screen"}`}
       >
         <GoogleMapView
           className="h-full"
