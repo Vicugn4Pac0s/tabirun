@@ -87,17 +87,14 @@ function RouteMapView({
               zoomControl: false,
               addressControl: false,
               motionTrackingControl: false,
-              // 地図インスタンスがあるときだけ Maps API は読み込み済み。
-              // 右上のユーザーアイコンと全画面ボタンが重ならないよう左上に置く。
-              ...(map
-                ? {
-                    fullscreenControlOptions: {
-                      position: window.google.maps.ControlPosition.LEFT_TOP,
-                    },
-                  }
-                : {}),
             }}
             onInit={() => {
+              // 右上のユーザーアイコンと重ならないよう、全画面ボタンは左上に置く
+              streetView.current?.setOptions({
+                fullscreenControlOptions: {
+                  position: window.google.maps.ControlPosition.LEFT_TOP,
+                },
+              });
               void previewPoint(initialCenter);
             }}
             onPositionChanged={(position) => {
