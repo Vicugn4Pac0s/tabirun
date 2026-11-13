@@ -45,12 +45,14 @@ vi.mock("~/frontend/features/googlemap/components/GoogleMapView", () => ({
 vi.mock("~/frontend/features/googlemap/components/StreetView", () => ({
   default: ({
     onPositionChanged,
+    options,
   }: {
+    options: google.maps.StreetViewPanoramaOptions;
     onPositionChanged: (position: {
       toJSON: () => google.maps.LatLngLiteral;
     }) => void;
   }) => {
-    renderStreetView();
+    renderStreetView(options);
     return (
       <button
         onClick={() =>
@@ -215,7 +217,9 @@ describe("RouteMapView", () => {
         />
       </GoogleMapProvider>,
     );
-    expect(renderStreetView).toHaveBeenCalled();
+    expect(renderStreetView).toHaveBeenCalledWith(
+      expect.objectContaining({ fullscreenControl: false }),
+    );
     expect(
       screen.getByRole("region", { name: "Street Viewで下見" }),
     ).toBeInTheDocument();

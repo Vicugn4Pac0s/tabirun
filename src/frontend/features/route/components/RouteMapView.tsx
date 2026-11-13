@@ -87,14 +87,9 @@ function RouteMapView({
               zoomControl: false,
               addressControl: false,
               motionTrackingControl: false,
+              fullscreenControl: false,
             }}
             onInit={() => {
-              // 右上のユーザーアイコンと重ならないよう、全画面ボタンは左上に置く
-              streetView.current?.setOptions({
-                fullscreenControlOptions: {
-                  position: window.google.maps.ControlPosition.LEFT_TOP,
-                },
-              });
               void previewPoint(initialCenter);
             }}
             onPositionChanged={(position) => {
