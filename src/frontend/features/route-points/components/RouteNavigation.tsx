@@ -1,5 +1,6 @@
 "use client";
 
+import { ROUTE_POINTS_MAX } from "~/shared/schemas";
 import { useEnterKey } from "~/frontend/hooks/shared/useEnterKey";
 import MainActionButton from "~/frontend/components/app-ui/MainActionButton";
 import SubActionButton from "~/frontend/components/app-ui/SubActionButton";
@@ -14,7 +15,7 @@ type RouteNavigationProps = {
 
 /**
  * 登録地点の前後移動と、現在地点の追加・削除を呼出側へ通知する。
- * disabledでなければEnterキーでも切替を通知する。登録外の現在地点からは前後移動できない。
+ * 保存中・追加上限時以外はEnterキーでも切替を通知する。登録外の現在地点からは前後移動できない。
  */
 export function RouteNavigation({
   points,
@@ -26,13 +27,15 @@ export function RouteNavigation({
   const index = points.findIndex(
     (point) => point.lat === currentPoint.lat && point.lng === currentPoint.lng,
   );
+  const toggleDisabled =
+    disabled || (index < 0 && points.length >= ROUTE_POINTS_MAX);
   const canPrev = index > 0;
   const canNext = index >= 0 && index < points.length - 1;
   const move = (targetIndex: number) => {
     const point = points[targetIndex];
     if (point) onMove(point);
   };
-  useEnterKey(onToggle, { enabled: !disabled });
+  useEnterKey(onToggle, { enabled: !toggleDisabled });
 
   return (
     <div className="relative flex gap-16 bg-white">
@@ -52,7 +55,7 @@ export function RouteNavigation({
         <MainActionButton
           type={index >= 0 ? "delete" : "add"}
           onClick={onToggle}
-          disabled={disabled}
+          disabled={toggleDisabled}
         />
       </div>
       <div className="flex">

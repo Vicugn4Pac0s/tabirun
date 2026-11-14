@@ -371,6 +371,43 @@ describe("route.getById", () => {
 });
 
 describe("route.create", () => {
+  it("27地点を受け入れて保存・計算する", async () => {
+    const limitPoints = Array.from({ length: 27 }, (_, index) => ({
+      lat: 35 + index / 100,
+      lng: 135,
+    }));
+    insertReturning.mockResolvedValue([
+      { ...routeWithoutCache, points: JSON.stringify(limitPoints) },
+    ]);
+    await expect(
+      createCaller().create({ title: "27地点のルート", points: limitPoints }),
+    ).resolves.toBeUndefined();
+    expect(insertValues).toHaveBeenCalledWith({
+      title: "27地点のルート",
+      points: JSON.stringify(limitPoints),
+      createdById: "owner",
+    });
+    expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
+      { routePoints: limitPoints, travelMode: "WALK" },
+      expect.any(Function),
+    );
+  });
+
+  it("28地点は入力検証で拒否し、DB変更・経路計算を行わない", async () => {
+    const tooManyPoints = Array.from({ length: 28 }, (_, index) => ({
+      lat: 35 + index / 100,
+      lng: 135,
+    }));
+    await expect(
+      createCaller().create({ title: "28地点のルート", points: tooManyPoints }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    expect(transaction).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(computeRoute).not.toHaveBeenCalled();
+    expect(incrementQuota).not.toHaveBeenCalled();
+  });
+
   it("クライアントの計算結果を使わず、サーバーで計算して保存する", async () => {
     lock.mockResolvedValue([routeWithoutCache]);
     const input = {
@@ -453,6 +490,38 @@ describe("route.create", () => {
 });
 
 describe("route.update", () => {
+  it("27地点を受け入れて保存・計算する", async () => {
+    const limitPoints = Array.from({ length: 27 }, (_, index) => ({
+      lat: 35 + index / 100,
+      lng: 135,
+    }));
+    await expect(
+      createCaller().update({ ...updateInput, points: limitPoints }),
+    ).resolves.toBeUndefined();
+    expect(updateSet).toHaveBeenCalledWith(
+      expect.objectContaining({ points: JSON.stringify(limitPoints) }),
+    );
+    expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
+      { routePoints: limitPoints, travelMode: "WALK" },
+      expect.any(Function),
+    );
+  });
+
+  it("28地点は入力検証で拒否し、DB変更・経路計算を行わない", async () => {
+    const tooManyPoints = Array.from({ length: 28 }, (_, index) => ({
+      lat: 35 + index / 100,
+      lng: 135,
+    }));
+    await expect(
+      createCaller().update({ ...updateInput, points: tooManyPoints }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    expect(transaction).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(computeRoute).not.toHaveBeenCalled();
+    expect(incrementQuota).not.toHaveBeenCalled();
+  });
+
   it.each([routeWithCache, routeWithoutCache])(
     "タイトルだけの変更では保存値の有無によらず再計算しない（%#）",
     async (existing) => {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { RouteNavigation } from "~/frontend/features/route-points/components/RouteNavigation";
 import RouteMapView from "./RouteMapView";
+import { RoutePointCount } from "./RoutePointCount";
 
 type RouteEditorMapProps = {
   initialCenter: google.maps.LatLngLiteral;
@@ -48,6 +49,9 @@ export function RouteEditorMap({
         fitToRoute={fitToRoute}
         onSelectedPointChange={setSelectedPoint}
       />
+      <div className="pointer-events-none absolute left-3 top-3 z-10">
+        <RoutePointCount count={points.length} />
+      </div>
       {selectedPoint && (
         <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 min-[1201px]:peer-data-[street-view=visible]:left-1/4">
           <RouteNavigation

@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFormState, useWatch } from "react-hook-form";
-import { routeCreateSchema, type RouteCreateInput } from "~/shared/schemas";
+import {
+  ROUTE_POINTS_MAX,
+  routeCreateSchema,
+  type RouteCreateInput,
+} from "~/shared/schemas";
 
 /**
  * 初回のルートを基準に編集状態・地点操作・破棄確認を返す。入力の変更後も基準は更新しない。
@@ -28,6 +32,7 @@ export function useRouteDraft(route: RouteCreateInput) {
     const exists = current.some(
       (item) => item.lat === point.lat && item.lng === point.lng,
     );
+    if (!exists && current.length >= ROUTE_POINTS_MAX) return;
     const next = exists
       ? current.filter(
           (item) => item.lat !== point.lat || item.lng !== point.lng,

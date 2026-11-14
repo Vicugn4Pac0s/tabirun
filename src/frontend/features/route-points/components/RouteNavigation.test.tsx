@@ -71,3 +71,43 @@ describe("RouteNavigation", () => {
     expect(onToggle).not.toHaveBeenCalled();
   });
 });
+
+describe("RouteNavigation 地点上限", () => {
+  const fullPoints = Array.from({ length: 27 }, (_, i) => ({
+    lat: 35 + i / 100,
+    lng: 135,
+  }));
+  it("上限時は追加ボタンとEnterを無効化する", () => {
+    const onToggle = vi.fn();
+    render(
+      <RouteNavigation
+        points={fullPoints}
+        currentPoint={{ lat: 38, lng: 138 }}
+        onMove={vi.fn()}
+        onToggle={onToggle}
+      />,
+    );
+    const button = screen.getByRole("button", { name: "地点を追加" });
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onToggle).not.toHaveBeenCalled();
+  });
+  it("上限でも登録地点の削除と移動はできる", () => {
+    const onToggle = vi.fn();
+    const onMove = vi.fn();
+    render(
+      <RouteNavigation
+        points={fullPoints}
+        currentPoint={fullPoints[0]!}
+        onMove={onMove}
+        onToggle={onToggle}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "地点を削除" })).toBeEnabled();
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onToggle).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole("button", { name: "次へ" }));
+    expect(onMove).toHaveBeenCalledWith(fullPoints[1]);
+  });
+});

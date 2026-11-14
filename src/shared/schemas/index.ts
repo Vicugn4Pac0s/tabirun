@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-/** 地図クリックで増える経由点の上限（DoS 緩和。実利用は数十点程度） */
-export const ROUTE_POINTS_MAX = 1000;
+/** 出発・到着を含む地点数の上限（Google Routes APIの中継地点は25個まで） */
+export const ROUTE_POINTS_MAX = 27;
 
 export const routePointsSchema = z
   .array(z.object({ lat: z.number(), lng: z.number() }))
