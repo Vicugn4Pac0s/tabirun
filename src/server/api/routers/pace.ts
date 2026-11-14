@@ -1,11 +1,7 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { publicProcedure } from "../procedure";
-import { paces } from "~/server/db/schema";
+import { getPaces } from "~/server/features/pace/paces";
 
 export const paceRouter = createTRPCRouter({
-  getPace: publicProcedure.query(async ({ ctx }) => {
-    const res = await ctx.db.select().from(paces);
-
-    return res;
-  }),
+  getPace: publicProcedure.query(({ ctx }) => getPaces(ctx.db)),
 });
