@@ -26,10 +26,6 @@ beforeEach(() => {
       {
         id: 123,
         title: "朝のルート",
-        points: [
-          { lat: 35, lng: 135 },
-          { lat: 36, lng: 136 },
-        ],
         createdAt: new Date("2026-10-24"),
         updatedAt: null,
       },
@@ -44,6 +40,11 @@ afterEach(cleanup);
 describe("Dashboard", () => {
   it("登録ルートをID指定の詳細ページへのリンクとして表示する", () => {
     render(<Dashboard />);
+    expect(
+      screen.getByRole("heading", { name: "朝のルート" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("更新日：2026/10/24")).toBeInTheDocument();
+    expect(screen.queryByText(/\d+\s*地点/)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /朝のルート/ })).toHaveAttribute(
       "href",
       "/routes/123",

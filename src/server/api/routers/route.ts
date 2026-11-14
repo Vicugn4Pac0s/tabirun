@@ -151,21 +151,15 @@ export const routeRouter = createTRPCRouter({
     }),
 
   getByUser: protectedProcedure.query(async ({ ctx }) => {
-    const res = await ctx.db
+    return ctx.db
       .select({
         id: routes.id,
         title: routes.title,
-        points: routes.points,
         createdById: routes.createdById,
         createdAt: routes.createdAt,
         updatedAt: routes.updatedAt,
       })
       .from(routes)
       .where(eq(routes.createdById, ctx.session.user.id));
-
-    return res.map((route) => ({
-      ...route,
-      points: routePointsSchema.parse(JSON.parse(route.points)),
-    }));
   }),
 });
