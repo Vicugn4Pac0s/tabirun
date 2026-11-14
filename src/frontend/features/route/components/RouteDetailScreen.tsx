@@ -101,6 +101,10 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
   );
 }
 
+/**
+ * 保存済み経路の表示・削除を行う詳細画面を、専用のGoogleMapProviderで包んで表示する。
+ * 経路取得失敗や上限到達は警告として表示し、登録地点の下見は続けられる。
+ */
 export function RouteDetailScreen(props: RouteDetailScreenProps) {
   return (
     <GoogleMapProvider>

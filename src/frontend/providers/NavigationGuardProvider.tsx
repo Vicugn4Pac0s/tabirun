@@ -9,6 +9,7 @@ type NavigationGuardProviderProps = {
   children: ReactNode;
 };
 
+/** 配下のリンクで使う離脱確認を提供する。確認の実行は利用側に委ねる。 */
 export function NavigationGuardProvider({
   confirmNavigation,
   children,
@@ -20,6 +21,7 @@ export function NavigationGuardProvider({
   );
 }
 
+/** 最も近いProviderの離脱確認を返す。Providerの外ではnullを返す。 */
 export function useNavigationGuard() {
   return useContext(NavigationGuardContext);
 }

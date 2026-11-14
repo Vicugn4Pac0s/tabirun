@@ -22,6 +22,10 @@ type Props = {
   onLogout: () => void;
 };
 
+/**
+ * プロフィールへのリンクとログアウト操作を持つメニューを表示する。
+ * ログアウト処理は呼出側に任せ、プロフィールへの遷移には離脱確認を適用する。
+ */
 export const UserMenuView = ({ image, name, onLogout }: Props) => {
   const fallbackLabel = name?.slice(0, 1).toUpperCase() ?? "U";
 

@@ -7,6 +7,10 @@ interface StreetViewPointMarkerProps {
   pov: google.maps.StreetViewPov | null;
 }
 
+/**
+ * Street Viewの位置と方角を点と矢印で地図上に表示する。
+ * 地図・位置・視点が揃うまでは何も表示しない。
+ */
 export function StreetViewPointMarker({
   map,
   latLng,

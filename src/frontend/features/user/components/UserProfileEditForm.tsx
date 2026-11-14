@@ -29,6 +29,10 @@ const toOptionalString = (value: string) => (value === "" ? undefined : value);
 const toOptionalInt = (value: string) =>
   value === "" ? undefined : Number.parseInt(value, 10);
 
+/**
+ * プロフィールの入力欄を呼出側のformに接続し、更新中は入力・送信を無効にする。
+ * 空欄はundefinedに変換し、検証・保存は渡されたformとonSubmitに任せる。
+ */
 export function UserProfileEditForm({
   form,
   onSubmit,

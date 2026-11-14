@@ -25,6 +25,10 @@ type RouteMapViewProps = {
   onSelectedPointChange?: (point: google.maps.LatLngLiteral) => void;
 };
 
+/**
+ * GoogleMapProvider内で経路・マーカーを描画し、必要に応じてStreet Viewと連動する。
+ * 全体表示は読み込み後の初回だけ行い、Street View対象外の地点は案内を重ねて表示する。
+ */
 function RouteMapView({
   initialCenter,
   path,

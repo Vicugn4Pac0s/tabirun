@@ -1,5 +1,9 @@
 import type { RouteMapMarker } from "../types";
 
+/**
+ * 始点・終点のプレビューマーカーを返す。どちらかがなければ空配列にする。
+ * 始点と終点が同じ座標ならS/Gの1個にまとめる。
+ */
 export function getRoutePreviewMarkers(
   start: google.maps.LatLngLiteral | undefined,
   goal: google.maps.LatLngLiteral | undefined,

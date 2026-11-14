@@ -1,6 +1,9 @@
 import type { RouteDeleteInput } from "~/shared/schemas";
 import { api } from "~/trpc/react";
 
+/**
+ * ルート削除の操作と状態を返し、成功時に一覧と対象ルート詳細のキャッシュを無効化する。
+ */
 export const useDeleteRoute = () => {
   const utils = api.useUtils();
 

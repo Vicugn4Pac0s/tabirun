@@ -14,6 +14,10 @@ type PaceSelectProps = {
   "id" | "onBlur" | "aria-invalid" | "aria-describedby"
 >;
 
+/**
+ * ペース一覧を取得して選択肢にし、一覧に存在する値だけを変更通知する。
+ * 取得失敗時は選択を無効にしてエラーを表示する。
+ */
 function PaceSelect({
   value,
   onChangeValue,

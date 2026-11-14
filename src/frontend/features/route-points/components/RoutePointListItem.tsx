@@ -5,6 +5,9 @@ interface RoutePointListItemProps {
   onClick?: (index: number) => void;
 }
 
+/**
+ * 地点番号を1始まりで表示し、選択時は0始まりの位置を通知する。
+ */
 function RoutePointListItem({ index, onClick }: RoutePointListItemProps) {
   return (
     <Button

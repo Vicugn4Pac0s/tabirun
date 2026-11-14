@@ -24,6 +24,11 @@ function getDistanceMeters(
   return 2 * earthRadiusMeters * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/**
+ * 指定地点付近のStreet Viewへ移動する非同期関数を返す。GoogleMapProvider内で使う。
+ * 返した関数は未初期化・候補なし・候補が30m超ならfalse、表示を更新したらtrueを返す。
+ * 候補なし・30m超では利用不可状態を立て、移動成功時に解除する。
+ */
 export const useMoveStreetView = () => {
   const { streetView, setStreetViewUnavailable } = useGoogleMap();
 

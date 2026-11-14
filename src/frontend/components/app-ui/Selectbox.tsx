@@ -28,6 +28,8 @@ type SelectboxProps = {
   "id" | "onBlur" | "aria-invalid" | "aria-describedby"
 >;
 
+/** 候補の選択UIを表示し、フォーム用のID・検証属性をトリガーに渡す。
+ * labelは候補グループの見出しで、トリガーの読み上げ名はariaLabelで指定する。 */
 export function Selectbox({
   items,
   value,

@@ -19,6 +19,10 @@ const messages = {
   },
 } as const;
 
+/**
+ * 経路計算のエラーコードと画面用途から警告文を選び、エラーなしならnullを返す。
+ * サーバーのmessageは使わず、上限到達以外は共通の取得失敗として扱う。
+ */
 export function getRouteCalculationWarningMessage(
   error: RouteCalculationError | null,
   mode: RouteCalculationMode,

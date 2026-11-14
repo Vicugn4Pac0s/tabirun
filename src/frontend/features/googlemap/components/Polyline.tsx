@@ -6,6 +6,10 @@ type PolylineProps = {
   options?: Omit<google.maps.PolylineOptions, "map" | "path">;
 };
 
+/**
+ * 初期化済みの地図へ線を追加し、座標列・オプションの変更を反映する。
+ * 破棄時は線を地図から外す。React側の描画要素は返さない。
+ */
 export function Polyline({ map, path, options }: PolylineProps) {
   const polylineRef = useRef<google.maps.Polyline | null>(null);
 

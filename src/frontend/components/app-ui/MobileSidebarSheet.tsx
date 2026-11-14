@@ -18,6 +18,8 @@ interface MobileSidebarSheetProps {
   title?: string;
 }
 
+/** トリガーで開く下端のパネルを表示し、開閉状態を内部で管理する。
+ * titleは読み上げ用の見出しとして使い、内容領域はスクロールできる。 */
 function MobileSidebarSheet({
   children,
   trigger,

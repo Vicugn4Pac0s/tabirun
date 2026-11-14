@@ -4,6 +4,7 @@ interface StatValueProps {
   className?: string;
 }
 
+/** 計測値と縮小した単位をベースラインを揃えて表示する。値の丸めや整形は呼出側で行う。 */
 export function StatValue({ value, unit, className }: StatValueProps) {
   return (
     <p

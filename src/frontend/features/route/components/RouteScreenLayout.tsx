@@ -15,6 +15,10 @@ type RouteScreenLayoutProps = {
   confirmNavigation?: () => boolean;
 };
 
+/**
+ * ルート画面のパネルをPCではサイドバー、モバイルでは開閉シートに配置する。
+ * 移動確認を渡した場合だけ配下にNavigationGuardProviderを設ける。
+ */
 export function RouteScreenLayout({
   panelTitle,
   menuTriggerLabel,

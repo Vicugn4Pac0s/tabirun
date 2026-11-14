@@ -15,6 +15,7 @@ type Props = {
   onMouseOut?: () => void;
 };
 
+/** 先頭・前・次・末尾への移動ボタンを表示する。移動可否と操作は呼出側で決める。 */
 const SubActionButton = ({
   type,
   disabled = false,

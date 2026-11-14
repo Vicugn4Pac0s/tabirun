@@ -15,6 +15,10 @@ type RouteEditorMapProps = {
   onTogglePoint: (point: google.maps.LatLngLiteral) => void;
 };
 
+/**
+ * Street Viewで選択した地点の追加・削除と、登録地点間の移動操作を地図に重ねる。
+ * GoogleMapProvider内で使う。地点の変更はonTogglePointへ委ねる。
+ */
 export function RouteEditorMap({
   initialCenter,
   points,

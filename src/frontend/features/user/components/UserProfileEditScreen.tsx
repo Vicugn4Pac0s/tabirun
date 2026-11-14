@@ -7,6 +7,10 @@ import type { UserProfileUpdateInput } from "~/shared/schemas";
 
 type UserProfileEditScreenProps = { initialValues: UserProfileUpdateInput };
 
+/**
+ * プロフィールの編集フォームとホームへのリンクを表示する。
+ * 保存成功時はホームへ遷移して再取得し、失敗時は入力を保ってtoastを表示する。
+ */
 export function UserProfileEditScreen({
   initialValues,
 }: UserProfileEditScreenProps) {

@@ -25,6 +25,10 @@ type Props = {
   children: ReactNode;
 };
 
+/**
+ * 地図とStreet Viewの参照・利用不可状態を子孫で共有する。
+ * 地図とパノラマのインスタンス生成は子コンポーネント側で行う。
+ */
 export const GoogleMapProvider = ({ children }: Props) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [streetViewUnavailable, setStreetViewUnavailable] = useState(false);
@@ -48,8 +52,10 @@ export const GoogleMapProvider = ({ children }: Props) => {
   );
 };
 
+/** 地図の共有状態を取得し、GoogleMapProviderの外ではnullを返す。 */
 export const useOptionalGoogleMap = () => useContext(GoogleMapContext);
 
+/** 地図の共有状態を取得する。GoogleMapProviderの外で呼ぶとエラーになる。 */
 export const useGoogleMap = () => {
   const context = useOptionalGoogleMap();
 

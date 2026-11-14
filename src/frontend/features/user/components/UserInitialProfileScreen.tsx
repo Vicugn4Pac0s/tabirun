@@ -5,6 +5,10 @@ import { InitialProfileForm } from "~/frontend/features/user/components/InitialP
 type UserInitialProfileScreenProps = {
   initialValues: UserProfileUpdateInput;
 };
+/**
+ * 初期プロフィールの入力と保存を表示する。
+ * 保存成功後は同じ画面を再取得し、サーバー側のプロフィール完了判定を更新する。
+ */
 export function UserInitialProfileScreen({
   initialValues,
 }: UserInitialProfileScreenProps) {
