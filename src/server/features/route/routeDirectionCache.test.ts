@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  createStraightLineDirection,
+  toSavedGoogleRouteDirection,
   getReusableRouteDirection,
   getRoutePointsHash,
   ROUTE_DIRECTION_CACHE_MAX_AGE_MS,
@@ -113,6 +115,91 @@ describe("getReusableRouteDirection", () => {
       getReusableRouteDirection(
         { ...snapshot, directionSource: "straight_line" },
         points,
+        now,
+      ),
+    ).toBeNull();
+  });
+});
+
+describe("createStraightLineDirection", () => {
+  it("指定された地点・hash・残数確認時刻で直線結果を組み立てる", () => {
+    expect(
+      createStraightLineDirection(points, snapshot.directionPointsHash, now),
+    ).toEqual({
+      directionSource: "straight_line",
+      encodedPolyline: null,
+      distanceMeters: null,
+      duration: null,
+      directionCalculatedAt: now,
+      directionPointsHash: snapshot.directionPointsHash,
+      path: points,
+    });
+  });
+});
+
+describe("toSavedGoogleRouteDirection", () => {
+  const direction = {
+    encodedPolyline: snapshot.encodedPolyline,
+    distanceMeters: 1200,
+    duration: "600s",
+    path: [],
+  };
+  it("応答のpathではなくpolylineを復元し、保存値を返す", () => {
+    expect(
+      toSavedGoogleRouteDirection(
+        direction,
+        points,
+        snapshot.directionPointsHash,
+        now,
+      ),
+    ).toEqual({ ...snapshot, path: points });
+  });
+  it.each([
+    { encodedPolyline: null },
+    { encodedPolyline: "?" },
+    { encodedPolyline: "!!!!!!" },
+    { distanceMeters: -1 },
+    { distanceMeters: 0.5 },
+    { duration: "invalid" },
+  ])("不正なGoogle結果はnullを返す（%#）", (change) => {
+    expect(
+      toSavedGoogleRouteDirection(
+        { ...direction, ...change },
+        points,
+        snapshot.directionPointsHash,
+        now,
+      ),
+    ).toBeNull();
+  });
+  it("距離ゼロ・所要時間ゼロも保存できる", () => {
+    expect(
+      toSavedGoogleRouteDirection(
+        { ...direction, distanceMeters: 0, duration: "0s" },
+        points,
+        snapshot.directionPointsHash,
+        now,
+      ),
+    ).toMatchObject({ distanceMeters: 0, duration: "0s" });
+  });
+  it("hash不一致や不正な計算時刻はnullを返す", () => {
+    expect(
+      toSavedGoogleRouteDirection(direction, points, "0".repeat(64), now),
+    ).toBeNull();
+    expect(
+      toSavedGoogleRouteDirection(
+        direction,
+        points,
+        snapshot.directionPointsHash,
+        new Date("invalid"),
+      ),
+    ).toBeNull();
+  });
+  it("地点の検証例外もnullを返す", () => {
+    expect(
+      toSavedGoogleRouteDirection(
+        direction,
+        [],
+        snapshot.directionPointsHash,
         now,
       ),
     ).toBeNull();
