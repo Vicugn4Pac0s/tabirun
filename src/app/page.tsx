@@ -2,7 +2,8 @@ import { SessionProvider } from "next-auth/react";
 import { redirect } from "next/navigation";
 
 import { auth } from "~/server/auth";
-import { getUserHomePageSettings } from "~/server/features/user/queries";
+import { db } from "~/server/db";
+import { getUserHomePageSettings } from "~/server/features/user/profile";
 import { api, HydrateClient } from "~/trpc/server";
 import { Dashboard } from "~/frontend/features/dashboard/components/Dashboard";
 
@@ -10,7 +11,7 @@ export default async function Home() {
   const session = await auth();
 
   const user = session?.user?.id
-    ? await getUserHomePageSettings(session.user.id)
+    ? await getUserHomePageSettings(db, session.user.id)
     : null;
 
   if (user && !user.profileCompletedAt) {

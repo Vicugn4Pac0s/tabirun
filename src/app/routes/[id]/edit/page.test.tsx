@@ -31,7 +31,8 @@ vi.mock("~/frontend/features/route/components/RouteEditScreen", () => ({
   },
 }));
 vi.mock("~/server/auth", () => ({ auth }));
-vi.mock("~/server/features/user/queries", () => ({ getUserProfileSettings }));
+vi.mock("~/server/db", () => ({ db: {} }));
+vi.mock("~/server/features/user/profile", () => ({ getUserProfileSettings }));
 vi.mock("~/trpc/server", () => ({ api: { route: { getById } } }));
 vi.mock("next/navigation", () => ({ notFound, redirect }));
 

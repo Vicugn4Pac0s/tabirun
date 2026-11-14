@@ -1,3 +1,4 @@
+import { db } from "~/server/db";
 import type { ReactNode } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -20,7 +21,8 @@ const {
 }));
 
 vi.mock("~/server/auth", () => ({ auth }));
-vi.mock("~/server/features/user/queries", () => ({ getUserHomePageSettings }));
+vi.mock("~/server/db", () => ({ db: {} }));
+vi.mock("~/server/features/user/profile", () => ({ getUserHomePageSettings }));
 vi.mock("next/navigation", () => ({ redirect }));
 vi.mock("next-auth/react", () => ({
   SessionProvider: ({ children }: { children: ReactNode }) => children,
@@ -48,7 +50,10 @@ afterEach(cleanup);
 describe("Home", () => {
   it("ログイン済みなら本人の完了状態を確認し、2件をprefetchしてホームを返す", async () => {
     render(await Home());
-    expect(getUserHomePageSettings).toHaveBeenCalledExactlyOnceWith("owner");
+    expect(getUserHomePageSettings).toHaveBeenCalledExactlyOnceWith(
+      db,
+      "owner",
+    );
     expect(prefetchUser).toHaveBeenCalledExactlyOnceWith();
     expect(prefetchRoutes).toHaveBeenCalledExactlyOnceWith();
     expect(screen.getByRole("heading", { name: "ホーム" })).toBeInTheDocument();

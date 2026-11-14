@@ -1,3 +1,4 @@
+import { db } from "~/server/db";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import UserProfileEditPage from "./page";
@@ -11,7 +12,8 @@ vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("~/server/auth", () => ({ auth }));
-vi.mock("~/server/features/user/queries", () => ({ getUserProfileSettings }));
+vi.mock("~/server/db", () => ({ db: {} }));
+vi.mock("~/server/features/user/profile", () => ({ getUserProfileSettings }));
 vi.mock("next/navigation", () => ({
   redirect: (path: string) => {
     throw new Error(`REDIRECT:${path}`);
@@ -42,7 +44,7 @@ describe("UserProfileEditPage", () => {
     expect(
       screen.getByRole("heading", { name: "プロフィールを編集" }),
     ).toBeInTheDocument();
-    expect(getUserProfileSettings).toHaveBeenCalledWith("owner");
+    expect(getUserProfileSettings).toHaveBeenCalledWith(db, "owner");
     expect(screenProps).toHaveBeenCalledWith({
       initialValues: {
         birthDate: "1990-01-01",
