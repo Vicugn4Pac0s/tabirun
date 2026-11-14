@@ -1,14 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { checkQuota, incrementQuota } from "~/server/quota/service";
+import {
+  checkQuota,
+  hasQuotaRemaining,
+  incrementQuota,
+} from "~/server/quota/service";
 
 const fixedDate = new Date("2026-07-08T12:00:00.000Z");
 
 const createDbMock = (existing: { count: number } | null) => {
   const findFirst = vi.fn().mockResolvedValue(existing);
-  const where = vi.fn().mockResolvedValue(undefined);
-  const set = vi.fn(() => ({ where }));
-  const update = vi.fn(() => ({ set }));
-  const values = vi.fn().mockResolvedValue(undefined);
+  const onConflictDoUpdate = vi.fn().mockResolvedValue(undefined);
+  const values = vi.fn(() => ({ onConflictDoUpdate }));
   const insert = vi.fn(() => ({ values }));
 
   return {
@@ -18,16 +20,13 @@ const createDbMock = (existing: { count: number } | null) => {
           findFirst,
         },
       },
-      update,
       insert,
     } as never,
     mocks: {
       findFirst,
-      where,
-      set,
-      update,
       values,
       insert,
+      onConflictDoUpdate,
     },
   };
 };
@@ -62,30 +61,47 @@ describe("checkQuota", () => {
   });
 });
 
-describe("incrementQuota", () => {
-  it("既存レコードがあれば update を呼ぶ", async () => {
-    const { db, mocks } = createDbMock({ count: 10 });
-
-    await incrementQuota(db, "user-1", "direction");
-
-    expect(mocks.update).toHaveBeenCalledTimes(1);
-    expect(mocks.set).toHaveBeenCalledTimes(1);
-    expect(mocks.where).toHaveBeenCalledTimes(1);
-    expect(mocks.insert).not.toHaveBeenCalled();
+describe("hasQuotaRemaining", () => {
+  it.each([
+    [null, true],
+    [{ count: 49 }, true],
+    [{ count: 50 }, false],
+    [{ count: 51 }, false],
+  ])("利用回数 %s の上限判定は %s", async (existing, expected) => {
+    const { db } = createDbMock(existing);
+    await expect(hasQuotaRemaining(db, "user-1", "direction")).resolves.toBe(
+      expected,
+    );
   });
 
-  it("既存レコードがなければ当日分を insert する", async () => {
+  it("DB障害を伝播する", async () => {
     const { db, mocks } = createDbMock(null);
+    const error = new Error("database error");
+    mocks.findFirst.mockRejectedValue(error);
+    await expect(hasQuotaRemaining(db, "user-1", "direction")).rejects.toBe(
+      error,
+    );
+  });
+});
 
+describe("incrementQuota", () => {
+  it("当日分を検索せず UPSERT する", async () => {
+    const { db, mocks } = createDbMock(null);
     await incrementQuota(db, "user-1", "direction");
-
-    expect(mocks.insert).toHaveBeenCalledTimes(1);
+    expect(mocks.findFirst).not.toHaveBeenCalled();
     expect(mocks.values).toHaveBeenCalledWith({
       userId: "user-1",
       feature: "direction",
       date: "2026-07-08",
       count: 1,
     });
-    expect(mocks.update).not.toHaveBeenCalled();
+    expect(mocks.onConflictDoUpdate).toHaveBeenCalledOnce();
+  });
+
+  it("DB障害を伝播する", async () => {
+    const { db, mocks } = createDbMock(null);
+    const error = new Error("database error");
+    mocks.onConflictDoUpdate.mockRejectedValue(error);
+    await expect(incrementQuota(db, "user-1", "direction")).rejects.toBe(error);
   });
 });

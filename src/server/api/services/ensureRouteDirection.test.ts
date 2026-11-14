@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   update: vi.fn(),
   set: vi.fn(),
   updateWhere: vi.fn(),
-  checkQuota: vi.fn(),
+  hasQuotaRemaining: vi.fn(),
   incrementQuota: vi.fn(),
   computeRoute: vi.fn(),
 }));
@@ -24,7 +24,7 @@ vi.mock("~/server/db", () => ({
   },
 }));
 vi.mock("~/server/quota/service", () => ({
-  checkQuota: mocks.checkQuota,
+  hasQuotaRemaining: mocks.hasQuotaRemaining,
   incrementQuota: mocks.incrementQuota,
 }));
 vi.mock("~/server/features/googlemap/computeRoute", () => ({
@@ -55,6 +55,7 @@ let route: Parameters<typeof ensureRouteDirection>[2];
 
 beforeEach(() => {
   vi.resetAllMocks();
+  mocks.hasQuotaRemaining.mockResolvedValue(true);
   vi.useFakeTimers();
   vi.setSystemTime(now);
   route = { ...savedRoute };
@@ -75,7 +76,7 @@ describe("ensureRouteDirection", () => {
     const result = await ensureRouteDirection(db, "owner", route);
     expect(result.direction?.distanceMeters).toBe(1200);
     expect(result.direction?.path).toHaveLength(3);
-    expect(mocks.checkQuota).not.toHaveBeenCalled();
+    expect(mocks.hasQuotaRemaining).not.toHaveBeenCalled();
     expect(mocks.computeRoute).not.toHaveBeenCalled();
     expect(mocks.incrementQuota).not.toHaveBeenCalled();
     expect(mocks.update).not.toHaveBeenCalled();
@@ -102,7 +103,11 @@ describe("ensureRouteDirection", () => {
         },
         expect.any(Function),
       );
-      expect(mocks.checkQuota).toHaveBeenCalledWith(db, "owner", "direction");
+      expect(mocks.hasQuotaRemaining).toHaveBeenCalledWith(
+        db,
+        "owner",
+        "direction",
+      );
       expect(mocks.incrementQuota).toHaveBeenCalledExactlyOnceWith(
         db,
         "owner",
@@ -129,7 +134,7 @@ describe("ensureRouteDirection", () => {
     await expect(
       ensureRouteDirection(db, "other", route),
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
-    expect(mocks.checkQuota).not.toHaveBeenCalled();
+    expect(mocks.hasQuotaRemaining).not.toHaveBeenCalled();
     expect(mocks.computeRoute).not.toHaveBeenCalled();
     expect(mocks.update).not.toHaveBeenCalled();
   });
@@ -164,9 +169,7 @@ describe("ensureRouteDirection", () => {
 
   it("上限到達時は直線結果を保存し、Googleも利用回数加算も呼ばない", async () => {
     route = { ...savedRoute, directionCalculatedAt: null };
-    mocks.checkQuota.mockRejectedValue(
-      new TRPCError({ code: "TOO_MANY_REQUESTS" }),
-    );
+    mocks.hasQuotaRemaining.mockResolvedValue(false);
     const result = await ensureRouteDirection(db, "owner", route);
     expect(result).toEqual({
       direction: {
@@ -203,7 +206,7 @@ describe("ensureRouteDirection", () => {
     ).resolves.toMatchObject({
       direction: { directionSource: "straight_line" },
     });
-    expect(mocks.checkQuota).not.toHaveBeenCalled();
+    expect(mocks.hasQuotaRemaining).not.toHaveBeenCalled();
     vi.setSystemTime(new Date("2026-11-11T00:00:00Z"));
     await expect(
       ensureRouteDirection(db, "owner", route),
@@ -214,9 +217,9 @@ describe("ensureRouteDirection", () => {
   it("クォータ確認中にUTC日付が変わっても、前日の上限結果を翌日まで固定しない", async () => {
     vi.setSystemTime(new Date("2026-11-10T23:59:59Z"));
     route = { ...savedRoute, directionCalculatedAt: null };
-    mocks.checkQuota.mockImplementationOnce(() => {
+    mocks.hasQuotaRemaining.mockImplementationOnce(() => {
       vi.setSystemTime(new Date("2026-11-11T00:00:00Z"));
-      throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+      return false;
     });
     const first = await ensureRouteDirection(db, "owner", route);
     expect(first.direction?.directionCalculatedAt).toEqual(
@@ -239,7 +242,7 @@ describe("ensureRouteDirection", () => {
 
   it("クォータ取得の障害を上限到達として扱わない", async () => {
     route = { ...savedRoute, directionCalculatedAt: null };
-    mocks.checkQuota.mockRejectedValue(new Error("database error"));
+    mocks.hasQuotaRemaining.mockRejectedValue(new Error("database error"));
     await expect(ensureRouteDirection(db, "owner", route)).rejects.toThrow(
       "database error",
     );

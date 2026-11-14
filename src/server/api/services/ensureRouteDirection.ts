@@ -9,7 +9,7 @@ import {
   computeRoute,
   type GoogleRouteDirection,
 } from "~/server/features/googlemap/computeRoute";
-import { checkQuota, incrementQuota } from "~/server/quota/service";
+import { hasQuotaRemaining, incrementQuota } from "~/server/quota/service";
 import {
   getReusableRouteDirection,
   getRoutePointsHash,
@@ -40,19 +40,11 @@ export async function ensureRouteDirection(
   if (reusable) return { direction: reusable, directionErrorCode: null };
 
   const quotaCheckedAt = new Date();
-  let isQuotaExceeded = false;
-  try {
-    await checkQuota(tx, userId, "direction");
-  } catch (error) {
-    if (!(error instanceof TRPCError) || error.code !== "TOO_MANY_REQUESTS") {
-      throw error;
-    }
-    isQuotaExceeded = true;
-  }
+  const quotaRemaining = await hasQuotaRemaining(tx, userId, "direction");
 
   const pointsHash = getRoutePointsHash(points);
   let result: SavedRouteDirection;
-  if (isQuotaExceeded) {
+  if (!quotaRemaining) {
     result = {
       directionSource: "straight_line",
       encodedPolyline: null,

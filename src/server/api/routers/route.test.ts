@@ -26,7 +26,7 @@ const {
   insert,
   insertValues,
   insertReturning,
-  checkQuota,
+  hasQuotaRemaining,
   incrementQuota,
   computeRoute,
 } = vi.hoisted(() => ({
@@ -44,7 +44,7 @@ const {
   insert: vi.fn(),
   insertValues: vi.fn(),
   insertReturning: vi.fn(),
-  checkQuota: vi.fn(),
+  hasQuotaRemaining: vi.fn(),
   incrementQuota: vi.fn(),
   computeRoute: vi.fn(),
 }));
@@ -61,7 +61,10 @@ vi.mock("~/server/db", () => ({
 }));
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
 vi.mock("~/server/features/googlemap/computeRoute", () => ({ computeRoute }));
-vi.mock("~/server/quota/service", () => ({ checkQuota, incrementQuota }));
+vi.mock("~/server/quota/service", () => ({
+  hasQuotaRemaining,
+  incrementQuota,
+}));
 
 const points = [
   { lat: 35, lng: 135 },
@@ -120,6 +123,7 @@ const updateInput = { id: 1, title: "夕方のルート", points };
 
 beforeEach(() => {
   vi.resetAllMocks();
+  hasQuotaRemaining.mockResolvedValue(true);
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(now);
   transaction.mockImplementation(
@@ -228,7 +232,7 @@ describe("route.getById", () => {
     expect(transaction).toHaveBeenCalledOnce();
     expect(findFirst).not.toHaveBeenCalled();
     expect(computeRoute).not.toHaveBeenCalled();
-    expect(checkQuota).not.toHaveBeenCalled();
+    expect(hasQuotaRemaining).not.toHaveBeenCalled();
     expect(incrementQuota).not.toHaveBeenCalled();
   });
 
@@ -341,7 +345,7 @@ describe("route.getById", () => {
 
   it("クォータ上限時もルートを返し、直線結果として保存する", async () => {
     lock.mockResolvedValue([routeWithoutCache]);
-    checkQuota.mockRejectedValue(new TRPCError({ code: "TOO_MANY_REQUESTS" }));
+    hasQuotaRemaining.mockResolvedValue(false);
     await expect(createCaller().getById({ id: 1 })).resolves.toMatchObject({
       id: 1,
       direction: {
@@ -357,7 +361,7 @@ describe("route.getById", () => {
 
   it("DB障害は経路取得失敗に変換せず、失敗として返す", async () => {
     lock.mockResolvedValue([routeWithoutCache]);
-    checkQuota.mockRejectedValue(new Error("db failed"));
+    hasQuotaRemaining.mockRejectedValue(new Error("db failed"));
     await expect(createCaller().getById({ id: 1 })).rejects.toMatchObject({
       code: "INTERNAL_SERVER_ERROR",
     });
@@ -400,7 +404,7 @@ describe("route.create", () => {
 
   it("上限到達時もルートを保存し、直線として扱う", async () => {
     lock.mockResolvedValue([routeWithoutCache]);
-    checkQuota.mockRejectedValue(new TRPCError({ code: "TOO_MANY_REQUESTS" }));
+    hasQuotaRemaining.mockResolvedValue(false);
     await expect(
       createCaller().create({ title: "朝のルート", points }),
     ).resolves.toBeUndefined();
@@ -465,7 +469,7 @@ describe("route.update", () => {
       expect(updateWhere).toHaveBeenCalledWith(
         and(eq(routes.id, 1), eq(routes.createdById, "owner")),
       );
-      expect(checkQuota).not.toHaveBeenCalled();
+      expect(hasQuotaRemaining).not.toHaveBeenCalled();
       expect(computeRoute).not.toHaveBeenCalled();
       expect(incrementQuota).not.toHaveBeenCalled();
     },
