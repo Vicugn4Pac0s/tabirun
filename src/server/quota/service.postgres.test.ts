@@ -16,6 +16,7 @@ import {
   vi,
 } from "vitest";
 import * as schema from "~/server/db/schema";
+import migrationJournal from "../../../drizzle/meta/_journal.json";
 import { checkQuota, hasQuotaRemaining, incrementQuota } from "./service";
 
 declare module "vitest" {
@@ -40,8 +41,14 @@ describe.skipIf(!databaseUrl)("quota PostgreSQL", () => {
       new URL("../../../drizzle", import.meta.url),
     ),
   });
-  const initialMigration = migrations[0];
-  const quotaMigration = migrations[4];
+  function findMigration(tag: string) {
+    const entry = migrationJournal.entries.find((entry) => entry.tag === tag);
+    return migrations.find(
+      (migration) => migration.folderMillis === entry?.when,
+    );
+  }
+  const initialMigration = findMigration("0000_sticky_texas_twister");
+  const quotaMigration = findMigration("0004_slow_the_hood");
   if (!initialMigration || !quotaMigration)
     throw new Error("quota migrationがありません");
   const quotaTableSql = initialMigration.sql.find((statement) =>
