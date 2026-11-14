@@ -71,11 +71,15 @@ async function main() {
     return;
   }
 
+  const databaseUrl = new URL(result.data);
+  // poolerのホストは共有されるため、ユーザー名のrefでプロジェクトを照合する。
+  const projectRef = /^postgres\.([a-z0-9]+)$/.exec(databaseUrl.username)?.[1];
+  console.log(`本番DB migrationの接続先ホスト: ${databaseUrl.hostname}`);
   console.log(
-    `本番DB migrationの接続先ホスト: ${new URL(result.data).hostname}`,
+    `接続先プロジェクトref: ${projectRef ?? "判別できません。専用ファイルの接続先を管理画面と照合してください。"}`,
   );
   console.log(
-    "本番デプロイが完了し、接続先が本番DBであることを確認してください。",
+    "接続先が本番プロジェクトか確認してください。列の追加などはデプロイ前に適用し、破壊的な変更は適用手順とコードとの互換性を確認してください。",
   );
   const prompt = createInterface({ input: stdin, output: stdout });
   let answer: string;
