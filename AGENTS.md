@@ -51,7 +51,8 @@
 - `src/frontend/components/app-ui`: 2つ以上のfeatureで使う見た目だけの部品。feature・tRPC・業務知識に依存しない。
 - `src/frontend/hooks/shared`, `src/frontend/lib`: feature非依存の汎用処理。
 - `src/shared/schemas`: client/server共通のZod schemaと推論型。入力制約の唯一の定義元。
-- `src/server/api`（routers / procedure / middleware）、`src/server/db`（schema・接続）、`src/server/auth`、`src/server/quota`、`src/server/features/*`（RSCから呼ぶ `server-only` の読み取り）。
+- `src/server/api`（routers / procedure / middleware）、`src/server/db`（schema・接続）、`src/server/auth`、`src/server/quota`、`src/server/features/*`（サーバー専用の業務処理・DB操作・外部通信。RSC向けの副作用のない読み取りは `<feature>/queries.ts`）。
+- バックエンドの責務・配置・書き方は `docs/BACKEND_GUIDE.md` に従う。既存コードの移動・整理は依頼範囲内だけ行う。
 - 依存ルール:
   - `frontend` → `server` は `import type` のみ（例: `AppRouter`）。値のimportは禁止。
   - feature間は上位 → 下位の一方向のみ、循環禁止。下位: `googlemap`, `pace` / 中位: `route-points`, `run-metrics`, `user`, `auth` / 上位: `route`, `dashboard`。新しいfeature間依存を作るときは計画に書く。
