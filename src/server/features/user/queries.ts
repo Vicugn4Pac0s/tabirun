@@ -7,7 +7,7 @@ import { users } from "~/server/db/schema";
 
 /**
  * ホーム表示に必要なプロフィール完了状態を読み取り、対象なしならundefinedを返す。
- * 認証・画面の出し分けは呼出側で行い、DB障害は伝播する。
+ * 認証・画面の出し分けは呼出側で行う。
  */
 export function getUserHomePageSettings(userId: string) {
   return db.query.users.findFirst({
@@ -20,7 +20,7 @@ export function getUserHomePageSettings(userId: string) {
 
 /**
  * プロフィール画面に必要な設定を読み取り、対象なしならundefinedを返す。
- * 認証・画面の出し分けは呼出側で行い、DB障害は伝播する。
+ * 認証・画面の出し分けは呼出側で行う。
  */
 export function getUserProfileSettings(userId: string) {
   return db.query.users.findFirst({

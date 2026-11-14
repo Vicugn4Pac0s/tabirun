@@ -26,7 +26,7 @@ type RouteForDirection = Omit<typeof routes.$inferSelect, "points"> & {
 /**
  * 経路を再利用または計算・保存する。残数不足は直線、通信・保存値検証の失敗はエラーコードで返す。
  * 呼出側で取得・ロック（新規作成はINSERT）した行と同じトランザクションを使う。
- * 所有者不一致・保存0件はNOT_FOUND。DB障害や入力地点の検証例外は伝播する。
+ * 所有者不一致・保存0件はNOT_FOUND。入力地点が不正な場合も例外になる。
  */
 export async function ensureRouteDirection(
   tx: RouteDirectionDb,

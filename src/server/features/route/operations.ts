@@ -17,7 +17,7 @@ import { getRoutePointsHash } from "./routeDirectionCache";
 
 /**
  * 所有ルートの詳細と経路を返し、対象がなければNOT_FOUNDを投げる。
- * 同じトランザクションの行ロックを保持したまま経路を計算・保存する場合がある。DB障害は伝播する。
+ * 同じトランザクションの行ロックを保持したまま経路を計算・保存する場合がある。
  */
 export async function getRouteDetail(
   database: typeof db,
@@ -43,7 +43,7 @@ export async function getRouteDetail(
 
 /**
  * ルートを登録し、経路計算・保存までを1つのトランザクションで行う。
- * 経路取得失敗でも地点は保存する。登録行が返らなければINTERNAL_SERVER_ERROR、DB障害は伝播する。
+ * 経路取得失敗でも地点は保存する。登録行が返らなければINTERNAL_SERVER_ERROR。
  */
 export async function createRoute(
   database: typeof db,
@@ -61,7 +61,7 @@ export async function createRoute(
 /**
  * 所有ルートを更新し、地点が変わった場合だけ経路を無効化・再計算する。
  * 取得から計算まで同じトランザクションでロックを保持する。対象なし・更新0件はNOT_FOUND。
- * 経路取得失敗でも変更地点は保存するが、DB障害は伝播してロールバックする。
+ * 経路取得失敗でも変更地点は保存する。
  */
 export async function updateRoute(
   database: typeof db,
@@ -94,7 +94,7 @@ export async function updateRoute(
 
 /**
  * 所有ルートを削除し、対象がなければNOT_FOUNDを投げる。
- * 他人のルートも対象なしと同じ扱いにし、DB障害は伝播する。
+ * 他人のルートも対象なしと同じ扱いにする。
  */
 export async function deleteRoute(
   database: typeof db,
@@ -106,7 +106,7 @@ export async function deleteRoute(
 }
 
 /**
- * 指定ユーザーのルート一覧を返す。未登録なら空配列、DB障害は例外として伝播する。
+ * 指定ユーザーのルート一覧を返す。未登録なら空配列を返す。
  */
 export function getUserRoutes(database: typeof db, userId: string) {
   return findUserRoutes(database, userId);
