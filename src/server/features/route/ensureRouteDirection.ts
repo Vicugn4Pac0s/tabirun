@@ -1,9 +1,9 @@
 import "server-only";
 
-import { and, eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import type { db as Database } from "~/server/db";
-import { routes } from "~/server/db/schema";
+import type { routes } from "~/server/db/schema";
+import { saveOwnedRouteDirection } from "./data";
 import type { RouteCreateInput } from "~/shared/schemas";
 import {
   computeRoute,
@@ -31,10 +31,6 @@ export async function ensureRouteDirection(
   | { direction: null; directionErrorCode: "INTERNAL_SERVER_ERROR" }
 > {
   if (route.createdById !== userId) throw new TRPCError({ code: "NOT_FOUND" });
-  const ownerCondition = and(
-    eq(routes.id, route.id),
-    eq(routes.createdById, userId),
-  );
   const points = route.points;
   const reusable = getReusableRouteDirection(route, points, new Date());
   if (reusable) return { direction: reusable, directionErrorCode: null };
@@ -96,20 +92,8 @@ export async function ensureRouteDirection(
     }
   }
 
-  const updated = await tx
-    .update(routes)
-    .set({
-      encodedPolyline: result.encodedPolyline,
-      distanceMeters: result.distanceMeters,
-      duration: result.duration,
-      directionSource: result.directionSource,
-      directionCalculatedAt: result.directionCalculatedAt,
-      directionPointsHash: result.directionPointsHash,
-      // 閲覧時の再取得で、一覧の「更新日」を書き換えない。
-      updatedAt: sql`${routes.updatedAt}`,
-    })
-    .where(ownerCondition);
-  if (updated.count === 0) throw new TRPCError({ code: "NOT_FOUND" });
+  const updated = await saveOwnedRouteDirection(tx, userId, route.id, result);
+  if (updated.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
 
   return { direction: result, directionErrorCode: null };
 }
