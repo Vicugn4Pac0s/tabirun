@@ -40,3 +40,20 @@ export const EmptyRoute: Story = {
     await expect(args.onToggle).toHaveBeenCalledTimes(1);
   },
 };
+
+const fullPoints = Array.from({ length: 27 }, (_, i) => ({
+  lat: 35 + i / 100,
+  lng: 135,
+}));
+export const AtLimit: Story = {
+  args: { points: fullPoints, currentPoint: { lat: 38, lng: 138 } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await expect(
+      canvas.getByRole("button", { name: "地点を追加" }),
+    ).toBeDisabled();
+    await userEvent.keyboard("{Enter}");
+    await expect(args.onToggle).not.toHaveBeenCalled();
+  },
+};
+export const DeletingAtLimit: Story = { args: { points: fullPoints } };

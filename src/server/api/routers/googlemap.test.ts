@@ -49,6 +49,41 @@ afterEach(() => {
 });
 
 describe("googlemap.getDirection", () => {
+  it("27地点を受け入れ、中継25地点で経路を計算する", async () => {
+    const limitPoints = Array.from({ length: 27 }, (_, index) => ({
+      lat: 35 + index / 100,
+      lng: 135,
+    }));
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ routes: [{ distanceMeters: 1200 }] })),
+    );
+    await expect(
+      createCaller().getDirection({ routePoints: limitPoints }),
+    ).resolves.toMatchObject({ distanceMeters: 1200 });
+    expect(fetch).toHaveBeenCalledOnce();
+    const body = vi.mocked(fetch).mock.calls[0]?.[1]?.body;
+    if (typeof body !== "string") throw new Error("Expected JSON request body");
+    const requestBody: unknown = JSON.parse(body);
+    expect(requestBody).toMatchObject({
+      intermediates: limitPoints.slice(1, -1).map((point) => ({
+        location: { latLng: { latitude: point.lat, longitude: point.lng } },
+      })),
+    });
+    expect(incrementQuota).toHaveBeenCalledOnce();
+  });
+
+  it("28地点は入力検証で拒否し、Google APIの呼び出し・計上を行わない", async () => {
+    const tooManyPoints = Array.from({ length: 28 }, (_, index) => ({
+      lat: 35 + index / 100,
+      lng: 135,
+    }));
+    await expect(
+      createCaller().getDirection({ routePoints: tooManyPoints }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    expect(fetch).not.toHaveBeenCalled();
+    expect(incrementQuota).not.toHaveBeenCalled();
+  });
+
   it("未ログインなら通信も計上も行わない", async () => {
     const caller = googlemapRouter.createCaller({
       db,
