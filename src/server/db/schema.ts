@@ -8,6 +8,7 @@ import {
   serial,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -146,5 +147,7 @@ export const quotaUsages = createTable(
     date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
     count: integer("count").notNull().default(0),
   },
-  (t) => [index("quota_user_feature_date_idx").on(t.userId, t.feature, t.date)],
+  (t) => [
+    uniqueIndex("quota_user_feature_date_idx").on(t.userId, t.feature, t.date),
+  ],
 );
