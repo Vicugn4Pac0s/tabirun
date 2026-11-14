@@ -11,6 +11,8 @@ import {
 } from "~/server/features/googlemap/computeRoute";
 import { hasQuotaRemaining, incrementQuota } from "~/server/quota/service";
 import {
+  createStraightLineDirection,
+  toSavedGoogleRouteDirection,
   getReusableRouteDirection,
   getRoutePointsHash,
   type SavedRouteDirection,
@@ -21,7 +23,8 @@ type RouteForDirection = Omit<typeof routes.$inferSelect, "points"> & {
   points: RouteCreateInput["points"];
 };
 
-// 呼出側のトランザクションで取得・ロック（新規作成はINSERT）した行を受け取る。
+/** 経路を再利用または計算・保存し、取得失敗はエラーコードで返す。
+ * 呼出側で取得・ロック（新規作成はINSERT）した行と同じトランザクションを使う。 */
 export async function ensureRouteDirection(
   tx: RouteDirectionDb,
   userId: string,
@@ -41,59 +44,52 @@ export async function ensureRouteDirection(
   const pointsHash = getRoutePointsHash(points);
   let result: SavedRouteDirection;
   if (!quotaRemaining) {
-    result = {
-      directionSource: "straight_line",
-      encodedPolyline: null,
-      distanceMeters: null,
-      duration: null,
-      directionCalculatedAt: quotaCheckedAt,
-      directionPointsHash: pointsHash,
-      path: points,
-    };
+    result = createStraightLineDirection(points, pointsHash, quotaCheckedAt);
   } else {
-    let requestStarted = false;
-    let direction: GoogleRouteDirection;
-    try {
-      direction = await computeRoute(
-        { routePoints: points, travelMode: "WALK" },
-        () => {
-          requestStarted = true;
-        },
-      );
-    } catch {
-      // 到達不明の通信例外も送信試行として数え、失敗の繰り返しで上限を回避させない。
-      if (requestStarted) await incrementQuota(tx, userId, "direction");
+    const direction = await computeAndCountRoute(tx, userId, points);
+    if (!direction) {
       return { direction: null, directionErrorCode: "INTERNAL_SERVER_ERROR" };
     }
-    // Googleの呼出結果を受け取った時点で数え、保存値の検証失敗も利用回数に含める。
-    // DB障害は経路エラーに変換せず、呼出側のトランザクションへ伝播させる。
-    await incrementQuota(tx, userId, "direction");
-    try {
-      const calculatedAt = new Date();
-      const validated = getReusableRouteDirection(
-        {
-          directionSource: "routes_api",
-          encodedPolyline: direction.encodedPolyline,
-          distanceMeters: direction.distanceMeters,
-          duration: direction.duration,
-          directionCalculatedAt: calculatedAt,
-          directionPointsHash: pointsHash,
-        },
-        points,
-        calculatedAt,
-      );
-      if (!validated) {
-        return { direction: null, directionErrorCode: "INTERNAL_SERVER_ERROR" };
-      }
-      result = validated;
-    } catch {
-      // 保存値の検証失敗は汎用エラーで返し、DB操作の失敗はこの外で伝播させる。
+    const validated = toSavedGoogleRouteDirection(
+      direction,
+      points,
+      pointsHash,
+      new Date(),
+    );
+    if (!validated) {
       return { direction: null, directionErrorCode: "INTERNAL_SERVER_ERROR" };
     }
+    result = validated;
   }
 
   const updated = await saveOwnedRouteDirection(tx, userId, route.id, result);
   if (updated.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
 
   return { direction: result, directionErrorCode: null };
+}
+
+/** Googleの計算結果を返し、送信開始後の試行を計上する。通信失敗はnull、DB障害は伝播する。 */
+async function computeAndCountRoute(
+  tx: RouteDirectionDb,
+  userId: string,
+  points: RouteCreateInput["points"],
+): Promise<GoogleRouteDirection | null> {
+  let requestStarted = false;
+  let direction: GoogleRouteDirection;
+  try {
+    direction = await computeRoute(
+      { routePoints: points, travelMode: "WALK" },
+      () => {
+        requestStarted = true;
+      },
+    );
+  } catch {
+    // 到達不明の通信例外も送信試行として数え、失敗の繰り返しで上限を回避させない。
+    if (requestStarted) await incrementQuota(tx, userId, "direction");
+    return null;
+  }
+  // 結果を受け取った時点で数え、後続の検証失敗も利用回数に含める。
+  // DB障害は経路エラーに変換せず、呼出側のトランザクションへ伝播させる。
+  await incrementQuota(tx, userId, "direction");
+  return direction;
 }
