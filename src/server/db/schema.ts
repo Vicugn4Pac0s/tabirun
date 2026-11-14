@@ -13,6 +13,10 @@ import {
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
+/**
+ * テーブル名にtabirun_を付け、同じDB内でアプリのテーブルを識別する。
+ * テーブル定義を作るだけで、DBへの作成・変更は実行しない。
+ */
 export const createTable = pgTableCreator((name) => `tabirun_${name}`);
 
 export const routes = createTable(

@@ -15,16 +15,8 @@ import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 
 /**
- * 1. CONTEXT
- *
- * This section defines the "contexts" that are available in the backend API.
- *
- * These allow you to access things when processing a request, like the database, the session, etc.
- *
- * This helper generates the "internals" for a tRPC context. The API handler and RSC clients each
- * wrap this and provides the required context.
- *
- * @see https://trpc.io/docs/server/context
+ * セッションを取得し、DBとリクエストヘッダーを含むtRPCコンテキストを返す。
+ * 未ログインも許容し、認証の強制はprocedure側で行う。
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await auth();
@@ -58,9 +50,8 @@ export const t = initTRPC.context<typeof createTRPCContext>().create({
 });
 
 /**
- * Create a server-side caller.
- *
- * @see https://trpc.io/docs/server/server-side-calls
+ * ルーターから、コンテキストを受け取るサーバー内呼び出し用のファクトリーを作る。
+ * HTTPを介さず、呼び出すprocedureの認証・入力検証・middlewareを適用する。
  */
 export const createCallerFactory = t.createCallerFactory;
 
@@ -72,12 +63,15 @@ export const createCallerFactory = t.createCallerFactory;
  */
 
 /**
- * This is how you create new routers and sub-routers in your tRPC API.
- *
- * @see https://trpc.io/docs/router
+ * このアプリのコンテキスト・エラー形式を共有するtRPCルーターを作る。
+ * 各操作の認証・クォータ条件は登録するprocedure側で選択する。
  */
 export const createTRPCRouter = t.router;
 
+/**
+ * このアプリのコンテキストを使うtRPC middlewareを作る。
+ * 後続処理へ進む場合はコールバック内でnextを呼ぶ。
+ */
 export const createTRPCMiddleware = t.middleware;
 
 export const createTRPCProcedure = t.procedure;

@@ -51,7 +51,10 @@ export function getRoutePointsHash(points: RoutePoints): string {
     .digest("hex");
 }
 
-/** 保存値が地点・期限・経路の条件を満たせば復元し、それ以外はnullを返す。地点の検証例外は伝播する。 */
+/**
+ * 保存値が同じ地点の有効な経路なら復元し、欠損・不正・期限切れはnullを返す。
+ * 29日未満の結果を使い、直線は同じUTC日のみ再利用する。地点の検証例外は伝播する。
+ */
 export function getReusableRouteDirection(
   saved: unknown,
   points: RoutePoints,

@@ -36,10 +36,8 @@ export const protectedProcedure = createTRPCProcedure
   });
 
 /**
- * クォータ付き保護済みプロシージャ
- *
- * 認証済みユーザーに対して、指定した機能の1日あたりの利用上限を事前チェックする。
- * API呼び出し成功後のインクリメントは各 router 側で incrementQuota() を呼び出すこと。
+ * 認証と指定機能のUTC当日の残数確認を行うprocedureを返す。
+ * 未ログインはUNAUTHORIZED、上限到達はTOO_MANY_REQUESTS。利用回数の加算は呼出側が行う。
  */
 export const quotaProtectedProcedure = (feature: QuotaFeature) =>
   protectedProcedure.use(async ({ ctx, next }) => {
