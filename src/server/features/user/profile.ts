@@ -37,6 +37,7 @@ export async function updateProfile(
 ) {
   await database
     .update(users)
+    // undefinedの項目はDrizzleがSQLから除外するため、未指定の項目は更新されない。
     .set({
       birthDate: input.birthDate,
       gender: input.gender,
