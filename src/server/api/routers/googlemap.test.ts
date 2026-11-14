@@ -38,6 +38,7 @@ function createCaller() {
 beforeEach(() => {
   vi.clearAllMocks();
   checkQuota.mockResolvedValue(undefined);
+  incrementQuotaMock.mockResolvedValue(undefined);
   vi.stubGlobal("fetch", vi.fn());
   vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
@@ -48,6 +49,36 @@ afterEach(() => {
 });
 
 describe("googlemap.getDirection", () => {
+  it("未ログインなら通信も計上も行わない", async () => {
+    const caller = googlemapRouter.createCaller({
+      db,
+      headers: new Headers(),
+      session: null,
+    });
+    await expect(caller.getDirection({ routePoints })).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+    expect(checkQuota).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(incrementQuota).not.toHaveBeenCalled();
+  });
+
+  it("送信後の通信例外でも1回計上し、エラーを返す", async () => {
+    const error = new Error("network failure");
+    vi.mocked(fetch).mockRejectedValue(error);
+    await expect(
+      createCaller().getDirection({ routePoints }),
+    ).rejects.toMatchObject({
+      code: "INTERNAL_SERVER_ERROR",
+      cause: error,
+    });
+    expect(incrementQuota).toHaveBeenCalledExactlyOnceWith(
+      db,
+      "owner",
+      "direction",
+    );
+  });
+
   it("上限到達時はGoogle APIを呼ばず、クォータも加算しない", async () => {
     checkQuota.mockRejectedValue(new TRPCError({ code: "TOO_MANY_REQUESTS" }));
 
@@ -126,7 +157,7 @@ describe("googlemap.getDirection", () => {
     expect(incrementQuota).toHaveBeenCalledOnce();
   });
 
-  it("経路がない応答はNOT_FOUNDとし、クォータを加算しない", async () => {
+  it("経路がない応答はNOT_FOUNDとし、クォータを1回加算する", async () => {
     vi.mocked(fetch).mockResolvedValue(
       new Response(JSON.stringify({ routes: [] })),
     );
@@ -136,7 +167,11 @@ describe("googlemap.getDirection", () => {
     ).rejects.toMatchObject({
       code: "NOT_FOUND",
     });
-    expect(incrementQuota).not.toHaveBeenCalled();
+    expect(incrementQuota).toHaveBeenCalledExactlyOnceWith(
+      db,
+      "owner",
+      "direction",
+    );
   });
 
   it.each([400, 500])(
@@ -161,7 +196,11 @@ describe("googlemap.getDirection", () => {
       expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain(
         apiKey,
       );
-      expect(incrementQuota).not.toHaveBeenCalled();
+      expect(incrementQuota).toHaveBeenCalledExactlyOnceWith(
+        db,
+        "owner",
+        "direction",
+      );
     },
   );
 
@@ -178,7 +217,11 @@ describe("googlemap.getDirection", () => {
       code: "INTERNAL_SERVER_ERROR",
       message: "INVALID_ROUTES_API_RESPONSE",
     });
-    expect(incrementQuota).not.toHaveBeenCalled();
+    expect(incrementQuota).toHaveBeenCalledExactlyOnceWith(
+      db,
+      "owner",
+      "direction",
+    );
   });
 
   it("正常な応答では経路を返し、クォータを加算する", async () => {
