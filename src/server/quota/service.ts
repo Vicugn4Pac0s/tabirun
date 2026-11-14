@@ -9,8 +9,8 @@ type Db = Pick<typeof DbType, "query" | "insert">;
 const getToday = () => new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
 /**
- * 指定機能の1日あたりクォータに余裕があるか確認する。
- * 利用枠の予約は行わないため、同時リクエストの上限超過までは防がない。
+ * 指定機能のUTC当日の利用回数を確認し、未使用または上限未満ならtrueを返す。
+ * 利用枠の予約は行わず、同時リクエストの上限超過までは防がない。DB障害は伝播する。
  */
 export async function hasQuotaRemaining(
   db: Db,
@@ -28,6 +28,10 @@ export async function hasQuotaRemaining(
   return !existing || existing.count < dailyLimit;
 }
 
+/**
+ * 指定機能のUTC当日の残数を確認し、上限到達時はTOO_MANY_REQUESTSを投げる。
+ * 利用枠の予約・加算は行わず、DB障害は伝播する。
+ */
 export async function checkQuota(
   db: Db,
   userId: string,
@@ -42,8 +46,8 @@ export async function checkQuota(
 }
 
 /**
- * 指定機能の当日クォータ使用量を1インクリメントする。
- * 各呼び出し側の計上条件に従い、API送信後に呼び出す。
+ * 指定機能のUTC当日の利用回数を1増やす。送信後の計上条件は呼出側で判断する。
+ * 渡されたDB・トランザクションで加算し、DB障害は伝播する。トランザクションのrollbackで加算も戻る。
  */
 export async function incrementQuota(
   db: Db,

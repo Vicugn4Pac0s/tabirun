@@ -22,6 +22,9 @@ const profileColumns = {
   profileCompletedAt: true,
 } as const;
 
+/**
+ * 指定ユーザーのプロフィールを返し、見つからなければnullを返す。DB障害は伝播する。
+ */
 export async function getCurrentProfile(database: typeof db, userId: string) {
   const user = await database.query.users.findFirst({
     where: eq(users.id, userId),
@@ -30,6 +33,10 @@ export async function getCurrentProfile(database: typeof db, userId: string) {
   return user ?? null;
 }
 
+/**
+ * 指定ユーザーのプロフィールを更新して再取得し、見つからなければundefinedを返す。
+ * 未指定の項目は更新しない。更新と取得は独自のトランザクションで囲まず、DB障害は伝播する。
+ */
 export async function updateProfile(
   database: typeof db,
   userId: string,
@@ -53,6 +60,10 @@ export async function updateProfile(
   });
 }
 
+/**
+ * 初期プロフィールと完了時刻を保存して再取得し、見つからなければundefinedを返す。
+ * 再実行すると完了時刻も更新する。更新と取得は独自のトランザクションで囲まず、DB障害は伝播する。
+ */
 export async function completeInitialProfile(
   database: typeof db,
   userId: string,

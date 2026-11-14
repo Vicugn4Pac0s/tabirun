@@ -47,6 +47,11 @@ const ComputeRoutesResponseSchema = z.object({
     .optional(),
 });
 
+/**
+ * Google Routes APIを呼び、先頭の経路と復元した座標列を返す。利用回数は計上しない。
+ * 送信直前にonRequestStartedを呼ぶ。キーなし・不正応答はINTERNAL_SERVER_ERROR、地点不足・HTTP失敗はBAD_REQUEST、経路なしはNOT_FOUND。
+ * 入力は呼出側でschema検証する前提。通信・JSON解析・復元中の例外は伝播する。
+ */
 export async function computeRoute(
   input: z.infer<typeof DirectionInputSchema>,
   onRequestStarted?: () => void,
