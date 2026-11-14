@@ -1,7 +1,8 @@
 import type { Pace } from "../types/pace";
 
 /**
- * 距離(km) と キロペース(mm:ss) から 総時間(hh:mm:ss) を計算
+ * 距離とキロペースから秒単位に丸めた総時間をhh:mm:ssで返す。
+ * ペースの分・秒のいずれかが欠ける場合は"0:00"を返す。
  */
 export const calcTimeFromDistanceAndPace = (
   distanceKm: number,
@@ -24,7 +25,7 @@ export const calcTimeFromDistanceAndPace = (
 };
 
 /**
- * メートル(m)をキロメートル(km)に変換
+ * メートルをキロメートルに換算し、指定桁数で丸める。非有限値は0を返す。
  */
 export const metersToKilometers = (
   meters: number,
@@ -36,7 +37,8 @@ export const metersToKilometers = (
 };
 
 /**
- * 体重(kg)・距離(km)・ペース(mm:ss)から消費カロリー(kcal)を計算
+ * 体重・距離から、ペース補正を基準の0.9〜1.1倍に抑えた消費カロリーを見積もる。
+ * 体重・距離が0以下、またはペースの分・秒を数値として扱えない場合は0を返す。
  */
 export const calcCaloriesFromRun = (
   weightKg: number,

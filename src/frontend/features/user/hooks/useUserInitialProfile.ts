@@ -10,6 +10,10 @@ import {
   type UserProfileUpdateInput,
 } from "~/shared/schemas";
 
+/**
+ * 初期プロフィールの検証付きフォームと、二重送信を防ぐ保存操作を返す。
+ * 保存結果をtoastで通知し、成功時は現在の画面を再取得する。
+ */
 export function useUserInitialProfile(initialValues: UserProfileUpdateInput) {
   const router = useRouter();
   const { completeInitialProfile, isCompleting } = useCompleteInitialProfile();

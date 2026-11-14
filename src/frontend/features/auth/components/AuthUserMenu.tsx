@@ -4,6 +4,10 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "~/frontend/components/ui/button";
 import { UserMenuView } from "~/frontend/features/user/components/UserMenuView";
 
+/**
+ * セッションに応じてサインインボタンまたはユーザーメニューを表示する。
+ * SessionProvider内で使い、操作時にNextAuthのサインイン・サインアウトを開始する。
+ */
 export const AuthUserMenu = () => {
   const { data: session } = useSession();
 

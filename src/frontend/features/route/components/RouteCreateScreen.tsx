@@ -93,6 +93,10 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
   );
 }
 
+/**
+ * 地図で地点を選ぶルート作成画面を、専用のGoogleMapProviderで包んで表示する。
+ * 未保存の変更がある移動には破棄確認を行い、保存中の移動を抑止する。
+ */
 export function RouteCreateScreen(props: RouteCreateScreenProps) {
   return (
     <GoogleMapProvider>

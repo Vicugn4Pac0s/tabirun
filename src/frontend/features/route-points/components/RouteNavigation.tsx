@@ -12,6 +12,10 @@ type RouteNavigationProps = {
   disabled?: boolean;
 };
 
+/**
+ * 登録地点の前後移動と、現在地点の追加・削除を呼出側へ通知する。
+ * disabledでなければEnterキーでも切替を通知する。登録外の現在地点からは前後移動できない。
+ */
 export function RouteNavigation({
   points,
   currentPoint,

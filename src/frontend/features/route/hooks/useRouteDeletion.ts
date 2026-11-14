@@ -3,6 +3,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useDeleteRoute } from "../api/useDeleteRoute";
 
+/**
+ * 確認ダイアログ付きの削除操作と状態を返し、実行中の重複削除を防ぐ。
+ * 結果をtoastで通知し、成功時はホームへ置き換えてサーバー表示を更新する。
+ */
 export function useRouteDeletion(routeId: number) {
   const router = useRouter();
   const { deleteRoute, isDeleting } = useDeleteRoute();

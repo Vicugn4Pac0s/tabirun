@@ -21,6 +21,10 @@ interface GoogleMapCanvasProps {
   options: google.maps.MapOptions;
 }
 
+/**
+ * Maps API読込後に地図を初期化し、有効なReact要素の子へmapを渡す。
+ * click・idleリスナーは更新時に既存分を消して登録し直し、optionsは初期化時だけ使う。
+ */
 function GoogleMapCanvas({
   children,
   onInit,

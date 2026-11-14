@@ -6,6 +6,10 @@ type UseRoutePolylinePathOptions = {
   canUseDirections: boolean;
 };
 
+/**
+ * 取得した経路の描画座標を返し、経路取得を使えない場合や上限到達時は2地点以上を直線で結ぶ。
+ * 取得経路も直線への縮退条件も満たさない場合は、描画座標をnullで返す。
+ */
 export const useRoutePolylinePath = (
   routePoints: google.maps.LatLngLiteral[],
   options: UseRoutePolylinePathOptions,

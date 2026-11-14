@@ -97,6 +97,10 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
   );
 }
 
+/**
+ * 保存済みルートの編集画面を、専用のGoogleMapProviderで包んで表示する。
+ * 初期編集値は初回のrouteを使うため、別ルートへ切り替える際は呼出側で再マウントする。
+ */
 export function RouteEditScreen(props: RouteEditScreenProps) {
   return (
     <GoogleMapProvider>

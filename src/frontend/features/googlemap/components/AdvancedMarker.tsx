@@ -10,6 +10,10 @@ interface AdvancedMarkerProps {
   onMouseOut?: EventListener;
 }
 
+/**
+ * 初期化済みの地図へDOMコンテンツ付きマーカーを追加し、参照へ保持する。
+ * 破棄時は地図から外して参照とリスナーを解除する。React側の描画要素は返さない。
+ */
 const AdvancedMarker = ({
   map,
   markerRef,

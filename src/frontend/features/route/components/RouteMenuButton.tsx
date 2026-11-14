@@ -9,6 +9,9 @@ type RouteMenuButtonProps = Omit<ButtonProps, "children"> & {
   label?: string;
 };
 
+/**
+ * 縦書きのメニューボタンを表示し、数字を含むラベルは距離用の強調表示にする。
+ */
 const RouteMenuButton = forwardRef<HTMLButtonElement, RouteMenuButtonProps>(
   ({ className, label = "MENU", ...props }, ref) => {
     const isDistanceLabel = typeof label === "string" && /\d/.test(label);

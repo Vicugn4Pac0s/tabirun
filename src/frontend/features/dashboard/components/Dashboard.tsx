@@ -138,6 +138,10 @@ function PersonalDashboard() {
   );
 }
 
+/**
+ * セッション状態に応じてプロフィール・登録ルート、またはログイン案内を表示する。
+ * 認証済みの場合だけ個人データの取得画面をマウントする。
+ */
 export function Dashboard() {
   const { status } = useSession();
   return (

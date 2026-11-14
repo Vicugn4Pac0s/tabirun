@@ -5,6 +5,10 @@ interface RoutePointListProps {
   onRoutePointClick?: (point: google.maps.LatLngLiteral, index: number) => void;
 }
 
+/**
+ * 経由地点を登録順に並べ、選択した座標と0始まりの位置を呼出側へ通知する。
+ * 地点がない場合は件数だけを表示する。
+ */
 function RoutePointList({
   routePoints,
   onRoutePointClick,

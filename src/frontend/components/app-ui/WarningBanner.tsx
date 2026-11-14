@@ -4,6 +4,7 @@ type WarningBannerProps = {
   children: ReactNode;
 };
 
+/** 続行可能な警告をalertとして表示する。警告の条件や文言は呼出側で決める。 */
 export function WarningBanner({ children }: WarningBannerProps) {
   return (
     <div

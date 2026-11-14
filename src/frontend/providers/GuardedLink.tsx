@@ -9,6 +9,8 @@ type GuardedLinkProps = Omit<
   "onNavigate"
 >;
 
+/** Next.jsの画面遷移時に離脱確認を行い、拒否された場合は遷移を中止する。
+ * NavigationGuardProviderの外では通常どおり遷移する。 */
 export const GuardedLink = forwardRef<HTMLAnchorElement, GuardedLinkProps>(
   function GuardedLink(props, ref) {
     const confirmNavigation = useNavigationGuard();

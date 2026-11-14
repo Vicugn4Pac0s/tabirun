@@ -17,6 +17,10 @@ type RunMetricsPanelProps = {
   weightKg?: number | null;
 };
 
+/**
+ * 距離とペースから予想時間・消費カロリーを表示する。体重未指定時は60kgで試算する。
+ * km換算して丸めた距離が正でなければ、計測中または表示不可の案内に切り替える。
+ */
 export function RunMetricsPanel({
   distanceMeters,
   isLoading,

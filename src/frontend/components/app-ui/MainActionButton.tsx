@@ -10,6 +10,8 @@ type Props = {
   onMouseOut?: () => void;
 };
 
+/** 地点追加・削除・再生のアイコンを操作ボタンに表示する。
+ * アイコンだけの表示に読み上げ用ラベルを付け、実際の操作はコールバックへ委ねる。 */
 const MainActionButton = ({
   type,
   className,

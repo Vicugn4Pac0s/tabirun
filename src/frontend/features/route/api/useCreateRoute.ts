@@ -1,6 +1,9 @@
 import type { RouteCreateInput } from "~/shared/schemas";
 import { api } from "~/trpc/react";
 
+/**
+ * ルート作成の操作と状態を返し、成功時にルート一覧のキャッシュを無効化する。
+ */
 export const useCreateRoute = () => {
   const utils = api.useUtils();
 

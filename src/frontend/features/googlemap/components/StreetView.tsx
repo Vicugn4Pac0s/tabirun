@@ -9,6 +9,10 @@ interface StreetViewProps {
   onPovChanged?: (position: google.maps.StreetViewPov) => void;
 }
 
+/**
+ * 地図の初期化後にパノラマを作成し、初期位置・視点もコールバックへ通知する。
+ * 破棄時は非表示化とリスナー解除を行う。optionsの変更だけではパノラマを再作成しない。
+ */
 const StreetView = ({
   map,
   streetView,

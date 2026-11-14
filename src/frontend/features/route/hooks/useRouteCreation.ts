@@ -4,6 +4,10 @@ import { toast } from "sonner";
 import { useCreateRoute } from "../api/useCreateRoute";
 import { useRouteDraft } from "./useRouteDraft";
 
+/**
+ * 新規ルートの編集状態と二重送信を防ぐ保存操作を返す。
+ * 保存結果をtoastで通知し、成功時はホームへ移動してサーバー表示を更新する。
+ */
 export function useRouteCreation() {
   const router = useRouter();
   const { createRoute, isCreating } = useCreateRoute();

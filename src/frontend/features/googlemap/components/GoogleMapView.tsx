@@ -16,6 +16,10 @@ interface GoogleMapViewProps {
   children?: React.ReactNode;
 }
 
+/**
+ * Maps APIとmarkerライブラリを読み込み、地図と任意の子要素を表示する。
+ * API読込中とisLoading時はオーバーレイを表示し、読込失敗時は状態文字列を表示する。
+ */
 function GoogleMapView({
   className,
   map,

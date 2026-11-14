@@ -13,6 +13,10 @@ type RouteFormProps = {
   children: ReactNode;
 };
 
+/**
+ * 編集用draftを使って名前入力と保存・リセット操作を表示する。
+ * 名前のエラーは入力済みか送信後に表示し、送信中は入力・操作を無効にする。
+ */
 export function RouteForm({
   draft,
   onSubmit,

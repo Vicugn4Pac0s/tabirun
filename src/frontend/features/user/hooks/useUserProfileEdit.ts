@@ -9,6 +9,10 @@ import {
   type UserProfileUpdateInput,
 } from "~/shared/schemas";
 
+/**
+ * プロフィールの検証付きフォームと、二重送信を防ぐ保存操作を返す。
+ * 保存結果をtoastで通知し、成功時はホームへ遷移して再取得する。
+ */
 export function useUserProfileEdit(initialValues: UserProfileUpdateInput) {
   const router = useRouter();
   const { updateUserProfile, isUpdating } = useUpdateUserProfile();

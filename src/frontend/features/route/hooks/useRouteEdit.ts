@@ -5,6 +5,10 @@ import type { RouteUpdateInput } from "~/shared/schemas";
 import { useUpdateRoute } from "../api/useUpdateRoute";
 import { useRouteDraft } from "./useRouteDraft";
 
+/**
+ * 既存ルートの編集状態と二重送信を防ぐ保存操作を返す。
+ * 更新結果をtoastで通知し、成功時は詳細へ移動してサーバー表示を更新する。
+ */
 export function useRouteEdit(route: RouteUpdateInput) {
   const router = useRouter();
   const { updateRoute, isUpdating } = useUpdateRoute();

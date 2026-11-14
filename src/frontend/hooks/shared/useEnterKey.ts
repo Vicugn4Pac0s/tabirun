@@ -11,6 +11,8 @@ const isFormControl = (target: EventTarget | null) =>
   target instanceof HTMLSelectElement ||
   (target instanceof HTMLElement && target.isContentEditable);
 
+/** フォーム入力中を除き、windowのEnter押下でコールバックを呼ぶ。
+ * enabledがfalseなら購読せず、既定ではブラウザの既定動作を抑止する。 */
 export const useEnterKey = (
   onEnter: () => void,
   options: UseEnterKeyOptions = {},

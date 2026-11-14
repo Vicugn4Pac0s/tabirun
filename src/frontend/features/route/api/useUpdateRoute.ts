@@ -1,6 +1,9 @@
 import type { RouteUpdateInput } from "~/shared/schemas";
 import { api } from "~/trpc/react";
 
+/**
+ * ルート更新の操作と状態を返し、成功時に一覧と対象ルート詳細のキャッシュを無効化する。
+ */
 export const useUpdateRoute = () => {
   const utils = api.useUtils();
 

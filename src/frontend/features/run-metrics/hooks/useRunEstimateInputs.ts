@@ -8,6 +8,10 @@ function isPace(value: string): value is Pace {
   return /^\d+:[0-5]\d$/.test(value);
 }
 
+/**
+ * 試算用のペースと体重をプロフィールから取得し、選択したペースを優先する。
+ * プロフィールのペースが未設定・不正なら5:00を使い、enabledがfalseなら取得を開始しない。
+ */
 export function useRunEstimateInputs(enabled = true) {
   const { user } = useCurrentUserQuery({ enabled });
   const [paceOverride, setPaceOverride] = useState<Pace | null>(null);

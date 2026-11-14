@@ -6,6 +6,9 @@ type RoutePointMarkerProps = Omit<RouteMapMarker, "id"> & {
   map: google.maps.Map | null;
 };
 
+/**
+ * 指定された地図にラベル付き地点マーカーを配置する。表示用DOMを作れない場合は何も表示しない。
+ */
 export function RoutePointMarker({
   map,
   position,

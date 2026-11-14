@@ -7,6 +7,10 @@ type SavedRoute = Pick<
   "points" | "direction" | "directionErrorCode"
 >;
 
+/**
+ * 編集地点の経路と警告を返す。保存時と同じ地点・順序なら保存済み経路を使う。
+ * 地点変更後だけ再計算し、元に戻せば保存済み経路の表示へ戻す。
+ */
 export function useRouteEditDirection(
   route: SavedRoute,
   points: SavedRoute["points"],
