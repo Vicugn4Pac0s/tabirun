@@ -147,16 +147,15 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe("route.getByUser", () => {
-  it("経路計算結果を取得せず、既存の一覧項目だけを返す", async () => {
-    selectWhere.mockResolvedValue([savedRoute]);
+  it("地点と経路計算結果を取得せず、一覧項目だけを返す", async () => {
+    const { id, title, createdById, createdAt, updatedAt } = savedRoute;
+    const listRoute = { id, title, createdById, createdAt, updatedAt };
+    selectWhere.mockResolvedValue([listRoute]);
 
-    await expect(createCaller().getByUser()).resolves.toEqual([
-      { ...savedRoute, points },
-    ]);
+    await expect(createCaller().getByUser()).resolves.toEqual([listRoute]);
     expect(select).toHaveBeenCalledWith({
       id: routes.id,
       title: routes.title,
-      points: routes.points,
       createdById: routes.createdById,
       createdAt: routes.createdAt,
       updatedAt: routes.updatedAt,
@@ -184,17 +183,6 @@ describe("route.getByUser", () => {
     });
     expect(select).not.toHaveBeenCalled();
   });
-
-  it.each(["invalid-json", JSON.stringify([{ lat: "invalid", lng: 135 }])])(
-    "不正な地点データ %s は返さない",
-    async (invalidPoints) => {
-      selectWhere.mockResolvedValue([{ ...savedRoute, points: invalidPoints }]);
-
-      await expect(createCaller().getByUser()).rejects.toMatchObject({
-        code: "INTERNAL_SERVER_ERROR",
-      });
-    },
-  );
 });
 
 describe("route.getById", () => {

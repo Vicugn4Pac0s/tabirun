@@ -122,9 +122,6 @@ function PersonalDashboard() {
                   <h3 className="break-words text-lg font-bold">
                     {route.title}
                   </h3>
-                  <p className="mt-2 text-sm text-gray-500">
-                    {route.points.length} 地点
-                  </p>
                   <p className="mt-4 text-xs text-gray-500">
                     更新日：
                     {new Intl.DateTimeFormat("ja-JP").format(
