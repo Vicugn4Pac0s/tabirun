@@ -13,7 +13,7 @@ export const CLEARED_DIRECTION = {
   directionSource: null,
   directionCalculatedAt: null,
   directionPointsHash: null,
-};
+} as const;
 
 export async function findOwnedRouteForUpdate(
   tx: Pick<typeof db, "select">,
