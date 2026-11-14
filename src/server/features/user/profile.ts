@@ -23,6 +23,37 @@ const profileColumns = {
 } as const;
 
 /**
+ * ホーム表示に必要なプロフィール完了状態を読み取り、対象なしならundefinedを返す。
+ * 認証・画面の出し分けは呼出側で行う。
+ */
+export function getUserHomePageSettings(database: typeof db, userId: string) {
+  return database.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: {
+      profileCompletedAt: true,
+    },
+  });
+}
+
+/**
+ * プロフィール画面に必要な設定を読み取り、対象なしならundefinedを返す。
+ * 認証・画面の出し分けは呼出側で行う。
+ */
+export function getUserProfileSettings(database: typeof db, userId: string) {
+  return database.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: {
+      profileCompletedAt: true,
+      birthDate: true,
+      gender: true,
+      pace: true,
+      height: true,
+      weight: true,
+    },
+  });
+}
+
+/**
  * 指定ユーザーのプロフィールを返し、見つからなければnullを返す。
  */
 export async function getCurrentProfile(database: typeof db, userId: string) {

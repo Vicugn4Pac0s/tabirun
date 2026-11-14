@@ -63,7 +63,7 @@ server/features/route/
   data.ts                          所有者条件付きDB操作・行の変換
   ensureRouteDirection.ts          経路の再利用・計算・保存の流れ
   routeDirectionCache.ts           hash・期限・検証などの純粋関数
-server/features/user/queries.ts    RSC向けの副作用のない読み取り
+server/features/user/profile.ts    プロフィールの読み取り・更新
 server/features/googlemap/         Googleとの通信
 server/quota/                     利用枠の確認・計上
 server/auth/                      認証
@@ -73,7 +73,7 @@ server/db/                        接続・schema
 - `server/features` は読み取りに限定せず、サーバー専用の業務処理・DB操作・外部通信を置く。サーバー専用モジュールには `import "server-only"` を付ける。
 - 小さいfeatureは、扱うものの名前の1ファイルにまとめる（例: `features/user/profile.ts`）。
 - 所有者条件付きのDB処理やロックが増えたら、`operations.ts`（操作の順序・トランザクション・エラー判定）と `data.ts`（所有者条件付きDB処理・行の変換）に分ける（例: `features/route`）。操作ごとに1ファイルには分けない。
-- RSCから直接呼ぶ副作用のない読み取りは `<feature>/queries.ts` に置く。pageはここか `~/trpc/server` のAPIを使い、DBを直接操作しない。
+- 副作用のない読み取りは操作と同じファイルに置いてよい。RSCから呼ぶものも `server-only` で守る。pageはfeatureの読み取り関数か `~/trpc/server` のAPIを使い、DBを直接操作しない。
 - queryという名前だけで読み取り専用と判断しない。現在の `route.getById` は経路キャッシュを書き戻すことがあり、`getRouteDetail` のような操作として扱う。
 - 依存は原則 `router → features → DB／quota／外部通信`。feature間も一方向に保ち、例えばrouteからgooglemapを利用しても、その逆の依存は作らない。
 - `auth`・`quota`・`db` は既存の共通の仕組みとして残す。読み取り限定の配置を維持して業務処理を `api/services` に分散させる案より、関連処理をfeature内で探せる形を選ぶ。
