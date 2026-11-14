@@ -8,7 +8,7 @@ import {
   getRoutePointsHash,
   ROUTE_DIRECTION_CACHE_MAX_AGE_MS,
   type RouteDirectionSnapshot,
-} from "~/server/api/services/routeDirectionCache";
+} from "~/server/features/route/routeDirectionCache";
 import { routeRouter } from "./route";
 
 const {
@@ -136,7 +136,9 @@ beforeEach(() => {
   lock.mockResolvedValue([routeWithCache]);
   update.mockReturnValue({ set: updateSet });
   updateSet.mockReturnValue({ where: updateWhere });
-  updateWhere.mockResolvedValue({ count: 1 });
+  updateWhere.mockReturnValue({
+    returning: vi.fn().mockResolvedValue([{ id: 1 }]),
+  });
   remove.mockReturnValue({ where: removeWhere });
   insert.mockReturnValue({ values: insertValues });
   insertValues.mockReturnValue({ returning: insertReturning });
@@ -551,7 +553,7 @@ describe("route.update", () => {
   });
 
   it("更新0件を成功として返さない", async () => {
-    updateWhere.mockResolvedValue({ count: 0 });
+    updateWhere.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
     await expect(createCaller().update(updateInput)).rejects.toMatchObject({
       code: "NOT_FOUND",
     });
@@ -569,7 +571,9 @@ describe("route.update", () => {
 
 describe("route.delete", () => {
   it("自分のルートはIDと所有者の両方を条件に削除する", async () => {
-    removeWhere.mockResolvedValue({ count: 1 });
+    removeWhere.mockReturnValue({
+      returning: vi.fn().mockResolvedValue([{ id: 1 }]),
+    });
 
     await expect(createCaller().delete({ id: 1 })).resolves.toBeUndefined();
 
@@ -580,7 +584,7 @@ describe("route.delete", () => {
   });
 
   it("他人のルートは所有者条件で削除せず NOT_FOUND を返す", async () => {
-    removeWhere.mockResolvedValue({ count: 0 });
+    removeWhere.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
 
     await expect(createCaller("other").delete({ id: 1 })).rejects.toMatchObject(
       { code: "NOT_FOUND" },
@@ -592,7 +596,7 @@ describe("route.delete", () => {
   });
 
   it("存在しないルートは NOT_FOUND を返す", async () => {
-    removeWhere.mockResolvedValue({ count: 0 });
+    removeWhere.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
 
     await expect(createCaller().delete({ id: 999 })).rejects.toMatchObject({
       code: "NOT_FOUND",

@@ -51,6 +51,7 @@
 - `src/frontend/components/app-ui`: 2つ以上のfeatureで使う見た目だけの部品。feature・tRPC・業務知識に依存しない。
 - `src/frontend/hooks/shared`, `src/frontend/lib`: feature非依存の汎用処理。
 - `src/shared/schemas`: client/server共通のZod schemaと推論型。入力制約の唯一の定義元。
+- `src/server/features/route`: ルート操作、所有者条件付きDB処理、経路キャッシュ処理。
 - `src/server/api`（routers / procedure / middleware）、`src/server/db`（schema・接続）、`src/server/auth`、`src/server/quota`、`src/server/features/*`（サーバー専用の業務処理・DB操作・外部通信。RSC向けの副作用のない読み取りは `<feature>/queries.ts`）。
 - バックエンドの責務・配置・書き方は `docs/BACKEND_GUIDE.md` に従う。既存コードの移動・整理は依頼範囲内だけ行う。
 - 依存ルール:

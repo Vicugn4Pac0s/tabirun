@@ -61,7 +61,9 @@ beforeEach(() => {
   route = { ...savedRoute };
   mocks.update.mockReturnValue({ set: mocks.set });
   mocks.set.mockReturnValue({ where: mocks.updateWhere });
-  mocks.updateWhere.mockResolvedValue({ count: 1 });
+  mocks.updateWhere.mockReturnValue({
+    returning: vi.fn().mockResolvedValue([{ id: 1 }]),
+  });
   mocks.computeRoute.mockResolvedValue({
     encodedPolyline: savedRoute.encodedPolyline,
     distanceMeters: 1500,
@@ -234,7 +236,9 @@ describe("ensureRouteDirection", () => {
 
   it("書き戻せなかった場合は成功として返さない", async () => {
     route = { ...savedRoute, directionCalculatedAt: null };
-    mocks.updateWhere.mockResolvedValue({ count: 0 });
+    mocks.updateWhere.mockReturnValue({
+      returning: vi.fn().mockResolvedValue([]),
+    });
     await expect(
       ensureRouteDirection(db, "owner", route),
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
@@ -261,7 +265,9 @@ describe("ensureRouteDirection", () => {
   it("経路の保存に失敗した場合は例外を伝播させる", async () => {
     route = { ...savedRoute, directionCalculatedAt: null };
     const error = new Error("route update failed");
-    mocks.updateWhere.mockRejectedValue(error);
+    mocks.updateWhere.mockReturnValue({
+      returning: vi.fn().mockRejectedValue(error),
+    });
     await expect(ensureRouteDirection(db, "owner", route)).rejects.toBe(error);
   });
 
