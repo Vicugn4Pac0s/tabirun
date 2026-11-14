@@ -1,23 +1,13 @@
 "use client";
 import { useController, type UseFormReturn } from "react-hook-form";
-import { useId, type FormEvent } from "react";
+import type { FormEvent } from "react";
 import type { UserProfileUpdateInput } from "~/shared/schemas";
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import { Input } from "~/frontend/components/ui/input";
 import { Button } from "~/frontend/components/ui/button";
-
-type SelectOption = {
-  value: string;
-  label: string;
-};
-
-const genderOptions: SelectOption[] = [
-  { value: "male", label: "男性" },
-  { value: "female", label: "女性" },
-  { value: "other", label: "その他" },
-  { value: "prefer_not_to_say", label: "回答しない" },
-];
+import { FormField } from "~/frontend/components/app-ui/FormField";
+import { genderOptions } from "../lib/genderOptions";
 
 type UserProfileEditFormProps = {
   form: UseFormReturn<UserProfileUpdateInput>;
@@ -38,7 +28,6 @@ export function UserProfileEditForm({
   onSubmit,
   isSubmitting,
 }: UserProfileEditFormProps) {
-  const formId = useId();
   const {
     register,
     control,
@@ -47,11 +36,6 @@ export function UserProfileEditForm({
   const { field: gender } = useController({ control, name: "gender" });
   const { field: pace } = useController({ control, name: "pace" });
   const disabled = isSubmitting;
-  const birthDateError = errors.birthDate?.message;
-  const genderError = errors.gender?.message;
-  const paceError = errors.pace?.message;
-  const heightError = errors.height?.message;
-  const weightError = errors.weight?.message;
   return (
     <form
       className="space-y-4"
@@ -59,141 +43,75 @@ export function UserProfileEditForm({
         void onSubmit(event);
       }}
     >
-      <div className="space-y-1">
-        <label htmlFor={`${formId}-birthDate`} className="text-sm font-medium">
-          生年月日
-        </label>
-        <Input
-          id={`${formId}-birthDate`}
-          aria-invalid={Boolean(birthDateError)}
-          aria-describedby={
-            birthDateError ? `${formId}-birthDate-error` : undefined
-          }
-          type="date"
-          disabled={disabled}
-          {...register("birthDate", {
-            setValueAs: toOptionalString,
-          })}
-        />
-        {birthDateError && (
-          <p
-            id={`${formId}-birthDate-error`}
-            role="alert"
-            className="mt-1 text-sm text-destructive"
-          >
-            {birthDateError}
-          </p>
+      <FormField label="生年月日" error={errors.birthDate?.message}>
+        {(fieldProps) => (
+          <Input
+            {...fieldProps}
+            type="date"
+            disabled={disabled}
+            {...register("birthDate", {
+              setValueAs: toOptionalString,
+            })}
+          />
         )}
-      </div>
+      </FormField>
 
-      <div className="space-y-1">
-        <label htmlFor={`${formId}-gender`} className="text-sm font-medium">
-          性別
-        </label>
-        <Selectbox
-          id={`${formId}-gender`}
-          aria-invalid={Boolean(genderError)}
-          aria-describedby={genderError ? `${formId}-gender-error` : undefined}
-          onBlur={gender.onBlur}
-          items={genderOptions}
-          value={gender.value}
-          onValueChange={gender.onChange}
-          placeholder="選択してください"
-          className="w-full"
-          disabled={disabled}
-        />
-        {genderError && (
-          <p
-            id={`${formId}-gender-error`}
-            role="alert"
-            className="mt-1 text-sm text-destructive"
-          >
-            {genderError}
-          </p>
+      <FormField label="性別" error={errors.gender?.message}>
+        {(fieldProps) => (
+          <Selectbox
+            {...fieldProps}
+            onBlur={gender.onBlur}
+            items={genderOptions}
+            value={gender.value}
+            onValueChange={gender.onChange}
+            placeholder="選択してください"
+            className="w-full"
+            disabled={disabled}
+          />
         )}
-      </div>
+      </FormField>
 
-      <div className="space-y-1">
-        <label htmlFor={`${formId}-pace`} className="text-sm font-medium">
-          ランニングのペース
-        </label>
-        <PaceSelect
-          id={`${formId}-pace`}
-          aria-invalid={Boolean(paceError)}
-          aria-describedby={paceError ? `${formId}-pace-error` : undefined}
-          onBlur={pace.onBlur}
-          value={pace.value}
-          onChangeValue={pace.onChange}
-          placeholder="選択してください"
-          disabled={disabled}
-        />
-        {paceError && (
-          <p
-            id={`${formId}-pace-error`}
-            role="alert"
-            className="mt-1 text-sm text-destructive"
-          >
-            {paceError}
-          </p>
+      <FormField label="ランニングのペース" error={errors.pace?.message}>
+        {(fieldProps) => (
+          <PaceSelect
+            {...fieldProps}
+            onBlur={pace.onBlur}
+            value={pace.value}
+            onChangeValue={pace.onChange}
+            placeholder="選択してください"
+            disabled={disabled}
+          />
         )}
-      </div>
+      </FormField>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-1">
-          <label htmlFor={`${formId}-height`} className="text-sm font-medium">
-            身長(cm)
-          </label>
-          <Input
-            id={`${formId}-height`}
-            aria-invalid={Boolean(heightError)}
-            aria-describedby={
-              heightError ? `${formId}-height-error` : undefined
-            }
-            type="number"
-            inputMode="numeric"
-            disabled={disabled}
-            {...register("height", {
-              setValueAs: toOptionalInt,
-            })}
-          />
-          {heightError && (
-            <p
-              id={`${formId}-height-error`}
-              role="alert"
-              className="mt-1 text-sm text-destructive"
-            >
-              {heightError}
-            </p>
+        <FormField label="身長(cm)" error={errors.height?.message}>
+          {(fieldProps) => (
+            <Input
+              {...fieldProps}
+              type="number"
+              inputMode="numeric"
+              disabled={disabled}
+              {...register("height", {
+                setValueAs: toOptionalInt,
+              })}
+            />
           )}
-        </div>
+        </FormField>
 
-        <div className="space-y-1">
-          <label htmlFor={`${formId}-weight`} className="text-sm font-medium">
-            体重(kg)
-          </label>
-          <Input
-            id={`${formId}-weight`}
-            aria-invalid={Boolean(weightError)}
-            aria-describedby={
-              weightError ? `${formId}-weight-error` : undefined
-            }
-            type="number"
-            inputMode="numeric"
-            disabled={disabled}
-            {...register("weight", {
-              setValueAs: toOptionalInt,
-            })}
-          />
-          {weightError && (
-            <p
-              id={`${formId}-weight-error`}
-              role="alert"
-              className="mt-1 text-sm text-destructive"
-            >
-              {weightError}
-            </p>
+        <FormField label="体重(kg)" error={errors.weight?.message}>
+          {(fieldProps) => (
+            <Input
+              {...fieldProps}
+              type="number"
+              inputMode="numeric"
+              disabled={disabled}
+              {...register("weight", {
+                setValueAs: toOptionalInt,
+              })}
+            />
           )}
-        </div>
+        </FormField>
       </div>
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
