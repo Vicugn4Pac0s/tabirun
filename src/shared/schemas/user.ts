@@ -38,7 +38,6 @@ export const userInitialProfileSchema = z.object({
       invalid_type_error: "ペースを選択してください",
     })
     .min(1, "ペースを選択してください")
-    .max(255, "ペースは255文字以内で入力してください")
     .regex(/^\d{1,2}:\d{2}$/, "ペースは5:30の形式で入力してください"),
   height: z
     .number({

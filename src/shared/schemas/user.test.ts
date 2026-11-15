@@ -174,7 +174,7 @@ describe("プロフィールの入力制約と日本語エラー", () => {
     {
       field: "pace",
       value: "a".repeat(256),
-      message: "ペースは255文字以内で入力してください",
+      message: "ペースは5:30の形式で入力してください",
     },
     ...["height", "weight"].flatMap((field) => {
       const label = field === "height" ? "身長" : "体重";
