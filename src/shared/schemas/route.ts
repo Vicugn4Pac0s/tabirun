@@ -4,7 +4,12 @@ import { z } from "zod";
 export const ROUTE_POINTS_MAX = 27;
 
 export const routePointsSchema = z
-  .array(z.object({ lat: z.number(), lng: z.number() }))
+  .array(
+    z.object({
+      lat: z.number().finite().min(-90).max(90),
+      lng: z.number().finite().min(-180).max(180),
+    }),
+  )
   .min(2)
   .max(ROUTE_POINTS_MAX);
 

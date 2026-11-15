@@ -49,6 +49,52 @@ afterEach(() => {
 });
 
 describe("googlemap.getDirection", () => {
+  it.each([
+    { lat: -90.001, lng: 0 },
+    { lat: 90.001, lng: 0 },
+    { lat: 0, lng: -180.001 },
+    { lat: 0, lng: 180.001 },
+    { lat: Infinity, lng: 0 },
+    { lat: -Infinity, lng: 0 },
+    { lat: 0, lng: Infinity },
+    { lat: 0, lng: -Infinity },
+    { lat: NaN, lng: 0 },
+    { lat: 0, lng: NaN },
+  ])(
+    "不正な座標をBAD_REQUESTにし、通信・計上を行わない（%j）",
+    async (point) => {
+      await expect(
+        createCaller().getDirection({
+          routePoints: [point, { lat: 0, lng: 0 }],
+        }),
+      ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+      expect(fetch).not.toHaveBeenCalled();
+      expect(incrementQuota).not.toHaveBeenCalled();
+    },
+  );
+
+  it("境界値の座標をGoogle APIへ送信する", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ routes: [{ distanceMeters: 1200 }] })),
+    );
+    await expect(
+      createCaller().getDirection({
+        routePoints: [
+          { lat: -90, lng: -180 },
+          { lat: 90, lng: 180 },
+        ],
+      }),
+    ).resolves.toMatchObject({ distanceMeters: 1200 });
+    const body = vi.mocked(fetch).mock.calls[0]?.[1]?.body;
+    if (typeof body !== "string") throw new Error("Expected JSON request body");
+    expect(JSON.parse(body)).toMatchObject({
+      origin: { location: { latLng: { latitude: -90, longitude: -180 } } },
+      destination: { location: { latLng: { latitude: 90, longitude: 180 } } },
+    });
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(incrementQuota).toHaveBeenCalledOnce();
+  });
+
   it("27地点を受け入れ、中継25地点で経路を計算する", async () => {
     const limitPoints = Array.from({ length: 27 }, (_, index) => ({
       lat: 35 + index / 100,

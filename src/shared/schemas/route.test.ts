@@ -8,6 +8,34 @@ import {
 } from "~/shared/schemas";
 
 describe("route schemas", () => {
+  it.each([
+    { lat: -90.001, lng: 0 },
+    { lat: 90.001, lng: 0 },
+    { lat: 0, lng: -180.001 },
+    { lat: 0, lng: 180.001 },
+    { lat: Infinity, lng: 0 },
+    { lat: -Infinity, lng: 0 },
+    { lat: 0, lng: Infinity },
+    { lat: 0, lng: -Infinity },
+    { lat: NaN, lng: 0 },
+    { lat: 0, lng: NaN },
+  ])("範囲外・非有限の座標を拒否する（%j）", (point) => {
+    expect(
+      routePointsSchema.safeParse([point, { lat: 0, lng: 0 }]).success,
+    ).toBe(false);
+  });
+
+  it.each([
+    { lat: -90, lng: -180 },
+    { lat: -90, lng: 180 },
+    { lat: 90, lng: -180 },
+    { lat: 90, lng: 180 },
+  ])("境界値の座標を受け入れる（%j）", (point) => {
+    expect(
+      routePointsSchema.safeParse([point, { lat: 0, lng: 0 }]).success,
+    ).toBe(true);
+  });
+
   it("2点以上のルートポイントを受け入れる", () => {
     const result = routePointsSchema.safeParse([
       { lat: 35.0, lng: 139.0 },
