@@ -78,6 +78,7 @@
 ## 実装規約
 - TypeScript strict と `noUncheckedIndexedAccess` を維持する。`any`・不要な `as`・`!` を増やさない。
 - 外部入力・tRPC input・外部APIレスポンス・DBに保存したJSONはZodで検証する（例: `routePointsSchema.parse(JSON.parse(route.points))`）。
+- Zod schemaの変数名は camelCase + `Schema`（例: `routeCreateSchema`）、推論型は PascalCase（例: `RouteCreateInput`）にする。入力schemaは `src/shared/schemas`、サーバーだけで使う出力・外部APIレスポンスのschemaは利用側の `src/server/features/<feature>/` に置く。
 - tRPC: 未ログインでも使えるAPIだけ `publicProcedure`。それ以外は `protectedProcedure`。課金やクォータ対象の外部APIは `quotaProtectedProcedure(feature)` を使い、成功後に `incrementQuota()` を呼ぶ。上限は `src/server/quota/config.ts`。
 - DB: update/delete/select の where に ID と所有者条件（`createdById = ctx.session.user.id` など）を両方入れる。lintはwhereの有無しか見ない。
 - DBアクセスは Drizzle（`~/server/db`）のみ。supabase-js や Supabase Data API は使わない（Data API は無効）。

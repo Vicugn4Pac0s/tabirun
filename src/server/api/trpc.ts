@@ -1,12 +1,3 @@
-/**
- * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
- * 1. You want to modify request context (see Part 1).
- * 2. You want to create a new middleware or type of procedure (see Part 3).
- *
- * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
- * need to use are documented accordingly near the end.
- */
-
 import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
@@ -30,11 +21,8 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 };
 
 /**
- * 2. INITIALIZATION
- *
- * This is where the tRPC API is initialized, connecting the context and transformer. We also parse
- * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
- * errors on the backend.
+ * SuperJSONと共通のエラー形式を設定したtRPCの基盤を作る。
+ * 本番では内部エラーのmessageを固定し、入力検証の詳細だけをクライアントへ返す。
  */
 export const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
@@ -63,13 +51,6 @@ export const t = initTRPC.context<typeof createTRPCContext>().create({
 export const createCallerFactory = t.createCallerFactory;
 
 /**
- * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
- *
- * These are the pieces you use to build your tRPC API. You should import these a lot in the
- * "/src/server/api/routers" directory.
- */
-
-/**
  * このアプリのコンテキスト・エラー形式を共有するtRPCルーターを作る。
  * 各操作の認証・クォータ条件は登録するprocedure側で選択する。
  */
@@ -81,4 +62,5 @@ export const createTRPCRouter = t.router;
  */
 export const createTRPCMiddleware = t.middleware;
 
+/** 共通の通信・エラー設定を持つprocedureの基底を返す。認証やクォータの制約は含まない。 */
 export const createTRPCProcedure = t.procedure;
