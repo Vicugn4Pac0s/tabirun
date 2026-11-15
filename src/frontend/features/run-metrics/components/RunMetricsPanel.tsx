@@ -1,4 +1,5 @@
 import { StatValue } from "~/frontend/components/app-ui/StatValue";
+import { FormField } from "~/frontend/components/app-ui/FormField";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import {
   calcCaloriesFromRun,
@@ -34,12 +35,16 @@ export function RunMetricsPanel({
   return (
     <section aria-label="ランニングの試算" className="mb-6">
       <div className="mb-6">
-        <p className="mb-2 font-bold text-base-gray">ペース</p>
-        <PaceSelect
-          value={pace}
-          onChangeValue={onPaceChange}
-          className="w-full"
-        />
+        <FormField label="ペース">
+          {(fieldProps) => (
+            <PaceSelect
+              {...fieldProps}
+              value={pace}
+              onChangeValue={onPaceChange}
+              className="w-full"
+            />
+          )}
+        </FormField>
       </div>
       {distanceKm > 0 ? (
         <dl className="grid grid-cols-2 gap-2 text-center">

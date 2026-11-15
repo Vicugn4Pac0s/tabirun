@@ -1,20 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { RunMetricsPanel } from "./RunMetricsPanel";
 
-vi.mock("~/frontend/features/pace/components/PaceSelect", () => ({
-  default: ({
-    value,
-    onChangeValue,
-  }: {
-    value: string;
-    onChangeValue: (pace: "6:00") => void;
-  }) => (
-    <button type="button" onClick={() => onChangeValue("6:00")}>
-      ペース {value}
-    </button>
-  ),
+vi.mock("~/frontend/features/pace/api/usePacesQuery", () => ({
+  usePacesQuery: () => ({
+    paces: [{ value: "5:00" }, { value: "6:00" }],
+    error: null,
+  }),
 }));
 
 const baseProps = {
@@ -23,6 +16,18 @@ const baseProps = {
   pace: "5:00" as const,
   weightKg: 60,
 };
+
+// jsdomには選択肢を表示位置へ移動するブラウザAPIがない。
+beforeAll(() => {
+  Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+    configurable: true,
+    value: vi.fn(),
+  });
+});
+
+afterAll(() => {
+  Reflect.deleteProperty(HTMLElement.prototype, "scrollIntoView");
+});
 
 describe("RunMetricsPanel", () => {
   it("距離・予想時間・消費カロリーを表示し、ペース変更を通知する", async () => {
@@ -37,9 +42,14 @@ describe("RunMetricsPanel", () => {
     expect(screen.getByText("00:26:00")).toBeInTheDocument();
     expect(screen.getByText("消費カロリー")).toBeInTheDocument();
     expect(screen.getByText("343")).toBeInTheDocument();
-    await userEvent
-      .setup()
-      .click(screen.getByRole("button", { name: "ペース 5:00" }));
+    const user = userEvent.setup();
+    const paceSelect = screen.getByRole("combobox", { name: "ペース" });
+    expect(screen.getByLabelText("ペース")).toBe(paceSelect);
+    expect(paceSelect).toHaveAttribute("aria-invalid", "false");
+    expect(paceSelect).not.toHaveAttribute("aria-describedby");
+    await user.click(screen.getByText("ペース", { selector: "label" }));
+    expect(paceSelect).toHaveAttribute("aria-expanded", "true");
+    await user.keyboard("{End}{Enter}");
     expect(onPaceChange).toHaveBeenCalledWith("6:00");
     rerender(
       <RunMetricsPanel
