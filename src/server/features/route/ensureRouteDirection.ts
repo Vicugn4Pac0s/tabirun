@@ -80,12 +80,9 @@ async function computeAndCountRoute(
   let requestStarted = false;
   let direction: GoogleRouteDirection;
   try {
-    direction = await computeRoute(
-      { routePoints: points, travelMode: "WALK" },
-      () => {
-        requestStarted = true;
-      },
-    );
+    direction = await computeRoute({ routePoints: points }, () => {
+      requestStarted = true;
+    });
   } catch {
     // 到達不明の通信例外も送信試行として数え、失敗の繰り返しで上限を回避させない。
     if (requestStarted) await incrementQuota(tx, userId, "direction");

@@ -2,8 +2,8 @@ import "server-only";
 
 import type { db } from "~/server/db";
 import { incrementQuota } from "~/server/quota/service";
-import { computeRoute, type DirectionInputSchema } from "./computeRoute";
-import type { z } from "zod";
+import { computeRoute } from "./computeRoute";
+import type { DirectionInput } from "~/shared/schemas";
 
 /**
  * Googleの経路を取得し、送信開始後の試行を成功・失敗ともに1回計上する。
@@ -12,7 +12,7 @@ import type { z } from "zod";
 export async function getDirection(
   database: Pick<typeof db, "query" | "insert">,
   userId: string,
-  input: z.infer<typeof DirectionInputSchema>,
+  input: DirectionInput,
 ) {
   let requestStarted = false;
   let direction: Awaited<ReturnType<typeof computeRoute>>;

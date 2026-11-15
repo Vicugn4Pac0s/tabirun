@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  directionInputSchema,
+  routeIdSchema,
   routeCreateSchema,
   routeDeleteSchema,
   routePointsSchema,
@@ -164,5 +166,61 @@ describe("route schemas", () => {
     const result = routeDeleteSchema.safeParse({ id: -1 });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe("経路取得の共有入力schema", () => {
+  const points = [
+    { lat: 35, lng: 139 },
+    { lat: 36, lng: 140 },
+  ];
+
+  it("地点だけの入力を受け入れる", () => {
+    expect(directionInputSchema.parse({ routePoints: points })).toEqual({
+      routePoints: points,
+    });
+  });
+
+  it.each(["DRIVE", "BICYCLE", "WALK", "invalid", null])(
+    "travelMode=%sを未知のキーとして除去する",
+    (travelMode) => {
+      expect(
+        directionInputSchema.parse({ routePoints: points, travelMode }),
+      ).toEqual({ routePoints: points });
+    },
+  );
+
+  it.each([
+    undefined,
+    [],
+    [{ lat: 35, lng: 139 }],
+    [
+      { lat: 91, lng: 139 },
+      { lat: 36, lng: 140 },
+    ],
+    [
+      { lat: 35, lng: Infinity },
+      { lat: 36, lng: 140 },
+    ],
+    Array.from({ length: ROUTE_POINTS_MAX + 1 }, () => ({ lat: 35, lng: 139 })),
+  ])("既存の地点制約に違反する入力を拒否する（%j）", (routePoints) => {
+    expect(directionInputSchema.safeParse({ routePoints }).success).toBe(false);
+  });
+});
+
+describe("詳細取得・削除の共有ID schema", () => {
+  it.each([undefined, null, "1", 0, -1, 1.5, Infinity, NaN])(
+    "不正なIDを拒否する（%s）",
+    (id) => {
+      expect(routeIdSchema.safeParse({ id }).success).toBe(false);
+      expect(routeDeleteSchema.safeParse({ id }).success).toBe(false);
+    },
+  );
+
+  it("正の整数IDを受け入れ、未知のキーを除去する", () => {
+    expect(routeIdSchema.parse({ id: 1, extra: "ignored" })).toEqual({ id: 1 });
+    expect(routeDeleteSchema.parse({ id: 1, extra: "ignored" })).toEqual({
+      id: 1,
+    });
   });
 });

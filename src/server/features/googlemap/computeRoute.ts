@@ -4,12 +4,7 @@ import { env } from "~/env";
 import { z } from "zod";
 import { decode } from "@googlemaps/polyline-codec";
 import { TRPCError } from "@trpc/server";
-import { routePointsSchema } from "~/shared/schemas";
-
-export const DirectionInputSchema = z.object({
-  routePoints: routePointsSchema,
-  travelMode: z.enum(["WALK", "DRIVE", "BICYCLE"]).default("WALK"),
-});
+import type { DirectionInput } from "~/shared/schemas";
 
 const decodePolylineToLatLngLiteral = (encoded: string) => {
   return decode(encoded).map(([lat, lng]) => ({
@@ -48,12 +43,12 @@ const ComputeRoutesResponseSchema = z.object({
 });
 
 /**
- * Google Routes APIを呼び、先頭の経路と復元した座標列を返す。利用回数は計上しない。
+ * Google Routes APIで徒歩経路を計算し、先頭の経路と復元した座標列を返す。利用回数は計上しない。
  * 送信直前にonRequestStartedを呼ぶ。キーなし・不正応答はINTERNAL_SERVER_ERROR、地点不足・HTTP失敗はBAD_REQUEST、経路なしはNOT_FOUND。
  * 入力は呼出側でschema検証する前提。通信・JSON解析・復元中の例外は伝播する。
  */
 export async function computeRoute(
-  input: z.infer<typeof DirectionInputSchema>,
+  input: DirectionInput,
   onRequestStarted?: () => void,
 ): Promise<GoogleRouteDirection> {
   const key = env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY;
@@ -102,7 +97,7 @@ export async function computeRoute(
         intermediates: intermediates.map((p) => ({
           location: { latLng: { latitude: p.lat, longitude: p.lng } },
         })),
-        travelMode: input.travelMode,
+        travelMode: "WALK",
       }),
     },
   );
