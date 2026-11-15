@@ -25,6 +25,8 @@ declare module "vitest" {
   }
 }
 
+vi.mock("server-only", () => ({}));
+
 const databaseUrl = inject("quotaPostgresUrl");
 const fixedDate = new Date("2026-11-14T12:00:00Z");
 const today = "2026-11-14";

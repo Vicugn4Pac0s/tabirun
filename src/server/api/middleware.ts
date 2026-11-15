@@ -1,24 +1,24 @@
+import { env } from "~/env";
 import { t, createTRPCMiddleware } from "./trpc";
 
 /**
- * Middleware for timing procedure execution and adding an artificial delay in development.
- *
- * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
- * network latency that would occur in production but not in local development.
+ * procedureの実行時間を開発環境だけで記録する。
+ * tRPCの開発設定が有効な場合は、実行前に100〜499msの遅延を加える。
  */
 export const timingMiddleware = createTRPCMiddleware(async ({ next, path }) => {
   const start = Date.now();
 
   if (t._config.isDev) {
-    // artificial delay in dev
     const waitMs = Math.floor(Math.random() * 400) + 100;
     await new Promise((resolve) => setTimeout(resolve, waitMs));
   }
 
   const result = await next();
 
-  const end = Date.now();
-  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+  if (env.NODE_ENV === "development") {
+    const end = Date.now();
+    console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+  }
 
   return result;
 });

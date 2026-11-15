@@ -14,6 +14,7 @@ const { findFirst, update, set, where } = vi.hoisted(() => ({
   where: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
+vi.mock("~/env", () => ({ env: { NODE_ENV: "test" } }));
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
 vi.mock("~/server/db", () => ({
   db: { query: { users: { findFirst } }, update },
@@ -55,9 +56,7 @@ function createCaller(userId: string | null = "owner") {
   return userRouter.createCaller({
     db,
     headers: new Headers(),
-    session: userId
-      ? { user: { id: userId, role: "user" }, expires: "2099-01-01" }
-      : null,
+    session: userId ? { user: { id: userId }, expires: "2099-01-01" } : null,
   });
 }
 
