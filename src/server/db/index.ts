@@ -5,12 +5,11 @@ import postgres from "postgres";
 import { env } from "~/env";
 import * as schema from "./schema";
 
-// 非本番では再読み込みのたびに接続クライアントが増えるのを防ぐ。
 const globalForDb = globalThis as unknown as {
   client: postgres.Sql | undefined;
 };
 
-/** PostgreSQLの接続クライアントを共有する。非本番では再読み込み時も再利用する。 */
+/** PostgreSQLの接続クライアントを共有する。非本番では再読み込みによるクライアントの増加を防ぐため再利用する。 */
 export const client =
   globalForDb.client ?? postgres(env.DATABASE_URL, { prepare: false });
 if (env.NODE_ENV !== "production") globalForDb.client = client;

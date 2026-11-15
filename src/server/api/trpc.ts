@@ -22,7 +22,8 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
 /**
  * SuperJSONと共通のエラー形式を設定したtRPCの基盤を作る。
- * 本番では内部エラーのmessageを固定し、入力検証の詳細だけをクライアントへ返す。
+ * 本番の内部エラーはmessageを固定し、それ以外は元のmessageを返す。
+ * zodErrorにはBAD_REQUESTかつ原因がZodErrorの場合だけ検証の詳細を含める。
  */
 export const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
