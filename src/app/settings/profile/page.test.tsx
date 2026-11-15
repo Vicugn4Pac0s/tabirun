@@ -2,13 +2,18 @@ import { db } from "~/server/db";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import UserProfileEditPage from "./page";
-const { auth, getUserProfileSettings, screenProps } = vi.hoisted(() => ({
-  auth: vi.fn(),
-  getUserProfileSettings: vi.fn(),
-  screenProps: vi.fn(),
-}));
+const { auth, getUserProfileSettings, screenProps, initialScreenProps } =
+  vi.hoisted(() => ({
+    auth: vi.fn(),
+    getUserProfileSettings: vi.fn(),
+    screenProps: vi.fn(),
+    initialScreenProps: vi.fn(),
+  }));
 vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
-  UserInitialProfileScreen: () => <h1>初期設定</h1>,
+  UserInitialProfileScreen: (props: unknown) => {
+    initialScreenProps(props);
+    return <h1>初期設定</h1>;
+  },
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("~/server/auth", () => ({ auth }));
@@ -75,6 +80,26 @@ describe("UserProfileEditPage", () => {
       },
     });
   });
+  it.each([null, new Date()])(
+    "DBの選択肢外の性別を未選択として初回設定・編集フォームへ渡す（%s）",
+    async (profileCompletedAt) => {
+      getUserProfileSettings.mockResolvedValue({
+        profileCompletedAt,
+        gender: "invalid",
+      });
+      render(await UserProfileEditPage());
+      const formProps = profileCompletedAt ? screenProps : initialScreenProps;
+      expect(formProps).toHaveBeenCalledWith({
+        initialValues: {
+          birthDate: undefined,
+          gender: undefined,
+          pace: undefined,
+          height: undefined,
+          weight: undefined,
+        },
+      });
+    },
+  );
   it("未ログインならログイン案内を表示し、取得しない", async () => {
     auth.mockResolvedValue(null);
     render(await UserProfileEditPage());

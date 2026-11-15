@@ -50,6 +50,7 @@
 
 ## 3. 命名とファイル構成
 
+- feature の定数は `features/<feature>/constants.ts` に置く。
 - `components/ui` だけは shadcn 生成の kebab-case（例: `dropdown-menu.tsx`）。
 - hook ファイルは `useXxx.ts`。query は `useXxxQuery`、画面ロジック hook は `use<Feature><Action>`（例: `useRouteCreation`, `useRouteDraft`）。
 - lib: 1関数1ファイル、`camelCase` の動詞始まり（`getRouteMenuLabel.ts`）。汎用の計算群は1ファイルにまとめてよい（`frontend/lib/running.ts`）。

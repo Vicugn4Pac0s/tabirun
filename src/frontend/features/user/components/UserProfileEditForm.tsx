@@ -7,7 +7,7 @@ import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import { Input } from "~/frontend/components/ui/input";
 import { Button } from "~/frontend/components/ui/button";
 import { FormField } from "~/frontend/components/app-ui/FormField";
-import { genderOptions } from "../lib/genderOptions";
+import { genderOptions } from "~/frontend/features/user/constants";
 
 type UserProfileEditFormProps = {
   form: UseFormReturn<UserProfileUpdateInput>;
