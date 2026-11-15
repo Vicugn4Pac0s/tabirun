@@ -1,4 +1,5 @@
 import type { FormEvent, ReactNode } from "react";
+import { FormField } from "~/frontend/components/app-ui/FormField";
 import { Button } from "~/frontend/components/ui/button";
 import { Input } from "~/frontend/components/ui/input";
 import type { useRouteDraft } from "../hooks/useRouteDraft";
@@ -35,24 +36,18 @@ export function RouteForm({
         void onSubmit(event);
       }}
     >
-      <label className="block text-sm font-medium">
-        <span className="mb-2 block">ルート名</span>
-        <Input
-          disabled={isSubmitting}
-          aria-invalid={showTitleError}
-          aria-describedby={showTitleError ? "route-title-error" : undefined}
-          {...form.register("title")}
-        />
-      </label>
-      {showTitleError && (
-        <p
-          id="route-title-error"
-          role="alert"
-          className="mt-1 text-sm text-destructive"
-        >
-          {titleError}
-        </p>
-      )}
+      <FormField
+        label="ルート名"
+        error={showTitleError ? titleError : undefined}
+      >
+        {(fieldProps) => (
+          <Input
+            {...fieldProps}
+            disabled={isSubmitting}
+            {...form.register("title")}
+          />
+        )}
+      </FormField>
       {children}
       <div className="my-6 flex gap-2">
         <Button type="submit" disabled={!draft.canSave || isSubmitting}>
