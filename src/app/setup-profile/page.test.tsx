@@ -43,4 +43,11 @@ describe("SetupProfilePage", () => {
     await expect(SetupProfilePage()).rejects.toThrow("REDIRECT:/");
     expect(redirect).toHaveBeenCalledWith("/");
   });
+  it("DBの選択肢外の性別をフォームへ渡さない", async () => {
+    getUserProfileSettings.mockResolvedValue({
+      profileCompletedAt: null,
+      gender: "invalid",
+    });
+    await expect(SetupProfilePage()).rejects.toThrow();
+  });
 });

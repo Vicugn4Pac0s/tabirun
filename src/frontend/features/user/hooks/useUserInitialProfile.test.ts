@@ -1,3 +1,4 @@
+import type { UserInitialProfileInput } from "~/shared/schemas";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useUserInitialProfile } from "./useUserInitialProfile";
@@ -16,7 +17,7 @@ vi.mock("~/frontend/features/user/api/useCompleteInitialProfile", () => ({
     isCompleting: status.pending,
   }),
 }));
-const profile = {
+const profile: UserInitialProfileInput = {
   birthDate: "1990-01-01",
   gender: "male",
   pace: "6:00",

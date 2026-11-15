@@ -1,3 +1,4 @@
+import type { UserInitialProfileInput } from "~/shared/schemas";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -42,7 +43,7 @@ const profile = {
   weight: 60,
   profileCompletedAt: null,
 };
-const initialInput = {
+const initialInput: UserInitialProfileInput = {
   birthDate: "2000-01-01",
   gender: "other",
   pace: "5:00",

@@ -5,6 +5,54 @@ import {
 } from "~/shared/schemas";
 
 describe("user profile schemas", () => {
+  const initialProfile = {
+    birthDate: "1990-01-01",
+    gender: "male",
+    pace: "5:30",
+    height: 170,
+    weight: 60,
+  };
+
+  it.each(["male", "female", "other", "prefer_not_to_say"])(
+    "性別 %s を初回設定と更新で受け入れる",
+    (gender) => {
+      expect(
+        userInitialProfileSchema.safeParse({ ...initialProfile, gender })
+          .success,
+      ).toBe(true);
+      expect(userProfileUpdateSchema.safeParse({ gender }).success).toBe(true);
+    },
+  );
+
+  it.each(["invalid", "", "MALE", "male ", null, 1])(
+    "選択肢以外の性別 %s を初回設定と更新で拒否する",
+    (gender) => {
+      expect(
+        userInitialProfileSchema.safeParse({ ...initialProfile, gender })
+          .success,
+      ).toBe(false);
+      expect(userProfileUpdateSchema.safeParse({ gender }).success).toBe(false);
+    },
+  );
+
+  it.each([
+    ["", "性別を選択してください"],
+    [undefined, "Required"],
+  ])("初回設定の未選択の性別 %s に既存の案内を返す", (gender, message) => {
+    const result = userInitialProfileSchema.safeParse({
+      ...initialProfile,
+      gender,
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe(message);
+  });
+
+  it("更新では性別を省略できる", () => {
+    expect(userProfileUpdateSchema.safeParse({ pace: "5:30" }).success).toBe(
+      true,
+    );
+  });
+
   it("1項目以上を含むプロフィール更新入力を受け入れる", () => {
     const result = userProfileUpdateSchema.safeParse({
       gender: "male",

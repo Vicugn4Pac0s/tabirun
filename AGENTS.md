@@ -46,7 +46,7 @@
 
 ## アーキテクチャと依存の向き
 - `src/app`: page / layout / route handler。認証チェックとredirect、サーバーでのデータ取得、featureの画面コンポーネントの配置だけを行う。UIロジックは書かない。
-- `src/frontend/features/<feature>/`: `api/`（tRPC hookのラッパー: `useXxxQuery` / `use<動詞><名詞>`）、`hooks/`（画面ロジック）、`components/`、`lib/`（純粋関数）、`types.ts`。
+- `src/frontend/features/<feature>/`: `api/`（tRPC hookのラッパー: `useXxxQuery` / `use<動詞><名詞>`）、`hooks/`（画面ロジック）、`components/`、`lib/`（純粋関数）、`constants.ts`（定数）、`types.ts`。
 - `src/frontend/components/ui`: shadcn/ui の生成物。追加は shadcn CLI（`components.json`）で行い、手での大改造はしない。
 - `src/frontend/components/app-ui`: 2つ以上のfeatureで使う見た目だけの部品。feature・tRPC・業務知識に依存しない。
 - `src/frontend/hooks/shared`, `src/frontend/lib`: feature非依存の汎用処理。

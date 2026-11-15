@@ -1,3 +1,4 @@
+import type { UserInitialProfileInput } from "~/shared/schemas";
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useCompleteInitialProfile } from "./useCompleteInitialProfile";
@@ -19,7 +20,7 @@ afterEach(() => {
   cleanup();
   vi.resetAllMocks();
 });
-const input = {
+const input: UserInitialProfileInput = {
   birthDate: "1990-01-01",
   gender: "male",
   pace: "6:00",

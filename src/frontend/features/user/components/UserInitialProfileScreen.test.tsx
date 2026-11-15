@@ -1,3 +1,4 @@
+import type { UserInitialProfileInput } from "~/shared/schemas";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,7 +10,7 @@ const { save, refresh, success, error } = vi.hoisted(() => ({
   success: vi.fn(),
   error: vi.fn(),
 }));
-const profile = {
+const profile: UserInitialProfileInput = {
   birthDate: "1990-01-01",
   gender: "male",
   pace: "6:00",

@@ -75,6 +75,17 @@ describe("UserProfileEditPage", () => {
       },
     });
   });
+  it.each([null, new Date()])(
+    "DBの選択肢外の性別を初回設定・編集フォームへ渡さない（%s）",
+    async (profileCompletedAt) => {
+      getUserProfileSettings.mockResolvedValue({
+        profileCompletedAt,
+        gender: "invalid",
+      });
+      await expect(UserProfileEditPage()).rejects.toThrow();
+      expect(screenProps).not.toHaveBeenCalled();
+    },
+  );
   it("未ログインならログイン案内を表示し、取得しない", async () => {
     auth.mockResolvedValue(null);
     render(await UserProfileEditPage());

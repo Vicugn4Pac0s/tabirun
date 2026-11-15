@@ -1,5 +1,7 @@
+import type { GENDER_VALUES } from "~/shared/schemas";
+
 type SelectOption = {
-  value: string;
+  value: (typeof GENDER_VALUES)[number];
   label: string;
 };
 

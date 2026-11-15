@@ -1,3 +1,4 @@
+import type { UserProfileUpdateInput } from "~/shared/schemas";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useUserProfileEdit } from "./useUserProfileEdit";
@@ -16,7 +17,7 @@ vi.mock("~/frontend/features/user/api/useUpdateUserProfile", () => ({
     isUpdating: status.pending,
   }),
 }));
-const profile = {
+const profile: UserProfileUpdateInput = {
   birthDate: "1990-01-01",
   gender: "male",
   pace: "6:00",
