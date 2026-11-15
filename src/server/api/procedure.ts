@@ -4,22 +4,12 @@ import { createTRPCProcedure } from "./trpc";
 import { type QuotaFeature } from "~/server/quota/config";
 import { checkQuota } from "~/server/quota/service";
 
-/**
- * Public (unauthenticated) procedure
- *
- * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
- * guarantee that a user querying is authorized, but you can still access user session data if they
- * are logged in.
- */
+/** 認証を要求せず、実行時間の計測middlewareを適用する。 */
 export const publicProcedure = createTRPCProcedure.use(timingMiddleware);
 
 /**
- * Protected (authenticated) procedure
- *
- * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
- * the session is valid and guarantees `ctx.session.user` is not null.
- *
- * @see https://trpc.io/docs/procedures
+ * ログインを要求し、後続処理へユーザーを含むセッションを渡す。
+ * セッションまたはユーザーがなければUNAUTHORIZEDを返す。
  */
 export const protectedProcedure = createTRPCProcedure
   .use(timingMiddleware)
@@ -29,7 +19,6 @@ export const protectedProcedure = createTRPCProcedure
     }
     return next({
       ctx: {
-        // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
       },
     });

@@ -9,6 +9,7 @@ const { select, from } = vi.hoisted(() => ({
   from: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
+vi.mock("~/env", () => ({ env: { NODE_ENV: "test" } }));
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
 vi.mock("~/server/db", () => ({ db: { select } }));
 

@@ -5,6 +5,8 @@ import {
   incrementQuota,
 } from "~/server/quota/service";
 
+vi.mock("server-only", () => ({}));
+
 const fixedDate = new Date("2026-07-08T12:00:00.000Z");
 
 const createDbMock = (existing: { count: number } | null) => {

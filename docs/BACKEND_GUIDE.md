@@ -4,12 +4,13 @@
 
 featureは配置の単位、DDDは業務の概念や境界を考えるための考え方で、両立する。業務の言葉で命名しルールを分離する考えは採用するが、DDD一式やEntityクラス、層を増やすための仕組みは導入しない。
 
-このガイドは今後の追加・変更に適用する。既存コードの書き換えや移動は行わず、userの整理は #67、routeのデータアクセスは #68、経路処理は #69 で段階的に進める。
+このガイドは今後の追加・変更に適用する。プロフィールの読み書きは `features/user`、ルートの操作・DBアクセスは `features/route`、Googleとの通信は `features/googlemap` に配置している。ガイドを根拠に依頼範囲外の既存コードを移動・整理しない。
 
 ## 1. routerは入口にする
 
 - routerには入力schema、認証・クォータ用procedureの選択、操作関数の呼び出しを書く。
 - 入力制約は `shared/schemas` を使う。操作関数へ `ctx` 全体は渡さず、必要な `db`・セッション由来のユーザーID・入力を渡す。
+- Zod schemaの変数名は camelCase + `Schema`（例: `routeCreateSchema`）、推論型は PascalCase（例: `RouteCreateInput`）にする。入力schemaは `src/shared/schemas`、サーバーだけで使う出力・外部APIレスポンスのschemaは利用側の `src/server/features/<feature>/` に置く。
 - routerの認証と、対象データへの所有者条件は別の責務として扱う。
 
 ## 2. 操作の流れを1つの関数にまとめる
@@ -63,21 +64,27 @@ server/features/route/
   data.ts                          所有者条件付きDB操作・行の変換
   ensureRouteDirection.ts          経路の再利用・計算・保存の流れ
   routeDirectionCache.ts           hash・期限・検証などの純粋関数
-server/features/user/profile.ts    プロフィールの読み取り・更新
-server/features/googlemap/         Googleとの通信
-server/quota/                     利用枠の確認・計上
-server/auth/                      認証
-server/db/                        接続・schema
+server/features/user/
+  profile.ts                       プロフィールの読み取り・更新
+  profileGender.ts                 保存済みの性別をフォーム用に検証
+server/features/googlemap/
+  direction.ts                     経路取得と利用回数の計上
+  computeRoute.ts                  Googleへの通信・応答検証・経路復元
+server/features/pace/paces.ts       公開ペース一覧の取得
+server/quota/                      利用枠の確認・計上
+server/auth/                       認証
+server/db/                         接続・schema
 ```
 
 - `server/features` は読み取りに限定せず、サーバー専用の業務処理・DB操作・外部通信を置く。サーバー専用モジュールには `import "server-only"` を付ける。
+- `server/db/index.ts` は、通常のNode.jsで動く `db:seed` と接続を共有するため例外とする。現在の構成で `server-only` を追加するとseedのimport時に例外になる。DB入口をビルド時に保護する改善案として、接続処理とアプリ用入口の分離がある。現在は接続処理とアプリ用入口を分離していない。frontendからの値のimportは禁止する。
 - 小さいfeatureは、扱うものの名前の1ファイルにまとめる（例: `features/user/profile.ts`）。
 - 所有者条件付きのDB処理やロックが増えたら、`operations.ts`（操作の順序・トランザクション・エラー判定）と `data.ts`（所有者条件付きDB処理・行の変換）に分ける（例: `features/route`）。操作ごとに1ファイルには分けない。
 - 副作用のない読み取りは操作と同じファイルに置いてよい。RSCから呼ぶものも `server-only` で守る。pageはfeatureの読み取り関数か `~/trpc/server` のAPIを使い、DBを直接操作しない。
 - queryという名前だけで読み取り専用と判断しない。現在の `route.getById` は経路キャッシュを書き戻すことがあり、`getRouteDetail` のような操作として扱う。
 - 依存は原則 `router → features → DB／quota／外部通信`。feature間も一方向に保ち、例えばrouteからgooglemapを利用しても、その逆の依存は作らない。
-- `auth`・`quota`・`db` は既存の共通の仕組みとして残す。読み取り限定の配置を維持して業務処理を `api/services` に分散させる案より、関連処理をfeature内で探せる形を選ぶ。
-- このツリーは配置の目安。空の層は作らず、小さい処理は同じファイルに置いてよい。既存の `api/services` の移動は #68・#69 の範囲で行い、このガイドだけを根拠に移動しない。
+- `auth`・`quota`・`db` は共通の仕組みとして残し、業務処理は関連するfeature内に置く。
+- このツリーは配置の目安。空の層は作らず、小さい処理は同じファイルに置いてよい。このガイドだけを根拠に依頼範囲外の配置変更をしない。
 
 ## 8. 導入しないもの
 
@@ -85,9 +92,9 @@ Repositoryのinterface、DIの仕組み、基底クラス、Result型、無理�
 
 ## 例: `route.update` のbefore / after
 
-対象は [現在のroute router](../src/server/api/routers/route.ts) の `update`。所有者付き取得・行ロック・JSON変換・地点比較・更新・再計算が揃い、責務を分ける理由が分かる。
+現在の [route router](../src/server/api/routers/route.ts) の `update` は、[operations.ts](../src/server/features/route/operations.ts) の操作関数を呼ぶ。所有者条件付きの取得・更新・行変換は [data.ts](../src/server/features/route/data.ts)、経路の再利用・計算・保存は [ensureRouteDirection.ts](../src/server/features/route/ensureRouteDirection.ts) が担当する。
 
-beforeは現在の実装の抜粋で、比較・更新部分を省略している。
+beforeは整理前の構造を示す例で、比較・更新部分を省略している。
 
 ```ts
 update: protectedProcedure
@@ -107,7 +114,7 @@ update: protectedProcedure
   }),
 ```
 
-afterは今後の切り出し例。以下の操作関数・DB関数・定数は提案であり、まだ実装されていない。importなどは省略している。
+afterは現在の実装からの抜粋。以下の操作関数・DB関数・定数は実装済みで、importとJSDocは省略している。
 
 ```ts
 // api/routers/route.ts
@@ -140,13 +147,12 @@ export async function updateRoute(
     const updated = await updateOwnedRoute(tx, userId, input.id, changes);
     // FOR UPDATEで取得済みなので通常は起きないが、念のための保険。
     if (updated.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
-    if (pointsChanged) {
+    if (pointsChanged)
       await ensureRouteDirection(tx, userId, {
         ...existing,
         ...changes,
         points: input.points,
       });
-    }
   });
 }
 ```
@@ -158,12 +164,12 @@ DB関数は所有者条件やロックを名前だけにせず、SQLでも保証
 export async function findOwnedRouteForUpdate(
   tx: Pick<typeof db, "select">,
   userId: string,
-  routeId: number,
+  id: number,
 ) {
   const [row] = await tx
     .select()
     .from(routes)
-    .where(and(eq(routes.id, routeId), eq(routes.createdById, userId)))
+    .where(and(eq(routes.id, id), eq(routes.createdById, userId)))
     .for("update");
   return row;
 }
@@ -176,14 +182,14 @@ export async function findOwnedRouteForUpdate(
 return tx
   .update(routes)
   .set(changes)
-  .where(and(eq(routes.id, routeId), eq(routes.createdById, userId)))
+  .where(and(eq(routes.id, id), eq(routes.createdById, userId)))
   .returning({ id: routes.id });
 ```
 
 `toRoute` は地点JSONのparse・Zod検証を行い、`CLEARED_DIRECTION` は既存の経路保存6列を `null` にする定数とする。操作関数が同じ `tx` と取得行を使い続けることで、ロックとトランザクション境界を保つ。
 
-`ensureRouteDirection` の外部通信中も行ロックを保持している（現状の挙動）。改善は #69 で検討する。
+`ensureRouteDirection` の外部通信中も同じトランザクションの行ロックを保持する現状を維持する。同じルートを同時に開いたとき、後続処理が最新の保存済み経路を再利用できるようにし、経路の二重計算・利用回数の二重計上を防ぐためである。その代わり、Googleへの通信中（タイムアウトは最大10秒）は、同じルートで行ロックを必要とする操作が待たされる。現在は外部通信の前後でロックを分割しない。
 
-切り出し後も、タイトルだけの変更では再計算しない。地点変更では旧経路を無効化し、Googleの計算が失敗しても変更地点は保存する。DB障害は伝播してrollbackする。戻り値、クォータ計上、キャッシュ更新による更新日の扱いも変えない。
+現在の実装では、タイトルだけの変更では再計算しない。地点変更では旧経路を無効化し、Googleの計算が失敗しても変更地点は保存する。DB障害は伝播してrollbackする。戻り値、クォータ計上、キャッシュ更新による更新日の扱いも変えない。
 
 検証は [AGENTS.mdのテスト節](../AGENTS.md#テスト) に従い、純粋関数・DB競合など各層固有のリスクを検証する。

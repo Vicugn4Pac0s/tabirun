@@ -49,6 +49,7 @@ const {
   computeRoute: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
+vi.mock("~/env", () => ({ env: { NODE_ENV: "test" } }));
 vi.mock("~/server/db", () => ({
   db: {
     query: { routes: { findFirst } },
@@ -114,9 +115,7 @@ function createCaller(userId: string | null = "owner") {
   return routeRouter.createCaller({
     db,
     headers: new Headers(),
-    session: userId
-      ? { user: { id: userId, role: "user" }, expires: "2099-01-01" }
-      : null,
+    session: userId ? { user: { id: userId }, expires: "2099-01-01" } : null,
   });
 }
 const updateInput = { id: 1, title: "夕方のルート", points };

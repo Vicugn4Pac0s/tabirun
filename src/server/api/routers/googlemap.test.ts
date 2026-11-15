@@ -31,7 +31,7 @@ function createCaller() {
   return googlemapRouter.createCaller({
     db,
     headers: new Headers(),
-    session: { user: { id: "owner", role: "user" }, expires: "2099-01-01" },
+    session: { user: { id: "owner" }, expires: "2099-01-01" },
   });
 }
 
