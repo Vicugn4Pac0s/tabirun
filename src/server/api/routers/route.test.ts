@@ -263,7 +263,6 @@ describe("route.getById", () => {
       expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
         {
           routePoints: points,
-          travelMode: "WALK",
         },
         expect.any(Function),
       );
@@ -388,7 +387,7 @@ describe("route.create", () => {
       createdById: "owner",
     });
     expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
-      { routePoints: limitPoints, travelMode: "WALK" },
+      { routePoints: limitPoints },
       expect.any(Function),
     );
   });
@@ -432,7 +431,6 @@ describe("route.create", () => {
     expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
       {
         routePoints: points,
-        travelMode: "WALK",
       },
       expect.any(Function),
     );
@@ -502,7 +500,7 @@ describe("route.update", () => {
       expect.objectContaining({ points: JSON.stringify(limitPoints) }),
     );
     expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
-      { routePoints: limitPoints, travelMode: "WALK" },
+      { routePoints: limitPoints },
       expect.any(Function),
     );
   });
@@ -568,7 +566,6 @@ describe("route.update", () => {
     expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
       {
         routePoints: changed,
-        travelMode: "WALK",
       },
       expect.any(Function),
     );
@@ -736,7 +733,7 @@ describe.each(["create", "update"] as const)(
         expect.objectContaining({ points: JSON.stringify(boundaryPoints) }),
       );
       expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
-        { routePoints: boundaryPoints, travelMode: "WALK" },
+        { routePoints: boundaryPoints },
         expect.any(Function),
       );
       expect(incrementQuota).toHaveBeenCalledOnce();

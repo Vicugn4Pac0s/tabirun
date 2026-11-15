@@ -101,7 +101,6 @@ describe("ensureRouteDirection", () => {
       expect(mocks.computeRoute).toHaveBeenCalledExactlyOnceWith(
         {
           routePoints: points,
-          travelMode: "WALK",
         },
         expect.any(Function),
       );
@@ -160,7 +159,6 @@ describe("ensureRouteDirection", () => {
     expect(mocks.computeRoute).toHaveBeenCalledExactlyOnceWith(
       {
         routePoints: changed,
-        travelMode: "WALK",
       },
       expect.any(Function),
     );

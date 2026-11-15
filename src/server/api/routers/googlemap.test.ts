@@ -49,6 +49,30 @@ afterEach(() => {
 });
 
 describe("googlemap.getDirection", () => {
+  it.each(["DRIVE", "BICYCLE", "WALK", "invalid", null])(
+    "travelMode=%sが送られてもWALKで経路を計算し1回だけ計上する",
+    async (travelMode) => {
+      vi.mocked(fetch).mockResolvedValue(
+        new Response(JSON.stringify({ routes: [{ distanceMeters: 1200 }] })),
+      );
+      const input = { routePoints, travelMode };
+      await expect(createCaller().getDirection(input)).resolves.toMatchObject({
+        distanceMeters: 1200,
+      });
+      const body = vi.mocked(fetch).mock.calls[0]?.[1]?.body;
+      if (typeof body !== "string")
+        throw new Error("Expected JSON request body");
+      const requestBody: unknown = JSON.parse(body);
+      expect(requestBody).toMatchObject({ travelMode: "WALK" });
+      expect(fetch).toHaveBeenCalledOnce();
+      expect(incrementQuota).toHaveBeenCalledExactlyOnceWith(
+        db,
+        "owner",
+        "direction",
+      );
+    },
+  );
+
   it.each([
     { lat: -90.001, lng: 0 },
     { lat: 90.001, lng: 0 },

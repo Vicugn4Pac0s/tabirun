@@ -15,7 +15,6 @@ const input = {
     { lat: 35, lng: 135 },
     { lat: 36, lng: 136 },
   ],
-  travelMode: "WALK",
 } satisfies Parameters<typeof computeRoute>[0];
 
 beforeEach(() => {

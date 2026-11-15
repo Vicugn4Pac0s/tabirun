@@ -234,3 +234,50 @@ describe("user router", () => {
     expect(update).not.toHaveBeenCalled();
   });
 });
+
+describe.each(["updateProfile", "completeInitialProfile"] as const)(
+  "user.%s のプロフィール制約",
+  (operation) => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-11-15T15:00:00Z"));
+    });
+
+    it.each([
+      { height: 251 },
+      { height: 1e20 },
+      { weight: 301 },
+      { weight: 1e20 },
+      { pace: "abc" },
+      { pace: "5:3" },
+      { pace: "5:300" },
+      { pace: " 5:30" },
+      { pace: "5:30 " },
+      { birthDate: "1899-12-31" },
+      { birthDate: "2026-11-17" },
+    ])(
+      "制約外の入力をBAD_REQUESTにしてDBを更新しない（%j）",
+      async (fields) => {
+        await expect(
+          createCaller()[operation]({ ...initialInput, ...fields }),
+        ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+        expect(update).not.toHaveBeenCalled();
+        expect(findFirst).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each([
+      { height: 250, weight: 300, birthDate: "1900-01-01", pace: "5:30" },
+      { height: 250, weight: 300, birthDate: "2026-11-16", pace: "10:00" },
+    ])(
+      "境界値と正しいペースを本人のプロフィールに保存する（%j）",
+      async (fields) => {
+        await expect(
+          createCaller()[operation]({ ...initialInput, ...fields }),
+        ).resolves.toEqual(profile);
+        expect(set).toHaveBeenCalledWith(expect.objectContaining(fields));
+        expect(where).toHaveBeenCalledWith(eq(users.id, "owner"));
+      },
+    );
+  },
+);

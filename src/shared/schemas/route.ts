@@ -13,6 +13,12 @@ export const routePointsSchema = z
   .min(2)
   .max(ROUTE_POINTS_MAX);
 
+export const directionInputSchema = z.object({
+  routePoints: routePointsSchema,
+});
+
+export type DirectionInput = z.infer<typeof directionInputSchema>;
+
 export const routeCreateSchema = z.object({
   title: z
     .string()
@@ -30,8 +36,10 @@ export const routeUpdateSchema = routeCreateSchema.extend({
 
 export type RouteUpdateInput = z.infer<typeof routeUpdateSchema>;
 
-export const routeDeleteSchema = z.object({
+export const routeIdSchema = z.object({
   id: z.number().int().positive(),
 });
+
+export const routeDeleteSchema = routeIdSchema;
 
 export type RouteDeleteInput = z.infer<typeof routeDeleteSchema>;

@@ -75,19 +75,17 @@ describe("UserInitialProfileScreen", () => {
     const user = userEvent.setup();
     render(<UserInitialProfileScreen initialValues={{}} />);
     await user.click(screen.getByRole("button", { name: "初期設定を完了" }));
-    await waitFor(() =>
-      expect(screen.getAllByText("Required").length).toBeGreaterThan(0),
-    );
-    for (const label of [
-      "生年月日",
-      "性別",
-      "ランニングのペース",
-      "身長(cm)",
-      "体重(kg)",
-    ]) {
+    await waitFor(() => expect(screen.getAllByRole("alert")).toHaveLength(5));
+    for (const [label, message] of [
+      ["生年月日", "生年月日を入力してください"],
+      ["性別", "性別を選択してください"],
+      ["ランニングのペース", "ペースを選択してください"],
+      ["身長(cm)", "身長を入力してください"],
+      ["体重(kg)", "体重を入力してください"],
+    ] as const) {
       const input = screen.getByLabelText(label);
       expect(input).toHaveAttribute("aria-invalid", "true");
-      expect(input).toHaveAccessibleDescription("Required");
+      expect(input).toHaveAccessibleDescription(message);
     }
     expect(screen.getAllByRole("alert")).toHaveLength(5);
     expect(save).not.toHaveBeenCalled();

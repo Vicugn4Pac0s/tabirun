@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { protectedProcedure } from "../procedure";
 import {
@@ -11,12 +10,13 @@ import {
 import {
   routeCreateSchema,
   routeDeleteSchema,
+  routeIdSchema,
   routeUpdateSchema,
 } from "~/shared/schemas";
 
 export const routeRouter = createTRPCRouter({
   getById: protectedProcedure
-    .input(z.object({ id: z.number().int().positive() }))
+    .input(routeIdSchema)
     .query(({ ctx, input }) =>
       getRouteDetail(ctx.db, ctx.session.user.id, input.id),
     ),
