@@ -1,5 +1,6 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { type NextRequest } from "next/server";
+import { ZodError } from "zod";
 
 import { env } from "~/env";
 import { appRouter } from "~/server/api/root";
@@ -21,14 +22,33 @@ const handler = (req: NextRequest) =>
     req,
     router: appRouter,
     createContext: () => createContext(req),
-    onError:
-      env.NODE_ENV === "development"
-        ? ({ path, error }) => {
-            console.error(
-              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
-            );
-          }
-        : undefined,
+    onError: ({ path, error }) => {
+      if (
+        env.NODE_ENV !== "development" &&
+        error.code !== "INTERNAL_SERVER_ERROR"
+      ) {
+        return;
+      }
+      // The request controls path, so only log registered procedure names.
+      const safePath =
+        path && Object.hasOwn(appRouter._def.procedures, path)
+          ? path
+          : "<no-path>";
+      // Raw messages, stacks and causes may contain input or credentials.
+      const summary =
+        error.cause instanceof ZodError
+          ? "Validation failed"
+          : error.cause instanceof SyntaxError
+            ? "Invalid JSON"
+            : error.code === "INTERNAL_SERVER_ERROR"
+              ? "Internal error"
+              : "Request failed";
+      console.error("tRPC request failed", {
+        path: safePath,
+        code: error.code,
+        summary,
+      });
+    },
   });
 
 export { handler as GET, handler as POST };

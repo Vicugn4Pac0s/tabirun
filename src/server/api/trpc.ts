@@ -11,6 +11,7 @@ import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { env } from "~/env";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 
@@ -40,10 +41,16 @@ export const t = initTRPC.context<typeof createTRPCContext>().create({
   errorFormatter({ shape, error }) {
     return {
       ...shape,
+      message:
+        env.NODE_ENV === "production" && error.code === "INTERNAL_SERVER_ERROR"
+          ? "サーバーエラーが発生しました。時間をおいて再度お試しください。"
+          : shape.message,
       data: {
         ...shape.data,
         zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+          error.code === "BAD_REQUEST" && error.cause instanceof ZodError
+            ? error.cause.flatten()
+            : null,
       },
     };
   },
