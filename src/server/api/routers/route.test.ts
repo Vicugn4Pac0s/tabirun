@@ -682,3 +682,64 @@ describe("route.delete", () => {
     expect(remove).not.toHaveBeenCalled();
   });
 });
+
+describe.each(["create", "update"] as const)(
+  "route.%s の座標検証",
+  (operation) => {
+    it.each([
+      { lat: -90.001, lng: 0 },
+      { lat: 90.001, lng: 0 },
+      { lat: 0, lng: -180.001 },
+      { lat: 0, lng: 180.001 },
+      { lat: Infinity, lng: 0 },
+      { lat: -Infinity, lng: 0 },
+      { lat: 0, lng: Infinity },
+      { lat: 0, lng: -Infinity },
+      { lat: NaN, lng: 0 },
+      { lat: 0, lng: NaN },
+    ])(
+      "不正な座標をBAD_REQUESTにし、保存・通信・計上を行わない（%j）",
+      async (point) => {
+        await expect(
+          createCaller()[operation]({
+            id: 1,
+            title: "座標検証",
+            points: [point, { lat: 0, lng: 0 }],
+          }),
+        ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+        expect(transaction).not.toHaveBeenCalled();
+        expect(insert).not.toHaveBeenCalled();
+        expect(update).not.toHaveBeenCalled();
+        expect(computeRoute).not.toHaveBeenCalled();
+        expect(incrementQuota).not.toHaveBeenCalled();
+      },
+    );
+
+    it("境界値の地点を保存し、経路計算に渡す", async () => {
+      const boundaryPoints = [
+        { lat: -90, lng: -180 },
+        { lat: 90, lng: 180 },
+      ];
+      insertReturning.mockResolvedValue([
+        { ...routeWithoutCache, points: JSON.stringify(boundaryPoints) },
+      ]);
+      await expect(
+        createCaller()[operation]({
+          id: 1,
+          title: "境界値",
+          points: boundaryPoints,
+        }),
+      ).resolves.toBeUndefined();
+      expect(
+        operation === "create" ? insertValues : updateSet,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({ points: JSON.stringify(boundaryPoints) }),
+      );
+      expect(computeRoute).toHaveBeenCalledExactlyOnceWith(
+        { routePoints: boundaryPoints, travelMode: "WALK" },
+        expect.any(Function),
+      );
+      expect(incrementQuota).toHaveBeenCalledOnce();
+    });
+  },
+);
