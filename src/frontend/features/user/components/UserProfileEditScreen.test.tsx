@@ -104,12 +104,12 @@ describe("UserProfileEditScreen", () => {
     await user.click(screen.getByRole("button", { name: "保存する" }));
     await waitFor(() =>
       expect(
-        screen.getByText("Number must be greater than 0"),
+        screen.getByText("身長は1以上で入力してください"),
       ).toBeInTheDocument(),
     );
     const height = screen.getByRole("spinbutton", { name: "身長(cm)" });
     expect(height).toHaveAttribute("aria-invalid", "true");
-    expect(height).toHaveAccessibleDescription("Number must be greater than 0");
+    expect(height).toHaveAccessibleDescription("身長は1以上で入力してください");
     expect(screen.getByRole("alert")).toHaveClass("text-destructive");
     await user.clear(height);
     await user.type(height, "170");

@@ -111,7 +111,7 @@ export const RequiredFields: Story = {
     await expect(canvas.getAllByRole("alert")).toHaveLength(5);
     await expect(
       canvas.getByRole("combobox", { name: "性別" }),
-    ).toHaveAccessibleDescription("Required");
+    ).toHaveAccessibleDescription("性別を選択してください");
     const gender = canvas.getByRole("combobox", { name: "性別" });
     await userEvent.click(gender);
     await userEvent.keyboard("{Home}{Enter}");
