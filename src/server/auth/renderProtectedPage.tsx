@@ -8,7 +8,7 @@ import { UserInitialProfileScreen } from "~/frontend/features/user/components/Us
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { getUserProfileSettings } from "~/server/features/user/profile";
-import { genderSchema } from "~/shared/schemas";
+import { getProfileGender } from "~/server/features/user/profileGender";
 
 /**
  * 認証・プロフィール状態に応じてログイン画面、初期設定画面、またはrenderの結果を返す。
@@ -39,7 +39,7 @@ export async function renderProtectedPage(
           <UserInitialProfileScreen
             initialValues={{
               birthDate: user.birthDate ?? undefined,
-              gender: genderSchema.optional().parse(user.gender ?? undefined),
+              gender: getProfileGender(user.gender),
               pace: user.pace ?? undefined,
               height: user.height ?? undefined,
               weight: user.weight ?? undefined,

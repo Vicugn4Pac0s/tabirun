@@ -6,7 +6,7 @@ import { UserInitialProfileScreen } from "~/frontend/features/user/components/Us
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import { getUserProfileSettings } from "~/server/features/user/profile";
-import { genderSchema } from "~/shared/schemas";
+import { getProfileGender } from "~/server/features/user/profileGender";
 
 export default async function SetupProfilePage() {
   const session = await auth();
@@ -37,7 +37,7 @@ export default async function SetupProfilePage() {
         <UserInitialProfileScreen
           initialValues={{
             birthDate: user.birthDate ?? undefined,
-            gender: genderSchema.optional().parse(user.gender ?? undefined),
+            gender: getProfileGender(user.gender),
             pace: user.pace ?? undefined,
             height: user.height ?? undefined,
             weight: user.weight ?? undefined,
