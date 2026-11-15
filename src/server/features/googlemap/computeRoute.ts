@@ -13,7 +13,7 @@ const decodePolylineToLatLngLiteral = (encoded: string) => {
   }));
 };
 
-export const DirectionOutputSchema = z.object({
+export const directionOutputSchema = z.object({
   distanceMeters: z.number().nullable(),
   duration: z.string().nullable(),
   encodedPolyline: z.string().nullable(),
@@ -24,9 +24,9 @@ export const DirectionOutputSchema = z.object({
     }),
   ),
 });
-export type GoogleRouteDirection = z.infer<typeof DirectionOutputSchema>;
+export type GoogleRouteDirection = z.infer<typeof directionOutputSchema>;
 
-const ComputeRoutesResponseSchema = z.object({
+const computeRoutesResponseSchema = z.object({
   routes: z
     .array(
       z.object({
@@ -113,7 +113,7 @@ export async function computeRoute(
   }
 
   const raw: unknown = await res.json();
-  const parsed = ComputeRoutesResponseSchema.safeParse(raw);
+  const parsed = computeRoutesResponseSchema.safeParse(raw);
 
   if (!parsed.success) {
     throw new TRPCError({
