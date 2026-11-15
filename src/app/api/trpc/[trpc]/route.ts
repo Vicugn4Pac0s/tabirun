@@ -29,20 +29,22 @@ const handler = (req: NextRequest) =>
       ) {
         return;
       }
-      // The request controls path, so only log registered procedure names.
+      // pathはリクエスト由来なので、登録済みのprocedure名だけをログに残す。
       const safePath =
         path && Object.hasOwn(appRouter._def.procedures, path)
           ? path
           : "<no-path>";
-      // Raw messages, stacks and causes may contain input or credentials.
-      const summary =
-        error.cause instanceof ZodError
-          ? "Validation failed"
-          : error.cause instanceof SyntaxError
-            ? "Invalid JSON"
-            : error.code === "INTERNAL_SERVER_ERROR"
-              ? "Internal error"
-              : "Request failed";
+      // message・stack・cause本体には入力や認証情報が含まれ得る。
+      let summary: string;
+      if (error.cause instanceof ZodError) {
+        summary = "Validation failed";
+      } else if (error.cause instanceof SyntaxError) {
+        summary = "Invalid JSON";
+      } else if (error.code === "INTERNAL_SERVER_ERROR") {
+        summary = "Internal error";
+      } else {
+        summary = "Request failed";
+      }
       console.error("tRPC request failed", {
         path: safePath,
         code: error.code,
