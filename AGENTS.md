@@ -45,17 +45,19 @@
 - DB: schema変更・migration生成の個別承認を得た後、`npm run db:generate` で `drizzle/` にmigrationを生成してcommitする。`db:migrate` / `db:push` / `db:seed` はローカルDB（docker-compose か Cloud Agent VM）に対してだけ自由に実行してよい。Preview・本番DBには承認なしで実行しない。
 
 ## アーキテクチャと依存の向き
-- `src/app`: page / layout / route handler。認証チェックとredirect、サーバーでのデータ取得、featureの画面コンポーネントの配置だけを行う。UIロジックは書かない。
-- `src/frontend/features/<feature>/`: `api/`（tRPC hookのラッパー: `useXxxQuery` / `use<動詞><名詞>`）、`hooks/`（画面ロジック）、`components/`、`lib/`（純粋関数）、`constants.ts`（定数）、`types.ts`。
+- `src/app`: page / layout / route handler。認証・プロフィール状態に応じた画面の出し分けやredirect、サーバーでのデータ取得、featureの画面コンポーネントの配置だけを行う。UIロジックは書かない。pageでDBを直接クエリせず、サーバーの読み取り関数に `db` を渡すことは許容する。
+- `src/frontend/features/<feature>/`: `api/`（tRPC hookのラッパー: `useXxxQuery` / `use<動詞><名詞>`）、`hooks/`（画面ロジック）、`components/`、`lib/`（純粋関数）、`constants.ts`（feature内の複数ファイルで使う定数）、`types.ts`。ファイル内だけで使う定数はそのファイルに置く。
 - `src/frontend/components/ui`: shadcn/ui の生成物。追加は shadcn CLI（`components.json`）で行い、手での大改造はしない。
 - `src/frontend/components/app-ui`: 2つ以上のfeatureで使う見た目だけの部品。feature・tRPC・業務知識に依存しない。
 - `src/frontend/hooks/shared`, `src/frontend/lib`: feature非依存の汎用処理。
+- `src/frontend/providers`: feature非依存の共通Contextと関連部品（`NavigationGuardProvider`、`GuardedLink`）。feature固有のContextはfeature内に置く。
+- `src/frontend/config.ts`: アプリ共通の定数・設定（地図の初期位置・ズームなど）。`src/frontend/types/`: featureに閉じない共通型（汎用の計算処理からも使う `Pace` など）。
 - `src/shared/schemas`: client/server共通のZod schemaと推論型。入力制約の唯一の定義元。
 - `src/server/api`（routers / procedure / middleware）、`src/server/db`（schema・接続）、`src/server/auth`、`src/server/quota`、`src/server/features/*`（サーバー専用の業務処理・DB操作・外部通信。副作用のない読み取りは操作と同じファイルに置いてよい。RSCから呼ぶものも `server-only` で守る）。
 - バックエンドの責務・配置・書き方は `docs/BACKEND_GUIDE.md` に従う。既存コードの移動・整理は依頼範囲内だけ行う。
 - 依存ルール:
   - `frontend` → `server` は `import type` のみ（例: `AppRouter`）。値のimportは禁止。
-  - feature間は上位 → 下位の一方向のみ、循環禁止。下位: `googlemap`, `pace` / 中位: `route-points`, `run-metrics`, `user`, `auth` / 上位: `route`, `dashboard`。新しいfeature間依存を作るときは計画に書く。
+  - feature間は原則として上位 → 下位の一方向、循環禁止。下位: `googlemap`, `pace` / 中位: `route-points`, `run-metrics`, `user`, `auth` / 上位: `route`, `dashboard`。同階層では既存の `dashboard` → `route`、`run-metrics` → `user`、`auth` → `user` を許容し、逆方向の依存は作らない。新しいfeature間依存を作るときは計画に書く。
   - `components/*`, `hooks/shared`, `lib` から `features` を import しない。
   - 業務ルール: 入力制約は `shared/schemas`、認可・所有者条件・クォータは server、表示用の計算は `features/*/lib`。componentに業務ルールを書かない。
 
@@ -70,9 +72,9 @@
 
 ## フロントエンド
 - 詳細は `docs/FRONTEND_GUIDE.md`。ここには要点だけを書く。
-- page は認証・redirect・初期データ取得だけを行い、`<Feature><Action>Screen` に props で渡す。画面ロジック（送信・遷移・toast）は `hooks/use<Feature><Action>` に置く。
+- page は認証・プロフィール状態に応じた画面の出し分けやredirect・初期データ取得を行い、画面コンポーネントに props で渡す。保護対象のpageは `renderProtectedPage` を使い、未ログインならログイン画面、プロフィール未完了なら初期設定画面をその場で表示する。画面ロジック（送信・遷移・toast）とフォームの `useForm` は `hooks/use<Feature><Action>` に置き、フォームcomponentは渡されたformでフィールドを描画する。
 - client の取得は `features/*/api` の hook から行う。query は `useXxxQuery`、mutation は `use<動詞><名詞>`（例: `useUpdateRoute`）で、成功時に invalidate する。
-- エラーは `TRPCError` の code だけで分岐し、server の `message` を表示しない。mutation の結果は toast、query の失敗は inline（`role="alert"`）、page では `NOT_FOUND` だけ `notFound()` にする。
+- エラーは `TRPCError` の code だけで分岐し、server の `message` を表示しない。mutation の結果は toast、query の失敗は inline（`role="alert"`、`text-destructive`）、page では `NOT_FOUND` だけ `notFound()` にする。
 - 新規 component は `PascalCase.tsx` で named export にし、型は `type XxxProps` で書く。テストと story は同じディレクトリに置く。
 
 ## 実装規約
