@@ -57,6 +57,8 @@ export const userInitialProfileSchema = z.object({
     .max(300, "体重は300以下で入力してください"),
 });
 
+export const paceSchema = userInitialProfileSchema.shape.pace;
+
 export type UserInitialProfileInput = z.infer<typeof userInitialProfileSchema>;
 
 export const userProfileUpdateSchema = userInitialProfileSchema

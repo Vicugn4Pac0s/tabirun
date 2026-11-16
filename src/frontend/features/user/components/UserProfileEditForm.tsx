@@ -16,8 +16,8 @@ type UserProfileEditFormProps = {
 };
 const toOptionalString = (value: string) => (value === "" ? undefined : value);
 
-const toOptionalInt = (value: string) =>
-  value === "" ? undefined : Number.parseInt(value, 10);
+const toOptionalNumber = (value: string) =>
+  value === "" ? undefined : Number(value);
 
 /**
  * プロフィールの入力欄を呼出側のformに接続し、更新中は入力・送信を無効にする。
@@ -90,10 +90,11 @@ export function UserProfileEditForm({
             <Input
               {...fieldProps}
               type="number"
+              step="any"
               inputMode="numeric"
               disabled={disabled}
               {...register("height", {
-                setValueAs: toOptionalInt,
+                setValueAs: toOptionalNumber,
               })}
             />
           )}
@@ -104,10 +105,11 @@ export function UserProfileEditForm({
             <Input
               {...fieldProps}
               type="number"
+              step="any"
               inputMode="numeric"
               disabled={disabled}
               {...register("weight", {
-                setValueAs: toOptionalInt,
+                setValueAs: toOptionalNumber,
               })}
             />
           )}
