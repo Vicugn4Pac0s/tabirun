@@ -7,8 +7,10 @@ import { LoginScreen } from "~/frontend/features/auth/components/LoginScreen";
 import { UserInitialProfileScreen } from "~/frontend/features/user/components/UserInitialProfileScreen";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
-import { getUserProfileSettings } from "~/server/features/user/profile";
-import { getProfileGender } from "~/server/features/user/profileGender";
+import {
+  getUserProfileSettings,
+  getProfileFormInitialValues,
+} from "~/server/features/user/profile";
 
 /**
  * 認証・プロフィール状態に応じてログイン画面、初期設定画面、またはrenderの結果を返す。
@@ -37,13 +39,7 @@ export async function renderProtectedPage(
       <main>
         <PageContainer className="flex min-h-screen items-center">
           <UserInitialProfileScreen
-            initialValues={{
-              birthDate: user.birthDate ?? undefined,
-              gender: getProfileGender(user.gender),
-              pace: user.pace ?? undefined,
-              height: user.height ?? undefined,
-              weight: user.weight ?? undefined,
-            }}
+            initialValues={getProfileFormInitialValues(user)}
           />
         </PageContainer>
       </main>
