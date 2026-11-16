@@ -2,8 +2,8 @@
 
 import { ROUTE_POINTS_MAX } from "~/shared/schemas";
 import { useEnterKey } from "~/frontend/hooks/shared/useEnterKey";
-import MainActionButton from "~/frontend/components/app-ui/MainActionButton";
-import SubActionButton from "~/frontend/components/app-ui/SubActionButton";
+import MainActionButton from "./MainActionButton";
+import SubActionButton from "./SubActionButton";
 
 type RouteNavigationProps = {
   points: google.maps.LatLngLiteral[];

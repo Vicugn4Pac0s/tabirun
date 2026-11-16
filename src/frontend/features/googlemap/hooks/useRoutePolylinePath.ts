@@ -1,5 +1,3 @@
-import { type TRPCClientErrorLike } from "@trpc/client";
-import { type AppRouter } from "~/server/api/root";
 import { useGoogleMapDirectionQuery } from "../api/useGoogleMapDirectionQuery";
 
 type UseRoutePolylinePathOptions = {
@@ -22,9 +20,7 @@ export const useRoutePolylinePath = (
   );
 
   const hasEnoughRoutePoints = routePoints.length >= 2;
-  const isQuotaExceeded =
-    (error as TRPCClientErrorLike<AppRouter> | null)?.data?.code ===
-    "TOO_MANY_REQUESTS";
+  const isQuotaExceeded = error?.data?.code === "TOO_MANY_REQUESTS";
   const shouldFallbackToStraightPolyline =
     hasEnoughRoutePoints && (!options.canUseDirections || isQuotaExceeded);
 

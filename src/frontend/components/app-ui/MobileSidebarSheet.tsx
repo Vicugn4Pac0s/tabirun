@@ -40,7 +40,7 @@ function MobileSidebarSheet({
         </DrawerHeader>
         <DrawerClose className="absolute right-4 top-3 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
           <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">閉じる</span>
         </DrawerClose>
         <div className="overflow-y-auto px-5 pb-4 pt-3">{children}</div>
       </DrawerContent>

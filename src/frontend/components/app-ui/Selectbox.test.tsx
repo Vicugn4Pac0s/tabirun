@@ -76,6 +76,9 @@ describe("Selectbox", () => {
         disabled: true,
       }),
     );
+    expect(mockValue).toHaveBeenCalledWith(
+      expect.objectContaining({ placeholder: "選択してください" }),
+    );
   });
 
   it("placeholder を SelectValue に渡し、items を描画する", () => {

@@ -1,5 +1,6 @@
 import { MapPinPlus, MapPinX, Play } from "lucide-react";
 import { motion } from "motion/react";
+import { cn } from "~/frontend/lib/utils";
 
 type Props = {
   type: "add" | "delete" | "play";
@@ -42,7 +43,10 @@ const MainActionButton = ({
             ? "地点を削除"
             : "再生"
       }
-      className={`flex h-20 w-20 items-center justify-center rounded-full border-2 border-white bg-primary text-white transition-opacity disabled:opacity-50 ${className}`}
+      className={cn(
+        "flex h-20 w-20 items-center justify-center rounded-full border-2 border-white bg-primary text-white transition-opacity disabled:opacity-50",
+        className,
+      )}
       disabled={disabled}
       onClick={onClick}
       onMouseOver={onMouseOver}
