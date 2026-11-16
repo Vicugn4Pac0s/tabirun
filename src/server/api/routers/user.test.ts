@@ -250,6 +250,8 @@ describe.each(["updateProfile", "completeInitialProfile"] as const)(
       { pace: "abc" },
       { pace: "5:3" },
       { pace: "5:300" },
+      { pace: "5:60" },
+      { pace: "5:99" },
       { pace: " 5:30" },
       { pace: "5:30 " },
       { birthDate: "1899-12-31" },
@@ -268,6 +270,7 @@ describe.each(["updateProfile", "completeInitialProfile"] as const)(
     it.each([
       { height: 250, weight: 300, birthDate: "1900-01-01", pace: "5:30" },
       { height: 250, weight: 300, birthDate: "2026-11-16", pace: "10:00" },
+      { height: 250, weight: 300, birthDate: "1900-01-01", pace: "5:59" },
     ])(
       "境界値と正しいペースを本人のプロフィールに保存する（%j）",
       async (fields) => {
