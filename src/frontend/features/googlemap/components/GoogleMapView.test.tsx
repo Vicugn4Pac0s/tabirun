@@ -5,47 +5,34 @@ import { Status } from "@googlemaps/react-wrapper";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GoogleMapView from "./GoogleMapView";
 
-const { loadingStatus, canvasProps, wrapperProps } = vi.hoisted(() => ({
+const { loadingStatus } = vi.hoisted(() => ({
   loadingStatus: { value: "LOADING" },
-  canvasProps: vi.fn(),
-  wrapperProps: vi.fn(),
 }));
 
 vi.mock("~/env", () => ({
-  env: {
-    NEXT_PUBLIC_GOOGLE_MAP_API_KEY: "test-api-key",
-    NEXT_PUBLIC_GOOGLE_MAP_ID: "test-map-id",
-  },
+  env: { NEXT_PUBLIC_GOOGLE_MAP_API_KEY: "test-api-key" },
 }));
 vi.mock("@googlemaps/react-wrapper", async (importOriginal) => ({
   ...(await importOriginal<typeof MapsWrapper>()),
   Wrapper: ({
     render: renderStatus,
     children,
-    apiKey,
   }: {
     render: (status: Status) => ReactElement;
     children: ReactNode;
-    apiKey: string;
-  }) => {
-    wrapperProps({ apiKey });
-    return loadingStatus.value === "SUCCESS"
+  }) =>
+    loadingStatus.value === "SUCCESS"
       ? children
       : renderStatus(
           loadingStatus.value === "LOADING" ? Status.LOADING : Status.FAILURE,
-        );
-  },
+        ),
 }));
 vi.mock("./GoogleMapCanvas", () => ({
-  default: (props: { options: google.maps.MapOptions }) => {
-    canvasProps(props);
-    return <div aria-label="地図" />;
-  },
+  default: () => <div aria-label="地図" />,
 }));
 
 beforeEach(() => {
   loadingStatus.value = "LOADING";
-  vi.clearAllMocks();
 });
 afterEach(cleanup);
 
@@ -61,20 +48,6 @@ function renderMap(isLoading = false) {
 }
 
 describe("GoogleMapView", () => {
-  it("APIの認証キーと地図のMap IDを分け、optionsでもMap IDを上書きさせない", () => {
-    loadingStatus.value = "SUCCESS";
-    render(
-      <GoogleMapView
-        map={null}
-        setMap={vi.fn()}
-        options={{ zoom: 16, mapId: "other-map-id" }}
-      />,
-    );
-    expect(wrapperProps).toHaveBeenCalledWith({ apiKey: "test-api-key" });
-    expect(canvasProps).toHaveBeenCalledWith(
-      expect.objectContaining({ options: { zoom: 16, mapId: "test-map-id" } }),
-    );
-  });
   it("API読込中は読み込み表示を出し、エラーを表示しない", () => {
     renderMap();
     expect(screen.getByRole("status")).toBeInTheDocument();

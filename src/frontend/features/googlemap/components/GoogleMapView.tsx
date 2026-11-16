@@ -60,8 +60,8 @@ function GoogleMapView({
           onClick={onClick}
           onIdle={onIdle}
           options={{
+            mapId: apiKey,
             ...options,
-            mapId: env.NEXT_PUBLIC_GOOGLE_MAP_ID,
           }}
         >
           {children}
