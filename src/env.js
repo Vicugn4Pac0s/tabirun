@@ -27,6 +27,7 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_GOOGLE_MAP_API_KEY: z.string().min(1),
+    NEXT_PUBLIC_GOOGLE_MAP_ID: z.string().trim().min(1),
   },
 
   /**
@@ -40,6 +41,7 @@ export const env = createEnv({
     NEXT_PRIVATE_GOOGLE_MAP_API_KEY:
       process.env.NEXT_PRIVATE_GOOGLE_MAP_API_KEY,
     NEXT_PUBLIC_GOOGLE_MAP_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY,
+    NEXT_PUBLIC_GOOGLE_MAP_ID: process.env.NEXT_PUBLIC_GOOGLE_MAP_ID,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
   },
