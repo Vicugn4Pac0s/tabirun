@@ -148,7 +148,7 @@ Cloud Agent など VM 内開発では、PostgreSQL をホスト上で用意し `
 | `GOOGLE_CLIENT_ID` | 本番 OAuth クライアント | 本番と共用 | 開発用に同じ値を設定するか、別クライアントを用意 |
 | `GOOGLE_CLIENT_SECRET` | 本番 OAuth クライアント | 本番と共用 | 上記に対応する Secret |
 | `NEXT_PUBLIC_GOOGLE_MAP_API_KEY` | 本番用 Maps JS API キー | 開発用キー（リファラー制限あり） | 通常は開発用キー |
-| `NEXT_PUBLIC_GOOGLE_MAP_ID` | 本番用の JavaScript Map ID | Preview 用の JavaScript Map ID | 開発用の JavaScript Map ID |
+| `NEXT_PUBLIC_GOOGLE_MAP_ID` | JavaScript 用の Map ID | 本番と共用でよい（現運用も共用） | 本番と共用でよい |
 | `NEXT_PRIVATE_GOOGLE_MAP_API_KEY` | サーバー Routes API 用 | 本番と共用 | 本番と同じキーを設定することが多い |
 
 `NEXT_PUBLIC_GOOGLE_MAP_ID` は Advanced Marker に必要な地図の識別子で、API キーとは別です。Google Cloud の「地図の管理」で JavaScript 用の Map ID を作成し、ローカルと Vercel の対象環境（Production / Preview）に設定してください。`NEXT_PUBLIC_` の値はクライアントのビルドに埋め込まれるため、変更後は再ビルドが必要です。未設定・空欄では起動・ビルド時の環境変数検証が失敗します。CI のダミー値はビルド検証専用で、実地図の表示には使いません。設定変更は実装とは別に承認を得て行います。
