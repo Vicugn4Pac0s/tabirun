@@ -16,8 +16,8 @@ type InitialProfileFormProps = {
 };
 const toOptionalString = (value: string) => (value === "" ? undefined : value);
 
-const toOptionalInt = (value: string) =>
-  value === "" ? undefined : Number.parseInt(value, 10);
+const toOptionalNumber = (value: string) =>
+  value === "" ? undefined : Number(value);
 
 /**
  * 初期設定の入力欄を呼出側のformに接続し、保存中は入力・送信を無効にする。
@@ -90,10 +90,11 @@ export function InitialProfileForm({
             <Input
               {...fieldProps}
               type="number"
+              step="any"
               inputMode="numeric"
               disabled={disabled}
               {...register("height", {
-                setValueAs: toOptionalInt,
+                setValueAs: toOptionalNumber,
               })}
             />
           )}
@@ -104,10 +105,11 @@ export function InitialProfileForm({
             <Input
               {...fieldProps}
               type="number"
+              step="any"
               inputMode="numeric"
               disabled={disabled}
               {...register("weight", {
-                setValueAs: toOptionalInt,
+                setValueAs: toOptionalNumber,
               })}
             />
           )}

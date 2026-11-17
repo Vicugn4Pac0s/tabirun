@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 
 import type { db } from "~/server/db";
 import { users } from "~/server/db/schema";
+import { getProfileGender } from "./profileGender";
 import type {
   UserInitialProfileInput,
   UserProfileUpdateInput,
@@ -51,6 +52,22 @@ export function getUserProfileSettings(database: typeof db, userId: string) {
       weight: true,
     },
   });
+}
+
+/** 保存済みのプロフィールをフォーム初期値に変換する。未設定・選択肢外の性別はundefinedにする。 */
+export function getProfileFormInitialValues(
+  profile: Pick<
+    NonNullable<Awaited<ReturnType<typeof getUserProfileSettings>>>,
+    "birthDate" | "gender" | "pace" | "height" | "weight"
+  >,
+): UserProfileUpdateInput {
+  return {
+    birthDate: profile.birthDate ?? undefined,
+    gender: getProfileGender(profile.gender),
+    pace: profile.pace ?? undefined,
+    height: profile.height ?? undefined,
+    weight: profile.weight ?? undefined,
+  };
 }
 
 /**

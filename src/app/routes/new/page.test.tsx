@@ -1,3 +1,4 @@
+import type * as ProfileModule from "~/server/features/user/profile";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
@@ -18,7 +19,10 @@ vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
 vi.mock("server-only", () => ({}));
 vi.mock("~/server/auth", () => ({ auth }));
 vi.mock("~/server/db", () => ({ db: {} }));
-vi.mock("~/server/features/user/profile", () => ({ getUserProfileSettings }));
+vi.mock("~/server/features/user/profile", async (importOriginal) => ({
+  ...(await importOriginal<typeof ProfileModule>()),
+  getUserProfileSettings,
+}));
 vi.mock("next/navigation", () => ({ redirect }));
 vi.mock("~/frontend/features/route/components/RouteCreateScreen", () => ({
   RouteCreateScreen: (props: { defaultCenter: google.maps.LatLngLiteral }) => {

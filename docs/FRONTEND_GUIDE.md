@@ -54,7 +54,7 @@
 ## 3. 命名とファイル構成
 
 - feature内の複数ファイルで使う定数は `features/<feature>/constants.ts` に置く。ファイル内だけで使う定数はそのファイルに置く（例: `RunMetricsPanel` の `DEFAULT_WEIGHT_KG`）。
-- アプリ共通の定数・設定は `frontend/config.ts` に置く（例: 地図の初期位置・ズーム）。featureに閉じない共通型は `frontend/types/` に置く（例: 汎用の `frontend/lib/running.ts` からも使う `Pace`）。入力制約とその推論型は引き続き `shared/schemas` に置く。
+- アプリ共通の定数・設定は `frontend/config.ts` に置く（例: 地図の初期位置・ズーム）。featureに閉じない共通型は `frontend/types/` に置く（例: 汎用の `frontend/lib/running.ts` からも使う、共有schemaから推論した `Pace`）。入力制約とその推論型は引き続き `shared/schemas` に置く。
 - `components/ui` だけは shadcn 生成の kebab-case（例: `dropdown-menu.tsx`）。
 - hook ファイルは `useXxx.ts`。query は `useXxxQuery`、画面ロジック hook は `use<Feature><Action>`（例: `useRouteCreation`, `useRouteDraft`）。
 - lib: 1関数1ファイル、`camelCase` の動詞始まり（`getRouteMenuLabel.ts`）。汎用の計算群は1ファイルにまとめてよい（`frontend/lib/running.ts`）。

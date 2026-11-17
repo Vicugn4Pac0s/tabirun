@@ -91,4 +91,27 @@ describe("UserInitialProfileScreen", () => {
     expect(save).not.toHaveBeenCalled();
     expect(refresh).not.toHaveBeenCalled();
   });
+  it.each([
+    ["身長(cm)", "170.5", "身長は整数で入力してください", "170"],
+    ["体重(kg)", "60.5", "体重は整数で入力してください", "60"],
+  ])(
+    "%s の小数を切り捨てず、整数に直すと保存できる",
+    async (label, decimal, message, integer) => {
+      const user = userEvent.setup();
+      render(<UserInitialProfileScreen initialValues={profile} />);
+      const input = screen.getByRole("spinbutton", { name: label });
+      expect(input).toHaveAttribute("step", "any");
+      await user.clear(input);
+      await user.type(input, decimal);
+      await user.click(screen.getByRole("button", { name: "初期設定を完了" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(message);
+      expect(input).toHaveValue(Number(decimal));
+      expect(input).toHaveAccessibleDescription(message);
+      expect(save).not.toHaveBeenCalled();
+      await user.clear(input);
+      await user.type(input, integer);
+      await user.click(screen.getByRole("button", { name: "初期設定を完了" }));
+      await waitFor(() => expect(save).toHaveBeenCalledWith(profile));
+    },
+  );
 });

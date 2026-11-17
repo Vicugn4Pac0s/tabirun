@@ -29,7 +29,7 @@ export const Default: Story = {
       within(dialog).getByText("サイドバーのコンテンツ"),
     ).toBeVisible();
     await userEvent.click(
-      within(dialog).getByRole("button", { name: "Close" }),
+      within(dialog).getByRole("button", { name: "閉じる" }),
     );
     await waitFor(() => expect(dialog).not.toBeVisible());
   },
@@ -45,7 +45,7 @@ export const CustomTitle: Story = {
     const dialog = await body.findByRole("dialog", { name: "ルート情報" });
     await expect(dialog).toBeVisible();
     await userEvent.click(
-      within(dialog).getByRole("button", { name: "Close" }),
+      within(dialog).getByRole("button", { name: "閉じる" }),
     );
   },
 };

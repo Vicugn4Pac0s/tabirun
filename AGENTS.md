@@ -51,7 +51,7 @@
 - `src/frontend/components/app-ui`: 2つ以上のfeatureで使う見た目だけの部品。feature・tRPC・業務知識に依存しない。
 - `src/frontend/hooks/shared`, `src/frontend/lib`: feature非依存の汎用処理。
 - `src/frontend/providers`: feature非依存の共通Contextと関連部品（`NavigationGuardProvider`、`GuardedLink`）。feature固有のContextはfeature内に置く。
-- `src/frontend/config.ts`: アプリ共通の定数・設定（地図の初期位置・ズームなど）。`src/frontend/types/`: featureに閉じない共通型（汎用の計算処理からも使う `Pace` など）。
+- `src/frontend/config.ts`: アプリ共通の定数・設定（地図の初期位置・ズームなど）。`src/frontend/types/`: featureに閉じない共通型（汎用の計算処理からも使う、共有schemaから推論した `Pace` など）。
 - `src/shared/schemas`: client/server共通のZod schemaと推論型。入力制約の唯一の定義元。
 - `src/server/api`（routers / procedure / middleware）、`src/server/db`（schema・接続）、`src/server/auth`、`src/server/quota`、`src/server/features/*`（サーバー専用の業務処理・DB操作・外部通信。副作用のない読み取りは操作と同じファイルに置いてよい。RSCから呼ぶものも `server-only` で守る）。
 - バックエンドの責務・配置・書き方は `docs/BACKEND_GUIDE.md` に従う。既存コードの移動・整理は依頼範囲内だけ行う。

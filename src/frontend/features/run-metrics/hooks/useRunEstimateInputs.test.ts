@@ -41,9 +41,28 @@ describe("useRunEstimateInputs", () => {
     expect(result.current.weightKg).toBe(60);
   });
 
-  it("不正なプロフィールのペースは既定値を使う", () => {
-    getUser.mockReturnValue({ pace: "invalid", weight: 55 });
+  it.each([
+    "invalid",
+    "",
+    "100:00",
+    "5:3",
+    " 5:30",
+    "5:30 ",
+    "5:60",
+    "5:99",
+    "99:99",
+  ])("不正なプロフィールのペース %s は既定値を使う", (pace) => {
+    getUser.mockReturnValue({ pace, weight: 55 });
     const { result } = renderHook(() => useRunEstimateInputs());
     expect(result.current.pace).toBe("5:00");
   });
+
+  it.each(["0:00", "5:30", "5:59", "99:59"])(
+    "共有schemaで有効なペース %s を使う",
+    (pace) => {
+      getUser.mockReturnValue({ pace, weight: 55 });
+      const { result } = renderHook(() => useRunEstimateInputs());
+      expect(result.current.pace).toBe(pace);
+    },
+  );
 });

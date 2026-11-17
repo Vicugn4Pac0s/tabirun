@@ -2,12 +2,52 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { eq } from "drizzle-orm";
 import { db } from "~/server/db";
 import { users } from "~/server/db/schema";
-import { getUserHomePageSettings, getUserProfileSettings } from "./profile";
+import {
+  getProfileFormInitialValues,
+  getUserHomePageSettings,
+  getUserProfileSettings,
+} from "./profile";
 
 const { findFirst } = vi.hoisted(() => ({ findFirst: vi.fn() }));
 vi.mock("server-only", () => ({}));
 vi.mock("~/server/db", () => ({ db: { query: { users: { findFirst } } } }));
 beforeEach(() => vi.resetAllMocks());
+
+describe("プロフィールのフォーム初期値", () => {
+  it("設定済みの5項目をそのまま渡し、0も保持する", () => {
+    const profile = {
+      birthDate: "1990-01-01",
+      gender: "male",
+      pace: "6:00",
+      height: 0,
+      weight: 0,
+    };
+    expect(getProfileFormInitialValues(profile)).toEqual(profile);
+    expect(findFirst).not.toHaveBeenCalled();
+  });
+
+  it.each([null, "invalid"])(
+    "未設定の値と選択肢外の性別（%s）をundefinedにする",
+    (gender) => {
+      expect(
+        getProfileFormInitialValues({
+          birthDate: null,
+          gender,
+          pace: null,
+          height: null,
+          weight: null,
+        }),
+      ).toEqual({
+        birthDate: undefined,
+        gender: undefined,
+        pace: undefined,
+        height: undefined,
+        weight: undefined,
+      });
+      expect(findFirst).not.toHaveBeenCalled();
+    },
+  );
+});
 
 describe("プロフィール設定の読み取り", () => {
   it("ホーム用は渡されたDBで本人の完了状態だけを取得する", async () => {

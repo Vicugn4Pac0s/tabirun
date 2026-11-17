@@ -5,6 +5,7 @@ import {
   ArrowRightToLine,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { cn } from "~/frontend/lib/utils";
 
 type Props = {
   type: "first" | "prev" | "next" | "last";
@@ -47,7 +48,10 @@ const SubActionButton = ({
   }
   return (
     <motion.button
-      className={`flex h-16 w-16 flex-col items-center justify-center gap-1 bg-white ${className} disabled:opacity-50`}
+      className={cn(
+        "flex h-16 w-16 flex-col items-center justify-center gap-1 bg-white disabled:opacity-50",
+        className,
+      )}
       disabled={disabled}
       onClick={onClick}
       onMouseOver={onMouseOver}

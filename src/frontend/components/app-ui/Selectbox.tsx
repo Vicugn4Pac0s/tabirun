@@ -34,7 +34,7 @@ export function Selectbox({
   items,
   value,
   onValueChange,
-  placeholder = "Select",
+  placeholder = "選択してください",
   label,
   ariaLabel,
   disabled,

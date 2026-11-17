@@ -1,3 +1,4 @@
+import type * as ProfileModule from "~/server/features/user/profile";
 import { db } from "~/server/db";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -18,7 +19,10 @@ vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
 vi.mock("server-only", () => ({}));
 vi.mock("~/server/auth", () => ({ auth }));
 vi.mock("~/server/db", () => ({ db: {} }));
-vi.mock("~/server/features/user/profile", () => ({ getUserProfileSettings }));
+vi.mock("~/server/features/user/profile", async (importOriginal) => ({
+  ...(await importOriginal<typeof ProfileModule>()),
+  getUserProfileSettings,
+}));
 vi.mock("next/navigation", () => ({
   redirect: (path: string) => {
     throw new Error(`REDIRECT:${path}`);

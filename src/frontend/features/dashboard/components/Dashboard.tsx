@@ -42,7 +42,7 @@ function PersonalDashboard() {
               {isLoading ? (
                 <p role="status">読み込み中...</p>
               ) : error ? (
-                <p role="alert" className="text-red-600">
+                <p role="alert" className="text-destructive">
                   プロフィールを取得できませんでした。
                 </p>
               ) : (
@@ -86,7 +86,7 @@ function PersonalDashboard() {
         ) : routesError ? (
           <p
             role="alert"
-            className="rounded-xl border border-red-200 bg-white p-6 text-red-600"
+            className="rounded-xl border border-red-200 bg-white p-6 text-destructive"
           >
             ルートを取得できませんでした。時間をおいて再度お試しください。
           </p>
