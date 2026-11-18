@@ -20,7 +20,7 @@ import {
   toSavedGoogleRouteDirection,
   type SavedRouteDirection,
 } from "~/server/features/direction/domain";
-import { getDirectionOrNull } from "~/server/features/direction/service";
+import { tryGetDirection } from "~/server/features/direction/service";
 import { hasQuotaRemaining } from "~/server/quota/service";
 import type { routes } from "~/server/db/schema";
 
@@ -152,7 +152,7 @@ export async function ensureRouteDirection(
   if (!quotaRemaining) {
     result = createStraightLineDirection(points, pointsHash, quotaCheckedAt);
   } else {
-    const direction = await getDirectionOrNull(tx, userId, {
+    const direction = await tryGetDirection(tx, userId, {
       routePoints: points,
     });
     if (!direction) {

@@ -26,7 +26,7 @@ export async function getDirection(
  * 経路を取得して利用回数を計上し、計算失敗時はnullを返す。
  * 入力は呼出側でschema検証する。計上のDB障害はnullに変換せず伝播する。
  */
-export async function getDirectionOrNull(
+export async function tryGetDirection(
   database: DirectionDb,
   userId: string,
   input: DirectionInput,

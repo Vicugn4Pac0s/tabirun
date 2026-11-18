@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "~/server/db";
 import {
   getDirection,
-  getDirectionOrNull,
+  tryGetDirection,
 } from "~/server/features/direction/service";
 
 const mocks = vi.hoisted(() => ({
@@ -37,9 +37,9 @@ beforeEach(() => {
 });
 
 describe("getDirection", () => {
-  it("getDirectionOrNullも成功時は経路を返し、1回だけ計上する", async () => {
+  it("tryGetDirectionも成功時は経路を返し、1回だけ計上する", async () => {
     mocks.computeRoute.mockResolvedValue(direction);
-    await expect(getDirectionOrNull(db, "owner", input)).resolves.toEqual(
+    await expect(tryGetDirection(db, "owner", input)).resolves.toEqual(
       direction,
     );
     expect(mocks.incrementQuota).toHaveBeenCalledExactlyOnceWith(
@@ -58,7 +58,7 @@ describe("getDirection", () => {
           throw error;
         },
       );
-      await expect(getDirectionOrNull(db, "owner", input)).resolves.toBeNull();
+      await expect(tryGetDirection(db, "owner", input)).resolves.toBeNull();
       expect(mocks.incrementQuota).toHaveBeenCalledTimes(started ? 1 : 0);
     },
   );
@@ -75,7 +75,7 @@ describe("getDirection", () => {
       );
       const error = new Error("database failure");
       mocks.incrementQuota.mockRejectedValue(error);
-      await expect(getDirectionOrNull(db, "owner", input)).rejects.toBe(error);
+      await expect(tryGetDirection(db, "owner", input)).rejects.toBe(error);
       expect(mocks.incrementQuota).toHaveBeenCalledExactlyOnceWith(
         db,
         "owner",
