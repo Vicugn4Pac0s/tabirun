@@ -34,6 +34,50 @@ beforeEach(() => {
 });
 
 describe("getDirection", () => {
+  it.each([false, true])(
+    "計算失敗をnullに変換でき、送信開始=%sに応じて計上する",
+    async (started) => {
+      const error = new Error("compute failure");
+      const onComputeError = vi.fn(() => null);
+      mocks.computeRoute.mockImplementation(
+        (_input: unknown, onRequestStarted: () => void) => {
+          if (started) onRequestStarted();
+          throw error;
+        },
+      );
+      await expect(
+        getDirection(db, "owner", input, onComputeError),
+      ).resolves.toBeNull();
+      expect(onComputeError).toHaveBeenCalledExactlyOnceWith(error);
+      expect(mocks.incrementQuota).toHaveBeenCalledTimes(started ? 1 : 0);
+    },
+  );
+
+  it.each(["success", "failure"])(
+    "null変換を指定しても通信%s後の計上DB障害は伝播する",
+    async (result) => {
+      const onComputeError = vi.fn(() => null);
+      mocks.computeRoute.mockImplementation(
+        (_input: unknown, onRequestStarted: () => void) => {
+          onRequestStarted();
+          if (result === "failure") throw new Error("compute failure");
+          return direction;
+        },
+      );
+      const error = new Error("database failure");
+      mocks.incrementQuota.mockRejectedValue(error);
+      await expect(
+        getDirection(db, "owner", input, onComputeError),
+      ).rejects.toBe(error);
+      expect(onComputeError).not.toHaveBeenCalled();
+      expect(mocks.incrementQuota).toHaveBeenCalledExactlyOnceWith(
+        db,
+        "owner",
+        "direction",
+      );
+    },
+  );
+
   it("送信前の失敗は計上せず、元の例外を返す", async () => {
     const error = new Error("before request");
     mocks.computeRoute.mockRejectedValue(error);

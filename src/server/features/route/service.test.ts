@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "~/server/db";
 import { routes } from "~/server/db/schema";
-import { ensureRouteDirection } from "./ensureRouteDirection";
+import { ensureRouteDirection } from "./service";
 import {
   getRoutePointsHash,
   ROUTE_DIRECTION_CACHE_MAX_AGE_MS,
