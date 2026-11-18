@@ -7,7 +7,7 @@ import { ensureRouteDirection } from "./ensureRouteDirection";
 import {
   getRoutePointsHash,
   ROUTE_DIRECTION_CACHE_MAX_AGE_MS,
-} from "~/server/features/direction/rules";
+} from "~/server/features/direction/domain";
 
 const mocks = vi.hoisted(() => ({
   update: vi.fn(),

@@ -4,7 +4,7 @@ import { and, eq, sql } from "drizzle-orm";
 import type { db } from "~/server/db";
 import { routes } from "~/server/db/schema";
 import { routePointsSchema, type RouteCreateInput } from "~/shared/schemas";
-import type { SavedRouteDirection } from "~/server/features/direction/rules";
+import type { SavedRouteDirection } from "~/server/features/direction/domain";
 
 export const CLEARED_DIRECTION = {
   encodedPolyline: null,

@@ -2,36 +2,26 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { decode, encode } from "@googlemaps/polyline-codec";
-import { z } from "zod";
-import type { GoogleRouteDirection } from "~/server/features/direction/client";
-import { routePointsSchema } from "~/shared/schemas";
+import type { z } from "zod";
+import {
+  routePointsSchema,
+  routeDirectionSnapshotSchema,
+  type RouteDirectionSnapshot,
+} from "~/shared/schemas";
+
+export type { RouteDirectionSnapshot } from "~/shared/schemas";
 
 export const ROUTE_DIRECTION_CACHE_MAX_AGE_MS = 29 * 24 * 60 * 60 * 1000;
 
-const snapshotFields = {
-  directionCalculatedAt: z.date(),
-  directionPointsHash: z.string().regex(/^[a-f0-9]{64}$/),
+type RoutePoints = z.infer<typeof routePointsSchema>;
+
+export type GoogleRouteDirection = {
+  distanceMeters: number | null;
+  duration: string | null;
+  encodedPolyline: string | null;
+  path: Array<{ lat: number; lng: number }>;
 };
 
-const snapshotSchema = z.discriminatedUnion("directionSource", [
-  z.object({
-    ...snapshotFields,
-    directionSource: z.literal("routes_api"),
-    encodedPolyline: z.string().min(1),
-    distanceMeters: z.number().int().nonnegative(),
-    duration: z.string().regex(/^\d+(?:\.\d{1,9})?s$/),
-  }),
-  z.object({
-    ...snapshotFields,
-    directionSource: z.literal("straight_line"),
-    encodedPolyline: z.null(),
-    distanceMeters: z.null(),
-    duration: z.null(),
-  }),
-]);
-
-type RoutePoints = z.infer<typeof routePointsSchema>;
-export type RouteDirectionSnapshot = z.infer<typeof snapshotSchema>;
 export type SavedRouteDirection = RouteDirectionSnapshot & {
   path: RoutePoints;
 };
@@ -60,7 +50,7 @@ export function getReusableRouteDirection(
   points: RoutePoints,
   now: Date,
 ): SavedRouteDirection | null {
-  const parsed = snapshotSchema.safeParse(saved);
+  const parsed = routeDirectionSnapshotSchema.safeParse(saved);
   if (!parsed.success) return null;
   const snapshot = parsed.data;
   const age = now.getTime() - snapshot.directionCalculatedAt.getTime();

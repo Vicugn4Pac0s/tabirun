@@ -16,7 +16,7 @@ import {
   getReusableRouteDirection,
   getRoutePointsHash,
   type SavedRouteDirection,
-} from "~/server/features/direction/rules";
+} from "~/server/features/direction/domain";
 
 type RouteDirectionDb = Pick<typeof Database, "query" | "insert" | "update">;
 type RouteForDirection = Omit<typeof routes.$inferSelect, "points"> & {

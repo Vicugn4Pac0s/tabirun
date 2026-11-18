@@ -5,6 +5,9 @@ import { z } from "zod";
 import { decode } from "@googlemaps/polyline-codec";
 import { TRPCError } from "@trpc/server";
 import type { DirectionInput } from "~/shared/schemas";
+import type { GoogleRouteDirection } from "./domain";
+
+export type { GoogleRouteDirection } from "./domain";
 
 const decodePolylineToLatLngLiteral = (encoded: string) => {
   return decode(encoded).map(([lat, lng]) => ({
@@ -24,7 +27,6 @@ export const directionOutputSchema = z.object({
     }),
   ),
 });
-export type GoogleRouteDirection = z.infer<typeof directionOutputSchema>;
 
 const computeRoutesResponseSchema = z.object({
   routes: z

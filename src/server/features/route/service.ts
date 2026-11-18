@@ -13,7 +13,7 @@ import {
   updateOwnedRoute,
 } from "~/server/features/route/repository";
 import { ensureRouteDirection } from "./ensureRouteDirection";
-import { getRoutePointsHash } from "~/server/features/direction/rules";
+import { getRoutePointsHash } from "~/server/features/direction/domain";
 
 /**
  * 所有ルートの詳細と経路を返し、対象がなければNOT_FOUNDを投げる。
