@@ -88,7 +88,7 @@ server/db/                         接続・schema
 - 依存は原則 `router → features → DB／quota／外部通信`。サーバーfeature間は `route → direction` の一方向に保ち、directionからrouteの保存処理を呼ばない。
 - 保存ルートの所有者確認・経路再利用・残数による分岐・保存をまとめる `ensureRouteDirection` は `route/service.ts` に置く。経路取得と利用回数の計上は `direction/service.ts` に集約する。
 - `getDirection` は計算失敗を例外で返し、`tryGetDirection` は計算失敗を `null` で返す。利用回数の計上に失敗した場合は、どちらもDB障害を伝播させる。残数確認は呼び出し側が担当する。
-- `server` から `frontend` をimportしない。保護ページは `server/auth/getProtectedPageState.ts` が状態だけを返し、`app/_lib/renderProtectedPage.tsx` の描画関数が画面を出し分ける。描画コールバックは準備完了時だけ評価する。
+- `server` から `frontend` をimportしない。保護ページは `server/auth/getProtectedPageState.ts` が状態だけを返し、pageが状態を確認し、未ログイン・初期設定前なら `app/_components/ProtectedPageFallback.tsx` を返す。準備完了時だけpage内でデータ取得と通常画面の描画へ進む。
 - `auth`・`quota`・`db` は共通の仕組みとして残し、業務処理は関連するfeature内に置く。
 - 空の層は作らず、小さい処理は同じファイルに置いてよい。このガイドだけを根拠に依頼範囲外の配置変更をしない。
 

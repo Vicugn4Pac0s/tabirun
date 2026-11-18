@@ -75,7 +75,7 @@
 
 ## フロントエンド
 - 詳細は `docs/FRONTEND_GUIDE.md`。ここには要点だけを書く。
-- page は認証・プロフィール状態に応じた画面の出し分けやredirect・初期データ取得を行い、画面コンポーネントに props で渡す。保護対象のpageはserverの `getProtectedPageState` で状態を取得し、app層の描画関数 `app/_lib/renderProtectedPage.tsx` に状態とコールバックを渡す。準備完了時だけコールバックを評価し、未ログインならログイン画面、プロフィール未完了なら初期設定画面をその場で表示する。画面ロジック（送信・遷移・toast）とフォームの `useForm` は `hooks/use<Feature><Action>` に置き、フォームcomponentは渡されたformでフィールドを描画する。
+- page は認証・プロフィール状態に応じた画面の出し分けやredirect・初期データ取得を行い、画面コンポーネントに props で渡す。保護対象のpageはserverの `getProtectedPageState` で状態を取得し、未ログイン・初期設定前ならapp層の `ProtectedPageFallback` に状態を渡して早期returnする。準備完了時だけpage内でデータ取得と通常画面の描画へ進む。未ログインならログイン画面、プロフィール未完了なら初期設定画面をその場で表示する。画面ロジック（送信・遷移・toast）とフォームの `useForm` は `hooks/use<Feature><Action>` に置き、フォームcomponentは渡されたformでフィールドを描画する。
 - client の取得は `features/*/api` の hook から行う。query は `useXxxQuery`、mutation は `use<動詞><名詞>`（例: `useUpdateRoute`）で、成功時に invalidate する。
 - エラーは `TRPCError` の code だけで分岐し、server の `message` を表示しない。mutation の結果は toast、query の失敗は inline（`role="alert"`、`text-destructive`）、page では `NOT_FOUND` だけ `notFound()` にする。
 - 新規 component は `PascalCase.tsx` で named export にし、型は `type XxxProps` で書く。テストと story は同じディレクトリに置く。
