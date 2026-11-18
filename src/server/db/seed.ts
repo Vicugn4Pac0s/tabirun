@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { db } from "./index";
+import { db } from "./connection";
 import { paces } from "./schema";
 
 async function seed() {

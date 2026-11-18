@@ -82,7 +82,7 @@ server/db/                         接続・schema
 - `domain.ts` は判断・計算・組み立ての純粋関数を置き、DB・client・tRPC context・環境変数に依存させない。入力の形や制約を表すschemaは `shared/schemas` に定義し、domainでは参照して使う。
 - `client.ts` は外部APIとの通信と応答検証を担当する。外部APIレスポンスのschemaもここに置く。
 - `constants.ts` はfeature内の複数ファイルで共有する定数を置く。ファイル内だけで使う定数はそのファイルに置く。
-- `server/db/index.ts` は、通常のNode.jsで動く `db:seed` と接続を共有するため例外とする。現在の構成で `server-only` を追加するとseedのimport時に例外になる。DB入口をビルド時に保護する改善案として、接続処理とアプリ用入口の分離がある。現在は接続処理とアプリ用入口を分離していない。frontendからの値のimportは禁止する。
+- アプリ用のDB入口 `server/db/index.ts` には `import "server-only"` を付ける。接続クライアントとDrizzle接続の作成は `server/db/connection.ts` に置き、`index.ts` は同じ `client` と `db` を再exportする。接続は `prepare: false` とし、非本番では `globalThis` のクライアントを再利用して接続を二重に作らない。`db:seed` は通常のNode.js（tsx）で動くため `connection.ts` を直接読み、`connection.ts` には `server-only` を付けない。アプリのimportは `~/server/db` のままにする。frontendからの値のimportは禁止する。
 - RSCから呼ぶ読み取りも `server-only` で守る。pageはfeatureの読み取り関数か `~/trpc/server` のAPIを使い、DBを直接操作しない。
 - queryという名前だけで読み取り専用と判断しない。現在の `route.getById` は経路キャッシュを書き戻すことがあり、`getRouteDetail` のような操作として扱う。
 - 依存は原則 `router → features → DB／quota／外部通信`。サーバーfeature間は `route → direction` の一方向に保ち、directionからrouteの保存処理を呼ばない。
