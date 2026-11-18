@@ -9,29 +9,39 @@ import type { GoogleRouteDirection } from "./domain";
 type DirectionDb = Pick<typeof db, "query" | "insert">;
 
 /**
- * Googleの経路を取得し、送信開始後の試行を成功・失敗ともに1回計上する。
- * 入力は呼出側でschema検証する。計上に失敗した場合は通信結果よりDB障害を優先する。
- * onComputeErrorを渡した場合だけ計算失敗をnullに変換する。計上のDB障害には適用しない。
+ * 経路を取得して利用回数を計上し、計算失敗時は元の例外を投げる。
+ * 入力は呼出側でschema検証する。計上のDB障害は計算結果より優先して伝播する。
  */
-export function getDirection(
-  database: DirectionDb,
-  userId: string,
-  input: DirectionInput,
-): Promise<GoogleRouteDirection>;
-export function getDirection(
-  database: DirectionDb,
-  userId: string,
-  input: DirectionInput,
-  onComputeError: (error: unknown) => null,
-): Promise<GoogleRouteDirection | null>;
 export async function getDirection(
   database: DirectionDb,
   userId: string,
   input: DirectionInput,
-  onComputeError?: (error: unknown) => null,
+): Promise<GoogleRouteDirection> {
+  const result = await computeAndCountDirection(database, userId, input);
+  if (result.status === "rejected") throw result.reason;
+  return result.value;
+}
+
+/**
+ * 経路を取得して利用回数を計上し、計算失敗時はnullを返す。
+ * 入力は呼出側でschema検証する。計上のDB障害はnullに変換せず伝播する。
+ */
+export async function getDirectionOrNull(
+  database: DirectionDb,
+  userId: string,
+  input: DirectionInput,
 ): Promise<GoogleRouteDirection | null> {
+  const result = await computeAndCountDirection(database, userId, input);
+  return result.status === "fulfilled" ? result.value : null;
+}
+
+async function computeAndCountDirection(
+  database: DirectionDb,
+  userId: string,
+  input: DirectionInput,
+): Promise<PromiseSettledResult<GoogleRouteDirection>> {
   let requestStarted = false;
-  let direction: Awaited<ReturnType<typeof computeRoute>>;
+  let direction: GoogleRouteDirection;
   try {
     direction = await computeRoute(input, () => {
       requestStarted = true;
@@ -39,10 +49,9 @@ export async function getDirection(
   } catch (error) {
     // 到達不明の通信例外も数え、失敗の繰り返しで上限を回避させない。
     if (requestStarted) await incrementQuota(database, userId, "direction");
-    if (onComputeError) return onComputeError(error);
-    throw error;
+    return { status: "rejected", reason: error };
   }
-  // DB障害を通信失敗としてcatchせず、そのまま伝播させる。
+  // DB障害は計算結果に含めず、呼出側へ伝播させる。
   await incrementQuota(database, userId, "direction");
-  return direction;
+  return { status: "fulfilled", value: direction };
 }

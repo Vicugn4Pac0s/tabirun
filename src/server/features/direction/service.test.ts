@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "~/server/db";
-import { getDirection } from "~/server/features/direction/service";
+import {
+  getDirection,
+  getDirectionOrNull,
+} from "~/server/features/direction/service";
 
 const mocks = vi.hoisted(() => ({
   computeRoute: vi.fn(),
@@ -34,21 +37,28 @@ beforeEach(() => {
 });
 
 describe("getDirection", () => {
+  it("getDirectionOrNullも成功時は経路を返し、1回だけ計上する", async () => {
+    mocks.computeRoute.mockResolvedValue(direction);
+    await expect(getDirectionOrNull(db, "owner", input)).resolves.toEqual(
+      direction,
+    );
+    expect(mocks.incrementQuota).toHaveBeenCalledExactlyOnceWith(
+      db,
+      "owner",
+      "direction",
+    );
+  });
   it.each([false, true])(
     "計算失敗をnullに変換でき、送信開始=%sに応じて計上する",
     async (started) => {
       const error = new Error("compute failure");
-      const onComputeError = vi.fn(() => null);
       mocks.computeRoute.mockImplementation(
         (_input: unknown, onRequestStarted: () => void) => {
           if (started) onRequestStarted();
           throw error;
         },
       );
-      await expect(
-        getDirection(db, "owner", input, onComputeError),
-      ).resolves.toBeNull();
-      expect(onComputeError).toHaveBeenCalledExactlyOnceWith(error);
+      await expect(getDirectionOrNull(db, "owner", input)).resolves.toBeNull();
       expect(mocks.incrementQuota).toHaveBeenCalledTimes(started ? 1 : 0);
     },
   );
@@ -56,7 +66,6 @@ describe("getDirection", () => {
   it.each(["success", "failure"])(
     "null変換を指定しても通信%s後の計上DB障害は伝播する",
     async (result) => {
-      const onComputeError = vi.fn(() => null);
       mocks.computeRoute.mockImplementation(
         (_input: unknown, onRequestStarted: () => void) => {
           onRequestStarted();
@@ -66,10 +75,7 @@ describe("getDirection", () => {
       );
       const error = new Error("database failure");
       mocks.incrementQuota.mockRejectedValue(error);
-      await expect(
-        getDirection(db, "owner", input, onComputeError),
-      ).rejects.toBe(error);
-      expect(onComputeError).not.toHaveBeenCalled();
+      await expect(getDirectionOrNull(db, "owner", input)).rejects.toBe(error);
       expect(mocks.incrementQuota).toHaveBeenCalledExactlyOnceWith(
         db,
         "owner",
