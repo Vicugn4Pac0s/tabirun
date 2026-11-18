@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import { PageContainer } from "~/frontend/components/app-ui/PageContainer";
 import { UserProfileEditScreen } from "~/frontend/features/user/components/UserProfileEditScreen";
-import { renderProtectedPage } from "~/server/auth/renderProtectedPage";
+import { renderProtectedPage } from "~/app/_lib/renderProtectedPage";
+import { getProtectedPageState } from "~/server/auth/getProtectedPageState";
 import { getProfileFormInitialValues } from "~/server/features/user/service";
 
 export default async function UserProfileEditPage() {
-  return renderProtectedPage((_session, user) => {
+  return renderProtectedPage(await getProtectedPageState(), ({ user }) => {
     if (!user) redirect("/");
 
     return (

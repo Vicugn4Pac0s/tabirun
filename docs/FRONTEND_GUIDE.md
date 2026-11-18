@@ -42,7 +42,7 @@
 
 ### エラー
 
-- 保護対象のpageは `server/auth/renderProtectedPage.tsx` を使う。未ログインなら `LoginScreen`、プロフィール行が存在して未完了なら `UserInitialProfileScreen` をその場で表示し、redirectしない。プロフィール行がない場合は通常の画面描画へ進む。
+- 保護対象のpageは `server/auth/getProtectedPageState.ts` で状態を取得し、app層の描画関数 `app/_lib/renderProtectedPage.tsx` に状態と描画用のコールバックを渡す。コンポーネントとしては扱わず、準備完了時だけコールバックを評価する。未ログインなら `LoginScreen`、プロフィール行が存在して未完了なら `UserInitialProfileScreen` をその場で表示し、redirectしない。プロフィール行がない場合は通常の画面描画へ進む。
 - ホーム（`app/page.tsx`）はプロフィール行が存在して未完了なら `/setup-profile` へredirectする。`app/setup-profile/page.tsx` は未ログインならログイン画面を表示し、プロフィール行がない、または完了済みなら `/` へredirectする。
 - URL param は Zod で検証し不正なら `notFound()`。
 - page での tRPC 呼び出しは `TRPCError` の `NOT_FOUND` だけ `notFound()` に変え、それ以外は再 throw する（404 で隠さない。`app/routes/[id]/page.test.tsx` がこれを検証）。

@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 
 import { RouteEditScreen } from "~/frontend/features/route/components/RouteEditScreen";
-import { renderProtectedPage } from "~/server/auth/renderProtectedPage";
+import { renderProtectedPage } from "~/app/_lib/renderProtectedPage";
+import { getProtectedPageState } from "~/server/auth/getProtectedPageState";
 import { api } from "~/trpc/server";
 
 type RouteEditPageProps = {
@@ -20,21 +21,24 @@ export default async function RouteEditPage({ params }: RouteEditPageProps) {
     .pipe(z.number().int().positive().safe())
     .safeParse(id);
   if (!parsedId.success) notFound();
-  return renderProtectedPage(async (session) => {
-    const route = await api.route
-      .getById({ id: parsedId.data })
-      .catch((error: unknown) => {
-        if (error instanceof TRPCError && error.code === "NOT_FOUND")
-          notFound();
-        throw error;
-      });
+  return renderProtectedPage(
+    await getProtectedPageState(),
+    async ({ session }) => {
+      const route = await api.route
+        .getById({ id: parsedId.data })
+        .catch((error: unknown) => {
+          if (error instanceof TRPCError && error.code === "NOT_FOUND")
+            notFound();
+          throw error;
+        });
 
-    return (
-      <SessionProvider session={session}>
-        <main>
-          <RouteEditScreen key={route.id} route={route} />
-        </main>
-      </SessionProvider>
-    );
-  });
+      return (
+        <SessionProvider session={session}>
+          <main>
+            <RouteEditScreen key={route.id} route={route} />
+          </main>
+        </SessionProvider>
+      );
+    },
+  );
 }
