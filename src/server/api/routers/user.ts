@@ -4,7 +4,7 @@ import {
   completeInitialProfile,
   getCurrentProfile,
   updateProfile,
-} from "~/server/features/user/profile";
+} from "~/server/features/user/service";
 import {
   userInitialProfileSchema,
   userProfileUpdateSchema,

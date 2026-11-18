@@ -43,3 +43,32 @@ export const routeIdSchema = z.object({
 export const routeDeleteSchema = routeIdSchema;
 
 export type RouteDeleteInput = z.infer<typeof routeDeleteSchema>;
+
+const snapshotFields = {
+  directionCalculatedAt: z.date(),
+  directionPointsHash: z.string().regex(/^[a-f0-9]{64}$/),
+};
+
+export const routeDirectionSnapshotSchema = z.discriminatedUnion(
+  "directionSource",
+  [
+    z.object({
+      ...snapshotFields,
+      directionSource: z.literal("routes_api"),
+      encodedPolyline: z.string().min(1),
+      distanceMeters: z.number().int().nonnegative(),
+      duration: z.string().regex(/^\d+(?:\.\d{1,9})?s$/),
+    }),
+    z.object({
+      ...snapshotFields,
+      directionSource: z.literal("straight_line"),
+      encodedPolyline: z.null(),
+      distanceMeters: z.null(),
+      duration: z.null(),
+    }),
+  ],
+);
+
+export type RouteDirectionSnapshot = z.infer<
+  typeof routeDirectionSnapshotSchema
+>;

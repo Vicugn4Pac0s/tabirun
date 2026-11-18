@@ -6,7 +6,7 @@ import {
   getRouteDetail,
   getUserRoutes,
   updateRoute,
-} from "~/server/features/route/operations";
+} from "~/server/features/route/service";
 import {
   routeCreateSchema,
   routeDeleteSchema,

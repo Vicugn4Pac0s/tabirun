@@ -3,11 +3,11 @@ import { TRPCError } from "@trpc/server";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "~/server/db";
 import { routes } from "~/server/db/schema";
-import { ensureRouteDirection } from "./ensureRouteDirection";
+import { ensureRouteDirection } from "./service";
 import {
   getRoutePointsHash,
   ROUTE_DIRECTION_CACHE_MAX_AGE_MS,
-} from "./routeDirectionCache";
+} from "~/server/features/direction/domain";
 
 const mocks = vi.hoisted(() => ({
   update: vi.fn(),
@@ -27,7 +27,7 @@ vi.mock("~/server/quota/service", () => ({
   hasQuotaRemaining: mocks.hasQuotaRemaining,
   incrementQuota: mocks.incrementQuota,
 }));
-vi.mock("~/server/features/googlemap/computeRoute", () => ({
+vi.mock("~/server/features/direction/client", () => ({
   computeRoute: mocks.computeRoute,
 }));
 

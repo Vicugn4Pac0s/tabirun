@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 import type { db } from "~/server/db";
 import { users } from "~/server/db/schema";
-import { getProfileGender } from "./profileGender";
+import { getProfileGender } from "~/server/features/user/domain";
 import type {
   UserInitialProfileInput,
   UserProfileUpdateInput,

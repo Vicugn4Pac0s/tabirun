@@ -4,7 +4,7 @@
 
 featureは配置の単位、DDDは業務の概念や境界を考えるための考え方で、両立する。業務の言葉で命名しルールを分離する考えは採用するが、DDD一式やEntityクラス、層を増やすための仕組みは導入しない。
 
-このガイドは今後の追加・変更に適用する。プロフィールの読み書きは `features/user`、ルートの操作・DBアクセスは `features/route`、Googleとの通信は `features/googlemap` に配置している。ガイドを根拠に依頼範囲外の既存コードを移動・整理しない。
+このガイドは今後の追加・変更に適用する。プロフィールの読み書きは `features/user`、ルートの操作・DBアクセスは `features/route`、Googleとの通信は `features/direction` に配置している。ガイドを根拠に依頼範囲外の既存コードを移動・整理しない。
 
 ## 1. routerは入口にする
 
@@ -60,31 +60,36 @@ featureは配置の単位、DDDは業務の概念や境界を考えるための�
 ```text
 server/api/routers/                 入力・認証・呼び出し
 server/features/route/
-  operations.ts                    操作とトランザクション
-  data.ts                          所有者条件付きDB操作・行の変換
-  ensureRouteDirection.ts          経路の再利用・計算・保存の流れ
-  routeDirectionCache.ts           hash・期限・検証などの純粋関数
+  service.ts                       操作・トランザクション・経路の再利用と保存
+  repository.ts                    所有者条件付きDB操作・行の変換
+server/features/direction/
+  service.ts                       経路取得と利用回数の計上
+  domain.ts                        hash・期限・再利用判定・保存用経路の組み立て
+  client.ts                        Googleへの通信・応答検証・経路復元
 server/features/user/
-  profile.ts                       プロフィールの読み取り・更新
-  profileGender.ts                 保存済みの性別をフォーム用に検証
-server/features/googlemap/
-  direction.ts                     経路取得と利用回数の計上
-  computeRoute.ts                  Googleへの通信・応答検証・経路復元
-server/features/pace/paces.ts       公開ペース一覧の取得
+  service.ts                       プロフィールの読み取り・更新
+  domain.ts                        保存済みの性別をフォーム用に検証
+server/features/pace/service.ts     公開ペース一覧の取得
 server/quota/                      利用枠の確認・計上
 server/auth/                       認証
 server/db/                         接続・schema
 ```
 
 - `server/features` は読み取りに限定せず、サーバー専用の業務処理・DB操作・外部通信を置く。サーバー専用モジュールには `import "server-only"` を付ける。
+- feature内のファイル名は `service.ts`、`repository.ts`、`domain.ts`、`client.ts`、`constants.ts` と対応する `*.test.ts` に揃える。必要なものだけ作り、長くなった場合は同名のディレクトリに分けてよい。
+- `service.ts` は操作の順序・トランザクション・エラー判定を担当する。小さいfeatureのDB処理や、副作用のない読み取りも同じファイルに置いてよい。
+- `repository.ts` は所有者条件付きDB処理・行の変換を担当する。現在はロックや複数のDB操作を持つ `route` で分けており、全featureに機械的に作らない。
+- `domain.ts` は判断・計算・組み立ての純粋関数を置き、DB・client・tRPC context・環境変数に依存させない。入力の形や制約を表すschemaは `shared/schemas` に定義し、domainでは参照して使う。
+- `client.ts` は外部APIとの通信と応答検証を担当する。外部APIレスポンスのschemaもここに置く。
+- `constants.ts` はfeature内の複数ファイルで共有する定数を置く。ファイル内だけで使う定数はそのファイルに置く。
 - `server/db/index.ts` は、通常のNode.jsで動く `db:seed` と接続を共有するため例外とする。現在の構成で `server-only` を追加するとseedのimport時に例外になる。DB入口をビルド時に保護する改善案として、接続処理とアプリ用入口の分離がある。現在は接続処理とアプリ用入口を分離していない。frontendからの値のimportは禁止する。
-- 小さいfeatureは、扱うものの名前の1ファイルにまとめる（例: `features/user/profile.ts`）。
-- 所有者条件付きのDB処理やロックが増えたら、`operations.ts`（操作の順序・トランザクション・エラー判定）と `data.ts`（所有者条件付きDB処理・行の変換）に分ける（例: `features/route`）。操作ごとに1ファイルには分けない。
-- 副作用のない読み取りは操作と同じファイルに置いてよい。RSCから呼ぶものも `server-only` で守る。pageはfeatureの読み取り関数か `~/trpc/server` のAPIを使い、DBを直接操作しない。
+- RSCから呼ぶ読み取りも `server-only` で守る。pageはfeatureの読み取り関数か `~/trpc/server` のAPIを使い、DBを直接操作しない。
 - queryという名前だけで読み取り専用と判断しない。現在の `route.getById` は経路キャッシュを書き戻すことがあり、`getRouteDetail` のような操作として扱う。
-- 依存は原則 `router → features → DB／quota／外部通信`。feature間も一方向に保ち、例えばrouteからgooglemapを利用しても、その逆の依存は作らない。
+- 依存は原則 `router → features → DB／quota／外部通信`。サーバーfeature間は `route → direction` の一方向に保ち、directionからrouteの保存処理を呼ばない。
+- 保存ルートの所有者確認・経路再利用・残数による分岐・保存をまとめる `ensureRouteDirection` は `route/service.ts` に置く。経路取得と利用回数の計上は `direction/service.ts` に集約する。
+- `getDirection` は計算失敗を例外で返し、`tryGetDirection` は計算失敗を `null` で返す。利用回数の計上に失敗した場合は、どちらもDB障害を伝播させる。残数確認は呼び出し側が担当する。
 - `auth`・`quota`・`db` は共通の仕組みとして残し、業務処理は関連するfeature内に置く。
-- このツリーは配置の目安。空の層は作らず、小さい処理は同じファイルに置いてよい。このガイドだけを根拠に依頼範囲外の配置変更をしない。
+- 空の層は作らず、小さい処理は同じファイルに置いてよい。このガイドだけを根拠に依頼範囲外の配置変更をしない。
 
 ## 8. 導入しないもの
 
@@ -92,7 +97,7 @@ Repositoryのinterface、DIの仕組み、基底クラス、Result型、無理�
 
 ## 例: `route.update` のbefore / after
 
-現在の [route router](../src/server/api/routers/route.ts) の `update` は、[operations.ts](../src/server/features/route/operations.ts) の操作関数を呼ぶ。所有者条件付きの取得・更新・行変換は [data.ts](../src/server/features/route/data.ts)、経路の再利用・計算・保存は [ensureRouteDirection.ts](../src/server/features/route/ensureRouteDirection.ts) が担当する。
+現在の [route router](../src/server/api/routers/route.ts) の `update` は、[service.ts](../src/server/features/route/service.ts) の操作関数を呼ぶ。同じファイルの `ensureRouteDirection` が経路の再利用・計算・保存をまとめ、[repository.ts](../src/server/features/route/repository.ts) が所有者条件付きの取得・更新・行変換、[direction/domain.ts](../src/server/features/direction/domain.ts) が経路の純粋な判定・組み立てを担当する。
 
 beforeは整理前の構造を示す例で、比較・更新部分を省略している。
 
@@ -126,7 +131,7 @@ update: protectedProcedure
 ```
 
 ```ts
-// features/route/operations.ts
+// features/route/service.ts
 export async function updateRoute(
   database: typeof db,
   userId: string,
@@ -160,7 +165,7 @@ export async function updateRoute(
 DB関数は所有者条件やロックを名前だけにせず、SQLでも保証する。例えば `findOwnedRouteForUpdate` は次の形にする。
 
 ```ts
-// features/route/data.ts
+// features/route/repository.ts
 export async function findOwnedRouteForUpdate(
   tx: Pick<typeof db, "select">,
   userId: string,

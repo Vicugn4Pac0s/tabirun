@@ -22,7 +22,7 @@ const {
 
 vi.mock("~/server/auth", () => ({ auth }));
 vi.mock("~/server/db", () => ({ db: {} }));
-vi.mock("~/server/features/user/profile", () => ({ getUserHomePageSettings }));
+vi.mock("~/server/features/user/service", () => ({ getUserHomePageSettings }));
 vi.mock("next/navigation", () => ({ redirect }));
 vi.mock("next-auth/react", () => ({
   SessionProvider: ({ children }: { children: ReactNode }) => children,

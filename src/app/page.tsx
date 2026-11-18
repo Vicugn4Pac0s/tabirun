@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
-import { getUserHomePageSettings } from "~/server/features/user/profile";
+import { getUserHomePageSettings } from "~/server/features/user/service";
 import { api, HydrateClient } from "~/trpc/server";
 import { Dashboard } from "~/frontend/features/dashboard/components/Dashboard";
 

@@ -54,6 +54,8 @@
 - `src/frontend/config.ts`: アプリ共通の定数・設定（地図の初期位置・ズームなど）。`src/frontend/types/`: featureに閉じない共通型（汎用の計算処理からも使う、共有schemaから推論した `Pace` など）。
 - `src/shared/schemas`: client/server共通のZod schemaと推論型。入力制約の唯一の定義元。
 - `src/server/api`（routers / procedure / middleware）、`src/server/db`（schema・接続）、`src/server/auth`、`src/server/quota`、`src/server/features/*`（サーバー専用の業務処理・DB操作・外部通信。副作用のない読み取りは操作と同じファイルに置いてよい。RSCから呼ぶものも `server-only` で守る）。
+- サーバーfeature内は `service.ts`（操作の流れ）、`repository.ts`（DB操作）、`domain.ts`（純粋関数）、`client.ts`（外部通信）、`constants.ts` と対応するテストに揃え、必要なものだけ作る。長くなった場合は同名のディレクトリに分けてよい。小さいfeatureのDB処理はservice内でよい。
+- サーバーのdomainはDB・client・tRPC context・環境変数に依存させず、入力schemaは `shared/schemas` を参照する。サーバーfeature間は `route → direction` の一方向とし、保存ルートの経路を整える処理はroute、経路取得・利用回数の計上はdirectionに置く。
 - バックエンドの責務・配置・書き方は `docs/BACKEND_GUIDE.md` に従う。既存コードの移動・整理は依頼範囲内だけ行う。
 - 依存ルール:
   - `frontend` → `server` は `import type` のみ（例: `AppRouter`）。値のimportは禁止。

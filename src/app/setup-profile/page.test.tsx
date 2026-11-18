@@ -1,4 +1,4 @@
-import type * as ProfileModule from "~/server/features/user/profile";
+import type * as ProfileModule from "~/server/features/user/service";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import SetupProfilePage from "./page";
@@ -15,7 +15,7 @@ const { auth, getUserProfileSettings, redirect, screenProps } = vi.hoisted(
 vi.mock("~/server/auth", () => ({ auth }));
 vi.mock("server-only", () => ({}));
 vi.mock("~/server/db", () => ({ db: {} }));
-vi.mock("~/server/features/user/profile", async (importOriginal) => ({
+vi.mock("~/server/features/user/service", async (importOriginal) => ({
   ...(await importOriginal<typeof ProfileModule>()),
   getUserProfileSettings,
 }));

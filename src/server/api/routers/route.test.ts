@@ -8,7 +8,7 @@ import {
   getRoutePointsHash,
   ROUTE_DIRECTION_CACHE_MAX_AGE_MS,
   type RouteDirectionSnapshot,
-} from "~/server/features/route/routeDirectionCache";
+} from "~/server/features/direction/domain";
 import { routeRouter } from "./route";
 
 const {
@@ -61,7 +61,7 @@ vi.mock("~/server/db", () => ({
   },
 }));
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
-vi.mock("~/server/features/googlemap/computeRoute", () => ({ computeRoute }));
+vi.mock("~/server/features/direction/client", () => ({ computeRoute }));
 vi.mock("~/server/quota/service", () => ({
   hasQuotaRemaining,
   incrementQuota,

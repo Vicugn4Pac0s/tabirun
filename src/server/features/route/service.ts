@@ -9,11 +9,25 @@ import {
   findOwnedRouteForUpdate,
   findUserRoutes,
   insertOwnedRoute,
+  saveOwnedRouteDirection,
   toRoute,
   updateOwnedRoute,
-} from "./data";
-import { ensureRouteDirection } from "./ensureRouteDirection";
-import { getRoutePointsHash } from "./routeDirectionCache";
+} from "~/server/features/route/repository";
+import {
+  getRoutePointsHash,
+  getReusableRouteDirection,
+  createStraightLineDirection,
+  toSavedGoogleRouteDirection,
+  type SavedRouteDirection,
+} from "~/server/features/direction/domain";
+import { tryGetDirection } from "~/server/features/direction/service";
+import { hasQuotaRemaining } from "~/server/quota/service";
+import type { routes } from "~/server/db/schema";
+
+type RouteDirectionDb = Pick<typeof db, "query" | "insert" | "update">;
+type RouteForDirection = Omit<typeof routes.$inferSelect, "points"> & {
+  points: RouteCreateInput["points"];
+};
 
 /**
  * 所有ルートの詳細と経路を返し、対象がなければNOT_FOUNDを投げる。
@@ -110,4 +124,54 @@ export async function deleteRoute(
  */
 export function getUserRoutes(database: typeof db, userId: string) {
   return findUserRoutes(database, userId);
+}
+
+/**
+ * 経路を再利用または計算・保存する。残数不足は直線、通信・保存値検証の失敗はエラーコードで返す。
+ * 呼出側で取得・ロック（新規作成はINSERT）した行と同じトランザクションを使う。
+ * 所有者不一致・保存0件はNOT_FOUND。入力地点が不正な場合も例外になる。
+ */
+export async function ensureRouteDirection(
+  tx: RouteDirectionDb,
+  userId: string,
+  route: RouteForDirection,
+): Promise<
+  | { direction: SavedRouteDirection; directionErrorCode: null }
+  | { direction: null; directionErrorCode: "INTERNAL_SERVER_ERROR" }
+> {
+  if (route.createdById !== userId) throw new TRPCError({ code: "NOT_FOUND" });
+  const points = route.points;
+  const reusable = getReusableRouteDirection(route, points, new Date());
+  if (reusable) return { direction: reusable, directionErrorCode: null };
+
+  const quotaCheckedAt = new Date();
+  const quotaRemaining = await hasQuotaRemaining(tx, userId, "direction");
+
+  const pointsHash = getRoutePointsHash(points);
+  let result: SavedRouteDirection;
+  if (!quotaRemaining) {
+    result = createStraightLineDirection(points, pointsHash, quotaCheckedAt);
+  } else {
+    const direction = await tryGetDirection(tx, userId, {
+      routePoints: points,
+    });
+    if (!direction) {
+      return { direction: null, directionErrorCode: "INTERNAL_SERVER_ERROR" };
+    }
+    const validated = toSavedGoogleRouteDirection(
+      direction,
+      points,
+      pointsHash,
+      new Date(),
+    );
+    if (!validated) {
+      return { direction: null, directionErrorCode: "INTERNAL_SERVER_ERROR" };
+    }
+    result = validated;
+  }
+
+  const updated = await saveOwnedRouteDirection(tx, userId, route.id, result);
+  if (updated.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
+
+  return { direction: result, directionErrorCode: null };
 }
