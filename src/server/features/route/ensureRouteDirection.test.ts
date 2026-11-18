@@ -7,7 +7,7 @@ import { ensureRouteDirection } from "./ensureRouteDirection";
 import {
   getRoutePointsHash,
   ROUTE_DIRECTION_CACHE_MAX_AGE_MS,
-} from "./routeDirectionCache";
+} from "~/server/features/direction/rules";
 
 const mocks = vi.hoisted(() => ({
   update: vi.fn(),
@@ -27,7 +27,7 @@ vi.mock("~/server/quota/service", () => ({
   hasQuotaRemaining: mocks.hasQuotaRemaining,
   incrementQuota: mocks.incrementQuota,
 }));
-vi.mock("~/server/features/googlemap/computeRoute", () => ({
+vi.mock("~/server/features/direction/client", () => ({
   computeRoute: mocks.computeRoute,
 }));
 

@@ -2,7 +2,7 @@ import "server-only";
 
 import type { db } from "~/server/db";
 import { incrementQuota } from "~/server/quota/service";
-import { computeRoute } from "./computeRoute";
+import { computeRoute } from "~/server/features/direction/client";
 import type { DirectionInput } from "~/shared/schemas";
 
 /**

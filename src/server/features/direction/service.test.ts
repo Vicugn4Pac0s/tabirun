@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "~/server/db";
-import { getDirection } from "./direction";
+import { getDirection } from "~/server/features/direction/service";
 
 const mocks = vi.hoisted(() => ({
   computeRoute: vi.fn(),
@@ -8,7 +8,9 @@ const mocks = vi.hoisted(() => ({
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("~/server/db", () => ({ db: {} }));
-vi.mock("./computeRoute", () => ({ computeRoute: mocks.computeRoute }));
+vi.mock("~/server/features/direction/client", () => ({
+  computeRoute: mocks.computeRoute,
+}));
 vi.mock("~/server/quota/service", () => ({
   incrementQuota: mocks.incrementQuota,
 }));

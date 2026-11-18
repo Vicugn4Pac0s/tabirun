@@ -1,4 +1,4 @@
-import type * as ProfileModule from "~/server/features/user/profile";
+import type * as ProfileModule from "~/server/features/user/service";
 import { TRPCError } from "@trpc/server";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -39,7 +39,7 @@ vi.mock("~/frontend/features/route/components/RouteDetailScreen", () => ({
 }));
 vi.mock("~/server/auth", () => ({ auth }));
 vi.mock("~/server/db", () => ({ db: {} }));
-vi.mock("~/server/features/user/profile", async (importOriginal) => ({
+vi.mock("~/server/features/user/service", async (importOriginal) => ({
   ...(await importOriginal<typeof ProfileModule>()),
   getUserProfileSettings,
 }));

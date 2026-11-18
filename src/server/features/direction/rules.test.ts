@@ -6,7 +6,7 @@ import {
   getRoutePointsHash,
   ROUTE_DIRECTION_CACHE_MAX_AGE_MS,
   type RouteDirectionSnapshot,
-} from "./routeDirectionCache";
+} from "~/server/features/direction/rules";
 
 vi.mock("server-only", () => ({}));
 

@@ -3,7 +3,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { decode, encode } from "@googlemaps/polyline-codec";
 import { z } from "zod";
-import type { GoogleRouteDirection } from "~/server/features/googlemap/computeRoute";
+import type { GoogleRouteDirection } from "~/server/features/direction/client";
 import { routePointsSchema } from "~/shared/schemas";
 
 export const ROUTE_DIRECTION_CACHE_MAX_AGE_MS = 29 * 24 * 60 * 60 * 1000;

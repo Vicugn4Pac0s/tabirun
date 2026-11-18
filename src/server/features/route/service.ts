@@ -11,9 +11,9 @@ import {
   insertOwnedRoute,
   toRoute,
   updateOwnedRoute,
-} from "./data";
+} from "~/server/features/route/repository";
 import { ensureRouteDirection } from "./ensureRouteDirection";
-import { getRoutePointsHash } from "./routeDirectionCache";
+import { getRoutePointsHash } from "~/server/features/direction/rules";
 
 /**
  * 所有ルートの詳細と経路を返し、対象がなければNOT_FOUNDを投げる。

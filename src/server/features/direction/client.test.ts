@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { computeRoute } from "./computeRoute";
+import { computeRoute } from "~/server/features/direction/client";
 
 const { settings } = vi.hoisted(() => ({ settings: { key: "test-key" } }));
 vi.mock("server-only", () => ({}));

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { PageContainer } from "~/frontend/components/app-ui/PageContainer";
 import { UserProfileEditScreen } from "~/frontend/features/user/components/UserProfileEditScreen";
 import { renderProtectedPage } from "~/server/auth/renderProtectedPage";
-import { getProfileFormInitialValues } from "~/server/features/user/profile";
+import { getProfileFormInitialValues } from "~/server/features/user/service";
 
 export default async function UserProfileEditPage() {
   return renderProtectedPage((_session, user) => {

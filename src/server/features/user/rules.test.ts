@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { getProfileGender } from "./profileGender";
+import { getProfileGender } from "~/server/features/user/rules";
 
 vi.mock("server-only", () => ({}));
 

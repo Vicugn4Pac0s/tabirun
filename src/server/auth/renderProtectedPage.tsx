@@ -10,7 +10,7 @@ import { db } from "~/server/db";
 import {
   getUserProfileSettings,
   getProfileFormInitialValues,
-} from "~/server/features/user/profile";
+} from "~/server/features/user/service";
 
 /**
  * 認証・プロフィール状態に応じてログイン画面、初期設定画面、またはrenderの結果を返す。

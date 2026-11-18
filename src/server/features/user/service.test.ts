@@ -6,7 +6,7 @@ import {
   getProfileFormInitialValues,
   getUserHomePageSettings,
   getUserProfileSettings,
-} from "./profile";
+} from "~/server/features/user/service";
 
 const { findFirst } = vi.hoisted(() => ({ findFirst: vi.fn() }));
 vi.mock("server-only", () => ({}));

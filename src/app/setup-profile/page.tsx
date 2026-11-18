@@ -8,7 +8,7 @@ import { db } from "~/server/db";
 import {
   getUserProfileSettings,
   getProfileFormInitialValues,
-} from "~/server/features/user/profile";
+} from "~/server/features/user/service";
 
 export default async function SetupProfilePage() {
   const session = await auth();
