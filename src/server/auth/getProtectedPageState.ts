@@ -8,7 +8,7 @@ import {
   getProfileFormInitialValues,
 } from "~/server/features/user/service";
 
-type ProtectedPageState =
+export type ProtectedPageState =
   | { status: "unauthenticated" }
   | {
       status: "profileRequired";

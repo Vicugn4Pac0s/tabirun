@@ -1,9 +1,8 @@
 import { PageContainer } from "~/frontend/components/app-ui/PageContainer";
 import { LoginScreen } from "~/frontend/features/auth/components/LoginScreen";
 import { UserInitialProfileScreen } from "~/frontend/features/user/components/UserInitialProfileScreen";
-import type { getProtectedPageState } from "~/server/auth/getProtectedPageState";
+import type { ProtectedPageState } from "~/server/auth/getProtectedPageState";
 
-type ProtectedPageState = Awaited<ReturnType<typeof getProtectedPageState>>;
 type ProtectedPageFallbackProps = {
   state: Exclude<ProtectedPageState, { status: "ready" }>;
 };
