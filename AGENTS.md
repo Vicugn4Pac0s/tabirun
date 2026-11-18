@@ -58,6 +58,7 @@
 - サーバーのdomainはDB・client・tRPC context・環境変数に依存させず、入力schemaは `shared/schemas` を参照する。サーバーfeature間は `route → direction` の一方向とし、保存ルートの経路を整える処理はroute、経路取得・利用回数の計上はdirectionに置く。
 - バックエンドの責務・配置・書き方は `docs/BACKEND_GUIDE.md` に従う。既存コードの移動・整理は依頼範囲内だけ行う。
 - 依存ルール:
+  - `server` から `frontend` をimportしない。サーバーの状態判定と画面の組み合わせはapp層で行う。
   - `frontend` → `server` は `import type` のみ（例: `AppRouter`）。値のimportは禁止。
   - feature間は原則として上位 → 下位の一方向、循環禁止。下位: `googlemap`, `pace` / 中位: `route-points`, `run-metrics`, `user`, `auth` / 上位: `route`, `dashboard`。同階層では既存の `dashboard` → `route`、`run-metrics` → `user`、`auth` → `user` を許容し、逆方向の依存は作らない。新しいfeature間依存を作るときは計画に書く。
   - `components/*`, `hooks/shared`, `lib` から `features` を import しない。
@@ -74,7 +75,7 @@
 
 ## フロントエンド
 - 詳細は `docs/FRONTEND_GUIDE.md`。ここには要点だけを書く。
-- page は認証・プロフィール状態に応じた画面の出し分けやredirect・初期データ取得を行い、画面コンポーネントに props で渡す。保護対象のpageは `renderProtectedPage` を使い、未ログインならログイン画面、プロフィール未完了なら初期設定画面をその場で表示する。画面ロジック（送信・遷移・toast）とフォームの `useForm` は `hooks/use<Feature><Action>` に置き、フォームcomponentは渡されたformでフィールドを描画する。
+- page は認証・プロフィール状態に応じた画面の出し分けやredirect・初期データ取得を行い、画面コンポーネントに props で渡す。保護対象のpageはserverの `getProtectedPageState` で状態を取得し、未ログイン・初期設定前ならapp層の `ProtectedPageFallback` に状態を渡して早期returnする。準備完了時だけpage内でデータ取得と通常画面の描画へ進む。未ログインならログイン画面、プロフィール未完了なら初期設定画面をその場で表示する。画面ロジック（送信・遷移・toast）とフォームの `useForm` は `hooks/use<Feature><Action>` に置き、フォームcomponentは渡されたformでフィールドを描画する。
 - client の取得は `features/*/api` の hook から行う。query は `useXxxQuery`、mutation は `use<動詞><名詞>`（例: `useUpdateRoute`）で、成功時に invalidate する。
 - エラーは `TRPCError` の code だけで分岐し、server の `message` を表示しない。mutation の結果は toast、query の失敗は inline（`role="alert"`、`text-destructive`）、page では `NOT_FOUND` だけ `notFound()` にする。
 - 新規 component は `PascalCase.tsx` で named export にし、型は `type XxxProps` で書く。テストと story は同じディレクトリに置く。

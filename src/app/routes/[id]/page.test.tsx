@@ -79,6 +79,15 @@ describe("RouteDetailPage", () => {
     });
   });
 
+  it("プロフィール行がない場合もルートを取得して表示する", async () => {
+    getUserProfileSettings.mockResolvedValue(undefined);
+    render(await openPage());
+    expect(getById).toHaveBeenCalledWith({ id: 1 });
+    expect(
+      screen.getByRole("heading", { name: "朝のルート" }),
+    ).toBeInTheDocument();
+  });
+
   it("未ログインではログイン案内をその場で表示する", async () => {
     auth.mockResolvedValue(null);
     render(await openPage());
