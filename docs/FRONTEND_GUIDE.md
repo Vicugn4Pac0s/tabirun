@@ -7,7 +7,7 @@
 ## 1. コンポーネント設計
 
 - 画面は `src/app/**/page.tsx` → feature の画面コンポーネント、の形にする。page は認証・プロフィール状態に応じた画面の出し分けやredirect・取得・`<main>` での配置だけ（例: `app/routes/[id]/page.tsx` → `RouteDetailScreen`）。
-- page ではDBを直接クエリせず、`src/server/features/<feature>/` の副作用のない読み取り関数（`import "server-only"`。例: `user/profile.ts` の `getUserHomePageSettings`）か `~/trpc/server` の `api` を使う。読み取り関数へ `db` を渡すためのimportは許容する（例: `app/page.tsx`、`app/setup-profile/page.tsx`）。
+- page ではDBを直接クエリせず、`src/server/features/<feature>/` の副作用のない読み取り関数（`import "server-only"`。例: `user/service.ts` の `getUserHomePageSettings`）か `~/trpc/server` の `api` を使う。読み取り関数へ `db` を渡すためのimportは許容する（例: `app/page.tsx`、`app/setup-profile/page.tsx`）。
 - 画面コンポーネントは `<Feature><Action>Screen`。Context が要る画面は外側で Provider を巻き、中身は同じファイルの非 export `XxxContent` に書く（例: `RouteCreateScreen.tsx` の `GoogleMapProvider` + `RouteCreateScreenContent`）。
 - 新規 component は **named export**（既存の default export は触らない）。ファイル名は `PascalCase.tsx` = コンポーネント名。props 型は **`type XxxProps`**（新規のみ。既存は触らない）。
 - component と `hooks/` の画面ロジック hook は **`function` 宣言**、`features/*/api/` の hook は **アロー関数**。
