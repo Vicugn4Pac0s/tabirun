@@ -218,6 +218,15 @@ describe("user router", () => {
   });
 
   it("不正な入力を拒否し DB を更新しない", async () => {
+    await expect(
+      createCaller().updateProfile({
+        birthDate: undefined,
+        gender: undefined,
+        pace: undefined,
+        height: undefined,
+        weight: undefined,
+      }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
     await expect(createCaller().updateProfile({})).rejects.toMatchObject({
       code: "BAD_REQUEST",
     });

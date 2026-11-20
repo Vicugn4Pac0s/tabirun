@@ -12,7 +12,7 @@ export const AuthUserMenu = () => {
   const { data: session } = useSession();
 
   if (!session?.user) {
-    return <Button onClick={() => signIn()}>Sign In</Button>;
+    return <Button onClick={() => signIn()}>ログイン</Button>;
   }
 
   return (
