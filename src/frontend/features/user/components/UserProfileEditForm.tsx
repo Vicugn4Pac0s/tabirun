@@ -35,6 +35,9 @@ export function UserProfileEditForm({
   } = form;
   const { field: gender } = useController({ control, name: "gender" });
   const { field: pace } = useController({ control, name: "pace" });
+  // zodResolverはパスのないフォーム全体のエラーを空文字キーに格納する。
+  const formError = Object.entries(errors).find(([field]) => field === "")?.[1]
+    ?.message;
   const disabled = isSubmitting;
   return (
     <form
@@ -115,6 +118,12 @@ export function UserProfileEditForm({
           )}
         </FormField>
       </div>
+
+      {formError && (
+        <p role="alert" className="text-sm text-destructive">
+          {formError}
+        </p>
+      )}
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? "更新中..." : "保存する"}

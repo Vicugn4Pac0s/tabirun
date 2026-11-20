@@ -35,6 +35,39 @@ afterEach(() => {
 });
 
 describe("UserProfileEditScreen", () => {
+  it("全項目undefinedでは保存ボタン直前にエラーを表示し、入力後に保存できる", async () => {
+    const user = userEvent.setup();
+    render(
+      <UserProfileEditScreen
+        initialValues={{
+          birthDate: undefined,
+          gender: undefined,
+          pace: undefined,
+          height: undefined,
+          weight: undefined,
+        }}
+      />,
+    );
+    const button = screen.getByRole("button", { name: "保存する" });
+    await user.click(button);
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("1つ以上の項目を入力してください");
+    expect(alert).toHaveClass("text-destructive");
+    expect(button.previousElementSibling).toBe(alert);
+    expect(button).toBeEnabled();
+    expect(save).not.toHaveBeenCalled();
+    await user.type(
+      screen.getByRole("spinbutton", { name: "身長(cm)" }),
+      "170",
+    );
+    await user.click(button);
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith(
+        expect.objectContaining({ height: 170 }),
+      ),
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
   it("保存成功時に通知し、ホームへ戻って表示を更新する", async () => {
     const user = userEvent.setup();
     render(<UserProfileEditScreen initialValues={profile} />);

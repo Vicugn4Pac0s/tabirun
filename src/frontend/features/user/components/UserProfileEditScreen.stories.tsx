@@ -104,3 +104,25 @@ export const Mobile: Story = {
     await expect(mobile.scrollWidth).toBeLessThanOrEqual(mobile.clientWidth);
   },
 };
+
+export const Empty: Story = {
+  args: {
+    initialValues: {
+      birthDate: undefined,
+      gender: undefined,
+      pace: undefined,
+      height: undefined,
+      weight: undefined,
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole("button", { name: "保存する" });
+    await userEvent.click(button);
+    const alert = await canvas.findByRole("alert");
+    await expect(alert).toHaveTextContent("1つ以上の項目を入力してください");
+    await expect(alert).toHaveClass("text-destructive");
+    await expect(button.previousElementSibling).toBe(alert);
+    await expect(button).toBeEnabled();
+  },
+};

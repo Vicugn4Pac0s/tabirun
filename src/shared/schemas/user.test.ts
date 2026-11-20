@@ -61,12 +61,21 @@ describe("user profile schemas", () => {
     expect(result.success).toBe(true);
   });
 
-  it("空のプロフィール更新入力を拒否する", () => {
-    const result = userProfileUpdateSchema.safeParse({});
+  it.each([
+    {},
+    {
+      birthDate: undefined,
+      gender: undefined,
+      pace: undefined,
+      height: undefined,
+      weight: undefined,
+    },
+  ])("空のプロフィール更新入力を拒否する（%j）", (input) => {
+    const result = userProfileUpdateSchema.safeParse(input);
 
     expect(result.success).toBe(false);
     expect(result.error?.issues[0]?.message).toBe(
-      "At least one field is required",
+      "1つ以上の項目を入力してください",
     );
   });
 

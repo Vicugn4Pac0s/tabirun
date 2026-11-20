@@ -63,8 +63,11 @@ export type UserInitialProfileInput = z.infer<typeof userInitialProfileSchema>;
 
 export const userProfileUpdateSchema = userInitialProfileSchema
   .partial()
-  .refine((value) => Object.keys(value).length > 0, {
-    message: "At least one field is required",
-  });
+  .refine(
+    (value) => Object.values(value).some((field) => field !== undefined),
+    {
+      message: "1つ以上の項目を入力してください",
+    },
+  );
 
 export type UserProfileUpdateInput = z.infer<typeof userProfileUpdateSchema>;

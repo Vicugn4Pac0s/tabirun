@@ -47,6 +47,25 @@ afterEach(() => {
 });
 
 describe("UserMenuView", () => {
+  it.each(["ランナー", null, undefined, ""])(
+    "名前 %s に応じて見出しを表示し、日本語の項目からログアウトできる",
+    async (name) => {
+      const user = userEvent.setup();
+      const logout = vi.fn();
+      render(<UserMenuView name={name} onLogout={logout} />);
+      await user.click(
+        screen.getByRole("button", { name: "ユーザーメニュー" }),
+      );
+      if (name) expect(screen.getByText(name)).toBeInTheDocument();
+      expect(screen.queryByText("My Account")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("menuitem", { name: "プロフィール" }),
+      ).toBeVisible();
+      await user.click(screen.getByRole("menuitem", { name: "ログアウト" }));
+      expect(logout).toHaveBeenCalledOnce();
+    },
+  );
+
   it.each([true, false])(
     "プロフィールリンクの遷移許可が %s のときクリックを適切に扱う",
     async (allowed) => {
@@ -60,7 +79,7 @@ describe("UserMenuView", () => {
       await user.click(
         screen.getByRole("button", { name: "ユーザーメニュー" }),
       );
-      const link = screen.getByRole("menuitem", { name: "Profile" });
+      const link = screen.getByRole("menuitem", { name: "プロフィール" });
       expect(link).toHaveAttribute("href", "/settings/profile");
       await user.click(link);
       expect(guard).toHaveBeenCalledOnce();
@@ -74,13 +93,15 @@ describe("UserMenuView", () => {
     render(<UserMenuView name="Runner" onLogout={vi.fn()} />);
     await user.tab();
     await user.keyboard("{Enter}");
-    expect(screen.getByRole("menuitem", { name: "Profile" })).toHaveFocus();
+    expect(
+      screen.getByRole("menuitem", { name: "プロフィール" }),
+    ).toHaveFocus();
   });
   it("Provider がなければプロフィールへそのまま移動できる", async () => {
     const user = userEvent.setup();
     render(<UserMenuView name="Runner" onLogout={vi.fn()} />);
     await user.click(screen.getByRole("button", { name: "ユーザーメニュー" }));
-    await user.click(screen.getByRole("menuitem", { name: "Profile" }));
+    await user.click(screen.getByRole("menuitem", { name: "プロフィール" }));
     expect(navigate).toHaveBeenCalledWith("/settings/profile");
   });
 

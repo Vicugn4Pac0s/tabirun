@@ -37,18 +37,18 @@ export const UserMenuView = ({ image, name, onLogout }: Props) => {
           className="w-11 overflow-hidden rounded-full"
         >
           <Avatar className="h-11 w-11">
-            <AvatarImage src={image ?? undefined} alt={name ?? "User"} />
+            <AvatarImage src={image ?? undefined} alt={name ?? "ユーザー"} />
             <AvatarFallback>{fallbackLabel}</AvatarFallback>
           </Avatar>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          {name && <DropdownMenuLabel>{name}</DropdownMenuLabel>}
           <DropdownMenuItem asChild>
-            <GuardedLink href="/settings/profile">Profile</GuardedLink>
+            <GuardedLink href="/settings/profile">プロフィール</GuardedLink>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onLogout}>Logout</DropdownMenuItem>
+          <DropdownMenuItem onClick={onLogout}>ログアウト</DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
