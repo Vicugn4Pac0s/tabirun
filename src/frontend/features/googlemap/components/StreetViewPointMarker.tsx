@@ -22,7 +22,7 @@ export function StreetViewPointMarker({
   const radians = (pov.heading * Math.PI) / 180;
 
   return (
-    <AdvancedMarker map={map} options={{ position: latLng }}>
+    <AdvancedMarker map={map} position={latLng}>
       <div className="relative top-2.5 h-5 w-5">
         <div className="absolute left-0 top-0 box-border h-5 w-5 rounded-full border-2 border-white bg-primary shadow-[0_0_5px_hsl(var(--primary))]" />
         <div

@@ -3,7 +3,8 @@ import { createPortal } from "react-dom";
 
 interface AdvancedMarkerProps {
   map: google.maps.Map | null;
-  options?: google.maps.marker.AdvancedMarkerElementOptions;
+  position: google.maps.LatLngLiteral;
+  title?: string;
   children: ReactNode;
   onClick?: (e: google.maps.MapMouseEvent) => void;
   onMouseOver?: EventListener;
@@ -16,12 +17,14 @@ interface AdvancedMarkerProps {
  */
 const AdvancedMarker = ({
   map,
-  options = {},
+  position,
+  title = "",
   children,
   onClick,
   onMouseOver,
   onMouseOut,
 }: AdvancedMarkerProps) => {
+  const { lat, lng } = position;
   const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(
     null,
   );
@@ -49,8 +52,15 @@ const AdvancedMarker = ({
     const marker = markerRef.current;
     if (!marker) return;
 
-    Object.assign(marker, options);
-  }, [map, content, options]);
+    marker.position = { lat, lng };
+  }, [map, content, lat, lng]);
+
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker) return;
+
+    marker.title = title;
+  }, [map, content, title]);
 
   useEffect(() => {
     const marker = markerRef.current;

@@ -15,7 +15,12 @@ export function RoutePointMarker({
   onClick,
 }: RoutePointMarkerProps) {
   return (
-    <AdvancedMarker map={map} onClick={onClick} options={{ position, title }}>
+    <AdvancedMarker
+      map={map}
+      onClick={onClick}
+      position={position}
+      title={title}
+    >
       <div
         className="relative top-3.5 w-7 rounded-full text-center text-sm font-bold leading-7 text-white"
         style={{ backgroundColor: color }}

@@ -6,7 +6,7 @@ import RoutePointMarker from "./RoutePointMarker";
 
 const { renderMarker } = vi.hoisted(() => ({
   renderMarker: vi.fn((props: ComponentProps<typeof AdvancedMarker>) => (
-    <div role="img" aria-label={props.options?.title ?? undefined}>
+    <div role="img" aria-label={props.title}>
       {props.children}
     </div>
   )),
@@ -55,9 +55,6 @@ describe("RoutePointMarker", () => {
     expect(marker.firstElementChild).toHaveStyle({
       backgroundColor: "rgba(0, 0, 0, 0.6)",
     });
-    expect(renderMarker.mock.lastCall?.[0].options).toEqual({
-      position,
-      title,
-    });
+    expect(renderMarker.mock.lastCall?.[0]).toMatchObject({ position, title });
   });
 });

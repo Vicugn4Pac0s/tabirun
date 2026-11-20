@@ -31,7 +31,7 @@ describe("StreetViewPointMarker", () => {
     rerender(<StreetViewPointMarker map={map} latLng={latLng} pov={null} />);
     expect(renderMarker).not.toHaveBeenCalled();
     rerender(<StreetViewPointMarker map={map} latLng={latLng} pov={pov} />);
-    expect(renderMarker.mock.lastCall?.[0].options?.position).toEqual(latLng);
+    expect(renderMarker.mock.lastCall?.[0].position).toEqual(latLng);
   });
 
   it("同じDOMを維持し、位置と向きの更新を反映する", () => {
@@ -57,9 +57,7 @@ describe("StreetViewPointMarker", () => {
       />,
     );
     expect(screen.getByTestId("marker").firstElementChild).toBe(content);
-    expect(renderMarker.mock.lastCall?.[0].options?.position).toEqual(
-      nextPosition,
-    );
+    expect(renderMarker.mock.lastCall?.[0].position).toEqual(nextPosition);
     expect(arrow.style.left).toBe("26px");
     expect(parseFloat(arrow.style.top)).toBeCloseTo(10);
     expect(arrow.style.transform).toBe("translate(-50%, -50%) rotate(90deg)");
