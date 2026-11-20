@@ -1,13 +1,15 @@
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type AdvancedMarker from "~/frontend/features/googlemap/components/AdvancedMarker";
 import RoutePointMarker from "./RoutePointMarker";
 
 const { renderMarker } = vi.hoisted(() => ({
-  renderMarker: vi.fn<(props: ComponentProps<typeof AdvancedMarker>) => null>(
-    () => null,
-  ),
+  renderMarker: vi.fn((props: ComponentProps<typeof AdvancedMarker>) => (
+    <div role="img" aria-label={props.options?.title ?? undefined}>
+      {props.children}
+    </div>
+  )),
 }));
 vi.mock("~/frontend/features/googlemap/components/AdvancedMarker", () => ({
   default: renderMarker,
@@ -18,24 +20,19 @@ afterEach(() => {
 });
 
 describe("RoutePointMarker", () => {
-  it("更新では生成関数を維持し、同じDOMのラベルと色を更新する", () => {
+  it("再描画では同じDOMのラベルと色を更新する", () => {
     const props = { map: null, position: { lat: 35, lng: 135 }, title: "地点" };
     const { rerender } = render(
       <RoutePointMarker {...props} label="1" color="red" />,
     );
-    const initial = renderMarker.mock.lastCall?.[0];
-    if (!initial) throw new Error("マーカーが描画されていません");
-    const content = initial.createContent();
-    initial.updateContent(content);
-    expect(content.textContent).toBe("1");
-    expect(content.style.backgroundColor).toBe("red");
-
+    const marker = screen.getByRole("img", { name: "地点" });
+    const content = marker.firstElementChild;
+    expect(content).toHaveTextContent("1");
+    expect(content).toHaveStyle({ backgroundColor: "rgb(255, 0, 0)" });
     rerender(<RoutePointMarker {...props} label="2" color="blue" />);
-    const latest = renderMarker.mock.lastCall?.[0];
-    expect(latest?.createContent).toBe(initial.createContent);
-    latest?.updateContent(content);
-    expect(content.textContent).toBe("2");
-    expect(content.style.backgroundColor).toBe("blue");
+    expect(marker.firstElementChild).toBe(content);
+    expect(content).toHaveTextContent("2");
+    expect(content).toHaveStyle({ backgroundColor: "rgb(0, 0, 255)" });
   });
 
   it.each([
@@ -53,12 +50,14 @@ describe("RoutePointMarker", () => {
         title={title}
       />,
     );
-    const props = renderMarker.mock.lastCall?.[0];
-    if (!props) throw new Error("マーカーが描画されていません");
-    const content = props.createContent();
-    props.updateContent(content);
-    expect(content.textContent).toBe(label);
-    expect(content.style.backgroundColor).toBe("rgba(0, 0, 0, 0.6)");
-    expect(props.options).toEqual({ position, title });
+    const marker = screen.getByRole("img", { name: title });
+    expect(marker).toHaveTextContent(label);
+    expect(marker.firstElementChild).toHaveStyle({
+      backgroundColor: "rgba(0, 0, 0, 0.6)",
+    });
+    expect(renderMarker.mock.lastCall?.[0].options).toEqual({
+      position,
+      title,
+    });
   });
 });

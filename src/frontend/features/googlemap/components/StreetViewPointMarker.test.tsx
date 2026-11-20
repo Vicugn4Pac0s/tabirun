@@ -1,13 +1,13 @@
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import type AdvancedMarker from "./AdvancedMarker";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { StreetViewPointMarker } from "./StreetViewPointMarker";
 
 const { renderMarker } = vi.hoisted(() => ({
-  renderMarker: vi.fn<(props: ComponentProps<typeof AdvancedMarker>) => null>(
-    () => null,
-  ),
+  renderMarker: vi.fn((props: ComponentProps<typeof AdvancedMarker>) => (
+    <div data-testid="marker">{props.children}</div>
+  )),
 }));
 vi.mock("./AdvancedMarker", () => ({ default: renderMarker }));
 afterEach(() => {
@@ -42,12 +42,9 @@ describe("StreetViewPointMarker", () => {
         pov={{ heading: 0, pitch: 0 }}
       />,
     );
-    const initial = renderMarker.mock.lastCall?.[0];
-    if (!initial) throw new Error("マーカーが描画されていません");
-    const content = initial.createContent();
-    initial.updateContent(content);
-    const arrow = content.querySelectorAll("div")[1];
-    if (!content || !arrow) throw new Error("矢印が生成されていません");
+    const content = screen.getByTestId("marker").firstElementChild;
+    const arrow = content?.querySelectorAll("div")[1];
+    if (!arrow) throw new Error("矢印が生成されていません");
     expect(arrow.style.left).toBe("10px");
     expect(arrow.style.top).toBe("-6px");
     expect(arrow.style.transform).toBe("translate(-50%, -50%) rotate(0deg)");
@@ -59,9 +56,7 @@ describe("StreetViewPointMarker", () => {
         pov={{ heading: 90, pitch: 0 }}
       />,
     );
-    const latest = renderMarker.mock.lastCall?.[0];
-    expect(latest?.createContent).toBe(initial.createContent);
-    latest?.updateContent(content);
+    expect(screen.getByTestId("marker").firstElementChild).toBe(content);
     expect(renderMarker.mock.lastCall?.[0].options?.position).toEqual(
       nextPosition,
     );

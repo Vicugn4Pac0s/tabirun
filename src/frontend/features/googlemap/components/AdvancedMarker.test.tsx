@@ -1,6 +1,13 @@
-import { cleanup, render } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  within,
+} from "@testing-library/react";
 import { StrictMode } from "react";
 import { renderToString } from "react-dom/server";
+import { hydrateRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AdvancedMarker from "./AdvancedMarker";
 
@@ -60,134 +67,91 @@ afterEach(() => {
 });
 
 describe("AdvancedMarker", () => {
-  it("地図が初期化されるまでDOMを作らず、更新時も同じDOMとマーカーを使う", () => {
-    const createContent = vi.fn(() => document.createElement("div"));
-    const updateContent = vi.fn((content: HTMLElement) => {
-      content.textContent = "1";
-    });
+  it("地図の初期化を待ち、childrenとoptionsの更新では同じDOMとマーカーを使う", () => {
     const { rerender } = render(
-      <AdvancedMarker
-        map={null}
-        createContent={createContent}
-        updateContent={updateContent}
-      />,
+      <AdvancedMarker map={null}>
+        <span>1</span>
+      </AdvancedMarker>,
     );
-    expect(createContent).not.toHaveBeenCalled();
     expect(markerConstructor).not.toHaveBeenCalled();
-
     rerender(
-      <AdvancedMarker
-        map={map}
-        createContent={createContent}
-        updateContent={updateContent}
-        options={{ title: "地点1" }}
-      />,
+      <AdvancedMarker map={map} options={{ title: "地点1" }}>
+        <span>1</span>
+      </AdvancedMarker>,
     );
     const content = markers[0]?.content;
-    expect(createContent).toHaveBeenCalledOnce();
-    expect(content?.textContent).toBe("1");
+    if (!content) throw new Error("マーカーが生成されていません");
+    const label = within(content).getByText("1");
     expect(markers[0]).toMatchObject({ title: "地点1" });
 
-    const updateLatestContent = vi.fn((element: HTMLElement) => {
-      element.textContent = "2";
-    });
     rerender(
-      <AdvancedMarker
-        map={map}
-        createContent={createContent}
-        updateContent={updateLatestContent}
-        options={{ title: "地点2" }}
-      />,
+      <AdvancedMarker map={map} options={{ title: "地点2" }}>
+        <span>2</span>
+      </AdvancedMarker>,
     );
-    expect(createContent).toHaveBeenCalledOnce();
     expect(markerConstructor).toHaveBeenCalledOnce();
-    expect(updateLatestContent).toHaveBeenCalledWith(content);
-    expect(content?.textContent).toBe("2");
+    expect(within(content).getByText("2")).toBe(label);
     expect(markers[0]).toMatchObject({ title: "地点2", content });
   });
 
-  it("生成関数の変更時に旧イベントとマーカーを解除し、新しいDOMへ再登録する", () => {
-    const initialContent = document.createElement("div");
-    const latestContent = document.createElement("div");
-    const createInitialContent = () => initialContent;
-    const createLatestContent = () => latestContent;
-    const updateContent = vi.fn();
-    const initialRemoveEventListener = vi.spyOn(
-      initialContent,
-      "removeEventListener",
-    );
-    const latestAddEventListener = vi.spyOn(latestContent, "addEventListener");
+  it("地図変更時に旧イベントとマーカーを解除し、新しい地図へ再登録する", () => {
+    const nextMap = {} as google.maps.Map;
     const onClick = vi.fn();
     const onMouseOver: EventListener = vi.fn();
     const onMouseOut: EventListener = vi.fn();
     const events = { onClick, onMouseOver, onMouseOut };
-
     const { rerender, unmount } = render(
-      <AdvancedMarker
-        map={map}
-        createContent={createInitialContent}
-        updateContent={updateContent}
-        {...events}
-      />,
+      <AdvancedMarker map={map} {...events}>
+        <span>地点</span>
+      </AdvancedMarker>,
     );
+    const content = markers[0]?.content;
+    if (!content) throw new Error("マーカーが生成されていません");
+    const removeEventListener = vi.spyOn(content, "removeEventListener");
+    const addEventListener = vi.spyOn(content, "addEventListener");
     rerender(
-      <AdvancedMarker
-        map={map}
-        createContent={createLatestContent}
-        updateContent={updateContent}
-        {...events}
-      />,
+      <AdvancedMarker map={nextMap} {...events}>
+        <span>地点</span>
+      </AdvancedMarker>,
     );
 
     expect(markerConstructor).toHaveBeenCalledTimes(2);
     expect(markers[0]?.map).toBeNull();
     expect(clearInstanceListeners).toHaveBeenCalledWith(markers[0]);
-    expect(initialRemoveEventListener).toHaveBeenCalledWith(
-      "mouseover",
-      onMouseOver,
-    );
-    expect(initialRemoveEventListener).toHaveBeenCalledWith(
-      "mouseout",
-      onMouseOut,
-    );
-    expect(latestAddEventListener).toHaveBeenCalledWith(
-      "mouseover",
-      onMouseOver,
-    );
-    expect(latestAddEventListener).toHaveBeenCalledWith("mouseout", onMouseOut);
+    expect(removeEventListener).toHaveBeenCalledWith("mouseover", onMouseOver);
+    expect(removeEventListener).toHaveBeenCalledWith("mouseout", onMouseOut);
+    expect(addEventListener).toHaveBeenCalledWith("mouseover", onMouseOver);
+    expect(addEventListener).toHaveBeenCalledWith("mouseout", onMouseOut);
+    expect(markers[1]).toMatchObject({ map: nextMap, content });
     expect(markers[1]?.addListener).toHaveBeenCalledWith("click", onClick);
     unmount();
     expect(markers[1]?.map).toBeNull();
     expect(clearInstanceListeners).toHaveBeenCalledTimes(2);
+    expect(content).toBeEmptyDOMElement();
   });
 
   it("イベントハンドラーだけを更新してもマーカーを作り直さず、古いハンドラーを解除する", () => {
-    const content = document.createElement("div");
-    const createContent = () => content;
-    const updateContent = vi.fn();
     const onMouseOver = vi.fn();
     const onLatestMouseOver = vi.fn();
     const onClick = vi.fn();
     const onLatestClick = vi.fn();
     const { rerender, unmount } = render(
-      <AdvancedMarker
-        map={map}
-        createContent={createContent}
-        updateContent={updateContent}
-        onMouseOver={onMouseOver}
-        onClick={onClick}
-      />,
+      <AdvancedMarker map={map} onMouseOver={onMouseOver} onClick={onClick}>
+        <span>地点</span>
+      </AdvancedMarker>,
     );
+    const content = markers[0]?.content;
+    if (!content) throw new Error("マーカーが生成されていません");
     content.dispatchEvent(new MouseEvent("mouseover"));
     expect(onMouseOver).toHaveBeenCalledOnce();
     rerender(
       <AdvancedMarker
         map={map}
-        createContent={createContent}
-        updateContent={updateContent}
         onMouseOver={onLatestMouseOver}
         onClick={onLatestClick}
-      />,
+      >
+        <span>地点</span>
+      </AdvancedMarker>,
     );
     content.dispatchEvent(new MouseEvent("mouseover"));
     expect(onMouseOver).toHaveBeenCalledOnce();
@@ -203,65 +167,114 @@ describe("AdvancedMarker", () => {
     expect(onLatestMouseOver).toHaveBeenCalledOnce();
   });
 
-  it("地図が失われたらマーカーを外し、再初期化時は新しい地図へ配置する", () => {
-    const createContent = vi.fn(() => document.createElement("div"));
-    const updateContent = vi.fn();
+  it("地図が失われたらマーカーを外し、再初期化時は再配置する", () => {
     const { rerender } = render(
-      <AdvancedMarker
-        map={map}
-        createContent={createContent}
-        updateContent={updateContent}
-      />,
+      <AdvancedMarker map={map}>
+        <span>地点</span>
+      </AdvancedMarker>,
     );
+    const content = markers[0]?.content;
     rerender(
-      <AdvancedMarker
-        map={null}
-        createContent={createContent}
-        updateContent={updateContent}
-      />,
+      <AdvancedMarker map={null}>
+        <span>地点</span>
+      </AdvancedMarker>,
     );
     expect(markers[0]?.map).toBeNull();
     expect(markerConstructor).toHaveBeenCalledOnce();
     rerender(
-      <AdvancedMarker
-        map={map}
-        createContent={createContent}
-        updateContent={updateContent}
-      />,
+      <AdvancedMarker map={map}>
+        <span>地点</span>
+      </AdvancedMarker>,
     );
     expect(markerConstructor).toHaveBeenCalledTimes(2);
-    expect(markers[1]?.map).toBe(map);
+    expect(markers[1]).toMatchObject({ map, content });
   });
 
-  it("StrictModeの再実行後も破棄時にマーカーを残さない", () => {
-    const createContent = () => document.createElement("div");
+  it("StrictModeの再実行後も破棄時にマーカーと子要素を残さない", () => {
     const { unmount } = render(
       <StrictMode>
-        <AdvancedMarker
-          map={map}
-          createContent={createContent}
-          updateContent={vi.fn()}
-        />
+        <AdvancedMarker map={map}>
+          <span>地点</span>
+        </AdvancedMarker>
       </StrictMode>,
     );
     expect(markers.filter((marker) => marker.map !== null)).toHaveLength(1);
     unmount();
     expect(markers.every((marker) => marker.map === null)).toBe(true);
+    expect(
+      markers.every((marker) => marker.content.childElementCount === 0),
+    ).toBe(true);
     expect(clearInstanceListeners).toHaveBeenCalledTimes(markers.length);
   });
 
-  it("サーバー描画ではDOM生成関数を呼ばない", () => {
-    const createContent = vi.fn(() => document.createElement("div"));
-    expect(
-      renderToString(
-        <AdvancedMarker
-          map={map}
-          createContent={createContent}
-          updateContent={vi.fn()}
-        />,
-      ),
-    ).toBe("");
-    expect(createContent).not.toHaveBeenCalled();
-    expect(markerConstructor).not.toHaveBeenCalled();
+  it("documentのないサーバーではDOMとマーカーを作らない", () => {
+    const createElement = vi.spyOn(document, "createElement");
+    vi.stubGlobal("document", undefined);
+    try {
+      expect(
+        renderToString(
+          <AdvancedMarker map={map}>
+            <span>地点</span>
+          </AdvancedMarker>,
+        ),
+      ).toBe("");
+      expect(createElement).not.toHaveBeenCalled();
+      expect(markerConstructor).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("Portal内のReactイベントは子要素とReactツリー上の親へ伝わる", () => {
+    const onParentClick = vi.fn();
+    const onChildClick = vi.fn();
+    render(
+      <div onClick={onParentClick}>
+        <AdvancedMarker map={map}>
+          <button onClick={onChildClick}>地点</button>
+        </AdvancedMarker>
+      </div>,
+    );
+    const content = markers[0]?.content;
+    if (!content) throw new Error("マーカーが生成されていません");
+    fireEvent.click(within(content).getByRole("button", { name: "地点" }));
+    expect(onChildClick).toHaveBeenCalledOnce();
+    expect(onParentClick).toHaveBeenCalledOnce();
+  });
+
+  it("未初期化の地図をhydrateした後、初期化時に子要素を表示できる", () => {
+    const host = document.createElement("div");
+    host.innerHTML = renderToString(
+      <AdvancedMarker map={null}>
+        <span>地点</span>
+      </AdvancedMarker>,
+    );
+    const onRecoverableError = vi.fn();
+    let root: Root | undefined;
+    act(() => {
+      root = hydrateRoot(
+        host,
+        <AdvancedMarker map={null}>
+          <span>地点</span>
+        </AdvancedMarker>,
+        { onRecoverableError },
+      );
+    });
+    const hydratedRoot = root;
+    if (!hydratedRoot) throw new Error("hydrateされていません");
+    act(() => {
+      hydratedRoot.render(
+        <AdvancedMarker map={map}>
+          <span>地点</span>
+        </AdvancedMarker>,
+      );
+    });
+    const content = markers[0]?.content;
+    if (!content) throw new Error("マーカーが生成されていません");
+    expect(content).toHaveTextContent("地点");
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    act(() => {
+      hydratedRoot.unmount();
+    });
   });
 });

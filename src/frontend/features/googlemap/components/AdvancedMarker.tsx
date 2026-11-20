@@ -1,24 +1,23 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 interface AdvancedMarkerProps {
   map: google.maps.Map | null;
   options?: google.maps.marker.AdvancedMarkerElementOptions;
-  createContent: () => HTMLElement;
-  updateContent: (content: HTMLElement) => void;
+  children: ReactNode;
   onClick?: (e: google.maps.MapMouseEvent) => void;
   onMouseOver?: EventListener;
   onMouseOut?: EventListener;
 }
 
 /**
- * 地図の初期化後にDOMとマーカーを生成し、表示の更新と破棄を管理する。
- * createContentには安定した関数を渡す。関数または地図の変更時はマーカーを再生成する。
+ * 子要素を地図上のマーカーへ描画し、マーカーとイベントの生成・破棄を管理する。
+ * 表示内容の更新はReactに任せ、地図の変更時だけマーカーを再生成する。
  */
 const AdvancedMarker = ({
   map,
   options = {},
-  createContent,
-  updateContent,
+  children,
   onClick,
   onMouseOver,
   onMouseOut,
@@ -26,39 +25,35 @@ const AdvancedMarker = ({
   const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(
     null,
   );
-  const contentRef = useRef<HTMLElement | null>(null);
+  const [content] = useState(() =>
+    typeof document === "undefined" ? null : document.createElement("div"),
+  );
 
   useEffect(() => {
-    if (!map) return;
+    if (!map || !content) return;
 
-    const content = createContent();
     const marker = new window.google.maps.marker.AdvancedMarkerElement({
       map,
       content,
     });
     markerRef.current = marker;
-    contentRef.current = content;
 
     return () => {
       window.google.maps.event.clearInstanceListeners(marker);
       marker.map = null;
       markerRef.current = null;
-      contentRef.current = null;
     };
-  }, [map, createContent]);
+  }, [map, content]);
 
   useEffect(() => {
     const marker = markerRef.current;
-    const content = contentRef.current;
-    if (!marker || !content) return;
+    if (!marker) return;
 
     Object.assign(marker, options);
-    updateContent(content);
-  }, [map, createContent, options, updateContent]);
+  }, [map, content, options]);
 
   useEffect(() => {
     const marker = markerRef.current;
-    const content = contentRef.current;
     if (!marker || !content) return;
 
     if (onClick) marker.addListener("click", onClick);
@@ -70,9 +65,9 @@ const AdvancedMarker = ({
       if (onMouseOver) content.removeEventListener("mouseover", onMouseOver);
       if (onMouseOut) content.removeEventListener("mouseout", onMouseOut);
     };
-  }, [map, createContent, onClick, onMouseOver, onMouseOut]);
+  }, [map, content, onClick, onMouseOver, onMouseOut]);
 
-  return null;
+  return map && content ? createPortal(children, content) : null;
 };
 
 export default AdvancedMarker;
