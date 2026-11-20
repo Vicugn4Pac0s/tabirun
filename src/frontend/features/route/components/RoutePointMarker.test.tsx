@@ -1,48 +1,60 @@
 import { cleanup, render, screen } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type AdvancedMarker from "~/frontend/features/googlemap/components/AdvancedMarker";
 import RoutePointMarker from "./RoutePointMarker";
 
-vi.mock("~/frontend/features/googlemap/components/AdvancedMarker", () => ({
-  default: ({
-    content,
-    options,
-  }: {
-    content: HTMLElement;
-    options: { title: string };
-  }) => (
-    <span role="img" aria-label={options.title}>
-      {content.textContent}
-    </span>
-  ),
+const { renderMarker } = vi.hoisted(() => ({
+  renderMarker: vi.fn((props: ComponentProps<typeof AdvancedMarker>) => (
+    <div role="img" aria-label={props.title}>
+      {props.children}
+    </div>
+  )),
 }));
-afterEach(cleanup);
+vi.mock("~/frontend/features/googlemap/components/AdvancedMarker", () => ({
+  default: renderMarker,
+}));
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
 
 describe("RoutePointMarker", () => {
+  it("再描画では同じDOMのラベルと色を更新する", () => {
+    const props = { map: null, position: { lat: 35, lng: 135 }, title: "地点" };
+    const { rerender } = render(
+      <RoutePointMarker {...props} label="1" color="red" />,
+    );
+    const marker = screen.getByRole("img", { name: "地点" });
+    const content = marker.firstElementChild;
+    expect(content).toHaveTextContent("1");
+    expect(content).toHaveStyle({ backgroundColor: "rgb(255, 0, 0)" });
+    rerender(<RoutePointMarker {...props} label="2" color="blue" />);
+    expect(marker.firstElementChild).toBe(content);
+    expect(content).toHaveTextContent("2");
+    expect(content).toHaveStyle({ backgroundColor: "rgb(0, 0, 255)" });
+  });
+
   it.each([
     ["S", "スタート"],
     ["G", "ゴール"],
     ["S/G", "スタート／ゴール"],
+    ["2", "地点 2"],
   ] as const)("%sは略称と読み上げ用の名前を持つ", (label, title) => {
+    const position = { lat: 35, lng: 135 };
     render(
       <RoutePointMarker
         map={null}
-        position={{ lat: 35, lng: 135 }}
+        position={position}
         label={label}
         title={title}
       />,
     );
-    expect(screen.getByRole("img", { name: title })).toHaveTextContent(label);
-  });
-
-  it("通常の地点は既存の番号表示を維持する", () => {
-    render(
-      <RoutePointMarker
-        map={null}
-        position={{ lat: 35, lng: 135 }}
-        label="2"
-        title="地点 2"
-      />,
-    );
-    expect(screen.getByRole("img", { name: "地点 2" })).toHaveTextContent("2");
+    const marker = screen.getByRole("img", { name: title });
+    expect(marker).toHaveTextContent(label);
+    expect(marker.firstElementChild).toHaveStyle({
+      backgroundColor: "rgba(0, 0, 0, 0.6)",
+    });
+    expect(renderMarker.mock.lastCall?.[0]).toMatchObject({ position, title });
   });
 });

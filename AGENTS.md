@@ -1,6 +1,6 @@
 # TABIRUN Agent Instructions
 
-走りたいルートを地図上で作るアプリ。Next.js 15 App Router / React 18 / TypeScript strict / NextAuth v5 / tRPC / Drizzle + Postgres(Supabase) / TanStack Query / Tailwind + shadcn/ui / Vitest / Storybook 9 / Google Maps。
+走りたいルートを地図上で作るアプリ。Next.js 16 App Router / React 19 / TypeScript strict / NextAuth v5 / tRPC / Drizzle + Postgres(Supabase) / TanStack Query / Tailwind + shadcn/ui / Vitest 4 / Storybook 10 / Google Maps。
 環境・DB・環境変数の詳細は `docs/ENVIRONMENTS.md`、プロダクト方針は `docs/ROADMAP.md`、フロントエンドの書き方は `docs/FRONTEND_GUIDE.md`。
 
 ## 基本方針
@@ -39,7 +39,7 @@
 ## コマンド
 - Node 24（`.nvmrc`）、npm（`packageManager`）、lockfileは `package-lock.json`。install はローカル `npm install`、Cloud/CI は `npm ci`。
 - CI相当の確認（文書・Skillのみの変更も含め、PR作成・更新前に必須）: `npm run format:check && npm run check && npm run test:run && npm run build`
-  - `check` = lint + 型チェック。lintの実体はscripts側で管理する（Next 16 で `next lint` 廃止予定）。
+  - `check` = lint + 型チェック。lintの実体はscripts側で管理する（ESLint CLIとflat configを使用）。
 - UI/story を変えたら追加で `npm run test:storybook`（CI対象外）。
 - 整形: `npm run format:write`（変更ファイルのみに効かせる。無関係なファイルの差分はcommitしない）
 - DB: schema変更・migration生成の個別承認を得た後、`npm run db:generate` で `drizzle/` にmigrationを生成してcommitする。`db:migrate` / `db:push` / `db:seed` はローカルDB（docker-compose か Cloud Agent VM）に対してだけ自由に実行してよい。Preview・本番DBには承認なしで実行しない。

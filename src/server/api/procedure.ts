@@ -14,7 +14,7 @@ export const publicProcedure = createTRPCProcedure.use(timingMiddleware);
 export const protectedProcedure = createTRPCProcedure
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
-    if (!ctx.session || !ctx.session.user) {
+    if (!ctx.session?.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
     return next({

@@ -1,5 +1,13 @@
 // @vitest-environment node
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockInstance,
+} from "vitest";
 
 const mocks = vi.hoisted(() => ({
   readFile: vi.fn(),
@@ -16,7 +24,7 @@ vi.mock("node:child_process", () => ({ spawn: mocks.spawn }));
 const password = "dummy-private-password";
 const projectRef = "abcdefghijklmnopqrst";
 const databaseUrl = `postgresql://postgres.${projectRef}:${password}@shared-pooler.example.com:5432/postgres`;
-let logs: ReturnType<typeof vi.spyOn>;
+let logs: MockInstance<typeof console.log>;
 
 beforeEach(() => {
   vi.resetModules();
@@ -100,10 +108,11 @@ describe("本番migrationの確認表示", () => {
       process.execPath,
       [expect.stringContaining("drizzle-kit/bin.cjs"), "migrate"],
       expect.objectContaining({
-        env: expect.objectContaining({ DATABASE_URL: databaseUrl }),
         stdio: ["ignore", "pipe", "pipe"],
       }),
     );
+    const spawnOptions: unknown = mocks.spawn.mock.calls[0]?.[2];
+    expect(spawnOptions).toMatchObject({ env: { DATABASE_URL: databaseUrl } });
     expect(logs.mock.calls.flat().join("\n")).not.toContain(password);
   });
 

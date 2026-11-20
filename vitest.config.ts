@@ -1,4 +1,3 @@
-/// <reference types="vitest/config" />
 /// <reference types="vitest" />
 import { defineConfig } from "vitest/config";
 

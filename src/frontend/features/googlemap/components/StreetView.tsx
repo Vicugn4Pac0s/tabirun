@@ -2,7 +2,7 @@ import { useEffect, useRef, type MutableRefObject } from "react";
 
 interface StreetViewProps {
   map: google.maps.Map | null;
-  streetView: MutableRefObject<google.maps.StreetViewPanorama | null>;
+  streetViewRef: MutableRefObject<google.maps.StreetViewPanorama | null>;
   options: google.maps.StreetViewPanoramaOptions;
   onInit?: () => void;
   onPositionChanged?: (position: google.maps.LatLng) => void;
@@ -15,7 +15,7 @@ interface StreetViewProps {
  */
 const StreetView = ({
   map,
-  streetView,
+  streetViewRef,
   options,
   onInit,
   onPositionChanged,
@@ -59,7 +59,7 @@ const StreetView = ({
       notifyPosition,
     );
     const povChangedListener = panorama.addListener("pov_changed", notifyPov);
-    streetView.current = panorama;
+    streetViewRef.current = panorama;
 
     // 初期値の設定時に発生したイベントは、リスナー登録後には届かない。
     notifyPosition();
@@ -71,11 +71,11 @@ const StreetView = ({
       positionChangedListener.remove();
       povChangedListener.remove();
 
-      if (streetView.current === panorama) {
-        streetView.current = null;
+      if (streetViewRef.current === panorama) {
+        streetViewRef.current = null;
       }
     };
-  }, [map, streetView]);
+  }, [map, streetViewRef]);
 
   return <div ref={ref} style={{ width: "100%", height: "100%" }} />;
 };

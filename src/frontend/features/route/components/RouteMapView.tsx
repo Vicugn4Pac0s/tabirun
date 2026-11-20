@@ -41,7 +41,7 @@ function RouteMapView({
   const {
     map,
     setMap,
-    streetView,
+    streetViewRef,
     streetViewUnavailable,
     setStreetViewUnavailable,
   } = useGoogleMap();
@@ -84,7 +84,7 @@ function RouteMapView({
         >
           <StreetView
             map={map}
-            streetView={streetView}
+            streetViewRef={streetViewRef}
             options={{
               position: initialCenter,
               pov: { heading: 165, pitch: 0 },

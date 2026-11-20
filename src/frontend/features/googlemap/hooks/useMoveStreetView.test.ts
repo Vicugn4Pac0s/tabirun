@@ -3,7 +3,7 @@ import { renderHook } from "@testing-library/react";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 
 type MockGoogleMapContext = {
-  streetView: {
+  streetViewRef: {
     current: {
       setPosition: typeof setPosition;
       setVisible: typeof setVisible;
@@ -61,7 +61,7 @@ beforeEach(() => {
   panoramaStatus = "ZERO_RESULTS";
 
   mockUseGoogleMap.mockReturnValue({
-    streetView: {
+    streetViewRef: {
       current: {
         setPosition,
         setVisible,
@@ -85,9 +85,9 @@ beforeEach(() => {
 });
 
 describe("useMoveStreetView", () => {
-  it("streetView が未初期化なら false を返す", async () => {
+  it("streetViewRef が未初期化なら false を返す", async () => {
     mockUseGoogleMap.mockReturnValue({
-      streetView: {
+      streetViewRef: {
         current: null,
       },
       setStreetViewUnavailable,

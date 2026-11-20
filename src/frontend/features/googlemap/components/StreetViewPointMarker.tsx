@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import AdvancedMarker from "./AdvancedMarker";
 
 interface StreetViewPointMarkerProps {
@@ -16,80 +15,27 @@ export function StreetViewPointMarker({
   latLng,
   pov,
 }: StreetViewPointMarkerProps) {
-  const markerRef = useRef(null);
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const arrowRef = useRef<HTMLDivElement | null>(null);
+  if (!map || !latLng || !pov) return null;
 
-  const DOT_SIZE = 20;
-  const BORDER = 2;
-  const heading = pov?.heading;
-
-  if (!contentRef.current && typeof document !== "undefined") {
-    const root = document.createElement("div");
-    root.style.position = "relative";
-    root.style.width = `${DOT_SIZE}px`;
-    root.style.height = `${DOT_SIZE}px`;
-    root.style.top = `${DOT_SIZE / 2}px`;
-
-    const dot = document.createElement("div");
-    dot.style.position = "absolute";
-    dot.style.left = "0";
-    dot.style.top = "0";
-    dot.style.width = `${DOT_SIZE}px`;
-    dot.style.height = `${DOT_SIZE}px`;
-    dot.style.boxSizing = "border-box";
-    dot.style.backgroundColor = "hsl(var(--primary))";
-    dot.style.border = `${BORDER}px solid white`;
-    dot.style.boxShadow = "0 0 5px hsl(var(--primary))";
-    dot.style.borderRadius = "50%";
-
-    const arrow = document.createElement("div");
-    arrow.style.position = "absolute";
-    arrow.style.width = "0";
-    arrow.style.height = "0";
-    arrow.style.borderLeft = "6px solid transparent";
-    arrow.style.borderRight = "6px solid transparent";
-    arrow.style.borderBottom = "10px solid hsl(var(--primary))";
-    arrow.style.pointerEvents = "none";
-
-    root.appendChild(dot);
-    root.appendChild(arrow);
-
-    contentRef.current = root;
-    arrowRef.current = arrow;
-  }
-
-  useEffect(() => {
-    if (!contentRef.current || !arrowRef.current || heading === undefined)
-      return;
-
-    const cx = DOT_SIZE / 2;
-    const cy = DOT_SIZE / 2;
-
-    const r = 16; // 外周付近なら 10〜14あたりで調整
-    const rad = (heading * Math.PI) / 180;
-
-    // 北0度を上に：x=sin, y=-cos
-    const x = r * Math.sin(rad);
-    const y = -r * Math.cos(rad);
-
-    arrowRef.current.style.left = `${cx + x}px`;
-    arrowRef.current.style.top = `${cy + y}px`;
-
-    arrowRef.current.style.transform = `translate(-50%, -50%) rotate(${heading}deg)`;
-  }, [heading]);
-
-  if (!map || !latLng || !pov || !contentRef.current) return null;
+  const center = 10;
+  const radius = 16;
+  const radians = (pov.heading * Math.PI) / 180;
 
   return (
-    <AdvancedMarker
-      map={map}
-      markerRef={markerRef}
-      content={contentRef.current}
-      options={{
-        position: latLng,
-      }}
-    />
+    <AdvancedMarker map={map} position={latLng}>
+      <div className="relative top-2.5 h-5 w-5">
+        <div className="absolute left-0 top-0 box-border h-5 w-5 rounded-full border-2 border-white bg-primary shadow-[0_0_5px_hsl(var(--primary))]" />
+        <div
+          className="pointer-events-none absolute h-0 w-0 border-x-[6px] border-b-[10px] border-x-transparent border-b-primary"
+          style={{
+            // 北0度を上に：x=sin, y=-cos
+            left: center + radius * Math.sin(radians),
+            top: center - radius * Math.cos(radians),
+            transform: `translate(-50%, -50%) rotate(${pov.heading}deg)`,
+          }}
+        />
+      </div>
+    </AdvancedMarker>
   );
 }
 export default StreetViewPointMarker;
