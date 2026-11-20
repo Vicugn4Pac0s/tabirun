@@ -30,11 +30,11 @@ function getDistanceMeters(
  * 候補なし・30m超では利用不可状態を立て、移動成功時に解除する。
  */
 export const useMoveStreetView = () => {
-  const { streetView, setStreetViewUnavailable } = useGoogleMap();
+  const { streetViewRef, setStreetViewUnavailable } = useGoogleMap();
 
   const moveStreetView = useCallback(
     async (position: google.maps.LatLng | google.maps.LatLngLiteral) => {
-      if (!streetView.current || typeof window === "undefined") {
+      if (!streetViewRef.current || typeof window === "undefined") {
         return false;
       }
 
@@ -78,11 +78,11 @@ export const useMoveStreetView = () => {
       }
 
       setStreetViewUnavailable(false);
-      streetView.current.setPosition(resolvedPosition);
-      streetView.current.setVisible(true);
+      streetViewRef.current.setPosition(resolvedPosition);
+      streetViewRef.current.setVisible(true);
       return true;
     },
-    [setStreetViewUnavailable, streetView],
+    [setStreetViewUnavailable, streetViewRef],
   );
 
   return moveStreetView;

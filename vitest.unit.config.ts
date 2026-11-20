@@ -1,4 +1,3 @@
-/// <reference types="vitest/config" />
 /// <reference types="vitest" />
 import { defineProject } from "vitest/config";
 import react from "@vitejs/plugin-react";

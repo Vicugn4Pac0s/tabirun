@@ -1,6 +1,6 @@
-/// <reference types="vitest/config" />
 /// <reference types="vitest" />
 import { defineProject } from "vitest/config";
+import { playwright } from "@vitest/browser-playwright";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import path from "node:path";
@@ -22,11 +22,10 @@ export default defineProject({
   test: {
     name: "storybook",
     globals: true,
-    setupFiles: [".storybook/vitest.setup.ts"],
     browser: {
       enabled: true,
       headless: true,
-      provider: "playwright",
+      provider: playwright(),
       instances: [
         {
           browser: "chromium",

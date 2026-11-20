@@ -78,7 +78,7 @@ describe("StreetView", () => {
     const { rerender, unmount } = render(
       <StreetView
         map={map}
-        streetView={streetViewRef}
+        streetViewRef={streetViewRef}
         options={initialOptions}
         onInit={onInit}
         onPositionChanged={initialPositionChanged}
@@ -94,7 +94,7 @@ describe("StreetView", () => {
     rerender(
       <StreetView
         map={map}
-        streetView={streetViewRef}
+        streetViewRef={streetViewRef}
         options={latestOptions}
         onInit={onInit}
         onPositionChanged={latestPositionChanged}
@@ -135,7 +135,7 @@ describe("StreetView", () => {
     const { rerender } = render(
       <StreetView
         map={null}
-        streetView={streetViewRef}
+        streetViewRef={streetViewRef}
         options={options}
         onInit={onInit}
       />,
@@ -144,7 +144,7 @@ describe("StreetView", () => {
     rerender(
       <StreetView
         map={map}
-        streetView={streetViewRef}
+        streetViewRef={streetViewRef}
         options={options}
         onInit={onInit}
       />,
@@ -160,7 +160,7 @@ describe("StreetView", () => {
     rerender(
       <StreetView
         map={map}
-        streetView={streetViewRef}
+        streetViewRef={streetViewRef}
         options={options}
         onInit={onInit}
       />,
@@ -181,7 +181,7 @@ describe("StreetView", () => {
     render(
       <StreetView
         map={map}
-        streetView={{ current: null }}
+        streetViewRef={{ current: null }}
         options={{}}
         onPositionChanged={onPositionChanged}
         onPovChanged={onPovChanged}

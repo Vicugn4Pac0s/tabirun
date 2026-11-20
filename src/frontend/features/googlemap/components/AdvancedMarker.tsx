@@ -1,91 +1,76 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface AdvancedMarkerProps {
   map: google.maps.Map | null;
-  markerRef: React.MutableRefObject<google.maps.marker.AdvancedMarkerElement | null>;
   options?: google.maps.marker.AdvancedMarkerElementOptions;
-  content: HTMLElement;
+  createContent: () => HTMLElement;
+  updateContent: (content: HTMLElement) => void;
   onClick?: (e: google.maps.MapMouseEvent) => void;
   onMouseOver?: EventListener;
   onMouseOut?: EventListener;
 }
 
 /**
- * 初期化済みの地図へDOMコンテンツ付きマーカーを追加し、参照へ保持する。
- * 破棄時は地図から外して参照とリスナーを解除する。React側の描画要素は返さない。
+ * 地図の初期化後にDOMとマーカーを生成し、表示の更新と破棄を管理する。
+ * createContentには安定した関数を渡す。関数または地図の変更時はマーカーを再生成する。
  */
 const AdvancedMarker = ({
   map,
-  markerRef,
   options = {},
-  content,
+  createContent,
+  updateContent,
   onClick,
   onMouseOver,
   onMouseOut,
 }: AdvancedMarkerProps) => {
-  useEffect(() => {
-    if (!map) {
-      return;
-    }
+  const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(
+    null,
+  );
+  const contentRef = useRef<HTMLElement | null>(null);
 
+  useEffect(() => {
+    if (!map) return;
+
+    const content = createContent();
     const marker = new window.google.maps.marker.AdvancedMarkerElement({
       map,
       content,
     });
     markerRef.current = marker;
+    contentRef.current = content;
 
     return () => {
       window.google.maps.event.clearInstanceListeners(marker);
-
       marker.map = null;
-
-      if (markerRef.current === marker) {
-        markerRef.current = null;
-      }
+      markerRef.current = null;
+      contentRef.current = null;
     };
-  }, [content, map, markerRef]);
+  }, [map, createContent]);
 
   useEffect(() => {
     const marker = markerRef.current;
-    if (!marker) {
-      return;
-    }
-
-    marker.map = map;
-    marker.content = content;
+    const content = contentRef.current;
+    if (!marker || !content) return;
 
     Object.assign(marker, options);
-  }, [content, map, markerRef, options]);
+    updateContent(content);
+  }, [map, createContent, options, updateContent]);
 
   useEffect(() => {
     const marker = markerRef.current;
-    if (!marker) {
-      return;
-    }
+    const content = contentRef.current;
+    if (!marker || !content) return;
 
-    const contentElement = marker?.content;
-    if (marker && onClick) {
-      window.google.maps.event.clearListeners(marker, "click");
-      marker.addListener("click", onClick);
-    }
-    if (contentElement && onMouseOver) {
-      contentElement.addEventListener("mouseover", onMouseOver);
-    }
-    if (contentElement && onMouseOut) {
-      contentElement.addEventListener("mouseout", onMouseOut);
-    }
+    if (onClick) marker.addListener("click", onClick);
+    if (onMouseOver) content.addEventListener("mouseover", onMouseOver);
+    if (onMouseOut) content.addEventListener("mouseout", onMouseOut);
 
     return () => {
       window.google.maps.event.clearListeners(marker, "click");
-
-      if (contentElement && onMouseOver) {
-        contentElement.removeEventListener("mouseover", onMouseOver);
-      }
-      if (contentElement && onMouseOut) {
-        contentElement.removeEventListener("mouseout", onMouseOut);
-      }
+      if (onMouseOver) content.removeEventListener("mouseover", onMouseOver);
+      if (onMouseOut) content.removeEventListener("mouseout", onMouseOut);
     };
-  }, [content, map, markerRef, onClick, onMouseOver, onMouseOut]);
+  }, [map, createContent, onClick, onMouseOver, onMouseOut]);
 
   return null;
 };
