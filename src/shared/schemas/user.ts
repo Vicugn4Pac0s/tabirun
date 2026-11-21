@@ -8,14 +8,13 @@ export const GENDER_VALUES = [
 ] as const;
 
 export const genderSchema = z.enum(GENDER_VALUES, {
-  errorMap: () => ({ message: "性別を選択してください" }),
+  error: "性別を選択してください",
 });
 
 export const userInitialProfileSchema = z.object({
   birthDate: z
     .string({
-      required_error: "生年月日を入力してください",
-      invalid_type_error: "生年月日を入力してください",
+      error: "生年月日を入力してください",
     })
     .date("生年月日を入力してください")
     .refine((value) => value >= "1900-01-01", {
@@ -34,27 +33,30 @@ export const userInitialProfileSchema = z.object({
   gender: genderSchema,
   pace: z
     .string({
-      required_error: "ペースを選択してください",
-      invalid_type_error: "ペースを選択してください",
+      error: "ペースを選択してください",
     })
     .min(1, "ペースを選択してください")
     .regex(/^\d{1,2}:[0-5]\d$/, "ペースは5:30の形式で入力してください"),
   height: z
     .number({
-      required_error: "身長を入力してください",
-      invalid_type_error: "身長は数値で入力してください",
+      error: (issue) =>
+        issue.input === undefined
+          ? "身長を入力してください"
+          : "身長は数値で入力してください",
     })
-    .int("身長は整数で入力してください")
     .positive("身長は1以上で入力してください")
-    .max(250, "身長は250以下で入力してください"),
+    .max(250, "身長は250以下で入力してください")
+    .int("身長は整数で入力してください"),
   weight: z
     .number({
-      required_error: "体重を入力してください",
-      invalid_type_error: "体重は数値で入力してください",
+      error: (issue) =>
+        issue.input === undefined
+          ? "体重を入力してください"
+          : "体重は数値で入力してください",
     })
-    .int("体重は整数で入力してください")
     .positive("体重は1以上で入力してください")
-    .max(300, "体重は300以下で入力してください"),
+    .max(300, "体重は300以下で入力してください")
+    .int("体重は整数で入力してください"),
 });
 
 export const paceSchema = userInitialProfileSchema.shape.pace;
