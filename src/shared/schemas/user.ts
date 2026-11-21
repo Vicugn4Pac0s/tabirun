@@ -44,16 +44,9 @@ export const userInitialProfileSchema = z.object({
           ? "身長を入力してください"
           : "身長は数値で入力してください",
     })
-    .int({
-      error: (issue) =>
-        issue.code === "too_big"
-          ? "身長は250以下で入力してください"
-          : issue.code === "too_small"
-            ? "身長は1以上で入力してください"
-            : "身長は整数で入力してください",
-    })
     .positive("身長は1以上で入力してください")
-    .max(250, "身長は250以下で入力してください"),
+    .max(250, "身長は250以下で入力してください")
+    .int("身長は整数で入力してください"),
   weight: z
     .number({
       error: (issue) =>
@@ -61,16 +54,9 @@ export const userInitialProfileSchema = z.object({
           ? "体重を入力してください"
           : "体重は数値で入力してください",
     })
-    .int({
-      error: (issue) =>
-        issue.code === "too_big"
-          ? "体重は300以下で入力してください"
-          : issue.code === "too_small"
-            ? "体重は1以上で入力してください"
-            : "体重は整数で入力してください",
-    })
     .positive("体重は1以上で入力してください")
-    .max(300, "体重は300以下で入力してください"),
+    .max(300, "体重は300以下で入力してください")
+    .int("体重は整数で入力してください"),
 });
 
 export const paceSchema = userInitialProfileSchema.shape.pace;
