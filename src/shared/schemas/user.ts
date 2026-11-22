@@ -12,11 +12,10 @@ export const genderSchema = z.enum(GENDER_VALUES, {
 });
 
 export const userInitialProfileSchema = z.object({
-  birthDate: z
-    .string({
+  birthDate: z.iso
+    .date({
       error: "生年月日を入力してください",
     })
-    .date("生年月日を入力してください")
     .refine((value) => value >= "1900-01-01", {
       message: "生年月日は1900年1月1日以降で入力してください",
     })

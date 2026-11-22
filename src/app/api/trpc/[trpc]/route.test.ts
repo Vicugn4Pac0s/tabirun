@@ -101,9 +101,11 @@ describe("tRPC HTTPエラー処理", () => {
     expect(error.data.code).toBe("BAD_REQUEST");
     const validation = z
       .object({
+        formErrors: z.array(z.string()),
         fieldErrors: z.object({ value: z.array(z.string()).min(1) }),
       })
       .parse(error.data.zodError);
+    expect(validation.formErrors).toEqual([]);
     expect(validation.fieldErrors.value).toHaveLength(1);
     expect(fail).not.toHaveBeenCalled();
     expect(console.error).not.toHaveBeenCalled();

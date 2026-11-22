@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   userInitialProfileSchema,
@@ -265,7 +266,7 @@ describe("プロフィールの入力制約と日本語エラー", () => {
 
   it("初回設定で全項目未入力なら各項目に日本語の案内を返す", () => {
     const result = userInitialProfileSchema.safeParse({});
-    expect(result.error?.flatten().fieldErrors).toEqual({
+    expect(result.error && z.flattenError(result.error).fieldErrors).toEqual({
       birthDate: ["生年月日を入力してください"],
       gender: ["性別を選択してください"],
       pace: ["ペースを選択してください"],

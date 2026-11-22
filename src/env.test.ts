@@ -40,3 +40,20 @@ describe("MapsキーとMap IDの環境変数検証", () => {
     );
   });
 });
+
+describe("DATABASE_URLの環境変数検証", () => {
+  it("PostgreSQLのURLを受け入れる", async () => {
+    const { env } = await import("./env.js");
+    expect(env.DATABASE_URL).toBe("postgresql://user:pass@localhost:5432/test");
+  });
+
+  it.each([undefined, "", "not-a-url"])(
+    "不正なURL %j は読み込み時にエラーになる",
+    async (value) => {
+      vi.stubEnv("DATABASE_URL", value);
+      await expect(import("./env.js")).rejects.toThrow(
+        "Invalid environment variables",
+      );
+    },
+  );
+});

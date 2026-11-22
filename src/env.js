@@ -14,7 +14,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
     NEXT_PRIVATE_GOOGLE_MAP_API_KEY: z.string().min(1),
-    DATABASE_URL: z.string().url(),
+    DATABASE_URL: z.url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
