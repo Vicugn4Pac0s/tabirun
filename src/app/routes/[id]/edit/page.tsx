@@ -18,7 +18,7 @@ export default async function RouteEditPage({ params }: RouteEditPageProps) {
     .string()
     .regex(/^[1-9]\d*$/)
     .transform(Number)
-    .pipe(z.number().int().positive().safe())
+    .pipe(z.number().int().positive())
     .safeParse(id);
   if (!parsedId.success) notFound();
   const state = await getProtectedPageState();
