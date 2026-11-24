@@ -50,7 +50,7 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
           <h1 className="mb-4 mt-2 break-words text-xl font-bold">
             {route.title}
           </h1>
-          <div className="mb-4 flex gap-2">
+          <div className="mb-4 flex flex-wrap gap-2">
             <Link
               href={`/routes/${route.id}/edit`}
               className="inline-block rounded-md border px-3 py-2 text-sm font-medium hover:bg-gray-50"
@@ -59,7 +59,17 @@ function RouteDetailScreenContent({ route }: RouteDetailScreenProps) {
                 if (isDeleting) event.preventDefault();
               }}
             >
-              編集する
+              地図を編集
+            </Link>
+            <Link
+              href={`/routes/${route.id}/details`}
+              className="inline-block rounded-md border px-3 py-2 text-sm font-medium hover:bg-gray-50"
+              aria-disabled={isDeleting}
+              onClick={(event) => {
+                if (isDeleting) event.preventDefault();
+              }}
+            >
+              詳細を編集
             </Link>
             <Button
               type="button"

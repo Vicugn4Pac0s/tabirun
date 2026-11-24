@@ -1,23 +1,25 @@
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { RouteUpdateInput } from "~/shared/schemas";
-import { useUpdateRoute } from "../api/useUpdateRoute";
+import type { RouterOutputs } from "~/trpc/react";
+import { useUpdateRoutePoints } from "../api/useUpdateRoutePoints";
 import { useRouteDraft } from "./useRouteDraft";
 
 /**
  * 既存ルートの編集状態と二重送信を防ぐ保存操作を返す。
- * 更新結果をtoastで通知し、成功時は詳細へ移動してサーバー表示を更新する。
+ * 更新結果をtoastで通知し、下書きは詳細入力、完了済みは閲覧へ移動して表示を更新する。
  */
-export function useRouteEdit(route: RouteUpdateInput) {
+export function useRouteEdit(
+  route: Pick<RouterOutputs["route"]["getById"], "id" | "points" | "status">,
+) {
   const router = useRouter();
-  const { updateRoute, isUpdating } = useUpdateRoute();
+  const { updatePoints, isUpdating } = useUpdateRoutePoints();
   const draft = useRouteDraft(route);
   const submitting = useRef(false);
   const submit = draft.form.handleSubmit(async (values) => {
     if (!draft.isDirty) return;
     try {
-      await updateRoute({
+      await updatePoints({
         id: route.id,
         ...values,
       });
@@ -28,7 +30,10 @@ export function useRouteEdit(route: RouteUpdateInput) {
       return;
     }
     toast.success("ルートを更新しました。");
-    router.push(`/routes/${route.id}`);
+    draft.form.reset(values);
+    router.push(
+      `/routes/${route.id}${route.status === "draft" ? "/details" : ""}`,
+    );
     router.refresh();
   });
   const save: typeof submit = (event) => {

@@ -14,13 +14,13 @@ import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteEdit } from "../hooks/useRouteEdit";
 import type { RouterOutputs } from "~/trpc/react";
 import { RouteScreenLayout } from "./RouteScreenLayout";
-import { RouteForm } from "./RouteForm";
+import { Button } from "~/frontend/components/ui/button";
 import { RouteEditorMap } from "./RouteEditorMap";
 
 type RouteEditScreenProps = {
   route: Pick<
     RouterOutputs["route"]["getById"],
-    "id" | "title" | "points" | "direction" | "directionErrorCode"
+    "id" | "status" | "points" | "direction" | "directionErrorCode"
   >;
 };
 
@@ -42,17 +42,17 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
       panel={
         <>
           <GuardedLink
-            href={`/routes/${route.id}`}
+            href={`/routes/${route.id}${route.status === "draft" ? "/details" : ""}`}
             className="mb-5 inline-block font-medium underline"
             aria-disabled={isUpdating}
           >
-            ルートに戻る
+            {route.status === "draft" ? "詳細入力に戻る" : "ルートに戻る"}
           </GuardedLink>
           <h1 className="mb-4 text-xl font-bold">ルートを編集</h1>
-          <RouteForm
-            draft={draft}
-            onSubmit={save}
-            submitText={{ idle: "更新する", pending: "更新中..." }}
+          <form
+            onSubmit={(event) => {
+              void save(event);
+            }}
           >
             <p className="mt-2 text-sm text-gray-500">
               画面下部のボタンで地点を追加・削除できます。
@@ -69,7 +69,23 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
               onPaceChange={setPace}
               weightKg={weightKg}
             />
-          </RouteForm>
+            <div className="my-6 flex flex-wrap gap-2">
+              <Button
+                type="submit"
+                disabled={!draft.canSave || draft.isSubmitting || isUpdating}
+              >
+                {draft.isSubmitting || isUpdating ? "更新中..." : "更新する"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!draft.isDirty || draft.isSubmitting || isUpdating}
+                onClick={draft.reset}
+              >
+                リセット
+              </Button>
+            </div>
+          </form>
           {points.length < 2 && (
             <p role="status" className="mb-3 text-sm text-gray-500">
               保存するには2地点以上を登録してください。

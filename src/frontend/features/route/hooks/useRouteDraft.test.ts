@@ -12,9 +12,7 @@ describe("useRouteDraft 地点上限", () => {
     }));
     const last = { lat: 36, lng: 136 };
     const extra = { lat: 37, lng: 137 };
-    const { result } = renderHook(() =>
-      useRouteDraft({ title: "朝のラン", points }),
-    );
+    const { result } = renderHook(() => useRouteDraft({ points }));
     await act(async () => {
       result.current.togglePoint(last);
       result.current.togglePoint(extra);
@@ -31,9 +29,7 @@ describe("useRouteDraft 地点上限", () => {
       lat: 35 + i / 100,
       lng: 135,
     }));
-    const { result } = renderHook(() =>
-      useRouteDraft({ title: "朝のラン", points }),
-    );
+    const { result } = renderHook(() => useRouteDraft({ points }));
     await act(async () => result.current.togglePoint({ lat: 37, lng: 137 }));
     expect(result.current.points).toEqual(points);
     expect(result.current.isDirty).toBe(false);
