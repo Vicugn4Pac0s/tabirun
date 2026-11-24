@@ -17,6 +17,13 @@ export const routeIdSchema = z.object({
   id: z.number().int().positive(),
 });
 
+/** URLでは先頭ゼロや指数表記を許可せず、正確に扱える整数だけを受け入れる。 */
+export const routeIdParamSchema = z
+  .string()
+  .regex(/^[1-9]\d*$/)
+  .transform(Number)
+  .pipe(routeIdSchema.shape.id);
+
 const routeTitleSchema = z
   .string()
   .trim()

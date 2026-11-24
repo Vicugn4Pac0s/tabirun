@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   directionInputSchema,
   routeIdSchema,
+  routeIdParamSchema,
   routeDeleteSchema,
   routePointsSchema,
   ROUTE_POINTS_MAX,
@@ -207,5 +208,33 @@ describe("詳細取得・削除の共有ID schema", () => {
     expect(routeDeleteSchema.parse({ id: 1, extra: "ignored" })).toEqual({
       id: 1,
     });
+  });
+});
+
+describe("routeIdParamSchema", () => {
+  it.each(["1", "123", "9007199254740991"])(
+    "正しいID %s を数値に変換する",
+    (id) => {
+      expect(routeIdParamSchema.parse(id)).toBe(Number(id));
+    },
+  );
+
+  it.each([
+    "",
+    "0",
+    "-1",
+    "1.5",
+    "01",
+    "+1",
+    "1e2",
+    "0x10",
+    "abc",
+    " 1",
+    "1 ",
+    "1\n",
+    "１２３",
+    "9007199254740992",
+  ])("不正な形式や範囲外のIDを拒否する（%j）", (id) => {
+    expect(routeIdParamSchema.safeParse(id).success).toBe(false);
   });
 });

@@ -38,15 +38,13 @@ export function RouteDetailsEditScreen({ route }: RouteDetailsEditScreenProps) {
   return (
     <NavigationGuardProvider confirmNavigation={confirmNavigation}>
       <section className="mx-auto max-w-xl space-y-6 px-4 py-8 md:px-6">
-        {route.status === "completed" && (
-          <GuardedLink
-            href={`/routes/${route.id}`}
-            className="inline-block font-medium underline"
-            aria-disabled={isSaving}
-          >
-            ルートに戻る
-          </GuardedLink>
-        )}
+        <GuardedLink
+          href={route.status === "draft" ? "/" : `/routes/${route.id}`}
+          className="inline-block font-medium underline"
+          aria-disabled={isSaving}
+        >
+          {route.status === "draft" ? "ホームへ戻る" : "ルートに戻る"}
+        </GuardedLink>
         <h1 className="text-2xl font-semibold">ルートの詳細を入力</h1>
         {warning && <WarningBanner>{warning}</WarningBanner>}
         <RunMetricsPanel
