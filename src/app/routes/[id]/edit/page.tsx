@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { SessionProvider } from "next-auth/react";
 import { notFound } from "next/navigation";
-import { z } from "zod";
+import { routeIdParamSchema } from "~/shared/schemas";
 
-import { RouteEditScreen } from "~/frontend/features/route/components/RouteEditScreen";
+import { RoutePointsEditScreen } from "~/frontend/features/route/components/RoutePointsEditScreen";
 import { ProtectedPageFallback } from "~/app/_components/ProtectedPageFallback";
 import { getProtectedPageState } from "~/server/auth/getProtectedPageState";
 import { api } from "~/trpc/server";
@@ -14,12 +14,7 @@ type RouteEditPageProps = {
 
 export default async function RouteEditPage({ params }: RouteEditPageProps) {
   const { id } = await params;
-  const parsedId = z
-    .string()
-    .regex(/^[1-9]\d*$/)
-    .transform(Number)
-    .pipe(z.number().int().positive())
-    .safeParse(id);
+  const parsedId = routeIdParamSchema.safeParse(id);
   if (!parsedId.success) notFound();
   const state = await getProtectedPageState();
   if (state.status !== "ready") {
@@ -36,7 +31,7 @@ export default async function RouteEditPage({ params }: RouteEditPageProps) {
   return (
     <SessionProvider session={state.session}>
       <main>
-        <RouteEditScreen key={route.id} route={route} />
+        <RoutePointsEditScreen key={route.id} route={route} />
       </main>
     </SessionProvider>
   );

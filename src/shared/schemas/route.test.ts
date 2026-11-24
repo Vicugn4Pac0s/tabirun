@@ -2,10 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   directionInputSchema,
   routeIdSchema,
-  routeCreateSchema,
+  routeIdParamSchema,
   routeDeleteSchema,
   routePointsSchema,
-  routeUpdateSchema,
   ROUTE_POINTS_MAX,
   routeCreateDraftSchema,
   routeUpdatePointsSchema,
@@ -132,85 +131,15 @@ describe("route schemas", () => {
     expect(result.success).toBe(true);
   });
 
-  it("タイトルとポイントを含むルート作成入力を受け入れる", () => {
-    const result = routeCreateSchema.safeParse({
-      title: "Morning Run",
-      points: [
-        { lat: 35.0, lng: 139.0 },
-        { lat: 35.1, lng: 139.1 },
-      ],
-    });
-
-    expect(result.success).toBe(true);
-  });
-
-  it("ルート作成時に名前の前後の空白を除去する", () => {
-    const result = routeCreateSchema.parse({
-      title: " Morning Run ",
-      points: [
-        { lat: 35.0, lng: 139.0 },
-        { lat: 35.1, lng: 139.1 },
-      ],
-    });
-
-    expect(result.title).toBe("Morning Run");
-  });
-
-  it("空白のみのルート名を作成・更新で拒否する", () => {
-    const input = {
-      title: "   ",
-      points: [
-        { lat: 35.0, lng: 139.0 },
-        { lat: 35.1, lng: 139.1 },
-      ],
-    };
-
-    expect(routeCreateSchema.safeParse(input).success).toBe(false);
-    expect(routeUpdateSchema.safeParse({ ...input, id: 1 }).success).toBe(
-      false,
-    );
-  });
-
-  it("ルート名はDBの上限である256文字まで受け入れる", () => {
-    const input = {
-      title: "あ".repeat(256),
-      points: [
-        { lat: 35.0, lng: 139.0 },
-        { lat: 35.1, lng: 139.1 },
-      ],
-    };
-
-    expect(routeCreateSchema.safeParse(input).success).toBe(true);
+  it("名前は日本語でも256文字まで受け入れる", () => {
     expect(
-      routeCreateSchema.safeParse({ ...input, title: "あ".repeat(257) })
+      routeUpdateDetailsSchema.safeParse({ id: 1, title: "あ".repeat(256) })
+        .success,
+    ).toBe(true);
+    expect(
+      routeUpdateDetailsSchema.safeParse({ id: 1, title: "あ".repeat(257) })
         .success,
     ).toBe(false);
-  });
-
-  it("正の整数 id を持つルート更新入力を受け入れる", () => {
-    const result = routeUpdateSchema.safeParse({
-      id: 1,
-      title: "Updated Run",
-      points: [
-        { lat: 35.0, lng: 139.0 },
-        { lat: 35.1, lng: 139.1 },
-      ],
-    });
-
-    expect(result.success).toBe(true);
-  });
-
-  it("0 以下の id を持つルート更新入力を拒否する", () => {
-    const result = routeUpdateSchema.safeParse({
-      id: 0,
-      title: "Updated Run",
-      points: [
-        { lat: 35.0, lng: 139.0 },
-        { lat: 35.1, lng: 139.1 },
-      ],
-    });
-
-    expect(result.success).toBe(false);
   });
 
   it("正の整数 id を持つルート削除入力を受け入れる", () => {
@@ -279,5 +208,33 @@ describe("詳細取得・削除の共有ID schema", () => {
     expect(routeDeleteSchema.parse({ id: 1, extra: "ignored" })).toEqual({
       id: 1,
     });
+  });
+});
+
+describe("routeIdParamSchema", () => {
+  it.each(["1", "123", "9007199254740991"])(
+    "正しいID %s を数値に変換する",
+    (id) => {
+      expect(routeIdParamSchema.parse(id)).toBe(Number(id));
+    },
+  );
+
+  it.each([
+    "",
+    "0",
+    "-1",
+    "1.5",
+    "01",
+    "+1",
+    "1e2",
+    "0x10",
+    "abc",
+    " 1",
+    "1 ",
+    "1\n",
+    "１２３",
+    "9007199254740992",
+  ])("不正な形式や範囲外のIDを拒否する（%j）", (id) => {
+    expect(routeIdParamSchema.safeParse(id).success).toBe(false);
   });
 });

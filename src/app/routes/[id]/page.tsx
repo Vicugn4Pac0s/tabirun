@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { SessionProvider } from "next-auth/react";
 import { notFound } from "next/navigation";
-import { z } from "zod";
+import { routeIdParamSchema } from "~/shared/schemas";
 
 import { RouteDetailScreen } from "~/frontend/features/route/components/RouteDetailScreen";
 import { ProtectedPageFallback } from "~/app/_components/ProtectedPageFallback";
@@ -16,12 +16,7 @@ export default async function RouteDetailPage({
   params,
 }: RouteDetailPageProps) {
   const { id } = await params;
-  const parsedId = z
-    .string()
-    .regex(/^[1-9]\d*$/)
-    .transform(Number)
-    .pipe(z.number().int().positive())
-    .safeParse(id);
+  const parsedId = routeIdParamSchema.safeParse(id);
   if (!parsedId.success) notFound();
   const state = await getProtectedPageState();
   if (state.status !== "ready") {

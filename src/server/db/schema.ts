@@ -27,9 +27,7 @@ export const routes = createTable(
     status: varchar("status", {
       length: 20,
       enum: ["draft", "completed"],
-    })
-      .default("completed")
-      .notNull(),
+    }).notNull(),
     points: text("points").notNull(),
     encodedPolyline: text("encoded_polyline"),
     distanceMeters: integer("distance_meters"),

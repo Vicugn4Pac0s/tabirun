@@ -152,8 +152,11 @@ describe("RouteDetailScreen", () => {
       screen.getByRole("region", { name: "Street Viewで下見" }),
     ).toBeInTheDocument();
     expect(
-      within(sidebar).getByRole("link", { name: "編集する" }),
+      within(sidebar).getByRole("link", { name: "地図を編集" }),
     ).toHaveAttribute("href", "/routes/1/edit");
+    expect(
+      within(sidebar).getByRole("link", { name: "詳細を編集" }),
+    ).toHaveAttribute("href", "/routes/1/details");
     expect(
       within(sidebar).getByRole("button", { name: "削除する" }),
     ).toBeEnabled();
@@ -177,7 +180,7 @@ describe("RouteDetailScreen", () => {
     deletionStatus.isDeleting = true;
     rerender(<RouteDetailScreen route={route} />);
     expect(screen.getByRole("button", { name: "削除中..." })).toBeDisabled();
-    expect(screen.getByRole("link", { name: "編集する" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "地図を編集" })).toHaveAttribute(
       "aria-disabled",
       "true",
     );

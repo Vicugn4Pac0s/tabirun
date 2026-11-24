@@ -1,17 +1,17 @@
 import userEvent from "@testing-library/user-event";
-import { act, cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteCreateScreen } from "./RouteCreateScreen";
 
-const { directionsQuery, createRoute, push, refresh } = vi.hoisted(() => ({
+const { directionsQuery, createDraft, push, refresh } = vi.hoisted(() => ({
   directionsQuery: vi.fn(),
-  createRoute: vi.fn(),
+  createDraft: vi.fn(),
   push: vi.fn(),
   refresh: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, refresh }) }));
-vi.mock("../api/useCreateRoute", () => ({
-  useCreateRoute: () => ({ createRoute, isCreating: false }),
+vi.mock("../api/useCreateRouteDraft", () => ({
+  useCreateRouteDraft: () => ({ createDraft, isCreating: false }),
 }));
 vi.mock("~/frontend/features/googlemap/api/useGoogleMapDirectionQuery", () => ({
   useGoogleMapDirectionQuery: directionsQuery,
@@ -107,7 +107,7 @@ vi.mock("~/frontend/features/googlemap/components/Polyline", () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  createRoute.mockResolvedValue(undefined);
+  createDraft.mockResolvedValue({ id: 42 });
   vi.stubGlobal(
     "matchMedia",
     vi.fn(() => ({ matches: false })),
@@ -123,6 +123,9 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
+vi.mock("../api/useRouteDraftsQuery", () => ({
+  useRouteDraftsQuery: () => ({ drafts: [], isLoading: false, error: null }),
+}));
 const defaultCenter = { lat: 35, lng: 135 };
 describe("RouteCreateScreen", () => {
   it("空の作成画面から地点を追加し、経路を再計算して保存する", async () => {
@@ -133,9 +136,9 @@ describe("RouteCreateScreen", () => {
     expect(
       screen.getByRole("heading", { name: "ルートを作成" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "ルート名" })).toHaveValue("");
+    expect(screen.queryByRole("textbox", { name: "ルート名" })).toBeNull();
     expect(
-      screen.getByRole("button", { name: "ルートを保存する" }),
+      screen.getByRole("button", { name: "詳細入力へ進む" }),
     ).toBeDisabled();
     expect(
       screen.getByText("保存するには2地点以上を登録してください。"),
@@ -145,10 +148,6 @@ describe("RouteCreateScreen", () => {
         screen.getByRole("region", { name: "Street Viewで下見" }),
       ).queryByRole("button", { name: "地点を追加" }),
     ).not.toBeInTheDocument();
-    await user.type(
-      screen.getByRole("textbox", { name: "ルート名" }),
-      "朝のルート",
-    );
     await user.click(screen.getByRole("button", { name: "地点を追加" }));
     expect(screen.getByText("経由地点（1 地点）")).toBeInTheDocument();
     await user.click(
@@ -172,80 +171,37 @@ describe("RouteCreateScreen", () => {
     expect(screen.getByText("5.2")).toBeInTheDocument();
     expect(screen.getByText("予想時間")).toBeInTheDocument();
     expect(screen.getByText("消費カロリー")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "ルートを保存する" }));
-    expect(createRoute).toHaveBeenCalledWith({
-      title: "朝のルート",
+    await user.click(screen.getByRole("button", { name: "詳細入力へ進む" }));
+    expect(createDraft).toHaveBeenCalledWith({
       points: [defaultCenter, { lat: 36, lng: 136 }],
     });
-    expect(push).toHaveBeenCalledWith("/");
+    expect(push).toHaveBeenCalledWith("/routes/42/details");
     // CI では入力〜保存まで通しで実行するため、デフォルト 5s では不足することがある
   }, 15_000);
-  it("SPメニューでも名前入力と保存ボタンを表示する", async () => {
-    let onViewportChange: (() => void) | undefined;
-    const viewport = {
-      matches: false,
-      addEventListener: (_: string, listener: () => void) => {
-        onViewportChange = listener;
-      },
-      removeEventListener: vi.fn(),
-    };
+  it("SPメニューに次へボタンと下書きの入口を表示する", async () => {
     vi.stubGlobal(
       "matchMedia",
-      vi.fn((query: string) =>
-        query === "(max-width: 767px)"
-          ? viewport
-          : {
-              matches: false,
-              addEventListener: vi.fn(),
-              removeEventListener: vi.fn(),
-            },
-      ),
+      vi.fn((query: string) => ({
+        matches: query === "(max-width: 767px)",
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
     );
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup();
     render(<RouteCreateScreen defaultCenter={defaultCenter} />);
-    await user.type(
-      screen.getByRole("textbox", { name: "ルート名" }),
-      "入力中",
-    );
-    act(() => {
-      viewport.matches = true;
-      onViewportChange?.();
-    });
     await user.click(screen.getByRole("button", { name: "ルート作成を開く" }));
     const dialog = screen.getByRole("dialog", { name: "ルート作成" });
     expect(
-      within(dialog).getByRole("textbox", { name: "ルート名" }),
-    ).toHaveValue("入力中");
-    expect(screen.getAllByRole("textbox", { name: "ルート名" })).toHaveLength(
-      1,
-    );
+      within(dialog).queryByRole("textbox", { name: "ルート名" }),
+    ).toBeNull();
     expect(
-      within(dialog).getByRole("button", { name: "ルートを保存する" }),
+      within(dialog).getByRole("button", { name: "詳細入力へ進む" }),
     ).toBeDisabled();
-    act(() => {
-      viewport.matches = false;
-      onViewportChange?.();
-    });
     expect(
-      within(
-        screen.getByRole("complementary", { name: "ルート作成" }),
-      ).getByRole("textbox", { name: "ルート名" }),
-    ).toHaveValue("入力中");
-    expect(screen.queryByRole("dialog", { name: "ルート作成" })).toBeNull();
-  });
-
-  it("空白のみのルート名を入力するとエラーを表示して保存できない", async () => {
-    const user = userEvent.setup({ delay: null });
-    render(<RouteCreateScreen defaultCenter={defaultCenter} />);
-    const title = screen.getByRole("textbox", { name: "ルート名" });
-    await user.type(title, "   ");
-    await user.tab();
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "ルート名を入力してください。",
-    );
-    expect(
-      screen.getByRole("button", { name: "ルートを保存する" }),
-    ).toBeDisabled();
+      within(dialog).getByRole("heading", {
+        name: "作成途中のルートの続きから",
+      }),
+    ).toBeInTheDocument();
   });
 
   it("利用上限に達したら登録地点を直線で結び、警告をサイドバーで表示する", async () => {
@@ -287,7 +243,7 @@ describe("RouteCreateScreen", () => {
     expect(confirm).not.toHaveBeenCalled();
     expect(push).toHaveBeenCalledWith("/settings/profile");
     push.mockClear();
-    await user.type(screen.getByRole("textbox", { name: "ルート名" }), "変更");
+    await user.click(screen.getByRole("button", { name: "地点を追加" }));
     await user.click(
       screen.getByRole("button", { name: "プロフィールへ移動" }),
     );

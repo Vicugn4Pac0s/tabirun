@@ -43,6 +43,13 @@
       "when": 1795523088442,
       "tag": "0005_sad_stature",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795527430466,
+      "tag": "0006_crazy_wind_dancer",
+      "breakpoints": true
     }
   ]
 }

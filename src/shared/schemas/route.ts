@@ -17,6 +17,13 @@ export const routeIdSchema = z.object({
   id: z.number().int().positive(),
 });
 
+/** URLでは先頭ゼロや指数表記を許可せず、正確に扱える整数だけを受け入れる。 */
+export const routeIdParamSchema = z
+  .string()
+  .regex(/^[1-9]\d*$/)
+  .transform(Number)
+  .pipe(routeIdSchema.shape.id);
+
 const routeTitleSchema = z
   .string()
   .trim()
@@ -41,18 +48,6 @@ export type RouteUpdateDetailsInput = z.infer<typeof routeUpdateDetailsSchema>;
 export const routeDeleteSchema = routeIdSchema;
 
 export type RouteDeleteInput = z.infer<typeof routeDeleteSchema>;
-
-// 既存画面が利用するため、画面分割で新APIへ移行するまで残す。
-export const routeCreateSchema = z.object({
-  title: routeTitleSchema,
-  points: routePointsSchema,
-});
-
-export type RouteCreateInput = z.infer<typeof routeCreateSchema>;
-
-export const routeUpdateSchema = routeCreateSchema.extend(routeIdSchema.shape);
-
-export type RouteUpdateInput = z.infer<typeof routeUpdateSchema>;
 
 export const directionInputSchema = z.object({
   routePoints: routePointsSchema,

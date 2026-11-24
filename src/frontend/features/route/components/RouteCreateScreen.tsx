@@ -13,7 +13,8 @@ import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { useRouteCreation } from "../hooks/useRouteCreation";
 import { RouteScreenLayout } from "./RouteScreenLayout";
-import { RouteForm } from "./RouteForm";
+import { RouteDraftList } from "./RouteDraftList";
+import { Button } from "~/frontend/components/ui/button";
 import { RouteEditorMap } from "./RouteEditorMap";
 
 type RouteCreateScreenProps = { defaultCenter: google.maps.LatLngLiteral };
@@ -46,10 +47,11 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
             ホームへ戻る
           </GuardedLink>
           <h1 className="mb-4 text-xl font-bold">ルートを作成</h1>
-          <RouteForm
-            draft={draft}
-            onSubmit={save}
-            submitText={{ idle: "ルートを保存する", pending: "保存中..." }}
+          <RouteDraftList />
+          <form
+            onSubmit={(event) => {
+              void save(event);
+            }}
           >
             <p className="mt-2 text-sm text-gray-500">
               画面下部のボタンで地点を追加・削除できます。
@@ -66,7 +68,25 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
               onPaceChange={setPace}
               weightKg={weightKg}
             />
-          </RouteForm>
+            <div className="my-6 flex flex-wrap gap-2">
+              <Button
+                type="submit"
+                disabled={!draft.canSave || draft.isSubmitting || isCreating}
+              >
+                {draft.isSubmitting || isCreating
+                  ? "保存中..."
+                  : "詳細入力へ進む"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!draft.isDirty || draft.isSubmitting || isCreating}
+                onClick={draft.reset}
+              >
+                リセット
+              </Button>
+            </div>
+          </form>
           {points.length < 2 && (
             <p role="status" className="mb-3 text-sm text-gray-500">
               保存するには2地点以上を登録してください。

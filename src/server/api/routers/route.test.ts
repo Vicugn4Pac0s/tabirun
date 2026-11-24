@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TRPCError } from "@trpc/server";
 import { encode } from "@googlemaps/polyline-codec";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "~/server/db";
 import { routes } from "~/server/db/schema";
 import {
@@ -119,7 +119,7 @@ function createCaller(userId: string | null = "owner") {
     session: userId ? { user: { id: userId }, expires: "2099-01-01" } : null,
   });
 }
-const updateInput = { id: 1, title: "夕方のルート", points };
+const updateInput = { id: 1, points };
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -540,11 +540,16 @@ describe("下書きと分割した更新API", () => {
     expect(computeRoute).toHaveBeenCalledOnce();
   });
 
-  it("下書き一覧はログインユーザーとdraftで絞る", async () => {
-    selectWhere.mockResolvedValue([]);
+  it("下書き一覧は本人とdraftで絞り、未更新なら作成日時で並べる", async () => {
+    const orderBy = vi.fn().mockResolvedValue([]);
+    selectWhere.mockReturnValue({ orderBy });
     await expect(createCaller("other").getDrafts()).resolves.toEqual([]);
     expect(selectWhere).toHaveBeenCalledWith(
       and(eq(routes.createdById, "other"), eq(routes.status, "draft")),
+    );
+    expect(orderBy).toHaveBeenCalledWith(
+      desc(sql`coalesce(${routes.updatedAt}, ${routes.createdAt})`),
+      desc(routes.id),
     );
   });
 
@@ -633,7 +638,7 @@ describe("route.delete", () => {
   });
 });
 
-describe("route.create", () => {
+describe("route.createDraft", () => {
   it("27地点を受け入れて保存・計算する", async () => {
     const limitPoints = Array.from({ length: 27 }, (_, index) => ({
       lat: 35 + index / 100,
@@ -643,10 +648,11 @@ describe("route.create", () => {
       { ...routeWithoutCache, points: JSON.stringify(limitPoints) },
     ]);
     await expect(
-      createCaller().create({ title: "27地点のルート", points: limitPoints }),
-    ).resolves.toBeUndefined();
+      createCaller().createDraft({ points: limitPoints }),
+    ).resolves.toEqual({ id: 1 });
     expect(insertValues).toHaveBeenCalledWith({
-      title: "27地点のルート",
+      title: "2026/11/11のルート",
+      status: "draft",
       points: JSON.stringify(limitPoints),
       createdById: "owner",
     });
@@ -662,7 +668,7 @@ describe("route.create", () => {
       lng: 135,
     }));
     await expect(
-      createCaller().create({ title: "28地点のルート", points: tooManyPoints }),
+      createCaller().createDraft({ points: tooManyPoints }),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
     expect(transaction).not.toHaveBeenCalled();
     expect(insert).not.toHaveBeenCalled();
@@ -680,9 +686,10 @@ describe("route.create", () => {
       distanceMeters: 1,
       directionSource: "routes_api",
     };
-    await expect(createCaller().create(input)).resolves.toBeUndefined();
+    await expect(createCaller().createDraft(input)).resolves.toEqual({ id: 1 });
     expect(insertValues).toHaveBeenCalledWith({
-      title: input.title,
+      title: "2026/11/11のルート",
+      status: "draft",
       points: JSON.stringify(points),
       createdById: "owner",
     });
@@ -706,9 +713,9 @@ describe("route.create", () => {
   it("上限到達時もルートを保存し、直線として扱う", async () => {
     lock.mockResolvedValue([routeWithoutCache]);
     hasQuotaRemaining.mockResolvedValue(false);
-    await expect(
-      createCaller().create({ title: "朝のルート", points }),
-    ).resolves.toBeUndefined();
+    await expect(createCaller().createDraft({ points })).resolves.toEqual({
+      id: 1,
+    });
     expect(updateSet).toHaveBeenCalledWith(
       expect.objectContaining({
         directionSource: "straight_line",
@@ -722,9 +729,9 @@ describe("route.create", () => {
   it("Googleの障害でも登録地点の保存は成功させ、不正な経路は保存しない", async () => {
     lock.mockResolvedValue([routeWithoutCache]);
     failAfterRequest(new TRPCError({ code: "BAD_REQUEST" }));
-    await expect(
-      createCaller().create({ title: "朝のルート", points }),
-    ).resolves.toBeUndefined();
+    await expect(createCaller().createDraft({ points })).resolves.toEqual({
+      id: 1,
+    });
     expect(insertValues).toHaveBeenCalledOnce();
     expect(updateSet).not.toHaveBeenCalled();
     expect(incrementQuota).toHaveBeenCalledExactlyOnceWith(
@@ -736,7 +743,7 @@ describe("route.create", () => {
 
   it("未ログインでは作成も計算もしない", async () => {
     await expect(
-      createCaller(null).create({ title: "朝のルート", points }),
+      createCaller(null).createDraft({ points }),
     ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
     expect(transaction).not.toHaveBeenCalled();
     expect(computeRoute).not.toHaveBeenCalled();
@@ -744,21 +751,21 @@ describe("route.create", () => {
 
   it("DBへの作成失敗を成功として返さない", async () => {
     insertReturning.mockRejectedValue(new Error("db failed"));
-    await expect(
-      createCaller().create({ title: "朝のルート", points }),
-    ).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
+    await expect(createCaller().createDraft({ points })).rejects.toMatchObject({
+      code: "INTERNAL_SERVER_ERROR",
+    });
     expect(computeRoute).not.toHaveBeenCalled();
   });
 });
 
-describe("route.update", () => {
+describe("route.updatePoints", () => {
   it("27地点を受け入れて保存・計算する", async () => {
     const limitPoints = Array.from({ length: 27 }, (_, index) => ({
       lat: 35 + index / 100,
       lng: 135,
     }));
     await expect(
-      createCaller().update({ ...updateInput, points: limitPoints }),
+      createCaller().updatePoints({ ...updateInput, points: limitPoints }),
     ).resolves.toBeUndefined();
     expect(updateSet).toHaveBeenCalledWith(
       expect.objectContaining({ points: JSON.stringify(limitPoints) }),
@@ -775,7 +782,7 @@ describe("route.update", () => {
       lng: 135,
     }));
     await expect(
-      createCaller().update({ ...updateInput, points: tooManyPoints }),
+      createCaller().updatePoints({ ...updateInput, points: tooManyPoints }),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
     expect(transaction).not.toHaveBeenCalled();
     expect(insert).not.toHaveBeenCalled();
@@ -789,14 +796,16 @@ describe("route.update", () => {
     async (existing) => {
       lock.mockResolvedValue([existing]);
       const input = {
-        ...updateInput,
+        id: 1,
+        title: "夕方のルート",
         encodedPolyline: "forged-line",
         directionPointsHash: "forged-hash",
       };
-      await expect(createCaller().update(input)).resolves.toBeUndefined();
+      await expect(
+        createCaller().updateDetails(input),
+      ).resolves.toBeUndefined();
       expect(updateSet).toHaveBeenCalledExactlyOnceWith({
         title: input.title,
-        points: JSON.stringify(points),
         updatedAt: now,
       });
       expect(updateWhere).toHaveBeenCalledWith(
@@ -812,10 +821,9 @@ describe("route.update", () => {
     const changed = [...points].reverse();
     lock.mockResolvedValueOnce([routeWithCache]);
     await expect(
-      createCaller().update({ ...updateInput, points: changed }),
+      createCaller().updatePoints({ ...updateInput, points: changed }),
     ).resolves.toBeUndefined();
     expect(updateSet).toHaveBeenNthCalledWith(1, {
-      title: updateInput.title,
       points: JSON.stringify(changed),
       updatedAt: now,
       ...emptyCache,
@@ -844,10 +852,9 @@ describe("route.update", () => {
     lock.mockResolvedValueOnce([routeWithCache]);
     failAfterRequest(new TRPCError({ code: "NOT_FOUND" }));
     await expect(
-      createCaller().update({ ...updateInput, points: changed }),
+      createCaller().updatePoints({ ...updateInput, points: changed }),
     ).resolves.toBeUndefined();
     expect(updateSet).toHaveBeenCalledExactlyOnceWith({
-      title: updateInput.title,
       points: JSON.stringify(changed),
       updatedAt: now,
       ...emptyCache,
@@ -862,7 +869,7 @@ describe("route.update", () => {
   it("他人のルートは所有者条件で除外し、変更も計算もしない", async () => {
     lock.mockResolvedValue([]);
     await expect(
-      createCaller("other").update(updateInput),
+      createCaller("other").updatePoints(updateInput),
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
     expect(selectWhere).toHaveBeenCalledWith(
       and(eq(routes.id, 1), eq(routes.createdById, "other")),
@@ -874,7 +881,7 @@ describe("route.update", () => {
   it("存在しないルートはNOT_FOUNDを返す", async () => {
     lock.mockResolvedValue([]);
     await expect(
-      createCaller().update({ ...updateInput, id: 999 }),
+      createCaller().updatePoints({ ...updateInput, id: 999 }),
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
     expect(selectWhere).toHaveBeenCalledWith(
       and(eq(routes.id, 999), eq(routes.createdById, "owner")),
@@ -884,14 +891,21 @@ describe("route.update", () => {
 
   it("更新0件を成功として返さない", async () => {
     updateWhere.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
-    await expect(createCaller().update(updateInput)).rejects.toMatchObject({
+    await expect(
+      createCaller().updatePoints({
+        ...updateInput,
+        points: [...points].reverse(),
+      }),
+    ).rejects.toMatchObject({
       code: "NOT_FOUND",
     });
     expect(computeRoute).not.toHaveBeenCalled();
   });
 
   it("未ログインでは更新しない", async () => {
-    await expect(createCaller(null).update(updateInput)).rejects.toMatchObject({
+    await expect(
+      createCaller(null).updatePoints(updateInput),
+    ).rejects.toMatchObject({
       code: "UNAUTHORIZED",
     });
     expect(transaction).not.toHaveBeenCalled();
@@ -899,7 +913,7 @@ describe("route.update", () => {
   });
 });
 
-describe.each(["create", "update"] as const)(
+describe.each(["createDraft", "updatePoints"] as const)(
   "route.%s の座標検証",
   (operation) => {
     it.each([
@@ -919,7 +933,6 @@ describe.each(["create", "update"] as const)(
         await expect(
           createCaller()[operation]({
             id: 1,
-            title: "座標検証",
             points: [point, { lat: 0, lng: 0 }],
           }),
         ).rejects.toMatchObject({ code: "BAD_REQUEST" });
@@ -939,15 +952,14 @@ describe.each(["create", "update"] as const)(
       insertReturning.mockResolvedValue([
         { ...routeWithoutCache, points: JSON.stringify(boundaryPoints) },
       ]);
-      await expect(
-        createCaller()[operation]({
-          id: 1,
-          title: "境界値",
-          points: boundaryPoints,
-        }),
-      ).resolves.toBeUndefined();
+      const result = await createCaller()[operation]({
+        id: 1,
+        points: boundaryPoints,
+      });
+      if (operation === "createDraft") expect(result).toEqual({ id: 1 });
+      else expect(result).toBeUndefined();
       expect(
-        operation === "create" ? insertValues : updateSet,
+        operation === "createDraft" ? insertValues : updateSet,
       ).toHaveBeenCalledWith(
         expect.objectContaining({ points: JSON.stringify(boundaryPoints) }),
       );

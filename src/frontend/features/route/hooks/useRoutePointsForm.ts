@@ -3,21 +3,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFormState, useWatch } from "react-hook-form";
 import {
   ROUTE_POINTS_MAX,
-  routeCreateSchema,
-  type RouteCreateInput,
+  routeCreateDraftSchema,
+  type RouteCreateDraftInput,
 } from "~/shared/schemas";
 
 /**
  * 初回のルートを基準に編集状態・地点操作・破棄確認を返す。入力の変更後も基準は更新しない。
  * 変更中はブラウザ離脱を警告し、リセット時は確認後に初回の値へ戻す。
  */
-export function useRouteDraft(route: RouteCreateInput) {
+export function useRoutePointsForm(route: RouteCreateDraftInput) {
   const [initial] = useState(() => ({
-    title: route.title,
     points: route.points.map((point) => ({ ...point })),
   }));
-  const form = useForm<RouteCreateInput>({
-    resolver: zodResolver(routeCreateSchema),
+  const form = useForm<RouteCreateDraftInput>({
+    resolver: zodResolver(routeCreateDraftSchema),
     defaultValues: initial,
     mode: "onChange",
   });

@@ -3,11 +3,9 @@ import "server-only";
 import { TRPCError } from "@trpc/server";
 import type { db } from "~/server/db";
 import type {
-  RouteCreateInput,
   RouteCreateDraftInput,
   RouteUpdatePointsInput,
   RouteUpdateDetailsInput,
-  RouteUpdateInput,
 } from "~/shared/schemas";
 import {
   CLEARED_DIRECTION,
@@ -33,7 +31,7 @@ import type { routes } from "~/server/db/schema";
 
 type RouteDirectionDb = Pick<typeof db, "query" | "insert" | "update">;
 type RouteForDirection = Omit<typeof routes.$inferSelect, "points"> & {
-  points: RouteCreateInput["points"];
+  points: RouteCreateDraftInput["points"];
 };
 
 /**
@@ -170,57 +168,6 @@ export async function deleteRoute(
 ): Promise<void> {
   const deleted = await deleteOwnedRoute(database, userId, id);
   if (deleted.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
-}
-
-/**
- * ルートを登録し、経路計算・保存までを1つのトランザクションで行う。
- * 経路取得失敗でも地点は保存する。登録行が返らなければINTERNAL_SERVER_ERROR。
- */
-export async function createRoute(
-  database: typeof db,
-  userId: string,
-  input: RouteCreateInput,
-): Promise<void> {
-  await database.transaction(async (tx) => {
-    const [created] = await insertOwnedRoute(tx, userId, input);
-    if (!created) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-    // 計算に失敗しても登録地点は保存し、詳細取得時に再試行できるようにする。
-    await ensureRouteDirection(tx, userId, toRoute(created));
-  });
-}
-
-/**
- * 所有ルートを更新し、地点が変わった場合だけ経路を無効化・再計算する。
- * 取得から計算まで同じトランザクションでロックを保持する。対象なし・更新0件はNOT_FOUND。
- * 経路取得失敗でも変更地点は保存する。
- */
-export async function updateRoute(
-  database: typeof db,
-  userId: string,
-  input: RouteUpdateInput,
-): Promise<void> {
-  await database.transaction(async (tx) => {
-    const row = await findOwnedRouteForUpdate(tx, userId, input.id);
-    if (!row) throw new TRPCError({ code: "NOT_FOUND" });
-    const existing = toRoute(row);
-    const pointsChanged =
-      getRoutePointsHash(existing.points) !== getRoutePointsHash(input.points);
-    const changes = {
-      title: input.title,
-      points: JSON.stringify(input.points),
-      updatedAt: new Date(),
-      ...(pointsChanged ? CLEARED_DIRECTION : {}),
-    };
-    const updated = await updateOwnedRoute(tx, userId, input.id, changes);
-    // FOR UPDATEで取得済みなので通常は起きないが、念のための保険。
-    if (updated.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
-    if (pointsChanged)
-      await ensureRouteDirection(tx, userId, {
-        ...existing,
-        ...changes,
-        points: input.points,
-      });
-  });
 }
 
 /**
