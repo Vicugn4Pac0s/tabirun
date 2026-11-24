@@ -3,7 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
-import { RouteDetailsScreen } from "~/frontend/features/route/components/RouteDetailsScreen";
+import { RouteDetailsEditScreen } from "~/frontend/features/route/components/RouteDetailsEditScreen";
 import { ProtectedPageFallback } from "~/app/_components/ProtectedPageFallback";
 import { getProtectedPageState } from "~/server/auth/getProtectedPageState";
 import { api } from "~/trpc/server";
@@ -38,7 +38,7 @@ export default async function RouteDetailsPage({
   return (
     <SessionProvider session={state.session}>
       <main>
-        <RouteDetailsScreen key={route.id} route={route} />
+        <RouteDetailsEditScreen key={route.id} route={route} />
       </main>
     </SessionProvider>
   );

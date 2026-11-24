@@ -10,12 +10,12 @@ featureは配置の単位、DDDは業務の概念や境界を考えるための�
 
 - routerには入力schema、認証・クォータ用procedureの選択、操作関数の呼び出しを書く。
 - 入力制約は `shared/schemas` を使う。操作関数へ `ctx` 全体は渡さず、必要な `db`・セッション由来のユーザーID・入力を渡す。
-- Zod schemaの変数名は camelCase + `Schema`（例: `routeCreateSchema`）、推論型は PascalCase（例: `RouteCreateInput`）にする。入力schemaは `src/shared/schemas`、サーバーだけで使う出力・外部APIレスポンスのschemaは利用側の `src/server/features/<feature>/` に置く。
+- Zod schemaの変数名は camelCase + `Schema`（例: `routeCreateDraftSchema`）、推論型は PascalCase（例: `RouteCreateDraftInput`）にする。入力schemaは `src/shared/schemas`、サーバーだけで使う出力・外部APIレスポンスのschemaは利用側の `src/server/features/<feature>/` に置く。
 - routerの認証と、対象データへの所有者条件は別の責務として扱う。
 
 ## 2. 操作の流れを1つの関数にまとめる
 
-- `updateRoute`、`getRouteDetail` のように、目的が伝わる関数を入口にする。DB操作や外部通信を実行する順序をここで読めるようにする。
+- `updateRoutePoints`、`getRouteDetail` のように、目的が伝わる関数を入口にする。DB操作や外部通信を実行する順序をここで読めるようにする。
 - トランザクションは操作関数で開始し、その中のDB関数には同じ `tx` を渡す。内部で別の接続・トランザクションを作らない。
 - 行ロックが必要な操作では、最初に所有者条件付きで取得した行を使い、処理の終了までロックを保持する。
 - 操作ごとに必ず複数の層やファイルを作る、という意味ではない。小さく読みやすい処理まで機械的に分割しない。
@@ -96,69 +96,48 @@ server/db/                         接続・schema
 
 Repositoryのinterface、DIの仕組み、基底クラス、Result型、無理なジェネリクスは導入しない。普通の関数と既存の `db`・`tx` の引数で構成する。汎用化や層の数より、その操作で何をするかが素直に読めることを優先する。
 
-## 例: `route.update` のbefore / after
+## 例: 地点更新の責務分離
 
-現在の [route router](../src/server/api/routers/route.ts) の `update` は、[service.ts](../src/server/features/route/service.ts) の操作関数を呼ぶ。同じファイルの `ensureRouteDirection` が経路の再利用・計算・保存をまとめ、[repository.ts](../src/server/features/route/repository.ts) が所有者条件付きの取得・更新・行変換、[direction/domain.ts](../src/server/features/direction/domain.ts) が経路の純粋な判定・組み立てを担当する。
-
-beforeは整理前の構造を示す例で、比較・更新部分を省略している。
-
-```ts
-update: protectedProcedure
-  .input(routeUpdateSchema)
-  .mutation(async ({ ctx, input }) => {
-    await ctx.db.transaction(async (tx) => {
-      const ownerCondition = and(
-        eq(routes.id, input.id),
-        eq(routes.createdById, ctx.session.user.id),
-      );
-      const [existing] = await tx
-        .select().from(routes).where(ownerCondition).for("update");
-      if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
-      const previousPoints = routePointsSchema.parse(JSON.parse(existing.points));
-      // 地点比較、所有者条件付き更新、必要な場合だけ経路再計算が続く。
-    });
-  }),
-```
-
-afterは現在の実装からの抜粋。以下の操作関数・DB関数・定数は実装済みで、importとJSDocは省略している。
+[route router](../src/server/api/routers/route.ts) の `updatePoints` は、入力検証と認証の後に操作関数を呼ぶ。名前更新は `updateDetails` に分け、地点更新では名前・作成状況を変更しない。
 
 ```ts
 // api/routers/route.ts
-update: protectedProcedure
-  .input(routeUpdateSchema)
+updatePoints: protectedProcedure
+  .input(routeUpdatePointsSchema)
   .mutation(({ ctx, input }) =>
-    updateRoute(ctx.db, ctx.session.user.id, input),
+    updateRoutePoints(ctx.db, ctx.session.user.id, input),
   ),
 ```
 
+操作関数は所有者条件付きで行ロックを取り、地点が変わった場合にだけキャッシュを無効化・再計算する。以下は現在の実装からの抜粋で、importとJSDocは省略している。
+
 ```ts
 // features/route/service.ts
-export async function updateRoute(
+export async function updateRoutePoints(
   database: typeof db,
   userId: string,
-  input: RouteUpdateInput,
+  input: RouteUpdatePointsInput,
 ): Promise<void> {
   await database.transaction(async (tx) => {
     const row = await findOwnedRouteForUpdate(tx, userId, input.id);
     if (!row) throw new TRPCError({ code: "NOT_FOUND" });
     const existing = toRoute(row);
-    const pointsChanged =
-      getRoutePointsHash(existing.points) !== getRoutePointsHash(input.points);
+    if (
+      getRoutePointsHash(existing.points) === getRoutePointsHash(input.points)
+    )
+      return;
     const changes = {
-      title: input.title,
       points: JSON.stringify(input.points),
       updatedAt: new Date(),
-      ...(pointsChanged ? CLEARED_DIRECTION : {}),
+      ...CLEARED_DIRECTION,
     };
     const updated = await updateOwnedRoute(tx, userId, input.id, changes);
-    // FOR UPDATEで取得済みなので通常は起きないが、念のための保険。
     if (updated.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
-    if (pointsChanged)
-      await ensureRouteDirection(tx, userId, {
-        ...existing,
-        ...changes,
-        points: input.points,
-      });
+    await ensureRouteDirection(tx, userId, {
+      ...existing,
+      ...changes,
+      points: input.points,
+    });
   });
 }
 ```

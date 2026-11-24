@@ -7,10 +7,10 @@ import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
-import { useRouteDetails } from "../hooks/useRouteDetails";
+import { useRouteDetailsEdit } from "../hooks/useRouteDetailsEdit";
 import { RouteDetailsForm } from "./RouteDetailsForm";
 
-type RouteDetailsScreenProps = {
+type RouteDetailsEditScreenProps = {
   route: Pick<
     RouterOutputs["route"]["getById"],
     "id" | "title" | "status" | "direction" | "directionErrorCode"
@@ -18,9 +18,9 @@ type RouteDetailsScreenProps = {
 };
 
 /** 保存済みの距離と名前入力を表示する。下書きは完了、完了済みは名前だけを保存する。 */
-export function RouteDetailsScreen({ route }: RouteDetailsScreenProps) {
+export function RouteDetailsEditScreen({ route }: RouteDetailsEditScreenProps) {
   const { form, save, editMap, isSaving, canSave, confirmNavigation } =
-    useRouteDetails(route);
+    useRouteDetailsEdit(route);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const warningCode =
     route.direction?.directionSource === "straight_line"

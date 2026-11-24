@@ -1,6 +1,6 @@
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useRouteEdit } from "./useRouteEdit";
+import { useRoutePointsEdit } from "./useRoutePointsEdit";
 const { updatePoints, push, refresh } = vi.hoisted(() => ({
   updatePoints: vi.fn(),
   push: vi.fn(),
@@ -18,7 +18,7 @@ const route = {
     { lat: 35, lng: 135 },
     { lat: 36, lng: 136 },
   ],
-} satisfies Parameters<typeof useRouteEdit>[0];
+} satisfies Parameters<typeof useRoutePointsEdit>[0];
 const extra = { lat: 37, lng: 137 };
 beforeEach(() => {
   vi.resetAllMocks();
@@ -27,11 +27,13 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
 });
-describe("useRouteEdit", () => {
+describe("useRoutePointsEdit", () => {
   it.each(["draft", "completed"] as const)(
     "%sの地点だけを更新し、状態に応じた画面へ戻る",
     async (status) => {
-      const { result } = renderHook(() => useRouteEdit({ ...route, status }));
+      const { result } = renderHook(() =>
+        useRoutePointsEdit({ ...route, status }),
+      );
       act(() => result.current.draft.togglePoint(extra));
       await act(() => result.current.save());
       expect(updatePoints).toHaveBeenCalledExactlyOnceWith({
@@ -46,7 +48,7 @@ describe("useRouteEdit", () => {
     },
   );
   it("未変更や2地点未満では送信しない", async () => {
-    const { result } = renderHook(() => useRouteEdit(route));
+    const { result } = renderHook(() => useRoutePointsEdit(route));
     await act(() => result.current.save());
     act(() => result.current.draft.togglePoint(route.points[0] ?? extra));
     await act(() => result.current.save());
@@ -54,7 +56,7 @@ describe("useRouteEdit", () => {
   });
   it("保存失敗時は地点を保持して再試行する", async () => {
     updatePoints.mockRejectedValueOnce(new Error("failed"));
-    const { result } = renderHook(() => useRouteEdit(route));
+    const { result } = renderHook(() => useRoutePointsEdit(route));
     act(() => result.current.draft.togglePoint(extra));
     await act(() => result.current.save());
     expect(result.current.draft.points).toEqual([...route.points, extra]);
@@ -72,7 +74,7 @@ describe("useRouteEdit", () => {
           finish = resolve;
         }),
     );
-    const { result } = renderHook(() => useRouteEdit(route));
+    const { result } = renderHook(() => useRoutePointsEdit(route));
     act(() => result.current.draft.togglePoint(extra));
     let pending: Promise<void> | undefined;
     act(() => {
@@ -91,7 +93,7 @@ describe("useRouteEdit", () => {
   it("再描画で地点を上書きせず、リセットと離脱確認を行う", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const { result, rerender } = renderHook(
-      ({ initial }) => useRouteEdit(initial),
+      ({ initial }) => useRoutePointsEdit(initial),
       { initialProps: { initial: route } },
     );
     act(() => result.current.draft.togglePoint(extra));

@@ -1,9 +1,12 @@
 import "server-only";
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import type { db } from "~/server/db";
 import { routes } from "~/server/db/schema";
-import { routePointsSchema, type RouteCreateInput } from "~/shared/schemas";
+import {
+  routePointsSchema,
+  type RouteCreateDraftInput,
+} from "~/shared/schemas";
 import type { SavedRouteDirection } from "~/server/features/direction/domain";
 
 export const CLEARED_DIRECTION = {
@@ -35,7 +38,7 @@ export function findUserRoutes(
     .where(and(eq(routes.createdById, userId), eq(routes.status, "completed")));
 }
 
-/** 指定ユーザーの下書き一覧を返す。地点JSON・経路キャッシュは取得しない。 */
+/** 本人の下書きを更新日時の降順（未更新は作成日時）で返す。同日時はIDの降順。 */
 export function findUserDrafts(
   database: Pick<typeof db, "select">,
   userId: string,
@@ -49,7 +52,11 @@ export function findUserDrafts(
       updatedAt: routes.updatedAt,
     })
     .from(routes)
-    .where(and(eq(routes.createdById, userId), eq(routes.status, "draft")));
+    .where(and(eq(routes.createdById, userId), eq(routes.status, "draft")))
+    .orderBy(
+      desc(sql`coalesce(${routes.updatedAt}, ${routes.createdAt})`),
+      desc(routes.id),
+    );
 }
 
 /**
@@ -76,7 +83,8 @@ export async function findOwnedRouteForUpdate(
 export function insertOwnedRoute(
   tx: Pick<typeof db, "insert">,
   userId: string,
-  input: RouteCreateInput & { status?: "draft" | "completed" },
+  input: RouteCreateDraftInput &
+    Pick<typeof routes.$inferInsert, "title" | "status">,
 ) {
   return tx
     .insert(routes)
@@ -84,7 +92,7 @@ export function insertOwnedRoute(
       title: input.title,
       points: JSON.stringify(input.points),
       createdById: userId,
-      ...(input.status ? { status: input.status } : {}),
+      status: input.status,
     })
     .returning();
 }

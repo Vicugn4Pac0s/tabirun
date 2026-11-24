@@ -12,16 +12,16 @@
 - 新規 component は **named export**（既存の default export は触らない）。ファイル名は `PascalCase.tsx` = コンポーネント名。props 型は **`type XxxProps`**（新規のみ。既存は触らない）。
 - component と `hooks/` の画面ロジック hook は **`function` 宣言**、`features/*/api/` の hook は **アロー関数**。
 - `src/app` から直接 import される client 境界には **`"use client"` を必ず付ける**。子 component への付与は任意。
-- 画面ロジック（送信・遷移・toast・二重送信防止・confirm）は `hooks/use<Feature><Action>` に出し、component は hook の戻り値を並べるだけにする（例: `useRouteCreation` / `useRouteEdit` / `useRouteDeletion`）。
-- 再表示で state を捨てたい画面は page 側で `key` を渡す（例: `<RouteEditScreen key={route.id} route={route} />`）。
-- 差分は `children` / `panel` などの ReactNode で受ける（例: `RouteScreenLayout` の `panel`、`RouteForm` の `children`）。文言差分はオブジェクト1つで渡す（例: `RouteForm` の `submitText={{ idle, pending }}`）。
+- 画面ロジック（送信・遷移・toast・二重送信防止・confirm）は `hooks/use<Feature><Action>` に出し、component は hook の戻り値を並べるだけにする（例: `useRouteCreation` / `useRoutePointsEdit` / `useRouteDeletion`）。
+- 再表示で state を捨てたい画面は page 側で `key` を渡す（例: `<RoutePointsEditScreen key={route.id} route={route} />`）。
+- 差分は `children` / `panel` などの ReactNode で受ける（例: `RouteScreenLayout` の `panel`）。文言差分はオブジェクト1つで渡す（idle / pending など、同時に変わる文言をまとめる）。
 - props にデータ取得の hook を渡さない。取得は使う側（画面 or 葉の部品）で `features/*/api` の hook を呼ぶ（例: `PaceSelect` が `usePacesQuery` を内部で呼ぶ）。
 - `src/frontend/components/app-ui` の部品は tRPC・feature・業務文言を持たない（例: `WarningBanner`, `StatValue`, `Selectbox`）。
 - フォームは react-hook-form + `zodResolver(shared/schemas の schema)`。フォーム値には `shared/schemas` で `z.infer` から定義した型を使う（例: `UserProfileUpdateInput`）。
   - `useForm` と送信処理は画面hookが持ち、フォームcomponentは渡されたformでフィールドを描画する（例: `useUserInitialProfile` → `InitialProfileForm`、`useUserProfileEdit` → `UserProfileEditForm`）。
-  - dirty 管理・離脱確認・地点操作を伴うルートでは `useRouteDraft` がformと編集状態を持つ。
+  - dirty 管理・離脱確認・地点操作を伴うルートでは `useRoutePointsForm` がformと編集状態を持つ。
   - 送信ボタンは送信中に無効化する。ルートでは保存可否も含めて `disabled={!canSave || isSubmitting}` とし、ラベルは pending 中に「〜中...」へ切替。
-- 入力のラベルとエラーは `FormField` を使い、子の入力に渡された属性を展開する。`aria-invalid` + `aria-describedby` + `role="alert"` を接続し、エラー色は **`text-destructive`**。表示タイミングの判断は呼出側に残す（例: `RouteForm`）。共通 `FieldError` 部品は作らない。
+- 入力のラベルとエラーは `FormField` を使い、子の入力に渡された属性を展開する。`aria-invalid` + `aria-describedby` + `role="alert"` を接続し、エラー色は **`text-destructive`**。表示タイミングの判断は呼出側に残す（例: `RouteDetailsForm`）。共通 `FieldError` 部品は作らない。
 - 状態表示はテキスト + ARIA: 読み込み中 `<p role="status">…読み込み中...</p>`、エラー `<p role="alert" className="text-destructive">`、空状態は説明 + 次の行動へのボタン（例: `Dashboard.tsx` のルート一覧）。地図上は `LoadingOverlay`。
 - アプリ共通のエラー画面は実装済みの **`app/not-found.tsx`** と **`app/error.tsx`** を使う。**`loading.tsx` は今は作らない**。
 - 共通の離脱確認は `frontend/providers/NavigationGuardProvider` が配下に提供する。`GuardedLink` は Next.js の `Link` の `onNavigate` で確認し、拒否時は遷移を中止する。Providerの外では通常どおり遷移する。ルート画面では `RouteScreenLayout` に `confirmNavigation` を渡してProviderを設ける。
@@ -35,7 +35,7 @@
   - 型は `RouterOutputs[...]` から `Pick` する（例: `RouteDetailScreen` の props 型）。
 - クライアント: 更新・共有するデータは `features/*/api/useXxxQuery` 経由。戻り値は `{ <名前付きデータ>, isLoading, error }` で、一覧は `?? []`、単体は `?? null`（例: `useRoutesQuery`, `useCurrentUserQuery`）。
 - `staleTime: Infinity` を既定にし、鮮度は mutation 側の invalidate で保つ。外部 API 課金系は `retry: false`（例: `useGoogleMapDirectionQuery`）。
-- mutation hook 名は **`use<動詞><名詞>`**（例: `useUpdateRoute`）。戻り値は `{ <動詞>, is<動詞ing>, error, reset }`（例: `updateRoute`, `isUpdating`）。`onSuccess` で影響する query を `Promise.all` で invalidate する。
+- mutation hook 名は **`use<動詞><名詞>`**（例: `useUpdateRoutePoints`）。戻り値は `{ <動詞>, is<動詞ing>, error, reset }`（例: `updatePoints`, `isUpdating`）。`onSuccess` で影響する query を `Promise.all` で invalidate する。
 - mutation の結果は **`try { await ... } catch { toast.error(...) }`** で受ける。
 - toast の文言は **「。」で終える**。mutation の成否は toast、**query の失敗は inline**（`role="alert"`、`text-destructive`）。
 - 保存・削除後に一覧が RSC 由来の画面へ戻るときは `router.push|replace` の後に `router.refresh()`（例: `useRouteCreation`）。
@@ -56,10 +56,10 @@
 - feature内の複数ファイルで使う定数は `features/<feature>/constants.ts` に置く。ファイル内だけで使う定数はそのファイルに置く（例: `RunMetricsPanel` の `DEFAULT_WEIGHT_KG`）。
 - アプリ共通の定数・設定は `frontend/config.ts` に置く（例: 地図の初期位置・ズーム）。featureに閉じない共通型は `frontend/types/` に置く（例: 汎用の `frontend/lib/running.ts` からも使う、共有schemaから推論した `Pace`）。入力制約とその推論型は引き続き `shared/schemas` に置く。
 - `components/ui` だけは shadcn 生成の kebab-case（例: `dropdown-menu.tsx`）。
-- hook ファイルは `useXxx.ts`。query は `useXxxQuery`、画面ロジック hook は `use<Feature><Action>`（例: `useRouteCreation`, `useRouteDraft`）。
+- hook ファイルは `useXxx.ts`。query は `useXxxQuery`、画面ロジック hook は `use<Feature><Action>`（例: `useRouteCreation`, `useRoutePointsForm`）。
 - lib: 1関数1ファイル、`camelCase` の動詞始まり（`getRouteMenuLabel.ts`）。汎用の計算群は1ファイルにまとめてよい（`frontend/lib/running.ts`）。
 - feature の型は `features/<feature>/types.ts`、Context は `features/<feature>/providers/XxxProvider.tsx`（例: `GoogleMapProvider`、`useGoogleMap` を同ファイルから export）。
 - feature非依存の共通Contextと関連部品は `frontend/providers/` に置く（例: `NavigationGuardProvider`、`GuardedLink`）。feature間の依存方向と同階層の許容する依存は `AGENTS.md` に従い、循環や逆方向の依存を作らない。
 - イベント props は `onXxx`（`onTogglePoint`, `onPaceChange`, `onOpenChange`）。boolean は `is/can/show/has` か HTML 属性名（`disabled`）。
 - テスト・story は対象と同じディレクトリに `Xxx.test.tsx` / `Xxx.stories.tsx`。page のテストは `page.test.tsx`。
-- import は `~/`。同じ feature 内は相対パス（`../api/useCreateRoute`）でもよい（現状 route feature はこの形）。
+- import は `~/`。同じ feature 内は相対パス（`../api/useCreateRouteDraft`）でもよい（現状 route feature はこの形）。

@@ -9,8 +9,6 @@ import {
   updateRouteDetails,
   completeRoute,
   deleteRoute,
-  createRoute,
-  updateRoute,
 } from "~/server/features/route/service";
 import {
   routeIdSchema,
@@ -18,8 +16,6 @@ import {
   routeUpdatePointsSchema,
   routeUpdateDetailsSchema,
   routeDeleteSchema,
-  routeCreateSchema,
-  routeUpdateSchema,
 } from "~/shared/schemas";
 
 export const routeRouter = createTRPCRouter({
@@ -58,16 +54,5 @@ export const routeRouter = createTRPCRouter({
     .input(routeDeleteSchema)
     .mutation(({ ctx, input }) =>
       deleteRoute(ctx.db, ctx.session.user.id, input.id),
-    ),
-  // 既存画面が利用するため、画面分割で新APIへ移行するまで残す。
-  create: protectedProcedure
-    .input(routeCreateSchema)
-    .mutation(({ ctx, input }) =>
-      createRoute(ctx.db, ctx.session.user.id, input),
-    ),
-  update: protectedProcedure
-    .input(routeUpdateSchema)
-    .mutation(({ ctx, input }) =>
-      updateRoute(ctx.db, ctx.session.user.id, input),
     ),
 });

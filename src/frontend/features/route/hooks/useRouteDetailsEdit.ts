@@ -17,7 +17,7 @@ type RouteDetails = Pick<
 >;
 
 /** 名前の保存・下書きの完了を行う。地図へ進む場合も先に名前を保存し、失敗時は入力を保つ。 */
-export function useRouteDetails(route: RouteDetails) {
+export function useRouteDetailsEdit(route: RouteDetails) {
   const router = useRouter();
   const { updateDetails, isUpdating } = useUpdateRouteDetails();
   const { completeRoute, isCompleting } = useCompleteRoute();

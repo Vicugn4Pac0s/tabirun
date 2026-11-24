@@ -4,11 +4,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { observable } from "@trpc/server/observable";
 import { expect, within } from "storybook/test";
 import { api } from "~/trpc/react";
-import { RouteDetailsScreen } from "./RouteDetailsScreen";
+import { RouteDetailsEditScreen } from "./RouteDetailsEditScreen";
 
 const meta = {
-  title: "Features/Route/RouteDetailsScreen",
-  component: RouteDetailsScreen,
+  title: "Features/Route/RouteDetailsEditScreen",
+  component: RouteDetailsEditScreen,
   parameters: { nextjs: { appDirectory: true } },
   decorators: [
     function WithApi(Story) {
@@ -62,7 +62,7 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof RouteDetailsScreen>;
+} satisfies Meta<typeof RouteDetailsEditScreen>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 

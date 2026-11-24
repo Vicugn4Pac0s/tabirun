@@ -42,18 +42,6 @@ export const routeDeleteSchema = routeIdSchema;
 
 export type RouteDeleteInput = z.infer<typeof routeDeleteSchema>;
 
-// 既存画面が利用するため、画面分割で新APIへ移行するまで残す。
-export const routeCreateSchema = z.object({
-  title: routeTitleSchema,
-  points: routePointsSchema,
-});
-
-export type RouteCreateInput = z.infer<typeof routeCreateSchema>;
-
-export const routeUpdateSchema = routeCreateSchema.extend(routeIdSchema.shape);
-
-export type RouteUpdateInput = z.infer<typeof routeUpdateSchema>;
-
 export const directionInputSchema = z.object({
   routePoints: routePointsSchema,
 });

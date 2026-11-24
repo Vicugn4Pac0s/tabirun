@@ -11,7 +11,7 @@ import {
  * 初回のルートを基準に編集状態・地点操作・破棄確認を返す。入力の変更後も基準は更新しない。
  * 変更中はブラウザ離脱を警告し、リセット時は確認後に初回の値へ戻す。
  */
-export function useRouteDraft(route: RouteCreateDraftInput) {
+export function useRoutePointsForm(route: RouteCreateDraftInput) {
   const [initial] = useState(() => ({
     points: route.points.map((point) => ({ ...point })),
   }));

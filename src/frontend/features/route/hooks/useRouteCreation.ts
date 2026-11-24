@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useCreateRouteDraft } from "../api/useCreateRouteDraft";
-import { useRouteDraft } from "./useRouteDraft";
+import { useRoutePointsForm } from "./useRoutePointsForm";
 
 /**
  * 新規ルートの編集状態と二重送信を防ぐ保存操作を返す。
@@ -11,7 +11,7 @@ import { useRouteDraft } from "./useRouteDraft";
 export function useRouteCreation() {
   const router = useRouter();
   const { createDraft, isCreating } = useCreateRouteDraft();
-  const draft = useRouteDraft({ points: [] });
+  const draft = useRoutePointsForm({ points: [] });
   const submitting = useRef(false);
   const submit = draft.form.handleSubmit(async (values) => {
     if (!draft.isDirty) return;

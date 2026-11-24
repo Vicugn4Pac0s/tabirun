@@ -11,21 +11,21 @@ import { useRouteEditDirection } from "../hooks/useRouteEditDirection";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
-import { useRouteEdit } from "../hooks/useRouteEdit";
+import { useRoutePointsEdit } from "../hooks/useRoutePointsEdit";
 import type { RouterOutputs } from "~/trpc/react";
 import { RouteScreenLayout } from "./RouteScreenLayout";
 import { Button } from "~/frontend/components/ui/button";
 import { RouteEditorMap } from "./RouteEditorMap";
 
-type RouteEditScreenProps = {
+type RoutePointsEditScreenProps = {
   route: Pick<
     RouterOutputs["route"]["getById"],
     "id" | "status" | "points" | "direction" | "directionErrorCode"
   >;
 };
 
-function RouteEditScreenContent({ route }: RouteEditScreenProps) {
-  const { draft, isUpdating, save } = useRouteEdit(route);
+function RoutePointsEditScreenContent({ route }: RoutePointsEditScreenProps) {
+  const { draft, isUpdating, save } = useRoutePointsEdit(route);
   const { points, togglePoint, confirmDiscard } = draft;
   const { polylinePath, directions, isLoading, warningMessage } =
     useRouteEditDirection(route, points);
@@ -117,10 +117,10 @@ function RouteEditScreenContent({ route }: RouteEditScreenProps) {
  * 保存済みルートの編集画面を、専用のGoogleMapProviderで包んで表示する。
  * 初期編集値は初回のrouteを使うため、別ルートへ切り替える際は呼出側で再マウントする。
  */
-export function RouteEditScreen(props: RouteEditScreenProps) {
+export function RoutePointsEditScreen(props: RoutePointsEditScreenProps) {
   return (
     <GoogleMapProvider>
-      <RouteEditScreenContent {...props} />
+      <RoutePointsEditScreenContent {...props} />
     </GoogleMapProvider>
   );
 }

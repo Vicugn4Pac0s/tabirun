@@ -1,0 +1,1 @@
+ALTER TABLE "tabirun_route" ALTER COLUMN "status" DROP DEFAULT;
