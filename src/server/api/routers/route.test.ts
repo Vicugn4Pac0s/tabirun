@@ -80,7 +80,7 @@ const savedRoute = {
   createdById: "owner",
   createdAt: new Date("2026-10-24T00:00:00Z"),
   updatedAt: null,
-} satisfies typeof routes.$inferInsert;
+} satisfies Omit<typeof routes.$inferSelect, keyof RouteDirectionSnapshot>;
 const snapshot: RouteDirectionSnapshot = {
   directionSource: "routes_api",
   encodedPolyline: encode(points.map(({ lat, lng }) => [lat, lng])),
@@ -374,6 +374,33 @@ describe("route.getById", () => {
 });
 
 describe("下書きと分割した更新API", () => {
+  it.each(["createDraft", "updatePoints"] as const)(
+    "%sは利用枠がなければ経路APIを呼ばず、直線として保存する",
+    async (operation) => {
+      hasQuotaRemaining.mockResolvedValue(false);
+      const caller = createCaller();
+      if (operation === "createDraft") {
+        await expect(caller.createDraft({ points })).resolves.toEqual({
+          id: 1,
+        });
+      } else {
+        await caller.updatePoints({
+          id: 1,
+          points: [...points, { lat: 37, lng: 137 }],
+        });
+      }
+      expect(updateSet).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          directionSource: "straight_line",
+          encodedPolyline: null,
+          distanceMeters: null,
+        }),
+      );
+      expect(computeRoute).not.toHaveBeenCalled();
+      expect(incrementQuota).not.toHaveBeenCalled();
+    },
+  );
+
   it("日付ベースの仮名で下書きを保存し、経路を保存してIDを返す", async () => {
     insertReturning.mockResolvedValue([
       { ...routeWithoutCache, status: "draft" },
