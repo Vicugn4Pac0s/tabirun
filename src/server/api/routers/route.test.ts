@@ -74,12 +74,13 @@ const points = [
 const now = new Date("2026-11-11T12:00:00Z");
 const savedRoute = {
   id: 1,
+  status: "completed",
   title: "朝のルート",
   points: JSON.stringify(points),
   createdById: "owner",
   createdAt: new Date("2026-10-24T00:00:00Z"),
   updatedAt: null,
-};
+} satisfies typeof routes.$inferInsert;
 const snapshot: RouteDirectionSnapshot = {
   directionSource: "routes_api",
   encodedPolyline: encode(points.map(({ lat, lng }) => [lat, lng])),
@@ -90,7 +91,6 @@ const snapshot: RouteDirectionSnapshot = {
 };
 const routeWithCache = {
   ...savedRoute,
-  status: "completed",
   ...snapshot,
 } satisfies typeof routes.$inferSelect;
 const emptyCache = {
@@ -167,14 +167,18 @@ describe("route.getByUser", () => {
       updatedAt: routes.updatedAt,
     });
     expect(selectFrom).toHaveBeenCalledWith(routes);
-    expect(selectWhere).toHaveBeenCalledWith(eq(routes.createdById, "owner"));
+    expect(selectWhere).toHaveBeenCalledWith(
+      and(eq(routes.createdById, "owner"), eq(routes.status, "completed")),
+    );
   });
 
   it("別のユーザーでも、そのログインユーザーの所有者条件で取得する", async () => {
     selectWhere.mockResolvedValue([]);
 
     await expect(createCaller("other").getByUser()).resolves.toEqual([]);
-    expect(selectWhere).toHaveBeenCalledWith(eq(routes.createdById, "other"));
+    expect(selectWhere).toHaveBeenCalledWith(
+      and(eq(routes.createdById, "other"), eq(routes.status, "completed")),
+    );
   });
 
   it("ルート未登録なら空の一覧を返す", async () => {
@@ -366,6 +370,239 @@ describe("route.getById", () => {
     await expect(createCaller().getById({ id: 1 })).rejects.toMatchObject({
       code: "INTERNAL_SERVER_ERROR",
     });
+  });
+});
+
+describe("下書きと分割した更新API", () => {
+  it("日付ベースの仮名で下書きを保存し、経路を保存してIDを返す", async () => {
+    insertReturning.mockResolvedValue([
+      { ...routeWithoutCache, status: "draft" },
+    ]);
+    await expect(createCaller().createDraft({ points })).resolves.toEqual({
+      id: 1,
+    });
+    expect(insertValues).toHaveBeenCalledWith({
+      title: "2026/11/11のルート",
+      points: JSON.stringify(points),
+      createdById: "owner",
+      status: "draft",
+    });
+    expect(computeRoute).toHaveBeenCalledOnce();
+    expect(updateSet).toHaveBeenCalledWith(
+      expect.objectContaining({ distanceMeters: 1500 }),
+    );
+  });
+
+  it("経路取得に失敗しても下書きのIDを返す", async () => {
+    failAfterRequest(new TRPCError({ code: "INTERNAL_SERVER_ERROR" }));
+    await expect(createCaller().createDraft({ points })).resolves.toEqual({
+      id: 1,
+    });
+    expect(updateSet).not.toHaveBeenCalled();
+  });
+
+  it("仮名の日付はサーバーのタイムゾーンに依存せず日本時間で付ける", async () => {
+    vi.setSystemTime(new Date("2026-11-11T16:00:00Z"));
+    await createCaller().createDraft({ points });
+    expect(insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "2026/11/12のルート" }),
+    );
+  });
+
+  it("登録行が返らない場合は失敗する", async () => {
+    insertReturning.mockResolvedValue([]);
+    await expect(createCaller().createDraft({ points })).rejects.toMatchObject({
+      code: "INTERNAL_SERVER_ERROR",
+    });
+    expect(computeRoute).not.toHaveBeenCalled();
+  });
+
+  it("地点だけを変え、名前と状態を保持して経路を再計算する", async () => {
+    const nextPoints = [...points, { lat: 37, lng: 137 }];
+    await createCaller().updatePoints({ id: 1, points: nextPoints });
+    expect(updateSet).toHaveBeenNthCalledWith(1, {
+      points: JSON.stringify(nextPoints),
+      updatedAt: now,
+      ...emptyCache,
+    });
+    expect(updateWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 1), eq(routes.createdById, "owner")),
+    );
+    expect(computeRoute).toHaveBeenCalledOnce();
+  });
+
+  it("同じ地点なら更新も経路計算もしない", async () => {
+    await createCaller().updatePoints({ id: 1, points });
+    expect(updateSet).not.toHaveBeenCalled();
+    expect(computeRoute).not.toHaveBeenCalled();
+  });
+
+  it("地点更新の経路取得に失敗しても、変更地点とキャッシュ無効化は保存する", async () => {
+    failAfterRequest(new TRPCError({ code: "INTERNAL_SERVER_ERROR" }));
+    const nextPoints = [...points, { lat: 37, lng: 137 }];
+    await expect(
+      createCaller().updatePoints({ id: 1, points: nextPoints }),
+    ).resolves.toBeUndefined();
+    expect(updateSet).toHaveBeenCalledExactlyOnceWith({
+      points: JSON.stringify(nextPoints),
+      updatedAt: now,
+      ...emptyCache,
+    });
+  });
+
+  it.each(["updatePoints", "complete"] as const)(
+    "%sはロック取得後の更新0件もNOT_FOUNDにする",
+    async (operation) => {
+      lock.mockResolvedValue([{ ...routeWithCache, status: "draft" }]);
+      updateWhere.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
+      const caller = createCaller();
+      await expect(
+        operation === "complete"
+          ? caller.complete({ id: 1 })
+          : caller.updatePoints({
+              id: 1,
+              points: [...points, { lat: 37, lng: 137 }],
+            }),
+      ).rejects.toMatchObject({ code: "NOT_FOUND" });
+      expect(computeRoute).not.toHaveBeenCalled();
+    },
+  );
+
+  it("名前だけを更新し、状態と経路は変えない", async () => {
+    await createCaller().updateDetails({ id: 1, title: "  新しい名前  " });
+    expect(updateSet).toHaveBeenCalledExactlyOnceWith({
+      title: "新しい名前",
+      updatedAt: now,
+    });
+    expect(updateWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 1), eq(routes.createdById, "owner")),
+    );
+    expect(computeRoute).not.toHaveBeenCalled();
+  });
+
+  it("下書きを完了にし、完了済みなら更新しない", async () => {
+    lock.mockResolvedValueOnce([{ ...routeWithCache, status: "draft" }]);
+    await createCaller().complete({ id: 1 });
+    expect(updateSet).toHaveBeenCalledExactlyOnceWith({
+      status: "completed",
+      updatedAt: now,
+    });
+    expect(updateWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 1), eq(routes.createdById, "owner")),
+    );
+    await createCaller().complete({ id: 1 });
+    expect(updateSet).toHaveBeenCalledOnce();
+    expect(computeRoute).not.toHaveBeenCalled();
+  });
+
+  it("下書きの詳細にも状態と保存済みの距離を返す", async () => {
+    lock.mockResolvedValue([{ ...routeWithCache, status: "draft" }]);
+    await expect(createCaller().getById({ id: 1 })).resolves.toMatchObject({
+      status: "draft",
+      direction: { distanceMeters: 1200 },
+    });
+    expect(computeRoute).not.toHaveBeenCalled();
+  });
+
+  it("経路のない下書きを取得すると再計算する", async () => {
+    lock.mockResolvedValue([{ ...routeWithoutCache, status: "draft" }]);
+    await expect(createCaller().getById({ id: 1 })).resolves.toMatchObject({
+      status: "draft",
+      direction: { distanceMeters: 1500 },
+    });
+    expect(computeRoute).toHaveBeenCalledOnce();
+  });
+
+  it("下書き一覧はログインユーザーとdraftで絞る", async () => {
+    selectWhere.mockResolvedValue([]);
+    await expect(createCaller("other").getDrafts()).resolves.toEqual([]);
+    expect(selectWhere).toHaveBeenCalledWith(
+      and(eq(routes.createdById, "other"), eq(routes.status, "draft")),
+    );
+  });
+
+  it.each(["updatePoints", "updateDetails", "complete"] as const)(
+    "%sは他人のルートをNOT_FOUNDとして扱う",
+    async (operation) => {
+      lock.mockResolvedValue([]);
+      updateWhere.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
+      const caller = createCaller("other");
+      const pending =
+        operation === "updatePoints"
+          ? caller.updatePoints({ id: 1, points })
+          : operation === "updateDetails"
+            ? caller.updateDetails({ id: 1, title: "別人" })
+            : caller.complete({ id: 1 });
+      await expect(pending).rejects.toMatchObject({ code: "NOT_FOUND" });
+      const where = operation === "updateDetails" ? updateWhere : selectWhere;
+      expect(where).toHaveBeenCalledWith(
+        and(eq(routes.id, 1), eq(routes.createdById, "other")),
+      );
+      expect(computeRoute).not.toHaveBeenCalled();
+    },
+  );
+
+  it("新しいAPIはすべてログインを要求する", async () => {
+    const caller = createCaller(null);
+    await Promise.all(
+      [
+        caller.createDraft({ points }),
+        caller.updatePoints({ id: 1, points }),
+        caller.updateDetails({ id: 1, title: "名前" }),
+        caller.complete({ id: 1 }),
+        caller.getDrafts(),
+      ].map((pending) =>
+        expect(pending).rejects.toMatchObject({ code: "UNAUTHORIZED" }),
+      ),
+    );
+    expect(select).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+  });
+});
+
+describe("route.delete", () => {
+  it("自分のルートはIDと所有者の両方を条件に削除する", async () => {
+    removeWhere.mockReturnValue({
+      returning: vi.fn().mockResolvedValue([{ id: 1 }]),
+    });
+
+    await expect(createCaller().delete({ id: 1 })).resolves.toBeUndefined();
+
+    expect(remove).toHaveBeenCalledWith(routes);
+    expect(removeWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 1), eq(routes.createdById, "owner")),
+    );
+  });
+
+  it("他人のルートは所有者条件で削除せず NOT_FOUND を返す", async () => {
+    removeWhere.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
+
+    await expect(createCaller("other").delete({ id: 1 })).rejects.toMatchObject(
+      { code: "NOT_FOUND" },
+    );
+    expect(removeWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 1), eq(routes.createdById, "other")),
+    );
+    expect(removeWhere).toHaveBeenCalledOnce();
+  });
+
+  it("存在しないルートは NOT_FOUND を返す", async () => {
+    removeWhere.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
+
+    await expect(createCaller().delete({ id: 999 })).rejects.toMatchObject({
+      code: "NOT_FOUND",
+    });
+    expect(removeWhere).toHaveBeenCalledWith(
+      and(eq(routes.id, 999), eq(routes.createdById, "owner")),
+    );
+  });
+
+  it("未ログインでは削除しない", async () => {
+    await expect(createCaller(null).delete({ id: 1 })).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+    expect(remove).not.toHaveBeenCalled();
   });
 });
 
@@ -632,51 +869,6 @@ describe("route.update", () => {
     });
     expect(transaction).not.toHaveBeenCalled();
     expect(update).not.toHaveBeenCalled();
-  });
-});
-
-describe("route.delete", () => {
-  it("自分のルートはIDと所有者の両方を条件に削除する", async () => {
-    removeWhere.mockReturnValue({
-      returning: vi.fn().mockResolvedValue([{ id: 1 }]),
-    });
-
-    await expect(createCaller().delete({ id: 1 })).resolves.toBeUndefined();
-
-    expect(remove).toHaveBeenCalledWith(routes);
-    expect(removeWhere).toHaveBeenCalledWith(
-      and(eq(routes.id, 1), eq(routes.createdById, "owner")),
-    );
-  });
-
-  it("他人のルートは所有者条件で削除せず NOT_FOUND を返す", async () => {
-    removeWhere.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
-
-    await expect(createCaller("other").delete({ id: 1 })).rejects.toMatchObject(
-      { code: "NOT_FOUND" },
-    );
-    expect(removeWhere).toHaveBeenCalledWith(
-      and(eq(routes.id, 1), eq(routes.createdById, "other")),
-    );
-    expect(removeWhere).toHaveBeenCalledOnce();
-  });
-
-  it("存在しないルートは NOT_FOUND を返す", async () => {
-    removeWhere.mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
-
-    await expect(createCaller().delete({ id: 999 })).rejects.toMatchObject({
-      code: "NOT_FOUND",
-    });
-    expect(removeWhere).toHaveBeenCalledWith(
-      and(eq(routes.id, 999), eq(routes.createdById, "owner")),
-    );
-  });
-
-  it("未ログインでは削除しない", async () => {
-    await expect(createCaller(null).delete({ id: 1 })).rejects.toMatchObject({
-      code: "UNAUTHORIZED",
-    });
-    expect(remove).not.toHaveBeenCalled();
   });
 });
 

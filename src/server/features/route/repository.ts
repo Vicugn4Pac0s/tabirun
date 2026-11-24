@@ -16,6 +16,43 @@ export const CLEARED_DIRECTION = {
 } as const;
 
 /**
+ * 指定ユーザーの完了済みルート一覧を返し、登録がなければ空配列を返す。
+ * 一覧で不要な地点JSON・経路キャッシュは取得しない。
+ */
+export function findUserRoutes(
+  database: Pick<typeof db, "select">,
+  userId: string,
+) {
+  return database
+    .select({
+      id: routes.id,
+      title: routes.title,
+      createdById: routes.createdById,
+      createdAt: routes.createdAt,
+      updatedAt: routes.updatedAt,
+    })
+    .from(routes)
+    .where(and(eq(routes.createdById, userId), eq(routes.status, "completed")));
+}
+
+/** 指定ユーザーの下書き一覧を返す。地点JSON・経路キャッシュは取得しない。 */
+export function findUserDrafts(
+  database: Pick<typeof db, "select">,
+  userId: string,
+) {
+  return database
+    .select({
+      id: routes.id,
+      title: routes.title,
+      createdById: routes.createdById,
+      createdAt: routes.createdAt,
+      updatedAt: routes.updatedAt,
+    })
+    .from(routes)
+    .where(and(eq(routes.createdById, userId), eq(routes.status, "draft")));
+}
+
+/**
  * 所有ルートを行ロック付きで取得し、見つからない・他人のルートならundefinedを返す。
  * 呼出側のトランザクションを渡し、後続の更新・経路計算にも同じトランザクションを使う。
  */
@@ -39,7 +76,7 @@ export async function findOwnedRouteForUpdate(
 export function insertOwnedRoute(
   tx: Pick<typeof db, "insert">,
   userId: string,
-  input: RouteCreateInput,
+  input: RouteCreateInput & { status?: "draft" | "completed" },
 ) {
   return tx
     .insert(routes)
@@ -47,6 +84,7 @@ export function insertOwnedRoute(
       title: input.title,
       points: JSON.stringify(input.points),
       createdById: userId,
+      ...(input.status ? { status: input.status } : {}),
     })
     .returning();
 }
@@ -81,26 +119,6 @@ export function deleteOwnedRoute(
     .delete(routes)
     .where(and(eq(routes.id, id), eq(routes.createdById, userId)))
     .returning({ id: routes.id });
-}
-
-/**
- * 指定ユーザーのルート一覧を返し、登録がなければ空配列を返す。
- * 一覧で不要な地点JSON・経路キャッシュは取得しない。
- */
-export function findUserRoutes(
-  database: Pick<typeof db, "select">,
-  userId: string,
-) {
-  return database
-    .select({
-      id: routes.id,
-      title: routes.title,
-      createdById: routes.createdById,
-      createdAt: routes.createdAt,
-      updatedAt: routes.updatedAt,
-    })
-    .from(routes)
-    .where(eq(routes.createdById, userId));
 }
 
 /**

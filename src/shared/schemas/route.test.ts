@@ -7,9 +7,66 @@ import {
   routePointsSchema,
   routeUpdateSchema,
   ROUTE_POINTS_MAX,
+  routeCreateDraftSchema,
+  routeUpdatePointsSchema,
+  routeUpdateDetailsSchema,
 } from "~/shared/schemas";
 
 describe("route schemas", () => {
+  it("下書き作成と地点更新は名前を要求しない", () => {
+    const points = [
+      { lat: 35, lng: 139 },
+      { lat: 36, lng: 140 },
+    ];
+    expect(routeCreateDraftSchema.parse({ points })).toEqual({ points });
+    expect(routeUpdatePointsSchema.parse({ id: 1, points })).toEqual({
+      id: 1,
+      points,
+    });
+  });
+
+  it.each([1, 28])("下書き作成と地点更新で%d点を拒否する", (length) => {
+    const points = Array.from({ length }, () => ({ lat: 35, lng: 139 }));
+    expect(routeCreateDraftSchema.safeParse({ points }).success).toBe(false);
+    expect(routeUpdatePointsSchema.safeParse({ id: 1, points }).success).toBe(
+      false,
+    );
+  });
+
+  it("詳細更新は地点を要求せず、名前をtrimする", () => {
+    expect(routeUpdateDetailsSchema.parse({ id: 1, title: " 名前 " })).toEqual({
+      id: 1,
+      title: "名前",
+    });
+    expect(
+      routeUpdateDetailsSchema.safeParse({ id: 1, title: "a".repeat(256) })
+        .success,
+    ).toBe(true);
+  });
+
+  it.each(["", "   ", "a".repeat(257)])(
+    "詳細更新で不正な名前を拒否する",
+    (title) => {
+      expect(routeUpdateDetailsSchema.safeParse({ id: 1, title }).success).toBe(
+        false,
+      );
+    },
+  );
+
+  it.each([0, -1, 1.5])("分割更新で不正なID %dを拒否する", (id) => {
+    expect(
+      routeUpdateDetailsSchema.safeParse({ id, title: "名前" }).success,
+    ).toBe(false);
+    expect(
+      routeUpdatePointsSchema.safeParse({
+        id,
+        points: [
+          { lat: 0, lng: 0 },
+          { lat: 1, lng: 1 },
+        ],
+      }).success,
+    ).toBe(false);
+  });
   it.each([
     { lat: -90.001, lng: 0 },
     { lat: 90.001, lng: 0 },
