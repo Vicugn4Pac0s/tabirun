@@ -13,36 +13,52 @@ export const routePointsSchema = z
   .min(2)
   .max(ROUTE_POINTS_MAX);
 
-export const directionInputSchema = z.object({
-  routePoints: routePointsSchema,
+export const routeIdSchema = z.object({
+  id: z.number().int().positive(),
 });
 
-export type DirectionInput = z.infer<typeof directionInputSchema>;
+const routeTitleSchema = z
+  .string()
+  .trim()
+  .min(1, "ルート名を入力してください。")
+  .max(256, "ルート名は256文字以内で入力してください。");
 
+export const routeCreateDraftSchema = z.object({
+  points: routePointsSchema,
+});
+export type RouteCreateDraftInput = z.infer<typeof routeCreateDraftSchema>;
+
+export const routeUpdatePointsSchema = routeCreateDraftSchema.extend(
+  routeIdSchema.shape,
+);
+export type RouteUpdatePointsInput = z.infer<typeof routeUpdatePointsSchema>;
+
+export const routeUpdateDetailsSchema = routeIdSchema.extend({
+  title: routeTitleSchema,
+});
+export type RouteUpdateDetailsInput = z.infer<typeof routeUpdateDetailsSchema>;
+
+export const routeDeleteSchema = routeIdSchema;
+
+export type RouteDeleteInput = z.infer<typeof routeDeleteSchema>;
+
+// 既存画面が利用するため、画面分割で新APIへ移行するまで残す。
 export const routeCreateSchema = z.object({
-  title: z
-    .string()
-    .trim()
-    .min(1, "ルート名を入力してください。")
-    .max(256, "ルート名は256文字以内で入力してください。"),
+  title: routeTitleSchema,
   points: routePointsSchema,
 });
 
 export type RouteCreateInput = z.infer<typeof routeCreateSchema>;
 
-export const routeUpdateSchema = routeCreateSchema.extend({
-  id: z.number().int().positive(),
-});
+export const routeUpdateSchema = routeCreateSchema.extend(routeIdSchema.shape);
 
 export type RouteUpdateInput = z.infer<typeof routeUpdateSchema>;
 
-export const routeIdSchema = z.object({
-  id: z.number().int().positive(),
+export const directionInputSchema = z.object({
+  routePoints: routePointsSchema,
 });
 
-export const routeDeleteSchema = routeIdSchema;
-
-export type RouteDeleteInput = z.infer<typeof routeDeleteSchema>;
+export type DirectionInput = z.infer<typeof directionInputSchema>;
 
 const snapshotFields = {
   directionCalculatedAt: z.date(),

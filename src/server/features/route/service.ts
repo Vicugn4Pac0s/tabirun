@@ -2,16 +2,23 @@ import "server-only";
 
 import { TRPCError } from "@trpc/server";
 import type { db } from "~/server/db";
-import type { RouteCreateInput, RouteUpdateInput } from "~/shared/schemas";
+import type {
+  RouteCreateInput,
+  RouteCreateDraftInput,
+  RouteUpdatePointsInput,
+  RouteUpdateDetailsInput,
+  RouteUpdateInput,
+} from "~/shared/schemas";
 import {
   CLEARED_DIRECTION,
-  deleteOwnedRoute,
-  findOwnedRouteForUpdate,
   findUserRoutes,
+  findUserDrafts,
+  findOwnedRouteForUpdate,
   insertOwnedRoute,
+  updateOwnedRoute,
+  deleteOwnedRoute,
   saveOwnedRouteDirection,
   toRoute,
-  updateOwnedRoute,
 } from "~/server/features/route/repository";
 import {
   getRoutePointsHash,
@@ -30,6 +37,18 @@ type RouteForDirection = Omit<typeof routes.$inferSelect, "points"> & {
 };
 
 /**
+ * 指定ユーザーの完了済みルート一覧を返す。未登録なら空配列を返す。
+ */
+export function getUserRoutes(database: typeof db, userId: string) {
+  return findUserRoutes(database, userId);
+}
+
+/** 指定ユーザーの下書き一覧を返す。未登録なら空配列を返す。 */
+export function getUserDrafts(database: typeof db, userId: string) {
+  return findUserDrafts(database, userId);
+}
+
+/**
  * 所有ルートの詳細と経路を返し、対象がなければNOT_FOUNDを投げる。
  * 同じトランザクションの行ロックを保持したまま経路を計算・保存する場合がある。
  */
@@ -46,6 +65,7 @@ export async function getRouteDetail(
     return {
       id: route.id,
       title: route.title,
+      status: route.status,
       points: route.points,
       createdById: route.createdById,
       createdAt: route.createdAt,
@@ -53,6 +73,103 @@ export async function getRouteDetail(
       ...directionResult,
     };
   });
+}
+
+/** 地点を下書きとして登録し、経路を計算・保存してIDを返す。経路取得失敗でも地点は保存する。 */
+export async function createRouteDraft(
+  database: typeof db,
+  userId: string,
+  input: RouteCreateDraftInput,
+) {
+  return database.transaction(async (tx) => {
+    const date = new Intl.DateTimeFormat("ja-JP", {
+      timeZone: "Asia/Tokyo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    const [created] = await insertOwnedRoute(tx, userId, {
+      title: `${date}のルート`,
+      points: input.points,
+      status: "draft",
+    });
+    if (!created) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    await ensureRouteDirection(tx, userId, toRoute(created));
+    return { id: created.id };
+  });
+}
+
+/** 所有ルートの地点だけを更新する。変更時は経路を再計算し、失敗しても地点は保存する。 */
+export async function updateRoutePoints(
+  database: typeof db,
+  userId: string,
+  input: RouteUpdatePointsInput,
+): Promise<void> {
+  await database.transaction(async (tx) => {
+    const row = await findOwnedRouteForUpdate(tx, userId, input.id);
+    if (!row) throw new TRPCError({ code: "NOT_FOUND" });
+    const existing = toRoute(row);
+    if (
+      getRoutePointsHash(existing.points) === getRoutePointsHash(input.points)
+    )
+      return;
+    const changes = {
+      points: JSON.stringify(input.points),
+      updatedAt: new Date(),
+      ...CLEARED_DIRECTION,
+    };
+    const updated = await updateOwnedRoute(tx, userId, input.id, changes);
+    if (updated.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
+    await ensureRouteDirection(tx, userId, {
+      ...existing,
+      ...changes,
+      points: input.points,
+    });
+  });
+}
+
+/** 所有ルートの名前だけを保存する。地点・作成状況・経路は変更せず、対象なしはNOT_FOUND。 */
+export async function updateRouteDetails(
+  database: typeof db,
+  userId: string,
+  input: RouteUpdateDetailsInput,
+): Promise<void> {
+  const updated = await updateOwnedRoute(database, userId, input.id, {
+    title: input.title,
+    updatedAt: new Date(),
+  });
+  if (updated.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
+}
+
+/** 所有ルートを完了にする。完了済みなら更新せず、対象なしはNOT_FOUND。 */
+export async function completeRoute(
+  database: typeof db,
+  userId: string,
+  id: number,
+): Promise<void> {
+  await database.transaction(async (tx) => {
+    const row = await findOwnedRouteForUpdate(tx, userId, id);
+    if (!row) throw new TRPCError({ code: "NOT_FOUND" });
+    if (row.status === "completed") return;
+    const updated = await updateOwnedRoute(tx, userId, id, {
+      status: "completed",
+      updatedAt: new Date(),
+    });
+    if (updated.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
+  });
+}
+
+/**
+ * 所有ルートを削除し、対象がなければNOT_FOUNDを投げる。
+ * 他人のルートも対象なしと同じ扱いにする。
+ */
+export async function deleteRoute(
+  database: typeof db,
+  userId: string,
+  id: number,
+): Promise<void> {
+  const deleted = await deleteOwnedRoute(database, userId, id);
+  if (deleted.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
 }
 
 /**
@@ -104,26 +221,6 @@ export async function updateRoute(
         points: input.points,
       });
   });
-}
-
-/**
- * 所有ルートを削除し、対象がなければNOT_FOUNDを投げる。
- * 他人のルートも対象なしと同じ扱いにする。
- */
-export async function deleteRoute(
-  database: typeof db,
-  userId: string,
-  id: number,
-): Promise<void> {
-  const deleted = await deleteOwnedRoute(database, userId, id);
-  if (deleted.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
-}
-
-/**
- * 指定ユーザーのルート一覧を返す。未登録なら空配列を返す。
- */
-export function getUserRoutes(database: typeof db, userId: string) {
-  return findUserRoutes(database, userId);
 }
 
 /**

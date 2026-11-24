@@ -24,6 +24,12 @@ export const routes = createTable(
   {
     id: serial("id").primaryKey(),
     title: varchar("title", { length: 256 }).notNull(),
+    status: varchar("status", {
+      length: 20,
+      enum: ["draft", "completed"],
+    })
+      .default("completed")
+      .notNull(),
     points: text("points").notNull(),
     encodedPolyline: text("encoded_polyline"),
     distanceMeters: integer("distance_meters"),
@@ -47,7 +53,9 @@ export const routes = createTable(
   },
   (route) => [
     check("route_title_not_blank", sql`${route.title} ~ '[^[:space:]]'`),
+    check("route_status_valid", sql`${route.status} in ('draft', 'completed')`),
     index("created_by_idx").on(route.createdById),
+    index("route_created_by_status_idx").on(route.createdById, route.status),
     index("title_idx").on(route.title),
     index("route_direction_calculated_at_idx").on(route.directionCalculatedAt),
   ],
