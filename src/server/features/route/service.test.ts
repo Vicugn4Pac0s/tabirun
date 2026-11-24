@@ -38,6 +38,7 @@ const points = [
 const now = new Date("2026-11-10T12:00:00Z");
 const savedRoute = {
   id: 1,
+  status: "completed",
   title: "朝のルート",
   points,
   createdById: "owner",

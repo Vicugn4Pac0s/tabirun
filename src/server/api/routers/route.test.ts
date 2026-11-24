@@ -90,6 +90,7 @@ const snapshot: RouteDirectionSnapshot = {
 };
 const routeWithCache = {
   ...savedRoute,
+  status: "completed",
   ...snapshot,
 } satisfies typeof routes.$inferSelect;
 const emptyCache = {
