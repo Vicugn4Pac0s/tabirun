@@ -4,11 +4,13 @@ import type { RouterOutputs } from "~/trpc/react";
 import { GuardedLink } from "~/frontend/providers/GuardedLink";
 import { NavigationGuardProvider } from "~/frontend/providers/NavigationGuardProvider";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
+import { FormField } from "~/frontend/components/app-ui/FormField";
+import { Button } from "~/frontend/components/ui/button";
+import { Input } from "~/frontend/components/ui/input";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { useRouteDetailsEdit } from "../hooks/useRouteDetailsEdit";
-import { RouteDetailsForm } from "./RouteDetailsForm";
 
 type RouteDetailsEditScreenProps = {
   route: Pick<
@@ -22,6 +24,9 @@ export function RouteDetailsEditScreen({ route }: RouteDetailsEditScreenProps) {
   const { form, save, editMap, isSaving, canSave, confirmNavigation } =
     useRouteDetailsEdit(route);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
+  const { errors, touchedFields, isSubmitted } = form.formState;
+  const titleError =
+    touchedFields.title || isSubmitted ? errors.title?.message : undefined;
   const warningCode =
     route.direction?.directionSource === "straight_line"
       ? "TOO_MANY_REQUESTS"
@@ -51,14 +56,41 @@ export function RouteDetailsEditScreen({ route }: RouteDetailsEditScreenProps) {
           onPaceChange={setPace}
           weightKg={weightKg}
         />
-        <RouteDetailsForm
-          form={form}
-          onSubmit={save}
-          onEditMap={editMap}
-          isSaving={isSaving}
-          canSave={canSave}
-          submitLabel={route.status === "draft" ? "完了" : "保存"}
-        />
+        <form
+          onSubmit={(event) => {
+            void save(event);
+          }}
+          className="space-y-6"
+        >
+          <FormField label="ルート名" error={titleError}>
+            {(fieldProps) => (
+              <Input
+                {...fieldProps}
+                {...form.register("title")}
+                disabled={isSaving}
+              />
+            )}
+          </FormField>
+          <div className="flex flex-wrap gap-3">
+            <Button type="submit" disabled={isSaving || !canSave}>
+              {isSaving
+                ? "保存中..."
+                : route.status === "draft"
+                  ? "完了"
+                  : "保存"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isSaving}
+              onClick={() => {
+                void editMap();
+              }}
+            >
+              地図を編集
+            </Button>
+          </div>
+        </form>
       </section>
     </NavigationGuardProvider>
   );

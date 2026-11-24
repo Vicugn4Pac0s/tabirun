@@ -21,7 +21,7 @@
   - `useForm` と送信処理は画面hookが持ち、フォームcomponentは渡されたformでフィールドを描画する（例: `useUserInitialProfile` → `InitialProfileForm`、`useUserProfileEdit` → `UserProfileEditForm`）。
   - dirty 管理・離脱確認・地点操作を伴うルートでは `useRoutePointsForm` がformと編集状態を持つ。
   - 送信ボタンは送信中に無効化する。ルートでは保存可否も含めて `disabled={!canSave || isSubmitting}` とし、ラベルは pending 中に「〜中...」へ切替。
-- 入力のラベルとエラーは `FormField` を使い、子の入力に渡された属性を展開する。`aria-invalid` + `aria-describedby` + `role="alert"` を接続し、エラー色は **`text-destructive`**。表示タイミングの判断は呼出側に残す（例: `RouteDetailsForm`）。共通 `FieldError` 部品は作らない。
+- 入力のラベルとエラーは `FormField` を使い、子の入力に渡された属性を展開する。`aria-invalid` + `aria-describedby` + `role="alert"` を接続し、エラー色は **`text-destructive`**。表示タイミングの判断は呼出側に残す（例: `RouteDetailsEditScreen`）。共通 `FieldError` 部品は作らない。
 - 状態表示はテキスト + ARIA: 読み込み中 `<p role="status">…読み込み中...</p>`、エラー `<p role="alert" className="text-destructive">`、空状態は説明 + 次の行動へのボタン（例: `Dashboard.tsx` のルート一覧）。地図上は `LoadingOverlay`。
 - アプリ共通のエラー画面は実装済みの **`app/not-found.tsx`** と **`app/error.tsx`** を使う。**`loading.tsx` は今は作らない**。
 - 共通の離脱確認は `frontend/providers/NavigationGuardProvider` が配下に提供する。`GuardedLink` は Next.js の `Link` の `onNavigate` で確認し、拒否時は遷移を中止する。Providerの外では通常どおり遷移する。ルート画面では `RouteScreenLayout` に `confirmNavigation` を渡してProviderを設ける。
