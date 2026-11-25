@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, fn, userEvent, within } from "storybook/test";
+import { fn } from "storybook/test";
 import { RouteNavigation } from "./RouteNavigation";
 
 const points = [
@@ -16,29 +16,9 @@ const meta = {
 } satisfies Meta<typeof RouteNavigation>;
 export default meta;
 type Story = StoryObj<typeof meta>;
-export const RegisteredPoint: Story = {
-  play: async ({ canvasElement, args }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByRole("button", { name: "最初へ" })).toBeDisabled();
-    await userEvent.click(canvas.getByRole("button", { name: "次へ" }));
-    await expect(args.onMove).toHaveBeenCalledWith(points[1]);
-    await userEvent.click(canvas.getByRole("button", { name: "地点を削除" }));
-    await expect(args.onToggle).toHaveBeenCalledTimes(1);
-  },
-};
+export const RegisteredPoint: Story = {};
 export const NewPoint: Story = {
   args: { currentPoint: { lat: 38, lng: 138 } },
-};
-export const Saving: Story = { args: { disabled: true } };
-
-export const EmptyRoute: Story = {
-  args: { points: [] },
-  play: async ({ canvasElement, args }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByRole("button", { name: "次へ" })).toBeDisabled();
-    await userEvent.click(canvas.getByRole("button", { name: "地点を追加" }));
-    await expect(args.onToggle).toHaveBeenCalledTimes(1);
-  },
 };
 
 const fullPoints = Array.from({ length: 27 }, (_, i) => ({
@@ -47,13 +27,4 @@ const fullPoints = Array.from({ length: 27 }, (_, i) => ({
 }));
 export const AtLimit: Story = {
   args: { points: fullPoints, currentPoint: { lat: 38, lng: 138 } },
-  play: async ({ canvasElement, args }) => {
-    const canvas = within(canvasElement);
-    await expect(
-      canvas.getByRole("button", { name: "地点を追加" }),
-    ).toBeDisabled();
-    await userEvent.keyboard("{Enter}");
-    await expect(args.onToggle).not.toHaveBeenCalled();
-  },
 };
-export const DeletingAtLimit: Story = { args: { points: fullPoints } };

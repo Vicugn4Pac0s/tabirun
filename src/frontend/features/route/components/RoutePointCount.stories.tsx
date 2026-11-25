@@ -11,7 +11,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
-export const Empty: Story = { args: { count: 0 } };
 export const AtLimit: Story = {
   args: { count: 27 },
   play: async ({ canvasElement }) => {

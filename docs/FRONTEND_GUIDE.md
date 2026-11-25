@@ -61,5 +61,5 @@
 - feature の型は `features/<feature>/types.ts`、Context は `features/<feature>/providers/XxxProvider.tsx`（例: `GoogleMapProvider`、`useGoogleMap` を同ファイルから export）。
 - feature非依存の共通Contextと関連部品は `frontend/providers/` に置く（例: `NavigationGuardProvider`、`GuardedLink`）。feature間の依存方向と同階層の許容する依存は `AGENTS.md` に従い、循環や逆方向の依存を作らない。
 - イベント props は `onXxx`（`onTogglePoint`, `onPaceChange`, `onOpenChange`）。boolean は `is/can/show/has` か HTML 属性名（`disabled`）。
-- テスト・story は対象と同じディレクトリに `Xxx.test.tsx` / `Xxx.stories.tsx`。page のテストは `page.test.tsx`。
+- テストは対象と同じディレクトリに `Xxx.test.tsx`。page のテストは `page.test.tsx`。Story は `AGENTS.md` の方針に従って必要な場合だけ作り、対象と同じディレクトリに `Xxx.stories.tsx` を置く。
 - import は `~/`。同じ feature 内は相対パス（`../api/useCreateRouteDraft`）でもよい（現状 route feature はこの形）。
