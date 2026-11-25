@@ -40,12 +40,6 @@ export const Delete: Story = {
   },
 };
 
-export const Play: Story = {
-  args: {
-    type: "play",
-  },
-};
-
 export const Disabled: Story = {
   args: {
     type: "add",
