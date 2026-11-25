@@ -54,7 +54,9 @@ beforeEach(() => {
   auth.mockResolvedValue({ user: { id: "owner" } });
   getUserProfileSettings.mockResolvedValue({ profileCompletedAt: new Date() });
   getById.mockResolvedValue({
+    id: 1,
     title: "朝のルート",
+    status: "completed",
     points: [
       { lat: 35, lng: 135 },
       { lat: 36, lng: 136 },
@@ -71,12 +73,15 @@ describe("RouteDetailPage", () => {
       screen.getByRole("heading", { name: "朝のルート" }),
     ).toBeInTheDocument();
     expect(detailScreen).toHaveBeenCalledWith({
+      id: 1,
       title: "朝のルート",
+      status: "completed",
       points: [
         { lat: 35, lng: 135 },
         { lat: 36, lng: 136 },
       ],
     });
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it("プロフィール行がない場合もルートを取得して表示する", async () => {
@@ -118,6 +123,22 @@ describe("RouteDetailPage", () => {
     auth.mockResolvedValue(null);
     await expect(openPage("abc")).rejects.toThrow("NOT_FOUND_PAGE");
     expect(getUserProfileSettings).not.toHaveBeenCalled();
+  });
+
+  it("下書きは閲覧せず詳細入力へ移す", async () => {
+    getById.mockResolvedValue({
+      id: 7,
+      title: "下書き",
+      status: "draft",
+      points: [
+        { lat: 35, lng: 135 },
+        { lat: 36, lng: 136 },
+      ],
+    });
+    await expect(openPage("7")).rejects.toThrow("REDIRECT:/routes/7/details");
+    expect(redirect).toHaveBeenCalledWith("/routes/7/details");
+    expect(detailScreen).not.toHaveBeenCalled();
+    expect(notFound).not.toHaveBeenCalled();
   });
 
   it("取得対象がなければ404にする", async () => {

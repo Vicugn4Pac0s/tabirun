@@ -3,13 +3,18 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteCreateScreen } from "./RouteCreateScreen";
 
-const { directionsQuery, createDraft, push, refresh } = vi.hoisted(() => ({
-  directionsQuery: vi.fn(),
-  createDraft: vi.fn(),
-  push: vi.fn(),
-  refresh: vi.fn(),
+const { directionsQuery, createDraft, push, replace, refresh } = vi.hoisted(
+  () => ({
+    directionsQuery: vi.fn(),
+    createDraft: vi.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+  }),
+);
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push, replace, refresh }),
 }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push, refresh }) }));
 vi.mock("../api/useCreateRouteDraft", () => ({
   useCreateRouteDraft: () => ({ createDraft, isCreating: false }),
 }));
@@ -175,7 +180,8 @@ describe("RouteCreateScreen", () => {
     expect(createDraft).toHaveBeenCalledWith({
       points: [defaultCenter, { lat: 36, lng: 136 }],
     });
-    expect(push).toHaveBeenCalledWith("/routes/42/details");
+    expect(replace).toHaveBeenCalledWith("/routes/42/details");
+    expect(push).not.toHaveBeenCalled();
     // CI では入力〜保存まで通しで実行するため、デフォルト 5s では不足することがある
   }, 15_000);
   it("SPメニューに次へボタンと下書きの入口を表示する", async () => {

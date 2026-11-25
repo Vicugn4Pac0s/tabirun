@@ -1,14 +1,18 @@
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useRouteCreation } from "./useRouteCreation";
-const { createDraft, push, refresh, errorToast, status } = vi.hoisted(() => ({
-  createDraft: vi.fn(),
-  push: vi.fn(),
-  refresh: vi.fn(),
-  errorToast: vi.fn(),
-  status: { isCreating: false },
+const { createDraft, replace, refresh, errorToast, status } = vi.hoisted(
+  () => ({
+    createDraft: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+    errorToast: vi.fn(),
+    status: { isCreating: false },
+  }),
+);
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace, refresh }),
 }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push, refresh }) }));
 vi.mock("../api/useCreateRouteDraft", () => ({
   useCreateRouteDraft: () => ({ createDraft, isCreating: status.isCreating }),
 }));
@@ -40,7 +44,7 @@ describe("useRouteCreation", () => {
     expect(createDraft).toHaveBeenCalledWith({
       points: [first, second],
     });
-    expect(push).toHaveBeenCalledWith("/routes/42/details");
+    expect(replace).toHaveBeenCalledWith("/routes/42/details");
     expect(refresh).toHaveBeenCalled();
   });
   it("保存失敗時は入力を保持し、再試行できる", async () => {
@@ -53,10 +57,10 @@ describe("useRouteCreation", () => {
     await waitFor(() => expect(result.current.draft.canSave).toBe(true));
     await act(() => result.current.save());
     expect(errorToast).toHaveBeenCalled();
-    expect(push).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
     expect(result.current.draft.points).toEqual([first, second]);
     await act(() => result.current.save());
-    expect(push).toHaveBeenCalledWith("/routes/42/details");
+    expect(replace).toHaveBeenCalledWith("/routes/42/details");
   });
   it("連続送信・保存中の送信を防ぐ", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
