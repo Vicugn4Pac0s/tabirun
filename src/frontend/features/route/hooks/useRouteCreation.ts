@@ -6,7 +6,8 @@ import { useRoutePointsForm } from "./useRoutePointsForm";
 
 /**
  * 新規ルートの編集状態と二重送信を防ぐ保存操作を返す。
- * 保存結果をtoastで通知し、成功時は詳細入力へ移動してサーバー表示を更新する。
+ * 保存結果をtoastで通知し、成功時は詳細入力へ履歴を置き換えて移動し、サーバー表示を更新する。
+ * 作成ページは履歴に残さない。
  */
 export function useRouteCreation() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export function useRouteCreation() {
     }
     draft.form.reset(values);
     toast.success("ルートを保存しました。");
-    router.push(`/routes/${id}/details`);
+    router.replace(`/routes/${id}/details`);
     router.refresh();
   });
   const save: typeof submit = (event) => {

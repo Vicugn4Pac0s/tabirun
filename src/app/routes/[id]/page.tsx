@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { SessionProvider } from "next-auth/react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { routeIdParamSchema } from "~/shared/schemas";
 
 import { RouteDetailScreen } from "~/frontend/features/route/components/RouteDetailScreen";
@@ -29,6 +29,8 @@ export default async function RouteDetailPage({
       if (error instanceof TRPCError && error.code === "NOT_FOUND") notFound();
       throw error;
     });
+
+  if (route.status === "draft") redirect(`/routes/${route.id}/details`);
 
   return (
     <SessionProvider session={state.session}>
