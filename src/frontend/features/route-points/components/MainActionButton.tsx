@@ -36,6 +36,7 @@ const MainActionButton = ({
   }
   return (
     <motion.button
+      type="button"
       aria-label={
         type === "add"
           ? "地点を追加"
@@ -44,7 +45,7 @@ const MainActionButton = ({
             : "再生"
       }
       className={cn(
-        "flex h-20 w-20 items-center justify-center rounded-full border-2 border-white bg-primary text-white transition-opacity disabled:opacity-50",
+        "flex h-16 w-16 items-center justify-center rounded-full border-4 border-background bg-primary text-primary-foreground transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:enabled:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 md:h-20 md:w-20",
         className,
       )}
       disabled={disabled}
@@ -56,7 +57,7 @@ const MainActionButton = ({
         duration: 0.1,
       }}
     >
-      <Icon className="h-12 w-12" />
+      <Icon className="h-8 w-8 md:h-10 md:w-10" />
     </motion.button>
   );
 };

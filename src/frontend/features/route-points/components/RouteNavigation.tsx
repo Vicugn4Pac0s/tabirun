@@ -38,8 +38,8 @@ export function RouteNavigation({
   useEnterKey(onToggle, { enabled: !toggleDisabled });
 
   return (
-    <div className="relative flex gap-16 bg-white">
-      <div className="flex">
+    <div className="flex h-16 w-max items-center rounded-lg border border-border bg-background px-2 md:h-20">
+      <div className="grid min-w-0 grid-cols-2">
         <SubActionButton
           type="first"
           disabled={disabled || !canPrev}
@@ -51,14 +51,14 @@ export function RouteNavigation({
           onClick={() => move(index - 1)}
         />
       </div>
-      <div className="absolute bottom-1 left-1/2 z-10 -translate-x-1/2">
+      <div className="relative -top-2 z-10">
         <MainActionButton
           type={index >= 0 ? "delete" : "add"}
           onClick={onToggle}
           disabled={toggleDisabled}
         />
       </div>
-      <div className="flex">
+      <div className="grid min-w-0 grid-cols-2">
         <SubActionButton
           type="next"
           disabled={disabled || !canNext}

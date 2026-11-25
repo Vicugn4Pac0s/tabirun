@@ -48,20 +48,21 @@ const SubActionButton = ({
   }
   return (
     <motion.button
+      type="button"
       className={cn(
-        "flex h-16 w-16 flex-col items-center justify-center gap-1 bg-white disabled:opacity-50",
+        "flex h-12 w-12 shrink-0 flex-col items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-transparent text-xs leading-none text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:enabled:bg-muted disabled:cursor-not-allowed disabled:opacity-40 md:w-14",
         className,
       )}
       disabled={disabled}
       onClick={onClick}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
-      whileTap={{ backgroundColor: "#eee" }}
+      whileTap={disabled ? undefined : { backgroundColor: "hsl(var(--muted))" }}
       transition={{
         duration: 0.1,
       }}
     >
-      <Icon className="h-6 w-6" />
+      <Icon className="h-5 w-5" />
       <span>{text}</span>
     </motion.button>
   );
