@@ -220,9 +220,9 @@ describe("RoutePreviewMap", () => {
     );
     openDesktopPanel();
     expect(
-      within(
-        screen.getByRole("complementary", { name: "ルート情報" }),
-      ).getByRole("alert"),
+      within(screen.getByRole("region", { name: "ルートの地図" })).getByRole(
+        "alert",
+      ),
     ).toHaveTextContent("スタート・ゴールのみ表示");
     expect(screen.queryByText("経路線")).not.toBeInTheDocument();
     expect(screen.getAllByRole("img")).toHaveLength(2);
@@ -256,9 +256,9 @@ describe("RoutePreviewMap", () => {
       JSON.stringify(route.points),
     );
     expect(
-      within(
-        screen.getByRole("complementary", { name: "ルート情報" }),
-      ).getByRole("alert"),
+      within(screen.getByRole("region", { name: "ルートの地図" })).getByRole(
+        "alert",
+      ),
     ).toHaveTextContent("直線で結んで表示");
     expect(screen.getByText("距離を表示できません。")).toBeInTheDocument();
     expect(directionsQuery).not.toHaveBeenCalled();

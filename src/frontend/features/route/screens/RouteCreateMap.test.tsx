@@ -216,7 +216,7 @@ describe("RouteCreateMap", () => {
     ).toHaveTextContent("地点 0 / 27");
   });
 
-  it("SPメニューに次へボタンと下書きの入口を表示する", async () => {
+  it("SPパネルに下書きの入口を残し、次へボタンは地図側に置く", async () => {
     vi.stubGlobal(
       "matchMedia",
       vi.fn((query: string) => ({
@@ -234,8 +234,8 @@ describe("RouteCreateMap", () => {
       within(dialog).queryByRole("textbox", { name: "ルート名" }),
     ).toBeNull();
     expect(
-      within(dialog).getByRole("button", { name: "詳細入力へ進む" }),
-    ).toBeDisabled();
+      within(dialog).queryByRole("button", { name: "詳細入力へ進む" }),
+    ).not.toBeInTheDocument();
     expect(
       within(dialog).getByRole("heading", {
         name: "作成途中のルートの続きから",
@@ -243,7 +243,7 @@ describe("RouteCreateMap", () => {
     ).toBeInTheDocument();
   });
 
-  it("利用上限に達したら登録地点を直線で結び、警告をサイドバーで表示する", async () => {
+  it("利用上限に達したら登録地点を直線で結び、警告を地図上で表示する", async () => {
     const user = userEvent.setup({ delay: null });
     const { rerender } = render(
       <RouteCreateMap defaultCenter={defaultCenter} />,
@@ -268,9 +268,9 @@ describe("RouteCreateMap", () => {
       JSON.stringify(points),
     );
     expect(
-      within(
-        screen.getByRole("complementary", { name: "ルート作成" }),
-      ).getByRole("alert"),
+      within(screen.getByRole("region", { name: "ルートの地図" })).getByRole(
+        "alert",
+      ),
     ).toHaveTextContent("直線で結んで表示");
   });
   it("プロフィールへ移動するとき未変更なら確認せず、編集中は許可した場合だけ移動する", async () => {

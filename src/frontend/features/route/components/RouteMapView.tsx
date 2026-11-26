@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useGoogleMap } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { useFocusMapOnRoute } from "~/frontend/features/googlemap/hooks/useFocusMapOnRoute";
@@ -23,11 +23,12 @@ type RouteMapViewProps = {
   showStreetView?: boolean;
   fitToRoute?: boolean;
   onSelectedPointChange?: (point: google.maps.LatLngLiteral) => void;
+  children?: ReactNode;
 };
 
 /**
  * GoogleMapProvider内で経路・マーカーを描画し、必要に応じてStreet Viewと連動する。
- * 全体表示は読み込み後の初回だけ行い、Street View対象外の地点は案内を重ねて表示する。
+ * 全体表示は読み込み後の初回だけ行う。childrenは地図領域内に重ね、Street View側には置かない。
  */
 function RouteMapView({
   initialCenter,
@@ -37,6 +38,7 @@ function RouteMapView({
   showStreetView = false,
   fitToRoute = false,
   onSelectedPointChange,
+  children,
 }: RouteMapViewProps) {
   const {
     map,
@@ -121,6 +123,8 @@ function RouteMapView({
       )}
       {/* スマホはDOM順（Street Viewが上）。PC幅だけ地図を左に出す */}
       <div
+        role="region"
+        aria-label="ルートの地図"
         className={`relative ${showStreetView ? "h-[50vh] min-[1201px]:order-first min-[1201px]:h-screen" : "h-screen"}`}
       >
         <GoogleMapView
@@ -180,6 +184,7 @@ function RouteMapView({
               />
             ))}
         </GoogleMapView>
+        {children}
       </div>
     </div>
   );

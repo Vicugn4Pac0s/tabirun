@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
 import {
   act,
   fireEvent,
@@ -10,6 +10,8 @@ import {
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteScreenLayout } from "./RouteScreenLayout";
+import RouteMenuButton from "./RouteMenuButton";
+import { RouteSidebar } from "./RouteSidebar";
 
 vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
   AuthUserMenu: () => <button type="button">ユーザーメニュー</button>,
@@ -17,22 +19,40 @@ vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
 
 function Fixture() {
   const [value, setValue] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
   return (
     <RouteScreenLayout
-      panelTitle="ルート情報"
-      menuTriggerLabel="5.2 km"
-      panel={
-        <input
-          aria-label="入力値"
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-        />
+      sidebar={
+        <RouteSidebar
+          id={panelId}
+          title="ルート情報"
+          open={sidebarOpen}
+          onOpenChange={setSidebarOpen}
+          triggerRef={triggerRef}
+        >
+          <input
+            aria-label="入力値"
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+          />
+        </RouteSidebar>
       }
     >
+      <RouteMenuButton
+        ref={triggerRef}
+        label="5.2 km"
+        aria-label={`ルート情報を${sidebarOpen ? "閉じる" : "開く"}`}
+        aria-controls={panelId}
+        aria-expanded={sidebarOpen}
+        onClick={() => setSidebarOpen((value) => !value)}
+      />
       <div>地図とStreet View</div>
     </RouteScreenLayout>
   );
 }
+
 let mobile = false;
 let onViewportChange: (() => void) | undefined;
 beforeEach(() => {

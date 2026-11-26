@@ -260,12 +260,11 @@ describe("RouteEditMap", () => {
     render(<RouteEditMap route={route} />);
     openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "ルート編集を開く" }));
+    const dialog = screen.getByRole("dialog", { name: "ルート編集" });
+    expect(within(dialog).getByText("予想時間")).toBeInTheDocument();
     expect(
-      within(screen.getByRole("dialog", { name: "ルート編集" })).getByRole(
-        "button",
-        { name: "更新する" },
-      ),
-    ).toBeDisabled();
+      within(dialog).queryByRole("button", { name: "更新する" }),
+    ).not.toBeInTheDocument();
   });
 
   it("保存済み経路の取得失敗時も初期値と編集欄を保持する", () => {

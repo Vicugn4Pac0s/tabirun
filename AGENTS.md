@@ -68,7 +68,7 @@
 - 共通化は3箇所目の重複が出てから。2箇所なら原則そのまま重複させる。
 - 「見た目が似ている」ではなく「同じ理由で同時に変わる」ものだけを共通化する。
 - 共通化のために boolean / variant / type props を増やさない。props の分岐が増えるなら別コンポーネントに分ける。
-- 差分は children / slot（`panel` などのReactNode props）で受ける合成を優先する（例: `WarningBanner`, `RouteScreenLayout`, `RouteForm`）。
+- 差分は children / slot（`sidebar` などのReactNode props）で受ける合成を優先する（例: `WarningBanner`, `RouteScreenLayout`, `RouteForm`）。
 - 共通部品の props は5〜7個を目安に少なく保つ。個数だけで一律にNGとはしないが、異なる責務の混在、利用箇所ごとの boolean / variant 分岐、同時に成立しない props の組み合わせが必要になる設計はNG。目安を超える場合は、分割・children/slot化・共通化しない案を比較し、採用理由を示す。
 - 共通化・リファクタを提案するときは、計画に必ず次を書く: 共通化しない案、変更後の props 一覧と数、利用箇所の数、将来の変更でどちらが楽か。
 - feature内でしか使わないものは feature内に置く。`components/app-ui` に上げるのは2feature以上で使ってから。

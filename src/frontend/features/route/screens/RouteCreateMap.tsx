@@ -1,5 +1,6 @@
 "use client";
 
+import { useId, useRef, useState } from "react";
 import { GuardedLink } from "~/frontend/providers/GuardedLink";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
@@ -9,13 +10,15 @@ import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useR
 import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
-import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { useRouteCreateMap } from "../hooks/useRouteCreateMap";
 import { RouteScreenLayout } from "../components/RouteScreenLayout";
 import { RouteDraftList } from "../components/RouteDraftList";
 import { Button } from "~/frontend/components/ui/button";
-import { RouteEditorMap } from "../components/RouteEditorMap";
+import { RouteMap } from "../components/RouteMap";
+
+import RouteMenuButton from "../components/RouteMenuButton";
+import { RouteSidebar } from "../components/RouteSidebar";
 
 type RouteCreateMapProps = { defaultCenter: google.maps.LatLngLiteral };
 
@@ -29,16 +32,20 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
   const warningMessage = getRouteCalculationWarningMessage(error, "editable");
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const moveStreetView = useMoveStreetView();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarTriggerRef = useRef<HTMLButtonElement>(null);
+  const sidebarId = useId();
   return (
     <RouteScreenLayout
       confirmNavigation={() => !isCreating && confirmDiscard()}
-      panelTitle="ルート作成"
-      menuTriggerLabel={getRouteMenuLabel(
-        directions?.distanceMeters,
-        isLoading,
-      )}
-      panel={
-        <>
+      sidebar={
+        <RouteSidebar
+          id={sidebarId}
+          title="ルート作成"
+          open={sidebarOpen}
+          onOpenChange={setSidebarOpen}
+          triggerRef={sidebarTriggerRef}
+        >
           <GuardedLink
             href="/"
             className="mb-5 inline-block font-medium underline"
@@ -48,45 +55,17 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
           </GuardedLink>
           <h1 className="mb-4 text-xl font-bold">ルートを作成</h1>
           <RouteDraftList />
-          <form
-            onSubmit={(event) => {
-              void save(event);
-            }}
-          >
-            <p className="mt-2 text-sm text-gray-500">
-              画面下部のボタンで地点を追加・削除できます。
-            </p>
-            {warningMessage && (
-              <div className="mb-4">
-                <WarningBanner>{warningMessage}</WarningBanner>
-              </div>
-            )}
-            <RunMetricsPanel
-              distanceMeters={directions?.distanceMeters}
-              isLoading={isLoading}
-              pace={pace}
-              onPaceChange={setPace}
-              weightKg={weightKg}
-            />
-            <div className="my-6 flex flex-wrap gap-2">
-              <Button
-                type="submit"
-                disabled={!draft.canSave || draft.isSubmitting || isCreating}
-              >
-                {draft.isSubmitting || isCreating
-                  ? "保存中..."
-                  : "詳細入力へ進む"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={!draft.isDirty || draft.isSubmitting || isCreating}
-                onClick={draft.reset}
-              >
-                リセット
-              </Button>
-            </div>
-          </form>
+          <p className="mt-2 text-sm text-gray-500">
+            画面下部のボタンで地点を追加・削除できます。
+          </p>
+          <RunMetricsPanel
+            distanceMeters={directions?.distanceMeters}
+            isLoading={isLoading}
+            pace={pace}
+            onPaceChange={setPace}
+            weightKg={weightKg}
+          />
+
           {points.length < 2 && (
             <p role="status" className="mb-3 text-sm text-gray-500">
               保存するには2地点以上を登録してください。
@@ -98,16 +77,58 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
               void moveStreetView(point).catch(() => undefined);
             }}
           />
-        </>
+        </RouteSidebar>
       }
     >
-      <RouteEditorMap
+      <RouteMap
         initialCenter={defaultCenter}
-        points={points}
-        polylinePath={polylinePath}
+        path={polylinePath}
+        markers={points.map((point, index) => ({
+          id: String(index),
+          position: point,
+          label: String(index + 1),
+          title: `地点 ${index + 1}`,
+        }))}
         isLoading={isLoading}
-        disabled={isCreating}
-        onTogglePoint={togglePoint}
+        topLeft={
+          <RouteMenuButton
+            ref={sidebarTriggerRef}
+            label={getRouteMenuLabel(directions?.distanceMeters, isLoading)}
+            aria-label={`ルート作成を${sidebarOpen ? "閉じる" : "開く"}`}
+            aria-controls={sidebarId}
+            aria-expanded={sidebarOpen}
+            onClick={() => setSidebarOpen((value) => !value)}
+          />
+        }
+        topRight={
+          <>
+            <Button
+              type="button"
+              onClick={() => {
+                void save();
+              }}
+              disabled={!draft.canSave || draft.isSubmitting || isCreating}
+            >
+              {draft.isSubmitting || isCreating
+                ? "保存中..."
+                : "詳細入力へ進む"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!draft.isDirty || draft.isSubmitting || isCreating}
+              onClick={draft.reset}
+            >
+              リセット
+            </Button>
+          </>
+        }
+        warning={warningMessage}
+        editing={{
+          points,
+          disabled: draft.isSubmitting || isCreating,
+          onTogglePoint: togglePoint,
+        }}
       />
     </RouteScreenLayout>
   );

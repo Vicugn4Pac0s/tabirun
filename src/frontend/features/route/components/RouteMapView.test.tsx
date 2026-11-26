@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import RouteMapView from "./RouteMapView";
@@ -121,6 +121,32 @@ describe("RouteMapView", () => {
       "G",
     );
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("渡されたUIは地図領域にだけ重ね、Street Viewには置かない", () => {
+    render(
+      <GoogleMapProvider>
+        <RouteMapView
+          showStreetView
+          initialCenter={start}
+          path={null}
+          markers={markers}
+        >
+          <button>地図上の操作</button>
+        </RouteMapView>
+      </GoogleMapProvider>,
+    );
+    expect(
+      within(screen.getByRole("region", { name: "ルートの地図" })).getByRole(
+        "button",
+        { name: "地図上の操作" },
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(
+        screen.getByRole("region", { name: "Street Viewで下見" }),
+      ).queryByRole("button", { name: "地図上の操作" }),
+    ).not.toBeInTheDocument();
   });
 
   it("マーカーの既定操作は下見位置の移動で、指定した操作にも差し替えられる", async () => {

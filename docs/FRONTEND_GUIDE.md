@@ -14,7 +14,7 @@
 - `src/app` から直接 import される client 境界には **`"use client"` を必ず付ける**。子 component への付与は任意。
 - 画面ロジック（送信・遷移・toast・二重送信防止・confirm）は `hooks/use<Feature><Action>` に出し、component は hook の戻り値を並べるだけにする（例: `useRouteCreateMap` / `useRouteEditMap` / `useRouteDeletion`）。
 - 再表示で state を捨てたい画面は page 側で `key` を渡す（例: `<RouteEditMap key={route.id} route={route} />`）。
-- 差分は `children` / `panel` などの ReactNode で受ける（例: `RouteScreenLayout` の `panel`）。文言差分はオブジェクト1つで渡す（idle / pending など、同時に変わる文言をまとめる）。
+- 差分は `children` / `sidebar` などの ReactNode で受ける（例: `RouteScreenLayout` の `sidebar`）。文言差分はオブジェクト1つで渡す（idle / pending など、同時に変わる文言をまとめる）。
 - props にデータ取得の hook を渡さない。取得は使う側（画面 or 葉の部品）で `features/*/api` の hook を呼ぶ（例: `PaceSelect` が `usePacesQuery` を内部で呼ぶ）。
 - `src/frontend/components/app-ui` の部品は tRPC・feature・業務文言を持たない（例: `WarningBanner`, `StatValue`, `Selectbox`）。
 - フォームは react-hook-form + `zodResolver(shared/schemas の schema)`。フォーム値には `shared/schemas` で `z.infer` から定義した型を使う（例: `UserProfileUpdateInput`）。
