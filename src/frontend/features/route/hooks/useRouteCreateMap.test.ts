@@ -1,6 +1,6 @@
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useRouteCreation } from "./useRouteCreation";
+import { useRouteCreateMap } from "./useRouteCreateMap";
 const { createDraft, replace, refresh, errorToast, status } = vi.hoisted(
   () => ({
     createDraft: vi.fn(),
@@ -28,9 +28,9 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
 });
-describe("useRouteCreation", () => {
+describe("useRouteCreateMap", () => {
   it("0地点から始め、2地点で下書きを保存して詳細入力に進む", async () => {
-    const { result } = renderHook(() => useRouteCreation());
+    const { result } = renderHook(() => useRouteCreateMap());
     expect(result.current.draft.points).toEqual([]);
     await act(() => result.current.save());
     expect(createDraft).not.toHaveBeenCalled();
@@ -49,7 +49,7 @@ describe("useRouteCreation", () => {
   });
   it("保存失敗時は入力を保持し、再試行できる", async () => {
     createDraft.mockRejectedValueOnce(new Error("failed"));
-    const { result } = renderHook(() => useRouteCreation());
+    const { result } = renderHook(() => useRouteCreateMap());
     act(() => {
       result.current.draft.togglePoint(first);
       result.current.draft.togglePoint(second);
@@ -71,7 +71,7 @@ describe("useRouteCreation", () => {
           finish = resolve;
         }),
     );
-    const { result, rerender } = renderHook(() => useRouteCreation());
+    const { result, rerender } = renderHook(() => useRouteCreateMap());
     act(() => {
       result.current.draft.togglePoint(first);
       result.current.draft.togglePoint(second);
@@ -98,7 +98,7 @@ describe("useRouteCreation", () => {
   });
   it("破棄確認を拒否すると保持し、承認すると空の下書きへ戻る", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
-    const { result } = renderHook(() => useRouteCreation());
+    const { result } = renderHook(() => useRouteCreateMap());
     act(() => {
       result.current.draft.togglePoint(first);
     });

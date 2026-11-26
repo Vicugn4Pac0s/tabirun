@@ -21,8 +21,8 @@ vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
   UserInitialProfileScreen: () => <h1>初期設定</h1>,
 }));
 vi.mock("server-only", () => ({}));
-vi.mock("~/frontend/features/route/components/RoutePointsEditScreen", () => ({
-  RoutePointsEditScreen: ({
+vi.mock("~/frontend/features/route/components/RouteEditMapScreen", () => ({
+  RouteEditMapScreen: ({
     route,
   }: {
     route: { title: string; points: google.maps.LatLngLiteral[] };

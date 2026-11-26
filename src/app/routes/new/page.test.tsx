@@ -24,8 +24,10 @@ vi.mock("~/server/features/user/service", async (importOriginal) => ({
   getUserProfileSettings,
 }));
 vi.mock("next/navigation", () => ({ redirect }));
-vi.mock("~/frontend/features/route/components/RouteCreateScreen", () => ({
-  RouteCreateScreen: (props: { defaultCenter: google.maps.LatLngLiteral }) => {
+vi.mock("~/frontend/features/route/components/RouteCreateMapScreen", () => ({
+  RouteCreateMapScreen: (props: {
+    defaultCenter: google.maps.LatLngLiteral;
+  }) => {
     screenProps(props);
     return <h1>ルートを作成</h1>;
   },

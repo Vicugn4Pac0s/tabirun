@@ -13,14 +13,14 @@ import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { RouteScreenLayout } from "./RouteScreenLayout";
 
-type RoutePreviewScreenProps = {
+type RoutePreviewMapScreenProps = {
   route: Pick<
     RouterOutputs["route"]["getById"],
     "id" | "title" | "points" | "direction" | "directionErrorCode"
   >;
 };
 
-function RoutePreviewScreenContent({ route }: RoutePreviewScreenProps) {
+function RoutePreviewMapScreenContent({ route }: RoutePreviewMapScreenProps) {
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const { direction, directionErrorCode } = route;
   const warningCode =
@@ -83,10 +83,10 @@ function RoutePreviewScreenContent({ route }: RoutePreviewScreenProps) {
  * 保存済み経路の地図とStreet Viewによる下見画面を表示する。
  * 経路取得失敗や上限到達は警告として表示し、登録地点の下見は続けられる。
  */
-export function RoutePreviewScreen(props: RoutePreviewScreenProps) {
+export function RoutePreviewMapScreen(props: RoutePreviewMapScreenProps) {
   return (
     <GoogleMapProvider>
-      <RoutePreviewScreenContent {...props} />
+      <RoutePreviewMapScreenContent {...props} />
     </GoogleMapProvider>
   );
 }

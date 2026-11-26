@@ -9,7 +9,7 @@ import { useRoutePointsForm } from "./useRoutePointsForm";
  * 保存結果をtoastで通知し、成功時は詳細入力へ履歴を置き換えて移動し、サーバー表示を更新する。
  * 作成ページは履歴に残さない。
  */
-export function useRouteCreation() {
+export function useRouteCreateMap() {
   const router = useRouter();
   const { createDraft, isCreating } = useCreateRouteDraft();
   const draft = useRoutePointsForm({ points: [] });

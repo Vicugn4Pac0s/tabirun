@@ -10,9 +10,9 @@ import { Input } from "~/frontend/components/ui/input";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
-import { useRouteDetailsEdit } from "../hooks/useRouteDetailsEdit";
+import { useRouteDetailEdit } from "../hooks/useRouteDetailEdit";
 
-type RouteDetailsEditScreenProps = {
+type RouteDetailEditScreenProps = {
   route: Pick<
     RouterOutputs["route"]["getById"],
     "id" | "title" | "status" | "direction" | "directionErrorCode"
@@ -20,9 +20,9 @@ type RouteDetailsEditScreenProps = {
 };
 
 /** 保存済みの距離と名前入力を表示する。下書きは完了、完了済みは名前だけを保存する。 */
-export function RouteDetailsEditScreen({ route }: RouteDetailsEditScreenProps) {
+export function RouteDetailEditScreen({ route }: RouteDetailEditScreenProps) {
   const { form, save, editMap, isSaving, canSave, confirmNavigation } =
-    useRouteDetailsEdit(route);
+    useRouteDetailEdit(route);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const { errors, touchedFields, isSubmitted } = form.formState;
   const titleError =

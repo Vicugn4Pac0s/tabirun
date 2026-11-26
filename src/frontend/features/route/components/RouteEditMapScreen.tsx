@@ -6,33 +6,35 @@ import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveSt
 import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
-import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRoutePolylinePath";
+import { useRouteEditDirection } from "../hooks/useRouteEditDirection";
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
-import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
-import { useRouteCreation } from "../hooks/useRouteCreation";
+import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
+import { useRouteEditMap } from "../hooks/useRouteEditMap";
+import type { RouterOutputs } from "~/trpc/react";
 import { RouteScreenLayout } from "./RouteScreenLayout";
-import { RouteDraftList } from "./RouteDraftList";
 import { Button } from "~/frontend/components/ui/button";
 import { RouteEditorMap } from "./RouteEditorMap";
 
-type RouteCreateScreenProps = { defaultCenter: google.maps.LatLngLiteral };
+type RouteEditMapScreenProps = {
+  route: Pick<
+    RouterOutputs["route"]["getById"],
+    "id" | "status" | "points" | "direction" | "directionErrorCode"
+  >;
+};
 
-function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
-  const { draft, isCreating, save } = useRouteCreation();
+function RouteEditMapScreenContent({ route }: RouteEditMapScreenProps) {
+  const { draft, isUpdating, save } = useRouteEditMap(route);
   const { points, togglePoint, confirmDiscard } = draft;
-  const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
-    points,
-    { canUseDirections: true },
-  );
-  const warningMessage = getRouteCalculationWarningMessage(error, "editable");
+  const { polylinePath, directions, isLoading, warningMessage } =
+    useRouteEditDirection(route, points);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const moveStreetView = useMoveStreetView();
   return (
     <RouteScreenLayout
-      confirmNavigation={() => !isCreating && confirmDiscard()}
-      panelTitle="ルート作成"
+      confirmNavigation={() => !isUpdating && confirmDiscard()}
+      panelTitle="ルート編集"
       menuTriggerLabel={getRouteMenuLabel(
         directions?.distanceMeters,
         isLoading,
@@ -40,14 +42,13 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
       panel={
         <>
           <GuardedLink
-            href="/"
+            href={`/routes/${route.id}${route.status === "draft" ? "/details" : ""}`}
             className="mb-5 inline-block font-medium underline"
-            aria-disabled={isCreating}
+            aria-disabled={isUpdating}
           >
-            ホームへ戻る
+            {route.status === "draft" ? "詳細入力に戻る" : "ルートに戻る"}
           </GuardedLink>
-          <h1 className="mb-4 text-xl font-bold">ルートを作成</h1>
-          <RouteDraftList />
+          <h1 className="mb-4 text-xl font-bold">ルートを編集</h1>
           <form
             onSubmit={(event) => {
               void save(event);
@@ -71,16 +72,14 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
             <div className="my-6 flex flex-wrap gap-2">
               <Button
                 type="submit"
-                disabled={!draft.canSave || draft.isSubmitting || isCreating}
+                disabled={!draft.canSave || draft.isSubmitting || isUpdating}
               >
-                {draft.isSubmitting || isCreating
-                  ? "保存中..."
-                  : "詳細入力へ進む"}
+                {draft.isSubmitting || isUpdating ? "更新中..." : "更新する"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                disabled={!draft.isDirty || draft.isSubmitting || isCreating}
+                disabled={!draft.isDirty || draft.isSubmitting || isUpdating}
                 onClick={draft.reset}
               >
                 リセット
@@ -102,11 +101,12 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
       }
     >
       <RouteEditorMap
-        initialCenter={defaultCenter}
+        initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
         points={points}
         polylinePath={polylinePath}
         isLoading={isLoading}
-        disabled={isCreating}
+        disabled={isUpdating}
+        fitToRoute
         onTogglePoint={togglePoint}
       />
     </RouteScreenLayout>
@@ -114,13 +114,13 @@ function RouteCreateScreenContent({ defaultCenter }: RouteCreateScreenProps) {
 }
 
 /**
- * 地図で地点を選ぶルート作成画面を、専用のGoogleMapProviderで包んで表示する。
- * 未保存の変更がある移動には破棄確認を行い、保存中の移動を抑止する。
+ * 保存済みルートの編集画面を、専用のGoogleMapProviderで包んで表示する。
+ * 初期編集値は初回のrouteを使うため、別ルートへ切り替える際は呼出側で再マウントする。
  */
-export function RouteCreateScreen(props: RouteCreateScreenProps) {
+export function RouteEditMapScreen(props: RouteEditMapScreenProps) {
   return (
     <GoogleMapProvider>
-      <RouteCreateScreenContent {...props} />
+      <RouteEditMapScreenContent {...props} />
     </GoogleMapProvider>
   );
 }
