@@ -5,7 +5,7 @@ import { ResponsivePanel } from "~/frontend/components/app-ui/ResponsivePanel";
 import { NavigationGuardProvider } from "~/frontend/providers/NavigationGuardProvider";
 import { AuthUserMenu } from "~/frontend/features/auth/components/AuthUserMenu";
 
-type RouteScreenLayoutProps = {
+type RouteMapLayoutProps = {
   panelContent: ReactNode;
   panelOpen: boolean;
   onPanelOpenChange: (open: boolean) => void;
@@ -14,13 +14,13 @@ type RouteScreenLayoutProps = {
 };
 
 /** 地図画面とパネルを配置する。移動確認を渡した場合だけNavigationGuardProviderを設ける。 */
-export function RouteScreenLayout({
+export function RouteMapLayout({
   panelContent,
   panelOpen,
   onPanelOpenChange,
   children,
   confirmNavigation,
-}: RouteScreenLayoutProps) {
+}: RouteMapLayoutProps) {
   const content = (
     <div className="relative min-h-screen">
       <div className="relative flex min-w-0">{children}</div>

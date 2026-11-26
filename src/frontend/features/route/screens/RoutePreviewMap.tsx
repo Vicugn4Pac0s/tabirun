@@ -10,7 +10,7 @@ import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunM
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
-import { RouteScreenLayout } from "../components/RouteScreenLayout";
+import { RouteMapLayout } from "../components/RouteMapLayout";
 
 import RouteMenuButton from "../components/RouteMenuButton";
 
@@ -37,7 +37,7 @@ function RoutePreviewMapContent({ route }: RoutePreviewMapProps) {
   const markers = getRoutePreviewMarkers(start, goal);
   const [panelOpen, setPanelOpen] = useState(false);
   return (
-    <RouteScreenLayout
+    <RouteMapLayout
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
       panelContent={
@@ -66,7 +66,7 @@ function RoutePreviewMapContent({ route }: RoutePreviewMapProps) {
         }
         warning={warningMessage}
       />
-    </RouteScreenLayout>
+    </RouteMapLayout>
   );
 }
 

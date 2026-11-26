@@ -10,7 +10,7 @@ import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/Googl
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteEditMap } from "../hooks/useRouteEditMap";
 import type { RouterOutputs } from "~/trpc/react";
-import { RouteScreenLayout } from "../components/RouteScreenLayout";
+import { RouteMapLayout } from "../components/RouteMapLayout";
 import { Button } from "~/frontend/components/ui/button";
 import { RouteMap } from "../components/RouteMap";
 
@@ -31,7 +31,7 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const [panelOpen, setPanelOpen] = useState(false);
   return (
-    <RouteScreenLayout
+    <RouteMapLayout
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
       confirmNavigation={() => !isUpdating && confirmDiscard()}
@@ -93,7 +93,7 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
           onTogglePoint: togglePoint,
         }}
       />
-    </RouteScreenLayout>
+    </RouteMapLayout>
   );
 }
 

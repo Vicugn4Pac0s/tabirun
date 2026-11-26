@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { RouteScreenLayout } from "./RouteScreenLayout";
+import { RouteMapLayout } from "./RouteMapLayout";
 import RouteMenuButton from "./RouteMenuButton";
 
 vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
@@ -20,7 +20,7 @@ function Fixture() {
   const [value, setValue] = useState("");
   const [panelOpen, setPanelOpen] = useState(false);
   return (
-    <RouteScreenLayout
+    <RouteMapLayout
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
       panelContent={
@@ -38,7 +38,7 @@ function Fixture() {
         onClick={() => setPanelOpen((value) => !value)}
       />
       <div>地図とStreet View</div>
-    </RouteScreenLayout>
+    </RouteMapLayout>
   );
 }
 
@@ -66,7 +66,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("RouteScreenLayout", () => {
+describe("RouteMapLayout", () => {
   it("閉じた状態で開始し、PCでは距離ボタンで開閉してフォーカスを戻す", async () => {
     const user = userEvent.setup();
     render(<Fixture />);

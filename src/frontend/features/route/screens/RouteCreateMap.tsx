@@ -9,7 +9,7 @@ import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRou
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { useRouteCreateMap } from "../hooks/useRouteCreateMap";
-import { RouteScreenLayout } from "../components/RouteScreenLayout";
+import { RouteMapLayout } from "../components/RouteMapLayout";
 import { Button } from "~/frontend/components/ui/button";
 import { RouteMap } from "../components/RouteMap";
 
@@ -28,7 +28,7 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const [panelOpen, setPanelOpen] = useState(false);
   return (
-    <RouteScreenLayout
+    <RouteMapLayout
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
       confirmNavigation={() => !isCreating && confirmDiscard()}
@@ -91,7 +91,7 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
           onTogglePoint: togglePoint,
         }}
       />
-    </RouteScreenLayout>
+    </RouteMapLayout>
   );
 }
 
