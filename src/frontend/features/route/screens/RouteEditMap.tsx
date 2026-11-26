@@ -29,13 +29,13 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
   const { polylinePath, directions, isLoading, warningMessage } =
     useRouteEditDirection(route, points);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
   return (
     <RouteScreenLayout
-      sidebarOpen={sidebarOpen}
-      onSidebarOpenChange={setSidebarOpen}
+      panelOpen={panelOpen}
+      onPanelOpenChange={setPanelOpen}
       confirmNavigation={() => !isUpdating && confirmDiscard()}
-      sidebar={
+      panelContent={
         <RunMetricsPanel
           distanceMeters={directions?.distanceMeters}
           isLoading={isLoading}
@@ -60,9 +60,9 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
         topLeft={
           <RouteMenuButton
             label={getRouteMenuLabel(directions?.distanceMeters, isLoading)}
-            aria-label={`ルート情報を${sidebarOpen ? "閉じる" : "開く"}`}
-            aria-expanded={sidebarOpen}
-            onClick={() => setSidebarOpen((value) => !value)}
+            aria-label={`ルート情報を${panelOpen ? "閉じる" : "開く"}`}
+            aria-expanded={panelOpen}
+            onClick={() => setPanelOpen((value) => !value)}
           />
         }
         topRight={

@@ -18,12 +18,12 @@ vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
 
 function Fixture() {
   const [value, setValue] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
   return (
     <RouteScreenLayout
-      sidebarOpen={sidebarOpen}
-      onSidebarOpenChange={setSidebarOpen}
-      sidebar={
+      panelOpen={panelOpen}
+      onPanelOpenChange={setPanelOpen}
+      panelContent={
         <input
           aria-label="入力値"
           value={value}
@@ -33,9 +33,9 @@ function Fixture() {
     >
       <RouteMenuButton
         label="5.2 km"
-        aria-label={`ルート情報を${sidebarOpen ? "閉じる" : "開く"}`}
-        aria-expanded={sidebarOpen}
-        onClick={() => setSidebarOpen((value) => !value)}
+        aria-label={`ルート情報を${panelOpen ? "閉じる" : "開く"}`}
+        aria-expanded={panelOpen}
+        onClick={() => setPanelOpen((value) => !value)}
       />
       <div>地図とStreet View</div>
     </RouteScreenLayout>

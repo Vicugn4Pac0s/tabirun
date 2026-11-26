@@ -35,12 +35,12 @@ function RoutePreviewMapContent({ route }: RoutePreviewMapProps) {
   const start = route.points[0];
   const goal = route.points[route.points.length - 1];
   const markers = getRoutePreviewMarkers(start, goal);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
   return (
     <RouteScreenLayout
-      sidebarOpen={sidebarOpen}
-      onSidebarOpenChange={setSidebarOpen}
-      sidebar={
+      panelOpen={panelOpen}
+      onPanelOpenChange={setPanelOpen}
+      panelContent={
         <RunMetricsPanel
           distanceMeters={direction?.distanceMeters}
           isLoading={false}
@@ -59,9 +59,9 @@ function RoutePreviewMapContent({ route }: RoutePreviewMapProps) {
         topLeft={
           <RouteMenuButton
             label={getRouteMenuLabel(direction?.distanceMeters, false)}
-            aria-label={`ルート情報を${sidebarOpen ? "閉じる" : "開く"}`}
-            aria-expanded={sidebarOpen}
-            onClick={() => setSidebarOpen((value) => !value)}
+            aria-label={`ルート情報を${panelOpen ? "閉じる" : "開く"}`}
+            aria-expanded={panelOpen}
+            onClick={() => setPanelOpen((value) => !value)}
           />
         }
         warning={warningMessage}

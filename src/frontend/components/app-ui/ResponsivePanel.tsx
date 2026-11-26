@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, type KeyboardEvent, type ReactNode } from "react";
+import { useId, useRef, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { Content as DialogPrimitiveContent } from "@radix-ui/react-dialog";
 import { useIsMobile } from "~/frontend/hooks/shared/useIsMobile";
@@ -18,20 +18,20 @@ import {
   DialogTitle,
 } from "~/frontend/components/ui/dialog";
 
-type RouteSidebarProps = {
+type ResponsivePanelProps = {
   title: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: ReactNode;
 };
 
-/** 地図画面の情報をPCでは右側、モバイルでは下端に表示し、開閉時のフォーカスを管理する。 */
-export function RouteSidebar({
+/** 内容をPCでは右側、モバイルでは下端に表示し、開閉時のフォーカスを管理する。 */
+export function ResponsivePanel({
   title,
   open,
   onOpenChange,
   children,
-}: RouteSidebarProps) {
+}: ResponsivePanelProps) {
   const isMobile = useIsMobile();
   const id = useId();
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -61,10 +61,6 @@ export function RouteSidebar({
     </aside>
   );
 
-  const stopPointShortcut = (event: KeyboardEvent) => {
-    // パネルのEnter操作を、地図の地点追加・削除ショートカットへ流さない。
-    if (event.key === "Enter") event.stopPropagation();
-  };
   const focusOnOpen = (event: Event) => {
     event.preventDefault();
     const activeElement = document.activeElement;
@@ -95,7 +91,6 @@ export function RouteSidebar({
             id={id}
             aria-describedby={undefined}
             className="h-[50dvh] max-h-[50dvh] gap-0 rounded-t-lg bg-background"
-            onKeyDown={stopPointShortcut}
             onOpenAutoFocus={focusOnOpen}
             onCloseAutoFocus={focusOnClose}
           >
@@ -109,7 +104,6 @@ export function RouteSidebar({
               id={id}
               aria-describedby={undefined}
               className="fixed inset-y-0 right-0 z-50 flex h-dvh w-80 flex-col border-l bg-background shadow-lg duration-150 ease-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-right-full motion-reduce:animate-none"
-              onKeyDown={stopPointShortcut}
               onOpenAutoFocus={focusOnOpen}
               onCloseAutoFocus={focusOnClose}
               onInteractOutside={(event) => event.preventDefault()}
