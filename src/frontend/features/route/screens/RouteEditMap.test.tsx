@@ -196,7 +196,7 @@ afterEach(() => {
 
 function openDesktopPanel() {
   if (!window.matchMedia("(max-width: 767px)").matches) {
-    fireEvent.click(screen.getByRole("button", { name: "ルート編集を開く" }));
+    fireEvent.click(screen.getByRole("button", { name: "ルート情報を開く" }));
   }
 }
 
@@ -206,7 +206,7 @@ describe("RouteEditMap", () => {
     render(<RouteEditMap route={route} />);
     openDesktopPanel();
     expect(
-      screen.getByRole("button", { name: "ルート編集を開く" }),
+      screen.getByRole("button", { name: "ルート情報を開く" }),
     ).toHaveTextContent("5.2 km");
   });
 
@@ -222,24 +222,27 @@ describe("RouteEditMap", () => {
     openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     expect(
-      screen.getByRole("button", { name: "ルート編集を開く" }),
+      screen.getByRole("button", { name: "ルート情報を開く" }),
     ).toHaveTextContent("MEASURING");
   });
 
-  it("既存の外枠で名前入力を出さず経由地点一覧・全地点マーカーを表示する", () => {
+  it("パネルを試算に絞り、地図の編集操作と全地点マーカーを維持する", () => {
     render(<RouteEditMap route={route} />);
     openDesktopPanel();
-    const sidebar = screen.getByRole("complementary", { name: "ルート編集" });
+    const sidebar = screen.getByRole("complementary", { name: "ルート情報" });
     expect(
-      within(sidebar).getByRole("heading", { name: "ルートを編集" }),
+      screen.getByRole("heading", { name: "ルートを編集" }),
     ).toBeInTheDocument();
     expect(
       within(sidebar).queryByRole("textbox", { name: "ルート名" }),
     ).toBeNull();
-    expect(within(sidebar).getAllByRole("listitem")).toHaveLength(3);
+    expect(within(sidebar).queryByRole("list")).not.toBeInTheDocument();
+    expect(within(sidebar).queryByRole("link")).not.toBeInTheDocument();
+    expect(within(sidebar).getAllByRole("heading")).toHaveLength(1);
+    expect(within(sidebar).getByText("ペース 5:00")).toBeInTheDocument();
     expect(
-      within(sidebar).getByRole("link", { name: "ルートに戻る" }),
-    ).toHaveAttribute("href", "/routes/1");
+      screen.queryByRole("link", { name: "ルートに戻る" }),
+    ).not.toBeInTheDocument();
     expect(screen.getAllByRole("img")).toHaveLength(3);
     expect(screen.getByRole("img", { name: "地点 2" })).toHaveTextContent("2");
     expect(
@@ -259,8 +262,8 @@ describe("RouteEditMap", () => {
     const user = userEvent.setup();
     render(<RouteEditMap route={route} />);
     openDesktopPanel();
-    await user.click(screen.getByRole("button", { name: "ルート編集を開く" }));
-    const dialog = screen.getByRole("dialog", { name: "ルート編集" });
+    await user.click(screen.getByRole("button", { name: "ルート情報を開く" }));
+    const dialog = screen.getByRole("dialog", { name: "ルート情報" });
     expect(within(dialog).getByText("予想時間")).toBeInTheDocument();
     expect(
       within(dialog).queryByRole("button", { name: "更新する" }),
@@ -380,14 +383,12 @@ describe("RouteEditMap", () => {
     expect(screen.getByRole("button", { name: "更新する" })).toBeEnabled();
   });
 
-  it("未保存時に戻る操作の破棄を確認し、リセットは承認時だけ行う", async () => {
+  it("編集中のリセットは承認時だけ行う", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const user = userEvent.setup();
     render(<RouteEditMap route={route} />);
     openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
-    await user.click(screen.getByRole("link", { name: "ルートに戻る" }));
-    expect(confirm).toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "リセット" }));
     expect(screen.getAllByRole("img")).toHaveLength(2);
     confirm.mockReturnValue(true);

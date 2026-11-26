@@ -149,9 +149,14 @@ describe("RoutePreviewMap", () => {
     openDesktopPanel();
     const sidebar = screen.getByRole("complementary", { name: "ルート情報" });
     expect(
-      within(sidebar).getByRole("heading", { name: "朝のルート" }),
+      screen.getByRole("heading", { name: "朝のルート" }),
     ).toBeInTheDocument();
     expect(within(sidebar).queryByRole("list")).not.toBeInTheDocument();
+    expect(within(sidebar).queryByRole("link")).not.toBeInTheDocument();
+    expect(
+      within(sidebar).queryByText("保存済みルート"),
+    ).not.toBeInTheDocument();
+    expect(within(sidebar).getAllByRole("heading")).toHaveLength(1);
     expect(
       within(sidebar).queryByRole("button", { name: "移動" }),
     ).not.toBeInTheDocument();
@@ -161,8 +166,8 @@ describe("RoutePreviewMap", () => {
       screen.getByRole("region", { name: "Street Viewで下見" }),
     ).toBeInTheDocument();
     expect(
-      within(sidebar).getByRole("link", { name: "ルート詳細に戻る" }),
-    ).toHaveAttribute("href", "/routes/1");
+      screen.queryByRole("link", { name: "ルート詳細に戻る" }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText("経路線")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "スタート" })).toHaveTextContent(
       "S",
@@ -197,7 +202,7 @@ describe("RoutePreviewMap", () => {
       within(screen.getByRole("dialog", { name: "ルート情報" })).getByRole(
         "heading",
         {
-          name: "朝のルート",
+          name: "ルート情報",
         },
       ),
     ).toBeInTheDocument();

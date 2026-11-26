@@ -1,10 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { GuardedLink } from "~/frontend/providers/GuardedLink";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
-import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
-import RoutePointList from "~/frontend/features/route-points/components/RoutePointList";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { useRouteEditDirection } from "../hooks/useRouteEditDirection";
@@ -33,7 +30,6 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
   const { polylinePath, directions, isLoading, warningMessage } =
     useRouteEditDirection(route, points);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
-  const moveStreetView = useMoveStreetView();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarTriggerRef = useRef<HTMLButtonElement>(null);
   const sidebarId = useId();
@@ -43,22 +39,11 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
       sidebar={
         <RouteSidebar
           id={sidebarId}
-          title="ルート編集"
+          title="ルート情報"
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
           triggerRef={sidebarTriggerRef}
         >
-          <GuardedLink
-            href={`/routes/${route.id}${route.status === "draft" ? "/details" : ""}`}
-            className="mb-5 inline-block font-medium underline"
-            aria-disabled={isUpdating}
-          >
-            {route.status === "draft" ? "詳細入力に戻る" : "ルートに戻る"}
-          </GuardedLink>
-          <h1 className="mb-4 text-xl font-bold">ルートを編集</h1>
-          <p className="mt-2 text-sm text-gray-500">
-            画面下部のボタンで地点を追加・削除できます。
-          </p>
           <RunMetricsPanel
             distanceMeters={directions?.distanceMeters}
             isLoading={isLoading}
@@ -66,21 +51,10 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
             onPaceChange={setPace}
             weightKg={weightKg}
           />
-
-          {points.length < 2 && (
-            <p role="status" className="mb-3 text-sm text-gray-500">
-              保存するには2地点以上を登録してください。
-            </p>
-          )}
-          <RoutePointList
-            routePoints={points}
-            onRoutePointClick={(point) => {
-              void moveStreetView(point).catch(() => undefined);
-            }}
-          />
         </RouteSidebar>
       }
     >
+      <h1 className="sr-only">ルートを編集</h1>
       <RouteMap
         initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
         path={polylinePath}
@@ -96,7 +70,7 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
           <RouteMenuButton
             ref={sidebarTriggerRef}
             label={getRouteMenuLabel(directions?.distanceMeters, isLoading)}
-            aria-label={`ルート編集を${sidebarOpen ? "閉じる" : "開く"}`}
+            aria-label={`ルート情報を${sidebarOpen ? "閉じる" : "開く"}`}
             aria-controls={sidebarId}
             aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen((value) => !value)}

@@ -134,13 +134,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
-vi.mock("../api/useRouteDraftsQuery", () => ({
-  useRouteDraftsQuery: () => ({ drafts: [], isLoading: false, error: null }),
-}));
 const defaultCenter = { lat: 35, lng: 135 };
 function openDesktopPanel() {
   if (!window.matchMedia("(max-width: 767px)").matches) {
-    fireEvent.click(screen.getByRole("button", { name: "ルート作成を開く" }));
+    fireEvent.click(screen.getByRole("button", { name: "ルート情報を開く" }));
   }
 }
 
@@ -154,20 +151,28 @@ describe("RouteCreateMap", () => {
     expect(
       screen.getByRole("heading", { name: "ルートを作成" }),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "ホームへ戻る" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "作成途中のルート" }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: "ルート名" })).toBeNull();
     expect(
       screen.getByRole("button", { name: "詳細入力へ進む" }),
     ).toBeDisabled();
     expect(
-      screen.getByText("保存するには2地点以上を登録してください。"),
-    ).toBeInTheDocument();
+      screen.queryByText("保存するには2地点以上を登録してください。"),
+    ).not.toBeInTheDocument();
     expect(
       within(
         screen.getByRole("region", { name: "Street Viewで下見" }),
       ).queryByRole("button", { name: "地点を追加" }),
     ).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "地点を追加" }));
-    expect(screen.getByText("経由地点（1 地点）")).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "ルートの地点数" }),
+    ).toHaveTextContent("地点 1 / 27");
     await user.click(
       screen.getByRole("button", { name: "Street Viewを次の地点へ" }),
     );
@@ -200,11 +205,11 @@ describe("RouteCreateMap", () => {
   it("距離ボタンと閉じるボタンをEnterで操作しても地点を追加しない", async () => {
     const user = userEvent.setup();
     render(<RouteCreateMap defaultCenter={defaultCenter} />);
-    const trigger = screen.getByRole("button", { name: "ルート作成を開く" });
+    const trigger = screen.getByRole("button", { name: "ルート情報を開く" });
     trigger.focus();
     await user.keyboard("{Enter}");
     expect(
-      screen.getByRole("dialog", { name: "ルート作成" }),
+      screen.getByRole("dialog", { name: "ルート情報" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("status", { name: "ルートの地点数" }),
@@ -216,7 +221,7 @@ describe("RouteCreateMap", () => {
     ).toHaveTextContent("地点 0 / 27");
   });
 
-  it("SPパネルに下書きの入口を残し、次へボタンは地図側に置く", async () => {
+  it("SPパネルは試算とペース変更だけを表示する", async () => {
     vi.stubGlobal(
       "matchMedia",
       vi.fn((query: string) => ({
@@ -228,19 +233,23 @@ describe("RouteCreateMap", () => {
     const user = userEvent.setup();
     render(<RouteCreateMap defaultCenter={defaultCenter} />);
     openDesktopPanel();
-    await user.click(screen.getByRole("button", { name: "ルート作成を開く" }));
-    const dialog = screen.getByRole("dialog", { name: "ルート作成" });
+    await user.click(screen.getByRole("button", { name: "ルート情報を開く" }));
+    const dialog = screen.getByRole("dialog", { name: "ルート情報" });
     expect(
       within(dialog).queryByRole("textbox", { name: "ルート名" }),
     ).toBeNull();
     expect(
       within(dialog).queryByRole("button", { name: "詳細入力へ進む" }),
     ).not.toBeInTheDocument();
+    expect(within(dialog).getByText("ペース 5:00")).toBeInTheDocument();
+    expect(within(dialog).queryByRole("list")).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole("link")).not.toBeInTheDocument();
     expect(
-      within(dialog).getByRole("heading", {
-        name: "作成途中のルートの続きから",
-      }),
-    ).toBeInTheDocument();
+      within(dialog).queryByText(
+        "画面下部のボタンで地点を追加・削除できます。",
+      ),
+    ).not.toBeInTheDocument();
+    expect(within(dialog).getAllByRole("heading")).toHaveLength(1);
   });
 
   it("利用上限に達したら登録地点を直線で結び、警告を地図上で表示する", async () => {

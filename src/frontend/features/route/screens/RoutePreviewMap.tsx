@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import Link from "next/link";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import type { RouterOutputs } from "~/trpc/react";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
@@ -50,19 +49,6 @@ function RoutePreviewMapContent({ route }: RoutePreviewMapProps) {
           onOpenChange={setSidebarOpen}
           triggerRef={sidebarTriggerRef}
         >
-          <Link
-            href={`/routes/${route.id}`}
-            className="mb-5 inline-block font-medium underline"
-          >
-            ルート詳細に戻る
-          </Link>
-          <p className="text-sm text-muted-foreground">保存済みルート</p>
-          <h1 className="mb-4 mt-2 break-words text-xl font-bold">
-            {route.title}
-          </h1>
-          <p className="mb-6 text-sm text-muted-foreground">
-            地図上の位置を選んで、Street Viewで下見できます。
-          </p>
           <RunMetricsPanel
             distanceMeters={direction?.distanceMeters}
             isLoading={false}
@@ -73,6 +59,7 @@ function RoutePreviewMapContent({ route }: RoutePreviewMapProps) {
         </RouteSidebar>
       }
     >
+      <h1 className="sr-only">{route.title}</h1>
       <RouteMap
         initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
         path={direction?.path ?? null}
