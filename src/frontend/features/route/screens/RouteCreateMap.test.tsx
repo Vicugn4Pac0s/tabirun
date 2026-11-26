@@ -202,6 +202,26 @@ describe("RouteCreateMap", () => {
     expect(push).not.toHaveBeenCalled();
     // CI では入力〜保存まで通しで実行するため、デフォルト 5s では不足することがある
   }, 15_000);
+  it("操作メニューに戻るとリセットを表示し、Enter操作で地点を追加しない", async () => {
+    const user = userEvent.setup();
+    render(<RouteCreateMap defaultCenter={defaultCenter} />);
+    expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
+    const trigger = screen.getByRole("button", { name: "ルート操作を開く" });
+    trigger.focus();
+    await user.keyboard("{Enter}");
+    expect(
+      screen.getByRole("menuitem", { name: "ホームへ戻る" }),
+    ).toHaveAttribute("href", "/");
+    expect(screen.getByRole("menuitem", { name: "リセット" })).toHaveAttribute(
+      "data-disabled",
+    );
+    await user.keyboard("{Escape}");
+    expect(trigger).toHaveFocus();
+    expect(
+      screen.getByRole("status", { name: "ルートの地点数" }),
+    ).toHaveTextContent("地点 0 / 27");
+  });
+
   it("距離ボタンと閉じるボタンをEnterで操作しても地点を追加しない", async () => {
     const user = userEvent.setup();
     render(<RouteCreateMap defaultCenter={defaultCenter} />);

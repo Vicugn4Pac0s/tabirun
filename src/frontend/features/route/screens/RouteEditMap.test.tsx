@@ -241,7 +241,7 @@ describe("RouteEditMap", () => {
     expect(within(sidebar).getAllByRole("heading")).toHaveLength(1);
     expect(within(sidebar).getByText("ペース 5:00")).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "ルートに戻る" }),
+      screen.queryByRole("menuitem", { name: "ルート詳細に戻る" }),
     ).not.toBeInTheDocument();
     expect(screen.getAllByRole("img")).toHaveLength(3);
     expect(screen.getByRole("img", { name: "地点 2" })).toHaveTextContent("2");
@@ -327,7 +327,8 @@ describe("RouteEditMap", () => {
     expect(directionsQuery).toHaveBeenLastCalledWith(route.points.slice(1), {
       enabled: true,
     });
-    await user.click(screen.getByRole("button", { name: "リセット" }));
+    await user.click(screen.getByRole("button", { name: "ルート操作を開く" }));
+    await user.click(screen.getByRole("menuitem", { name: "リセット" }));
     expect(directionsQuery).toHaveBeenLastCalledWith(route.points, {
       enabled: false,
     });
@@ -389,12 +390,34 @@ describe("RouteEditMap", () => {
     render(<RouteEditMap route={route} />);
     openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
-    await user.click(screen.getByRole("button", { name: "リセット" }));
+    await user.click(screen.getByRole("button", { name: "ルート操作を開く" }));
+    await user.click(screen.getByRole("menuitem", { name: "リセット" }));
     expect(screen.getAllByRole("img")).toHaveLength(2);
     confirm.mockReturnValue(true);
-    await user.click(screen.getByRole("button", { name: "リセット" }));
+    await user.click(screen.getByRole("button", { name: "ルート操作を開く" }));
+    await user.click(screen.getByRole("menuitem", { name: "リセット" }));
     expect(screen.queryByRole("textbox", { name: "ルート名" })).toBeNull();
     expect(screen.getByRole("button", { name: "更新する" })).toBeDisabled();
+  });
+  it("操作メニューから戻るとき、未保存の変更の破棄を確認する", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    const user = userEvent.setup();
+    render(<RouteEditMap route={route} />);
+    expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "更新する" })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "地点を削除" }));
+    await user.click(screen.getByRole("button", { name: "ルート操作を開く" }));
+    const back = screen.getByRole("menuitem", { name: "ルート詳細に戻る" });
+    expect(back).toHaveAttribute("href", "/routes/1");
+    await user.click(back);
+    expect(confirm).toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+    confirm.mockReturnValue(true);
+    await user.click(screen.getByRole("button", { name: "ルート操作を開く" }));
+    await user.click(
+      screen.getByRole("menuitem", { name: "ルート詳細に戻る" }),
+    );
+    expect(push).toHaveBeenCalledWith("/routes/1");
   });
   it("プロフィールへ移動するとき未変更なら確認せず、編集中は許可した場合だけ移動する", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);

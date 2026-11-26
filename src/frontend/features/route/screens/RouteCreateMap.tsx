@@ -1,6 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { MoreHorizontal } from "lucide-react";
+import { GuardedLink } from "~/frontend/providers/GuardedLink";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "~/frontend/components/ui/dropdown-menu";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
@@ -74,14 +82,30 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
                 ? "保存中..."
                 : "詳細入力へ進む"}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!draft.isDirty || draft.isSubmitting || isCreating}
-              onClick={draft.reset}
-            >
-              リセット
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="ルート操作を開く"
+                  disabled={draft.isSubmitting || isCreating}
+                >
+                  <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <GuardedLink href={"/"}>ホームへ戻る</GuardedLink>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={!draft.isDirty || draft.isSubmitting || isCreating}
+                  onSelect={draft.reset}
+                >
+                  リセット
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </>
         }
         warning={warningMessage}
