@@ -1,6 +1,12 @@
 import type { ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  cleanup,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RoutePreviewMap } from "./RoutePreviewMap";
 
@@ -107,10 +113,17 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+function openDesktopPanel() {
+  if (!window.matchMedia("(max-width: 767px)").matches) {
+    fireEvent.click(screen.getByRole("button", { name: "ルート情報を開く" }));
+  }
+}
+
 describe("RoutePreviewMap", () => {
   it("取得済みの経路距離をSPメニューボタンに表示する", () => {
     setMobileViewport();
     render(<RoutePreviewMap route={route} />);
+    openDesktopPanel();
     expect(
       screen.getByRole("button", { name: "ルート情報を開く" }),
     ).toHaveTextContent("5.2 km");
@@ -118,6 +131,7 @@ describe("RoutePreviewMap", () => {
 
   it("取得済みの経路を表示し、再表示でも経路計算を呼ばない", () => {
     const { rerender } = render(<RoutePreviewMap route={route} />);
+    openDesktopPanel();
     expect(screen.getByText("経路線")).toHaveAttribute(
       "data-path",
       JSON.stringify(savedDirection.path),
@@ -132,6 +146,7 @@ describe("RoutePreviewMap", () => {
 
   it("既存mapと共通の外枠と表示部品で、ルート情報・地図・Street Viewを表示する", () => {
     render(<RoutePreviewMap route={route} />);
+    openDesktopPanel();
     const sidebar = screen.getByRole("complementary", { name: "ルート情報" });
     expect(
       within(sidebar).getByRole("heading", { name: "朝のルート" }),
@@ -165,6 +180,7 @@ describe("RoutePreviewMap", () => {
         route={{ ...route, points: [...route.points, route.points[0]!] }}
       />,
     );
+    openDesktopPanel();
     expect(screen.getAllByRole("img")).toHaveLength(1);
     expect(
       screen.getByRole("img", { name: "スタート／ゴール" }),
@@ -175,6 +191,7 @@ describe("RoutePreviewMap", () => {
     setMobileViewport();
     const user = userEvent.setup();
     render(<RoutePreviewMap route={route} />);
+    openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "ルート情報を開く" }));
     expect(
       within(screen.getByRole("dialog", { name: "ルート情報" })).getByRole(
@@ -201,6 +218,7 @@ describe("RoutePreviewMap", () => {
         }}
       />,
     );
+    openDesktopPanel();
     expect(
       within(
         screen.getByRole("complementary", { name: "ルート情報" }),
@@ -231,6 +249,7 @@ describe("RoutePreviewMap", () => {
         }}
       />,
     );
+    openDesktopPanel();
 
     expect(screen.getByText("経路線")).toHaveAttribute(
       "data-path",

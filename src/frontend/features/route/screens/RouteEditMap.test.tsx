@@ -2,6 +2,7 @@ import type Link from "next/link";
 import type { ComponentProps, ComponentPropsWithoutRef } from "react";
 import userEvent from "@testing-library/user-event";
 import {
+  fireEvent,
   cleanup,
   render,
   screen,
@@ -193,10 +194,17 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+function openDesktopPanel() {
+  if (!window.matchMedia("(max-width: 767px)").matches) {
+    fireEvent.click(screen.getByRole("button", { name: "ルート編集を開く" }));
+  }
+}
+
 describe("RouteEditMap", () => {
   it("取得済みの経路距離をSPメニューボタンに表示する", () => {
     setMobileViewport();
     render(<RouteEditMap route={route} />);
+    openDesktopPanel();
     expect(
       screen.getByRole("button", { name: "ルート編集を開く" }),
     ).toHaveTextContent("5.2 km");
@@ -211,6 +219,7 @@ describe("RouteEditMap", () => {
     });
     const user = userEvent.setup();
     render(<RouteEditMap route={route} />);
+    openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     expect(
       screen.getByRole("button", { name: "ルート編集を開く" }),
@@ -219,6 +228,7 @@ describe("RouteEditMap", () => {
 
   it("既存の外枠で名前入力を出さず経由地点一覧・全地点マーカーを表示する", () => {
     render(<RouteEditMap route={route} />);
+    openDesktopPanel();
     const sidebar = screen.getByRole("complementary", { name: "ルート編集" });
     expect(
       within(sidebar).getByRole("heading", { name: "ルートを編集" }),
@@ -248,6 +258,7 @@ describe("RouteEditMap", () => {
     setMobileViewport();
     const user = userEvent.setup();
     render(<RouteEditMap route={route} />);
+    openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "ルート編集を開く" }));
     expect(
       within(screen.getByRole("dialog", { name: "ルート編集" })).getByRole(
@@ -267,6 +278,7 @@ describe("RouteEditMap", () => {
         }}
       />,
     );
+    openDesktopPanel();
     expect(screen.getByRole("alert")).toHaveTextContent("経由地点のみ表示");
     expect(screen.queryByRole("textbox", { name: "ルート名" })).toBeNull();
     expect(screen.getAllByRole("img")).toHaveLength(3);
@@ -292,6 +304,7 @@ describe("RouteEditMap", () => {
         }}
       />,
     );
+    openDesktopPanel();
     expect(screen.getByText("経路線")).toHaveAttribute(
       "data-path",
       JSON.stringify(route.points),
@@ -307,6 +320,7 @@ describe("RouteEditMap", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const user = userEvent.setup();
     render(<RouteEditMap route={route} />);
+    openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     expect(directionsQuery).toHaveBeenLastCalledWith(route.points.slice(1), {
       enabled: true,
@@ -324,6 +338,7 @@ describe("RouteEditMap", () => {
   it("地点を削除して経路を再計算し、地点だけを保存する", async () => {
     const user = userEvent.setup();
     render(<RouteEditMap route={route} />);
+    openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     expect(screen.getAllByRole("img")).toHaveLength(2);
     expect(directionsQuery).toHaveBeenLastCalledWith(route.points.slice(1), {
@@ -342,6 +357,7 @@ describe("RouteEditMap", () => {
   it("ルート名を変えずに地点だけ変更して更新できる", async () => {
     const user = userEvent.setup();
     render(<RouteEditMap route={route} />);
+    openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "更新する" })).toBeEnabled(),
@@ -357,6 +373,7 @@ describe("RouteEditMap", () => {
     updatePoints.mockRejectedValue(new Error("failed"));
     const user = userEvent.setup();
     render(<RouteEditMap route={route} />);
+    openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     await user.click(screen.getByRole("button", { name: "更新する" }));
     expect(push).not.toHaveBeenCalled();
@@ -368,6 +385,7 @@ describe("RouteEditMap", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const user = userEvent.setup();
     render(<RouteEditMap route={route} />);
+    openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     await user.click(screen.getByRole("link", { name: "ルートに戻る" }));
     expect(confirm).toHaveBeenCalled();
@@ -382,6 +400,7 @@ describe("RouteEditMap", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const user = userEvent.setup();
     render(<RouteEditMap route={route} />);
+    openDesktopPanel();
     await user.click(
       screen.getByRole("button", { name: "プロフィールへ移動" }),
     );

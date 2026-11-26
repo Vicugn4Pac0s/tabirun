@@ -49,7 +49,7 @@ export function RouteEditorMap({
         fitToRoute={fitToRoute}
         onSelectedPointChange={setSelectedPoint}
       />
-      <div className="pointer-events-none absolute left-3 top-3 z-10">
+      <div className="pointer-events-none absolute left-3 top-[calc(50vh+4.5rem)] z-10 min-[1201px]:top-20">
         <RoutePointCount count={points.length} />
       </div>
       {selectedPoint && (

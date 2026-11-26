@@ -1,6 +1,6 @@
 "use client";
 
-import { Route } from "lucide-react";
+import { PanelBottom, PanelRight } from "lucide-react";
 import { forwardRef } from "react";
 import { cn } from "~/frontend/lib/utils";
 import { Button, type ButtonProps } from "~/frontend/components/ui/button";
@@ -10,7 +10,7 @@ type RouteMenuButtonProps = Omit<ButtonProps, "children"> & {
 };
 
 /**
- * 縦書きのメニューボタンを表示し、数字を含むラベルは距離用の強調表示にする。
+ * 距離とパネルの開閉アイコンを横並びに表示する。数字を含むラベルを強調する。
  */
 const RouteMenuButton = forwardRef<HTMLButtonElement, RouteMenuButtonProps>(
   ({ className, label = "MENU", ...props }, ref) => {
@@ -21,28 +21,28 @@ const RouteMenuButton = forwardRef<HTMLButtonElement, RouteMenuButtonProps>(
         ref={ref}
         variant="outline"
         className={cn(
-          "flex h-auto w-10 flex-col items-center gap-2",
-          "rounded-r-none rounded-tl-md border-r-0 px-0 py-3 shadow-md",
+          "h-12 gap-3 rounded-lg bg-background px-3 shadow-md",
           className,
         )}
         aria-label="メニューを開く"
         {...props}
       >
-        <Route className="h-4 w-4 shrink-0 text-base-gray" />
         {label ? (
           <span
             className={cn(
-              "font-inter text-base-gray",
-              isDistanceLabel ? "text-lg font-black" : "text-md font-bold",
+              "font-inter text-primary",
+              isDistanceLabel
+                ? "text-2xl font-black italic"
+                : "text-sm font-bold",
             )}
-            style={{
-              writingMode: "vertical-rl",
-              textOrientation: "mixed",
-            }}
           >
             {label}
           </span>
         ) : null}
+        <span className="border-l pl-3 text-primary" aria-hidden="true">
+          <PanelRight className="hidden h-5 w-5 md:block" />
+          <PanelBottom className="h-5 w-5 md:hidden" />
+        </span>
       </Button>
     );
   },

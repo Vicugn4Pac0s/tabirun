@@ -31,4 +31,5 @@ export const Menu: Story = {
     await expect(args.onClick).toHaveBeenCalledTimes(1);
   },
 };
+export const Distance: Story = { args: { label: "5.2 km" } };
 export const Disabled: Story = { args: { label: "5.2 km", disabled: true } };

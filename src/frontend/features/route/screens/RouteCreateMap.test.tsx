@@ -1,5 +1,11 @@
 import userEvent from "@testing-library/user-event";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  cleanup,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteCreateMap } from "./RouteCreateMap";
 
@@ -132,12 +138,19 @@ vi.mock("../api/useRouteDraftsQuery", () => ({
   useRouteDraftsQuery: () => ({ drafts: [], isLoading: false, error: null }),
 }));
 const defaultCenter = { lat: 35, lng: 135 };
+function openDesktopPanel() {
+  if (!window.matchMedia("(max-width: 767px)").matches) {
+    fireEvent.click(screen.getByRole("button", { name: "ルート作成を開く" }));
+  }
+}
+
 describe("RouteCreateMap", () => {
   it("空の作成画面から地点を追加し、経路を再計算して保存する", async () => {
     const user = userEvent.setup({ delay: null });
     const { rerender } = render(
       <RouteCreateMap defaultCenter={defaultCenter} />,
     );
+    openDesktopPanel();
     expect(
       screen.getByRole("heading", { name: "ルートを作成" }),
     ).toBeInTheDocument();
@@ -184,6 +197,25 @@ describe("RouteCreateMap", () => {
     expect(push).not.toHaveBeenCalled();
     // CI では入力〜保存まで通しで実行するため、デフォルト 5s では不足することがある
   }, 15_000);
+  it("距離ボタンと閉じるボタンをEnterで操作しても地点を追加しない", async () => {
+    const user = userEvent.setup();
+    render(<RouteCreateMap defaultCenter={defaultCenter} />);
+    const trigger = screen.getByRole("button", { name: "ルート作成を開く" });
+    trigger.focus();
+    await user.keyboard("{Enter}");
+    expect(
+      screen.getByRole("dialog", { name: "ルート作成" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "ルートの地点数" }),
+    ).toHaveTextContent("地点 0 / 27");
+    await user.keyboard("{Enter}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "ルートの地点数" }),
+    ).toHaveTextContent("地点 0 / 27");
+  });
+
   it("SPメニューに次へボタンと下書きの入口を表示する", async () => {
     vi.stubGlobal(
       "matchMedia",
@@ -195,6 +227,7 @@ describe("RouteCreateMap", () => {
     );
     const user = userEvent.setup();
     render(<RouteCreateMap defaultCenter={defaultCenter} />);
+    openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "ルート作成を開く" }));
     const dialog = screen.getByRole("dialog", { name: "ルート作成" });
     expect(
@@ -215,6 +248,7 @@ describe("RouteCreateMap", () => {
     const { rerender } = render(
       <RouteCreateMap defaultCenter={defaultCenter} />,
     );
+    openDesktopPanel();
     await user.click(screen.getByRole("button", { name: "地点を追加" }));
     await user.click(
       screen.getByRole("button", { name: "Street Viewを次の地点へ" }),
@@ -243,6 +277,7 @@ describe("RouteCreateMap", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const user = userEvent.setup();
     render(<RouteCreateMap defaultCenter={defaultCenter} />);
+    openDesktopPanel();
     await user.click(
       screen.getByRole("button", { name: "プロフィールへ移動" }),
     );
