@@ -5,22 +5,22 @@ import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import type { RouterOutputs } from "~/trpc/react";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
-import RouteMapView from "./RouteMapView";
+import RouteMapView from "../components/RouteMapView";
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
-import { RouteScreenLayout } from "./RouteScreenLayout";
+import { RouteScreenLayout } from "../components/RouteScreenLayout";
 
-type RoutePreviewMapScreenProps = {
+type RoutePreviewMapProps = {
   route: Pick<
     RouterOutputs["route"]["getById"],
     "id" | "title" | "points" | "direction" | "directionErrorCode"
   >;
 };
 
-function RoutePreviewMapScreenContent({ route }: RoutePreviewMapScreenProps) {
+function RoutePreviewMapContent({ route }: RoutePreviewMapProps) {
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const { direction, directionErrorCode } = route;
   const warningCode =
@@ -83,10 +83,10 @@ function RoutePreviewMapScreenContent({ route }: RoutePreviewMapScreenProps) {
  * 保存済み経路の地図とStreet Viewによる下見画面を表示する。
  * 経路取得失敗や上限到達は警告として表示し、登録地点の下見は続けられる。
  */
-export function RoutePreviewMapScreen(props: RoutePreviewMapScreenProps) {
+export function RoutePreviewMap(props: RoutePreviewMapProps) {
   return (
     <GoogleMapProvider>
-      <RoutePreviewMapScreenContent {...props} />
+      <RoutePreviewMapContent {...props} />
     </GoogleMapProvider>
   );
 }

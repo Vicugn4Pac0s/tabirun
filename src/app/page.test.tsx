@@ -34,7 +34,7 @@ vi.mock("~/trpc/server", () => ({
   },
   HydrateClient: ({ children }: { children: ReactNode }) => children,
 }));
-vi.mock("~/frontend/features/dashboard/components/Dashboard", () => ({
+vi.mock("~/frontend/features/dashboard/screens/Dashboard", () => ({
   Dashboard: () => <h1>ホーム</h1>,
 }));
 

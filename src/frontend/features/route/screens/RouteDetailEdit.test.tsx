@@ -2,7 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { useForm } from "react-hook-form";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { RouteUpdateDetailsInput } from "~/shared/schemas";
-import { RouteDetailEditScreen } from "./RouteDetailEditScreen";
+import { RouteDetailEdit } from "./RouteDetailEdit";
 
 vi.mock("../hooks/useRouteDetailEdit", () => ({
   useRouteDetailEdit: (route: RouteUpdateDetailsInput) => ({
@@ -26,10 +26,10 @@ vi.mock("~/frontend/features/run-metrics/components/RunMetricsPanel", () => ({
 }));
 afterEach(cleanup);
 
-describe("RouteDetailEditScreenの戻りリンク", () => {
+describe("RouteDetailEditの戻りリンク", () => {
   it("下書きはホームへのリンクだけを表示する", () => {
     render(
-      <RouteDetailEditScreen
+      <RouteDetailEdit
         route={{
           id: 42,
           title: "下書き",
@@ -49,7 +49,7 @@ describe("RouteDetailEditScreenの戻りリンク", () => {
 
   it("完了済みは閲覧ページへのリンクだけを表示する", () => {
     render(
-      <RouteDetailEditScreen
+      <RouteDetailEdit
         route={{
           id: 42,
           title: "完了済み",

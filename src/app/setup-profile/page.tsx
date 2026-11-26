@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { PageContainer } from "~/frontend/components/app-ui/PageContainer";
-import { LoginScreen } from "~/frontend/features/auth/components/LoginScreen";
-import { UserInitialProfileScreen } from "~/frontend/features/user/components/UserInitialProfileScreen";
+import { Login } from "~/frontend/features/auth/screens/Login";
+import { UserInitialProfile } from "~/frontend/features/user/screens/UserInitialProfile";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 import {
@@ -17,7 +17,7 @@ export default async function SetupProfilePage() {
     return (
       <main>
         <PageContainer>
-          <LoginScreen />
+          <Login />
         </PageContainer>
       </main>
     );
@@ -36,9 +36,7 @@ export default async function SetupProfilePage() {
   return (
     <main>
       <PageContainer className="flex min-h-screen items-center">
-        <UserInitialProfileScreen
-          initialValues={getProfileFormInitialValues(user)}
-        />
+        <UserInitialProfile initialValues={getProfileFormInitialValues(user)} />
       </PageContainer>
     </main>
   );

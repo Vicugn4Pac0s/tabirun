@@ -1,7 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { RouteCreateMapScreen } from "./RouteCreateMapScreen";
+import { RouteCreateMap } from "./RouteCreateMap";
 
 const { directionsQuery, createDraft, push, replace, refresh } = vi.hoisted(
   () => ({
@@ -97,7 +97,7 @@ vi.mock("~/frontend/features/googlemap/components/StreetView", async () => {
     },
   };
 });
-vi.mock("./RoutePointMarker", () => ({
+vi.mock("../components/RoutePointMarker", () => ({
   default: ({ label, title }: { label: string; title: string }) => (
     <span role="img" aria-label={title}>
       {label}
@@ -132,11 +132,11 @@ vi.mock("../api/useRouteDraftsQuery", () => ({
   useRouteDraftsQuery: () => ({ drafts: [], isLoading: false, error: null }),
 }));
 const defaultCenter = { lat: 35, lng: 135 };
-describe("RouteCreateMapScreen", () => {
+describe("RouteCreateMap", () => {
   it("空の作成画面から地点を追加し、経路を再計算して保存する", async () => {
     const user = userEvent.setup({ delay: null });
     const { rerender } = render(
-      <RouteCreateMapScreen defaultCenter={defaultCenter} />,
+      <RouteCreateMap defaultCenter={defaultCenter} />,
     );
     expect(
       screen.getByRole("heading", { name: "ルートを作成" }),
@@ -172,7 +172,7 @@ describe("RouteCreateMapScreen", () => {
       isLoading: false,
       error: null,
     });
-    rerender(<RouteCreateMapScreen defaultCenter={defaultCenter} />);
+    rerender(<RouteCreateMap defaultCenter={defaultCenter} />);
     expect(screen.getByText("5.2")).toBeInTheDocument();
     expect(screen.getByText("予想時間")).toBeInTheDocument();
     expect(screen.getByText("消費カロリー")).toBeInTheDocument();
@@ -194,7 +194,7 @@ describe("RouteCreateMapScreen", () => {
       })),
     );
     const user = userEvent.setup();
-    render(<RouteCreateMapScreen defaultCenter={defaultCenter} />);
+    render(<RouteCreateMap defaultCenter={defaultCenter} />);
     await user.click(screen.getByRole("button", { name: "ルート作成を開く" }));
     const dialog = screen.getByRole("dialog", { name: "ルート作成" });
     expect(
@@ -213,7 +213,7 @@ describe("RouteCreateMapScreen", () => {
   it("利用上限に達したら登録地点を直線で結び、警告をサイドバーで表示する", async () => {
     const user = userEvent.setup({ delay: null });
     const { rerender } = render(
-      <RouteCreateMapScreen defaultCenter={defaultCenter} />,
+      <RouteCreateMap defaultCenter={defaultCenter} />,
     );
     await user.click(screen.getByRole("button", { name: "地点を追加" }));
     await user.click(
@@ -227,7 +227,7 @@ describe("RouteCreateMapScreen", () => {
       isLoading: false,
       error: { data: { code: "TOO_MANY_REQUESTS" } },
     });
-    rerender(<RouteCreateMapScreen defaultCenter={defaultCenter} />);
+    rerender(<RouteCreateMap defaultCenter={defaultCenter} />);
 
     expect(screen.getByText("経路線")).toHaveAttribute(
       "data-path",
@@ -242,7 +242,7 @@ describe("RouteCreateMapScreen", () => {
   it("プロフィールへ移動するとき未変更なら確認せず、編集中は許可した場合だけ移動する", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const user = userEvent.setup();
-    render(<RouteCreateMapScreen defaultCenter={defaultCenter} />);
+    render(<RouteCreateMap defaultCenter={defaultCenter} />);
     await user.click(
       screen.getByRole("button", { name: "プロフィールへ移動" }),
     );

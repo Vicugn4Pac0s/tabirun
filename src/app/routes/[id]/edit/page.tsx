@@ -3,7 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import { notFound } from "next/navigation";
 import { routeIdParamSchema } from "~/shared/schemas";
 
-import { RouteEditMapScreen } from "~/frontend/features/route/components/RouteEditMapScreen";
+import { RouteEditMap } from "~/frontend/features/route/screens/RouteEditMap";
 import { ProtectedPageFallback } from "~/app/_components/ProtectedPageFallback";
 import { getProtectedPageState } from "~/server/auth/getProtectedPageState";
 import { api } from "~/trpc/server";
@@ -31,7 +31,7 @@ export default async function RouteEditPage({ params }: RouteEditPageProps) {
   return (
     <SessionProvider session={state.session}>
       <main>
-        <RouteEditMapScreen key={route.id} route={route} />
+        <RouteEditMap key={route.id} route={route} />
       </main>
     </SessionProvider>
   );

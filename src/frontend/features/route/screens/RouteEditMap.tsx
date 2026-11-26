@@ -13,18 +13,18 @@ import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteEditMap } from "../hooks/useRouteEditMap";
 import type { RouterOutputs } from "~/trpc/react";
-import { RouteScreenLayout } from "./RouteScreenLayout";
+import { RouteScreenLayout } from "../components/RouteScreenLayout";
 import { Button } from "~/frontend/components/ui/button";
-import { RouteEditorMap } from "./RouteEditorMap";
+import { RouteEditorMap } from "../components/RouteEditorMap";
 
-type RouteEditMapScreenProps = {
+type RouteEditMapProps = {
   route: Pick<
     RouterOutputs["route"]["getById"],
     "id" | "status" | "points" | "direction" | "directionErrorCode"
   >;
 };
 
-function RouteEditMapScreenContent({ route }: RouteEditMapScreenProps) {
+function RouteEditMapContent({ route }: RouteEditMapProps) {
   const { draft, isUpdating, save } = useRouteEditMap(route);
   const { points, togglePoint, confirmDiscard } = draft;
   const { polylinePath, directions, isLoading, warningMessage } =
@@ -117,10 +117,10 @@ function RouteEditMapScreenContent({ route }: RouteEditMapScreenProps) {
  * 保存済みルートの編集画面を、専用のGoogleMapProviderで包んで表示する。
  * 初期編集値は初回のrouteを使うため、別ルートへ切り替える際は呼出側で再マウントする。
  */
-export function RouteEditMapScreen(props: RouteEditMapScreenProps) {
+export function RouteEditMap(props: RouteEditMapProps) {
   return (
     <GoogleMapProvider>
-      <RouteEditMapScreenContent {...props} />
+      <RouteEditMapContent {...props} />
     </GoogleMapProvider>
   );
 }

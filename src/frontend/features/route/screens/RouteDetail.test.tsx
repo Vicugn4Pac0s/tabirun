@@ -1,7 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { RouteDetailScreen } from "./RouteDetailScreen";
+import { RouteDetail } from "./RouteDetail";
 
 const { remove, deletionStatus, mapProvider } = vi.hoisted(() => ({
   remove: vi.fn(),
@@ -27,9 +27,9 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-describe("RouteDetailScreen", () => {
+describe("RouteDetail", () => {
   it("地図を初期化せず情報と下見・編集へのリンクを表示する", () => {
-    render(<RouteDetailScreen route={route} />);
+    render(<RouteDetail route={route} />);
     expect(
       screen.getByRole("heading", { name: "朝のルート" }),
     ).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe("RouteDetailScreen", () => {
   });
   it("保存済みの距離とプロフィールから試算を表示する", () => {
     render(
-      <RouteDetailScreen
+      <RouteDetail
         route={{
           ...route,
           direction: {
@@ -73,11 +73,11 @@ describe("RouteDetailScreen", () => {
   });
   it("削除を通知し、削除中は編集とプレビューへの移動を抑止する", async () => {
     const user = userEvent.setup();
-    const { rerender } = render(<RouteDetailScreen route={route} />);
+    const { rerender } = render(<RouteDetail route={route} />);
     await user.click(screen.getByRole("button", { name: "削除する" }));
     expect(remove).toHaveBeenCalledOnce();
     deletionStatus.isDeleting = true;
-    rerender(<RouteDetailScreen route={route} />);
+    rerender(<RouteDetail route={route} />);
     expect(screen.getByRole("button", { name: "削除中..." })).toBeDisabled();
     for (const name of ["地図を編集", "詳細を編集", "Street Viewで道を見る"]) {
       const link = screen.getByRole("link", { name });

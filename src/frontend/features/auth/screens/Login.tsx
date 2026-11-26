@@ -9,7 +9,7 @@ import { Button } from "~/frontend/components/ui/button";
  * Googleログインを開始する画面を表示し、開始中の重複操作を防ぐ。
  * 開始に失敗するとエラーを表示し、再試行できる状態に戻す。
  */
-export function LoginScreen() {
+export function Login() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [hasError, setHasError] = useState(false);
   const login = async () => {

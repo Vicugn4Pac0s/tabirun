@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { PageContainer } from "~/frontend/components/app-ui/PageContainer";
-import { UserProfileEditScreen } from "~/frontend/features/user/components/UserProfileEditScreen";
+import { UserProfileEdit } from "~/frontend/features/user/screens/UserProfileEdit";
 import { ProtectedPageFallback } from "~/app/_components/ProtectedPageFallback";
 import { getProtectedPageState } from "~/server/auth/getProtectedPageState";
 import { getProfileFormInitialValues } from "~/server/features/user/service";
@@ -15,7 +15,7 @@ export default async function UserProfileEditPage() {
   return (
     <main>
       <PageContainer>
-        <UserProfileEditScreen
+        <UserProfileEdit
           initialValues={getProfileFormInitialValues(state.user)}
         />
       </PageContainer>

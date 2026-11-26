@@ -2,7 +2,7 @@ import type { ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { RoutePreviewMapScreen } from "./RoutePreviewMapScreen";
+import { RoutePreviewMap } from "./RoutePreviewMap";
 
 const { directionsQuery } = vi.hoisted(() => ({
   directionsQuery: vi.fn(),
@@ -46,7 +46,7 @@ vi.mock("~/frontend/features/googlemap/components/GoogleMapView", () => ({
 vi.mock("~/frontend/features/googlemap/components/StreetView", () => ({
   default: () => <div>パノラマ</div>,
 }));
-vi.mock("./RoutePointMarker", () => ({
+vi.mock("../components/RoutePointMarker", () => ({
   default: ({ label, title }: { label: string; title: string }) => (
     <span role="img" aria-label={title}>
       {label}
@@ -72,7 +72,7 @@ const savedDirection = {
     { lat: 36, lng: 136 },
   ],
 } satisfies NonNullable<
-  ComponentProps<typeof RoutePreviewMapScreen>["route"]["direction"]
+  ComponentProps<typeof RoutePreviewMap>["route"]["direction"]
 >;
 const route = {
   id: 1,
@@ -84,7 +84,7 @@ const route = {
     { lat: 35.5, lng: 135.5 },
     { lat: 36, lng: 136 },
   ],
-} satisfies ComponentProps<typeof RoutePreviewMapScreen>["route"];
+} satisfies ComponentProps<typeof RoutePreviewMap>["route"];
 const setMobileViewport = () => {
   vi.stubGlobal(
     "matchMedia",
@@ -107,17 +107,17 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("RoutePreviewMapScreen", () => {
+describe("RoutePreviewMap", () => {
   it("取得済みの経路距離をSPメニューボタンに表示する", () => {
     setMobileViewport();
-    render(<RoutePreviewMapScreen route={route} />);
+    render(<RoutePreviewMap route={route} />);
     expect(
       screen.getByRole("button", { name: "ルート情報を開く" }),
     ).toHaveTextContent("5.2 km");
   });
 
   it("取得済みの経路を表示し、再表示でも経路計算を呼ばない", () => {
-    const { rerender } = render(<RoutePreviewMapScreen route={route} />);
+    const { rerender } = render(<RoutePreviewMap route={route} />);
     expect(screen.getByText("経路線")).toHaveAttribute(
       "data-path",
       JSON.stringify(savedDirection.path),
@@ -126,14 +126,12 @@ describe("RoutePreviewMapScreen", () => {
     expect(
       screen.queryByText(/計測中|経路を読み込み中/),
     ).not.toBeInTheDocument();
-    rerender(
-      <RoutePreviewMapScreen route={{ ...route, title: "夜のルート" }} />,
-    );
+    rerender(<RoutePreviewMap route={{ ...route, title: "夜のルート" }} />);
     expect(directionsQuery).not.toHaveBeenCalled();
   });
 
   it("既存mapと共通の外枠と表示部品で、ルート情報・地図・Street Viewを表示する", () => {
-    render(<RoutePreviewMapScreen route={route} />);
+    render(<RoutePreviewMap route={route} />);
     const sidebar = screen.getByRole("complementary", { name: "ルート情報" });
     expect(
       within(sidebar).getByRole("heading", { name: "朝のルート" }),
@@ -163,7 +161,7 @@ describe("RoutePreviewMapScreen", () => {
 
   it("周回コースではS/Gのマーカー1つだけを渡す", () => {
     render(
-      <RoutePreviewMapScreen
+      <RoutePreviewMap
         route={{ ...route, points: [...route.points, route.points[0]!] }}
       />,
     );
@@ -176,7 +174,7 @@ describe("RoutePreviewMapScreen", () => {
   it("モバイルではルート情報を開いて確認できる", async () => {
     setMobileViewport();
     const user = userEvent.setup();
-    render(<RoutePreviewMapScreen route={route} />);
+    render(<RoutePreviewMap route={route} />);
     await user.click(screen.getByRole("button", { name: "ルート情報を開く" }));
     expect(
       within(screen.getByRole("dialog", { name: "ルート情報" })).getByRole(
@@ -195,7 +193,7 @@ describe("RoutePreviewMapScreen", () => {
 
   it("経路取得に失敗しても地図とStreet Viewを残し、警告を表示する", () => {
     render(
-      <RoutePreviewMapScreen
+      <RoutePreviewMap
         route={{
           ...route,
           direction: null,
@@ -219,7 +217,7 @@ describe("RoutePreviewMapScreen", () => {
 
   it("利用上限に達したら保存済みの全地点を直線で結ぶ", () => {
     render(
-      <RoutePreviewMapScreen
+      <RoutePreviewMap
         route={{
           ...route,
           direction: {

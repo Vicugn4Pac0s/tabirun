@@ -46,7 +46,7 @@
 
 ## アーキテクチャと依存の向き
 - `src/app`: page / layout / route handler。認証・プロフィール状態に応じた画面の出し分けやredirect、サーバーでのデータ取得、featureの画面コンポーネントの配置だけを行う。UIロジックは書かない。pageでDBを直接クエリせず、サーバーの読み取り関数に `db` を渡すことは許容する。
-- `src/frontend/features/<feature>/`: `api/`（tRPC hookのラッパー: `useXxxQuery` / `use<動詞><名詞>`）、`hooks/`（画面ロジック）、`components/`、`lib/`（純粋関数）、`constants.ts`（feature内の複数ファイルで使う定数）、`types.ts`。ファイル内だけで使う定数はそのファイルに置く。
+- `src/frontend/features/<feature>/`: `api/`（tRPC hookのラッパー: `useXxxQuery` / `use<動詞><名詞>`）、`hooks/`（画面ロジック）、`screens/`（画面の入口。名前にScreen接尾辞を付けない）、`components/`（画面を構成する部品）、`lib/`（純粋関数）、`constants.ts`（feature内の複数ファイルで使う定数）、`types.ts`。ファイル内だけで使う定数はそのファイルに置く。
 - `src/frontend/components/ui`: shadcn/ui の生成物。追加は shadcn CLI（`components.json`）で行い、手での大改造はしない。
 - `src/frontend/components/app-ui`: 2つ以上のfeatureで使う見た目だけの部品。feature・tRPC・業務知識に依存しない。
 - `src/frontend/hooks/shared`, `src/frontend/lib`: feature非依存の汎用処理。
@@ -102,7 +102,7 @@
 - テストは対象の隣に `*.test.ts(x)`。hooks / lib / router は Vitest + Testing Library で振る舞いを検証する。
 - router は `createCaller` と `~/server/db` の mock で、認可（他人のデータに触れないこと）を必ずテストする（例: `routers/route.test.ts`）。
 - Story は、見た目の違い（variant・状態・エラー・空・ローディング）を目で確かめる価値がある UI 部品にだけ作る。新規 component に一律で足さない。
-- page・画面（`*Screen`）・コンテナ・Provider の Story は、依頼がなければ作らない。tRPC・セッション・地図をモックして描く Story も作らない。
+- page・画面（`screens/`配下）・コンテナ・Provider の Story は、依頼がなければ作らない。tRPC・セッション・地図をモックして描く Story も作らない。
 - 振る舞いは Vitest で検証する。テストと同じことを確かめる `play`、props の値が違うだけの Story、モバイル幅を確かめるだけの Story は作らない。
 - Story の title はディレクトリ構成に揃える（`App UI/<Component>`、`Features/<Feature>/<Component>`）。Atoms/Molecules は使わない。
 - 変更した重要な振る舞いとリスクに応じて検証を選ぶ。リスクに見合う検証であり、テストの一律削減ではない。

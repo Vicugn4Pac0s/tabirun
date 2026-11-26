@@ -2,16 +2,14 @@
 import type { UserProfileUpdateInput } from "~/shared/schemas";
 import { useUserInitialProfile } from "~/frontend/features/user/hooks/useUserInitialProfile";
 import { InitialProfileForm } from "~/frontend/features/user/components/InitialProfileForm";
-type UserInitialProfileScreenProps = {
+type UserInitialProfileProps = {
   initialValues: UserProfileUpdateInput;
 };
 /**
  * 初期プロフィールの入力と保存を表示する。
  * 保存成功後は同じ画面を再取得し、サーバー側のプロフィール完了判定を更新する。
  */
-export function UserInitialProfileScreen({
-  initialValues,
-}: UserInitialProfileScreenProps) {
+export function UserInitialProfile({ initialValues }: UserInitialProfileProps) {
   const { form, save, isCompleting } = useUserInitialProfile(initialValues);
   return (
     <section className="w-full space-y-6 rounded-xl border bg-white p-6 shadow-sm">

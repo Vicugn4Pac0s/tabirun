@@ -9,7 +9,7 @@ import {
   within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { RouteEditMapScreen } from "./RouteEditMapScreen";
+import { RouteEditMap } from "./RouteEditMap";
 
 const { directionsQuery, updatePoints, push, refresh } = vi.hoisted(() => ({
   directionsQuery: vi.fn(),
@@ -125,7 +125,7 @@ vi.mock("~/frontend/features/googlemap/components/StreetView", async () => {
     },
   };
 });
-vi.mock("./RoutePointMarker", () => ({
+vi.mock("../components/RoutePointMarker", () => ({
   default: ({ label, title }: { label: string; title: string }) => (
     <span role="img" aria-label={title}>
       {label}
@@ -151,7 +151,7 @@ const savedDirection = {
     { lat: 36, lng: 136 },
   ],
 } satisfies NonNullable<
-  ComponentProps<typeof RouteEditMapScreen>["route"]["direction"]
+  ComponentProps<typeof RouteEditMap>["route"]["direction"]
 >;
 const route = {
   status: "completed",
@@ -163,7 +163,7 @@ const route = {
     { lat: 35.5, lng: 135.5 },
     { lat: 36, lng: 136 },
   ],
-} satisfies ComponentProps<typeof RouteEditMapScreen>["route"];
+} satisfies ComponentProps<typeof RouteEditMap>["route"];
 const setMobileViewport = () => {
   vi.stubGlobal(
     "matchMedia",
@@ -193,10 +193,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("RouteEditMapScreen", () => {
+describe("RouteEditMap", () => {
   it("取得済みの経路距離をSPメニューボタンに表示する", () => {
     setMobileViewport();
-    render(<RouteEditMapScreen route={route} />);
+    render(<RouteEditMap route={route} />);
     expect(
       screen.getByRole("button", { name: "ルート編集を開く" }),
     ).toHaveTextContent("5.2 km");
@@ -210,7 +210,7 @@ describe("RouteEditMapScreen", () => {
       error: null,
     });
     const user = userEvent.setup();
-    render(<RouteEditMapScreen route={route} />);
+    render(<RouteEditMap route={route} />);
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     expect(
       screen.getByRole("button", { name: "ルート編集を開く" }),
@@ -218,7 +218,7 @@ describe("RouteEditMapScreen", () => {
   });
 
   it("既存の外枠で名前入力を出さず経由地点一覧・全地点マーカーを表示する", () => {
-    render(<RouteEditMapScreen route={route} />);
+    render(<RouteEditMap route={route} />);
     const sidebar = screen.getByRole("complementary", { name: "ルート編集" });
     expect(
       within(sidebar).getByRole("heading", { name: "ルートを編集" }),
@@ -247,7 +247,7 @@ describe("RouteEditMapScreen", () => {
   it("モバイルでも編集用のサイドバーを開ける", async () => {
     setMobileViewport();
     const user = userEvent.setup();
-    render(<RouteEditMapScreen route={route} />);
+    render(<RouteEditMap route={route} />);
     await user.click(screen.getByRole("button", { name: "ルート編集を開く" }));
     expect(
       within(screen.getByRole("dialog", { name: "ルート編集" })).getByRole(
@@ -259,7 +259,7 @@ describe("RouteEditMapScreen", () => {
 
   it("保存済み経路の取得失敗時も初期値と編集欄を保持する", () => {
     render(
-      <RouteEditMapScreen
+      <RouteEditMap
         route={{
           ...route,
           direction: null,
@@ -278,7 +278,7 @@ describe("RouteEditMapScreen", () => {
 
   it("保存済みの直線経路を初期表示し、再計算しない", () => {
     render(
-      <RouteEditMapScreen
+      <RouteEditMap
         route={{
           ...route,
           direction: {
@@ -306,7 +306,7 @@ describe("RouteEditMapScreen", () => {
   it("地点を変更してリセットすると保存済み経路に戻る", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const user = userEvent.setup();
-    render(<RouteEditMapScreen route={route} />);
+    render(<RouteEditMap route={route} />);
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     expect(directionsQuery).toHaveBeenLastCalledWith(route.points.slice(1), {
       enabled: true,
@@ -323,7 +323,7 @@ describe("RouteEditMapScreen", () => {
 
   it("地点を削除して経路を再計算し、地点だけを保存する", async () => {
     const user = userEvent.setup();
-    render(<RouteEditMapScreen route={route} />);
+    render(<RouteEditMap route={route} />);
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     expect(screen.getAllByRole("img")).toHaveLength(2);
     expect(directionsQuery).toHaveBeenLastCalledWith(route.points.slice(1), {
@@ -341,7 +341,7 @@ describe("RouteEditMapScreen", () => {
 
   it("ルート名を変えずに地点だけ変更して更新できる", async () => {
     const user = userEvent.setup();
-    render(<RouteEditMapScreen route={route} />);
+    render(<RouteEditMap route={route} />);
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "更新する" })).toBeEnabled(),
@@ -356,7 +356,7 @@ describe("RouteEditMapScreen", () => {
   it("更新失敗時は入力と地点を保持して再試行できる", async () => {
     updatePoints.mockRejectedValue(new Error("failed"));
     const user = userEvent.setup();
-    render(<RouteEditMapScreen route={route} />);
+    render(<RouteEditMap route={route} />);
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     await user.click(screen.getByRole("button", { name: "更新する" }));
     expect(push).not.toHaveBeenCalled();
@@ -367,7 +367,7 @@ describe("RouteEditMapScreen", () => {
   it("未保存時に戻る操作の破棄を確認し、リセットは承認時だけ行う", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const user = userEvent.setup();
-    render(<RouteEditMapScreen route={route} />);
+    render(<RouteEditMap route={route} />);
     await user.click(screen.getByRole("button", { name: "地点を削除" }));
     await user.click(screen.getByRole("link", { name: "ルートに戻る" }));
     expect(confirm).toHaveBeenCalled();
@@ -381,7 +381,7 @@ describe("RouteEditMapScreen", () => {
   it("プロフィールへ移動するとき未変更なら確認せず、編集中は許可した場合だけ移動する", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const user = userEvent.setup();
-    render(<RouteEditMapScreen route={route} />);
+    render(<RouteEditMap route={route} />);
     await user.click(
       screen.getByRole("button", { name: "プロフィールへ移動" }),
     );

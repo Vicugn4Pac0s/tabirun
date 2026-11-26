@@ -5,15 +5,13 @@ import { UserProfileEditForm } from "~/frontend/features/user/components/UserPro
 import { useUserProfileEdit } from "~/frontend/features/user/hooks/useUserProfileEdit";
 import type { UserProfileUpdateInput } from "~/shared/schemas";
 
-type UserProfileEditScreenProps = { initialValues: UserProfileUpdateInput };
+type UserProfileEditProps = { initialValues: UserProfileUpdateInput };
 
 /**
  * プロフィールの編集フォームとホームへのリンクを表示する。
  * 保存成功時はホームへ遷移して再取得し、失敗時は入力を保ってtoastを表示する。
  */
-export function UserProfileEditScreen({
-  initialValues,
-}: UserProfileEditScreenProps) {
+export function UserProfileEdit({ initialValues }: UserProfileEditProps) {
   const { form, save, isUpdating } = useUserProfileEdit(initialValues);
   return (
     <section className="space-y-6 rounded-xl border bg-white p-6 shadow-sm">

@@ -10,8 +10,8 @@ const { auth, getUserProfileSettings, screenProps, initialScreenProps } =
     screenProps: vi.fn(),
     initialScreenProps: vi.fn(),
   }));
-vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
-  UserInitialProfileScreen: (props: unknown) => {
+vi.mock("~/frontend/features/user/screens/UserInitialProfile", () => ({
+  UserInitialProfile: (props: unknown) => {
     initialScreenProps(props);
     return <h1>初期設定</h1>;
   },
@@ -28,8 +28,8 @@ vi.mock("next/navigation", () => ({
     throw new Error(`REDIRECT:${path}`);
   },
 }));
-vi.mock("~/frontend/features/user/components/UserProfileEditScreen", () => ({
-  UserProfileEditScreen: (props: unknown) => {
+vi.mock("~/frontend/features/user/screens/UserProfileEdit", () => ({
+  UserProfileEdit: (props: unknown) => {
     screenProps(props);
     return <h1>プロフィールを編集</h1>;
   },

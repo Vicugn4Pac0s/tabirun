@@ -2,7 +2,7 @@ import type { UserProfileUpdateInput } from "~/shared/schemas";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { UserProfileEditScreen } from "./UserProfileEditScreen";
+import { UserProfileEdit } from "./UserProfileEdit";
 
 const { save, push, refresh, success, error } = vi.hoisted(() => ({
   save: vi.fn(),
@@ -34,11 +34,11 @@ afterEach(() => {
   vi.resetAllMocks();
 });
 
-describe("UserProfileEditScreen", () => {
+describe("UserProfileEdit", () => {
   it("全項目undefinedでは保存ボタン直前にエラーを表示し、入力後に保存できる", async () => {
     const user = userEvent.setup();
     render(
-      <UserProfileEditScreen
+      <UserProfileEdit
         initialValues={{
           birthDate: undefined,
           gender: undefined,
@@ -70,7 +70,7 @@ describe("UserProfileEditScreen", () => {
   });
   it("保存成功時に通知し、ホームへ戻って表示を更新する", async () => {
     const user = userEvent.setup();
-    render(<UserProfileEditScreen initialValues={profile} />);
+    render(<UserProfileEdit initialValues={profile} />);
     await user.click(screen.getByRole("button", { name: "保存する" }));
     await waitFor(() =>
       expect(success).toHaveBeenCalledWith("プロフィールを更新しました。"),
@@ -87,7 +87,7 @@ describe("UserProfileEditScreen", () => {
   it("保存失敗を処理して画面を残し、再送信できる", async () => {
     save.mockRejectedValueOnce(new Error("server detail"));
     const user = userEvent.setup();
-    render(<UserProfileEditScreen initialValues={profile} />);
+    render(<UserProfileEdit initialValues={profile} />);
     await user.click(screen.getByRole("button", { name: "保存する" }));
     await waitFor(() =>
       expect(error).toHaveBeenCalledWith(
@@ -115,7 +115,7 @@ describe("UserProfileEditScreen", () => {
         }),
     );
     const user = userEvent.setup();
-    render(<UserProfileEditScreen initialValues={profile} />);
+    render(<UserProfileEdit initialValues={profile} />);
     await user.click(screen.getByRole("button", { name: "保存する" }));
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "更新中..." })).toBeDisabled(),
@@ -131,9 +131,7 @@ describe("UserProfileEditScreen", () => {
   });
   it("入力エラーでは送信せず、エラーをフィールドに表示する", async () => {
     const user = userEvent.setup();
-    render(
-      <UserProfileEditScreen initialValues={{ ...profile, height: -1 }} />,
-    );
+    render(<UserProfileEdit initialValues={{ ...profile, height: -1 }} />);
     await user.click(screen.getByRole("button", { name: "保存する" }));
     await waitFor(() =>
       expect(
@@ -160,7 +158,7 @@ describe("UserProfileEditScreen", () => {
     "%s の小数を切り捨てず、整数に直すと保存できる",
     async (label, decimal, message, integer) => {
       const user = userEvent.setup();
-      render(<UserProfileEditScreen initialValues={profile} />);
+      render(<UserProfileEdit initialValues={profile} />);
       const input = screen.getByRole("spinbutton", { name: label });
       expect(input).toHaveAttribute("step", "any");
       await user.clear(input);

@@ -13,8 +13,8 @@ const { auth, getUserProfileSettings, screenProps, redirect } = vi.hoisted(
     }),
   }),
 );
-vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
-  UserInitialProfileScreen: () => <h1>初期設定</h1>,
+vi.mock("~/frontend/features/user/screens/UserInitialProfile", () => ({
+  UserInitialProfile: () => <h1>初期設定</h1>,
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("~/server/auth", () => ({ auth }));
@@ -24,10 +24,8 @@ vi.mock("~/server/features/user/service", async (importOriginal) => ({
   getUserProfileSettings,
 }));
 vi.mock("next/navigation", () => ({ redirect }));
-vi.mock("~/frontend/features/route/components/RouteCreateMapScreen", () => ({
-  RouteCreateMapScreen: (props: {
-    defaultCenter: google.maps.LatLngLiteral;
-  }) => {
+vi.mock("~/frontend/features/route/screens/RouteCreateMap", () => ({
+  RouteCreateMap: (props: { defaultCenter: google.maps.LatLngLiteral }) => {
     screenProps(props);
     return <h1>ルートを作成</h1>;
   },

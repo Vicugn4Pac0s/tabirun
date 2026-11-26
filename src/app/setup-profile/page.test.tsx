@@ -20,8 +20,8 @@ vi.mock("~/server/features/user/service", async (importOriginal) => ({
   getUserProfileSettings,
 }));
 vi.mock("next/navigation", () => ({ redirect }));
-vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
-  UserInitialProfileScreen: (props: unknown) => {
+vi.mock("~/frontend/features/user/screens/UserInitialProfile", () => ({
+  UserInitialProfile: (props: unknown) => {
     screenProps(props);
     return <h1>初期設定</h1>;
   },

@@ -3,7 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import { notFound, redirect } from "next/navigation";
 import { routeIdParamSchema } from "~/shared/schemas";
 
-import { RoutePreviewMapScreen } from "~/frontend/features/route/components/RoutePreviewMapScreen";
+import { RoutePreviewMap } from "~/frontend/features/route/screens/RoutePreviewMap";
 import { ProtectedPageFallback } from "~/app/_components/ProtectedPageFallback";
 import { getProtectedPageState } from "~/server/auth/getProtectedPageState";
 import { api } from "~/trpc/server";
@@ -35,7 +35,7 @@ export default async function RoutePreviewPage({
   return (
     <SessionProvider session={state.session}>
       <main>
-        <RoutePreviewMapScreen key={route.id} route={route} />
+        <RoutePreviewMap key={route.id} route={route} />
       </main>
     </SessionProvider>
   );

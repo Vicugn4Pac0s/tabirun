@@ -23,12 +23,12 @@ const {
     throw new Error(`REDIRECT:${path}`);
   }),
 }));
-vi.mock("~/frontend/features/user/components/UserInitialProfileScreen", () => ({
-  UserInitialProfileScreen: () => <h1>初期設定</h1>,
+vi.mock("~/frontend/features/user/screens/UserInitialProfile", () => ({
+  UserInitialProfile: () => <h1>初期設定</h1>,
 }));
 vi.mock("server-only", () => ({}));
-vi.mock("~/frontend/features/route/components/RoutePreviewMapScreen", () => ({
-  RoutePreviewMapScreen: ({
+vi.mock("~/frontend/features/route/screens/RoutePreviewMap", () => ({
+  RoutePreviewMap: ({
     route,
   }: {
     route: { title: string; points: google.maps.LatLngLiteral[] };

@@ -12,16 +12,14 @@ import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/Googl
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { useRouteCreateMap } from "../hooks/useRouteCreateMap";
-import { RouteScreenLayout } from "./RouteScreenLayout";
-import { RouteDraftList } from "./RouteDraftList";
+import { RouteScreenLayout } from "../components/RouteScreenLayout";
+import { RouteDraftList } from "../components/RouteDraftList";
 import { Button } from "~/frontend/components/ui/button";
-import { RouteEditorMap } from "./RouteEditorMap";
+import { RouteEditorMap } from "../components/RouteEditorMap";
 
-type RouteCreateMapScreenProps = { defaultCenter: google.maps.LatLngLiteral };
+type RouteCreateMapProps = { defaultCenter: google.maps.LatLngLiteral };
 
-function RouteCreateMapScreenContent({
-  defaultCenter,
-}: RouteCreateMapScreenProps) {
+function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
   const { draft, isCreating, save } = useRouteCreateMap();
   const { points, togglePoint, confirmDiscard } = draft;
   const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
@@ -119,10 +117,10 @@ function RouteCreateMapScreenContent({
  * 地図で地点を選ぶルート作成画面を、専用のGoogleMapProviderで包んで表示する。
  * 未保存の変更がある移動には破棄確認を行い、保存中の移動を抑止する。
  */
-export function RouteCreateMapScreen(props: RouteCreateMapScreenProps) {
+export function RouteCreateMap(props: RouteCreateMapProps) {
   return (
     <GoogleMapProvider>
-      <RouteCreateMapScreenContent {...props} />
+      <RouteCreateMapContent {...props} />
     </GoogleMapProvider>
   );
 }
