@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import { useMoveStreetView } from "~/frontend/features/googlemap/hooks/useMoveStreetView";
 import { RouteNavigation } from "~/frontend/features/route-points/components/RouteNavigation";
 import RouteMapView from "./RouteMapView";
-import { RoutePointCount } from "./RoutePointCount";
+import { ROUTE_POINTS_MAX } from "~/shared/schemas";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import type { RouteMapMarker } from "../types";
 
@@ -63,7 +63,20 @@ export function RouteMap({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex flex-col items-start gap-3">
             {topLeft && <div className="pointer-events-auto">{topLeft}</div>}
-            {editing && <RoutePointCount count={editing.points.length} />}
+            {editing && (
+              <div
+                role="status"
+                aria-label="ルートの地点数"
+                className="rounded-md bg-background/95 px-3 py-2 text-sm text-foreground shadow"
+              >
+                <p>
+                  地点 {editing.points.length} / {ROUTE_POINTS_MAX}
+                </p>
+                {editing.points.length >= ROUTE_POINTS_MAX && (
+                  <p>1ルート{ROUTE_POINTS_MAX}地点までです</p>
+                )}
+              </div>
+            )}
           </div>
           {topRight && (
             <div className="pointer-events-auto ml-auto flex flex-wrap justify-end gap-2">
