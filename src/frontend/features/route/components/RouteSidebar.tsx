@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useRef,
-  type KeyboardEvent,
-  type ReactNode,
-  type RefObject,
-} from "react";
+import { useId, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { Content as DialogPrimitiveContent } from "@radix-ui/react-dialog";
 import { useIsMobile } from "~/frontend/hooks/shared/useIsMobile";
@@ -24,24 +19,22 @@ import {
 } from "~/frontend/components/ui/dialog";
 
 type RouteSidebarProps = {
-  id: string;
   title: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  triggerRef: RefObject<HTMLButtonElement | null>;
   children: ReactNode;
 };
 
 /** 地図画面の情報をPCでは右側、モバイルでは下端に表示し、開閉時のフォーカスを管理する。 */
 export function RouteSidebar({
-  id,
   title,
   open,
   onOpenChange,
-  triggerRef,
   children,
 }: RouteSidebarProps) {
   const isMobile = useIsMobile();
+  const id = useId();
+  const triggerRef = useRef<HTMLElement | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const PanelTitle = isMobile ? DrawerTitle : DialogTitle;
   const PanelClose = isMobile ? DrawerClose : DialogClose;
@@ -74,6 +67,14 @@ export function RouteSidebar({
   };
   const focusOnOpen = (event: Event) => {
     event.preventDefault();
+    const activeElement = document.activeElement;
+    // 幅変更時はbodyにフォーカスが移るため、最初に開いた操作元を保持する。
+    if (
+      activeElement instanceof HTMLElement &&
+      activeElement !== document.body
+    ) {
+      triggerRef.current = activeElement;
+    }
     closeRef.current?.focus();
   };
   const focusOnClose = (event: Event) => {

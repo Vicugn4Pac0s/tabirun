@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useState } from "react";
 import {
   act,
   fireEvent,
@@ -11,7 +11,6 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteScreenLayout } from "./RouteScreenLayout";
 import RouteMenuButton from "./RouteMenuButton";
-import { RouteSidebar } from "./RouteSidebar";
 
 vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
   AuthUserMenu: () => <button type="button">ユーザーメニュー</button>,
@@ -20,31 +19,21 @@ vi.mock("~/frontend/features/auth/components/AuthUserMenu", () => ({
 function Fixture() {
   const [value, setValue] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const panelId = useId();
   return (
     <RouteScreenLayout
+      sidebarOpen={sidebarOpen}
+      onSidebarOpenChange={setSidebarOpen}
       sidebar={
-        <RouteSidebar
-          id={panelId}
-          title="ルート情報"
-          open={sidebarOpen}
-          onOpenChange={setSidebarOpen}
-          triggerRef={triggerRef}
-        >
-          <input
-            aria-label="入力値"
-            value={value}
-            onChange={(event) => setValue(event.target.value)}
-          />
-        </RouteSidebar>
+        <input
+          aria-label="入力値"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+        />
       }
     >
       <RouteMenuButton
-        ref={triggerRef}
         label="5.2 km"
         aria-label={`ルート情報を${sidebarOpen ? "閉じる" : "開く"}`}
-        aria-controls={panelId}
         aria-expanded={sidebarOpen}
         onClick={() => setSidebarOpen((value) => !value)}
       />
@@ -87,10 +76,6 @@ describe("RouteScreenLayout", () => {
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
     await user.click(trigger);
     const panel = screen.getByRole("complementary", { name: "ルート情報" });
-    expect(trigger).toHaveAttribute(
-      "aria-controls",
-      screen.getByRole("dialog").id,
-    );
     expect(trigger).toHaveAttribute("aria-expanded", "true");
     expect(
       within(panel).getByRole("button", { name: "ルート情報を閉じる" }),
@@ -168,5 +153,9 @@ describe("RouteScreenLayout", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("textbox")).toHaveValue("画面幅を変更");
     expect(screen.getByText("地図とStreet View")).toBe(map);
+    await user.keyboard("{Escape}");
+    expect(
+      screen.getByRole("button", { name: "ルート情報を開く" }),
+    ).toHaveFocus();
   });
 });

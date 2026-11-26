@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useState } from "react";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
@@ -14,7 +14,6 @@ import { Button } from "~/frontend/components/ui/button";
 import { RouteMap } from "../components/RouteMap";
 
 import RouteMenuButton from "../components/RouteMenuButton";
-import { RouteSidebar } from "../components/RouteSidebar";
 
 type RouteCreateMapProps = { defaultCenter: google.maps.LatLngLiteral };
 
@@ -28,27 +27,19 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
   const warningMessage = getRouteCalculationWarningMessage(error, "editable");
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarTriggerRef = useRef<HTMLButtonElement>(null);
-  const sidebarId = useId();
   return (
     <RouteScreenLayout
+      sidebarOpen={sidebarOpen}
+      onSidebarOpenChange={setSidebarOpen}
       confirmNavigation={() => !isCreating && confirmDiscard()}
       sidebar={
-        <RouteSidebar
-          id={sidebarId}
-          title="ルート情報"
-          open={sidebarOpen}
-          onOpenChange={setSidebarOpen}
-          triggerRef={sidebarTriggerRef}
-        >
-          <RunMetricsPanel
-            distanceMeters={directions?.distanceMeters}
-            isLoading={isLoading}
-            pace={pace}
-            onPaceChange={setPace}
-            weightKg={weightKg}
-          />
-        </RouteSidebar>
+        <RunMetricsPanel
+          distanceMeters={directions?.distanceMeters}
+          isLoading={isLoading}
+          pace={pace}
+          onPaceChange={setPace}
+          weightKg={weightKg}
+        />
       }
     >
       <h1 className="sr-only">ルートを作成</h1>
@@ -64,10 +55,8 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
         isLoading={isLoading}
         topLeft={
           <RouteMenuButton
-            ref={sidebarTriggerRef}
             label={getRouteMenuLabel(directions?.distanceMeters, isLoading)}
             aria-label={`ルート情報を${sidebarOpen ? "閉じる" : "開く"}`}
-            aria-controls={sidebarId}
             aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen((value) => !value)}
           />

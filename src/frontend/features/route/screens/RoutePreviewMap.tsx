@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useState } from "react";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import type { RouterOutputs } from "~/trpc/react";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
@@ -13,7 +13,6 @@ import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { RouteScreenLayout } from "../components/RouteScreenLayout";
 
 import RouteMenuButton from "../components/RouteMenuButton";
-import { RouteSidebar } from "../components/RouteSidebar";
 
 type RoutePreviewMapProps = {
   route: Pick<
@@ -37,26 +36,18 @@ function RoutePreviewMapContent({ route }: RoutePreviewMapProps) {
   const goal = route.points[route.points.length - 1];
   const markers = getRoutePreviewMarkers(start, goal);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarTriggerRef = useRef<HTMLButtonElement>(null);
-  const sidebarId = useId();
   return (
     <RouteScreenLayout
+      sidebarOpen={sidebarOpen}
+      onSidebarOpenChange={setSidebarOpen}
       sidebar={
-        <RouteSidebar
-          id={sidebarId}
-          title="ルート情報"
-          open={sidebarOpen}
-          onOpenChange={setSidebarOpen}
-          triggerRef={sidebarTriggerRef}
-        >
-          <RunMetricsPanel
-            distanceMeters={direction?.distanceMeters}
-            isLoading={false}
-            pace={pace}
-            onPaceChange={setPace}
-            weightKg={weightKg}
-          />
-        </RouteSidebar>
+        <RunMetricsPanel
+          distanceMeters={direction?.distanceMeters}
+          isLoading={false}
+          pace={pace}
+          onPaceChange={setPace}
+          weightKg={weightKg}
+        />
       }
     >
       <h1 className="sr-only">{route.title}</h1>
@@ -67,10 +58,8 @@ function RoutePreviewMapContent({ route }: RoutePreviewMapProps) {
         fitToRoute
         topLeft={
           <RouteMenuButton
-            ref={sidebarTriggerRef}
             label={getRouteMenuLabel(direction?.distanceMeters, false)}
             aria-label={`ルート情報を${sidebarOpen ? "閉じる" : "開く"}`}
-            aria-controls={sidebarId}
             aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen((value) => !value)}
           />
