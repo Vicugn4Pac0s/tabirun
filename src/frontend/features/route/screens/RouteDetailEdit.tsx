@@ -5,6 +5,7 @@ import { GuardedLink } from "~/frontend/providers/GuardedLink";
 import { NavigationGuardProvider } from "~/frontend/providers/NavigationGuardProvider";
 import { WarningBanner } from "~/frontend/components/app-ui/WarningBanner";
 import { FormField } from "~/frontend/components/app-ui/FormField";
+import { PrimaryButton } from "~/frontend/components/app-ui/PrimaryButton";
 import { Button } from "~/frontend/components/ui/button";
 import { Input } from "~/frontend/components/ui/input";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
@@ -37,7 +38,7 @@ export function RouteDetailEdit({ route }: RouteDetailEditProps) {
   );
   return (
     <NavigationGuardProvider confirmNavigation={confirmNavigation}>
-      <section className="mx-auto max-w-xl space-y-6 px-4 py-8 md:px-6">
+      <section className="space-y-6">
         <GuardedLink
           href={route.status === "draft" ? "/" : `/routes/${route.id}`}
           className="inline-block font-medium underline"
@@ -66,20 +67,26 @@ export function RouteDetailEdit({ route }: RouteDetailEditProps) {
                 {...fieldProps}
                 {...form.register("title")}
                 disabled={isSaving}
+                className="h-12 rounded-lg bg-card px-4 py-3 shadow-none aria-[invalid=true]:border-destructive"
               />
             )}
           </FormField>
           <div className="flex flex-wrap gap-3">
-            <Button type="submit" disabled={isSaving || !canSave}>
+            <PrimaryButton
+              type="submit"
+              className="text-sm font-medium"
+              disabled={isSaving || !canSave}
+            >
               {isSaving
                 ? "保存中..."
                 : route.status === "draft"
                   ? "完了"
                   : "保存"}
-            </Button>
+            </PrimaryButton>
             <Button
               type="button"
               variant="outline"
+              className="h-12 rounded-lg shadow-none"
               disabled={isSaving}
               onClick={() => {
                 void editMap();
