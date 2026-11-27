@@ -268,10 +268,11 @@ describe("RouteCreateMap", () => {
   it("下書き一覧は操作メニューから開いた時に取得し、閉じると操作ボタンに戻る", async () => {
     const user = userEvent.setup();
     render(<RouteCreateMap defaultCenter={defaultCenter} />);
-    expect(draftsQuery).not.toHaveBeenCalled();
+    expect(draftsQuery).toHaveBeenLastCalledWith({ enabled: false });
     await user.click(screen.getByRole("button", { name: "ルート操作を開く" }));
     await user.click(screen.getByRole("menuitem", { name: "下書きから再開" }));
     const dialog = screen.getByRole("dialog", { name: "下書きから再開" });
+    expect(draftsQuery).toHaveBeenLastCalledWith({ enabled: true });
     expect(
       within(dialog).getByRole("link", { name: "途中のルート" }),
     ).toHaveAttribute("href", "/routes/12/details");

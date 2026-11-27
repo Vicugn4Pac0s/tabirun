@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "~/frontend/components/ui/dialog";
-import { RouteDraftList } from "../components/RouteDraftList";
+import { RouteDraftDialog } from "../components/RouteDraftDialog";
 import { ActionsDropdownMenu } from "~/frontend/components/app-ui/ActionsDropdownMenu";
 import { GuardedLink } from "~/frontend/providers/GuardedLink";
 import { DropdownMenuItem } from "~/frontend/components/ui/dropdown-menu";
@@ -55,25 +49,14 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
       }
     >
       <h1 className="sr-only">ルートを作成</h1>
-      <Dialog open={draftsOpen} onOpenChange={setDraftsOpen}>
-        <DialogContent
-          aria-describedby={undefined}
-          className="max-h-[80dvh] w-11/12 overflow-y-auto"
-          onKeyDown={(event) => {
-            // ダイアログ内のEnter操作を地図の地点操作へ流さない。
-            if (event.key === "Enter") event.stopPropagation();
-          }}
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            actionsTriggerRef.current?.focus();
-          }}
-        >
-          <DialogHeader>
-            <DialogTitle>下書きから再開</DialogTitle>
-          </DialogHeader>
-          {draftsOpen && <RouteDraftList />}
-        </DialogContent>
-      </Dialog>
+      <RouteDraftDialog
+        open={draftsOpen}
+        onOpenChange={setDraftsOpen}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          actionsTriggerRef.current?.focus();
+        }}
+      />
       <RouteMap
         initialCenter={defaultCenter}
         path={polylinePath}
@@ -109,8 +92,8 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
             <ActionsDropdownMenu
               aria-label="ルート操作を開く"
               disabled={draft.isSubmitting || isCreating}
-              ref={actionsTriggerRef}
               modal={false}
+              ref={actionsTriggerRef}
               onCloseAutoFocus={(event) => {
                 if (draftsOpen) event.preventDefault();
               }}
