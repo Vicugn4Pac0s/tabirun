@@ -51,3 +51,20 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const ScrollableContent: Story = {
+  args: {
+    children: (
+      <div className="space-y-6">
+        {Array.from({ length: 12 }, (_, index) => (
+          <section key={index} className="space-y-2">
+            <h2 className="font-bold">表示項目 {index + 1}</h2>
+            <p className="text-sm text-muted-foreground">
+              内容が長い場合は本文だけがスクロールし、閉じるボタンは上部に残ります。
+            </p>
+          </section>
+        ))}
+      </div>
+    ),
+  },
+};

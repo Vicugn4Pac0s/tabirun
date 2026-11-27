@@ -4,7 +4,6 @@ import { useId, useRef, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { Content as DialogPrimitiveContent } from "@radix-ui/react-dialog";
 import { useIsMobile } from "~/frontend/hooks/shared/useIsMobile";
-import { Button } from "~/frontend/components/ui/button";
 import {
   Drawer,
   DrawerClose,
@@ -41,18 +40,17 @@ export function ResponsivePanel({
 
   const panelContent = (
     <aside aria-label={title} className="flex min-h-0 flex-1 flex-col">
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b px-6 py-4">
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b bg-background px-6 py-3 text-foreground">
         <PanelTitle className="text-xl font-bold">{title}</PanelTitle>
         <PanelClose asChild>
-          <Button
+          <button
             ref={closeRef}
             type="button"
-            variant="ghost"
-            size="icon"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
             aria-label={`${title}を閉じる`}
           >
             <X className="h-5 w-5" aria-hidden="true" />
-          </Button>
+          </button>
         </PanelClose>
       </header>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
