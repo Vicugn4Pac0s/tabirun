@@ -46,7 +46,7 @@ export function ResponsivePanel({
           <button
             ref={closeRef}
             type="button"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-transparent text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
             aria-label={`${title}を閉じる`}
           >
             <X className="h-5 w-5" aria-hidden="true" />
