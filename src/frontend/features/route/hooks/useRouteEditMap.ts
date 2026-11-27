@@ -14,10 +14,10 @@ export function useRouteEditMap(
 ) {
   const router = useRouter();
   const { updatePoints, isUpdating } = useUpdateRoutePoints();
-  const draft = useRoutePointsForm(route);
+  const pointsForm = useRoutePointsForm(route);
   const submitting = useRef(false);
-  const submit = draft.form.handleSubmit(async (values) => {
-    if (!draft.isDirty) return;
+  const submit = pointsForm.form.handleSubmit(async (values) => {
+    if (!pointsForm.isDirty) return;
     try {
       await updatePoints({
         id: route.id,
@@ -30,7 +30,7 @@ export function useRouteEditMap(
       return;
     }
     toast.success("ルートを更新しました。");
-    draft.form.reset(values);
+    pointsForm.form.reset(values);
     router.push(
       `/routes/${route.id}${route.status === "draft" ? "/details" : ""}`,
     );
@@ -47,5 +47,5 @@ export function useRouteEditMap(
     });
   };
 
-  return { draft, isUpdating, save };
+  return { pointsForm, isUpdating, save };
 }

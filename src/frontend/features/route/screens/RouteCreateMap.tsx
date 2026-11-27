@@ -22,8 +22,8 @@ import RouteMenuButton from "../components/RouteMenuButton";
 type RouteCreateMapProps = { defaultCenter: google.maps.LatLngLiteral };
 
 function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
-  const { draft, isCreating, save } = useRouteCreateMap();
-  const { points, togglePoint, confirmDiscard } = draft;
+  const { pointsForm, isCreating, save } = useRouteCreateMap();
+  const { points, togglePoint, confirmDiscard } = pointsForm;
   const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
     points,
     { canUseDirections: true },
@@ -82,16 +82,18 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
               onClick={() => {
                 void save();
               }}
-              disabled={!draft.canSave || draft.isSubmitting || isCreating}
+              disabled={
+                !pointsForm.canSave || pointsForm.isSubmitting || isCreating
+              }
             >
-              {draft.isSubmitting || isCreating
+              {pointsForm.isSubmitting || isCreating
                 ? "保存中..."
                 : "詳細入力へ進む"}
             </Button>
             {/* 下書きダイアログへフォーカスを渡せるよう、メニュー内に閉じ込めない。 */}
             <ActionsDropdownMenu
               aria-label="ルート操作を開く"
-              disabled={draft.isSubmitting || isCreating}
+              disabled={pointsForm.isSubmitting || isCreating}
               modal={false}
               ref={actionsTriggerRef}
               onCloseAutoFocus={(event) => {
@@ -105,8 +107,10 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
                 <GuardedLink href={"/"}>ホームへ戻る</GuardedLink>
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={!draft.isDirty || draft.isSubmitting || isCreating}
-                onSelect={draft.reset}
+                disabled={
+                  !pointsForm.isDirty || pointsForm.isSubmitting || isCreating
+                }
+                onSelect={pointsForm.reset}
               >
                 リセット
               </DropdownMenuItem>
@@ -116,7 +120,7 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
         warning={warningMessage}
         editing={{
           points,
-          disabled: draft.isSubmitting || isCreating,
+          disabled: pointsForm.isSubmitting || isCreating,
           onTogglePoint: togglePoint,
         }}
       />

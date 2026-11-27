@@ -12,10 +12,10 @@ import { useRoutePointsForm } from "./useRoutePointsForm";
 export function useRouteCreateMap() {
   const router = useRouter();
   const { createDraft, isCreating } = useCreateRouteDraft();
-  const draft = useRoutePointsForm({ points: [] });
+  const pointsForm = useRoutePointsForm({ points: [] });
   const submitting = useRef(false);
-  const submit = draft.form.handleSubmit(async (values) => {
-    if (!draft.isDirty) return;
+  const submit = pointsForm.form.handleSubmit(async (values) => {
+    if (!pointsForm.isDirty) return;
     let id: number;
     try {
       const created = await createDraft(values);
@@ -26,7 +26,7 @@ export function useRouteCreateMap() {
       );
       return;
     }
-    draft.form.reset(values);
+    pointsForm.form.reset(values);
     toast.success("ルートを保存しました。");
     router.replace(`/routes/${id}/details`);
     router.refresh();
@@ -41,5 +41,5 @@ export function useRouteCreateMap() {
       submitting.current = false;
     });
   };
-  return { draft, isCreating, save };
+  return { pointsForm, isCreating, save };
 }

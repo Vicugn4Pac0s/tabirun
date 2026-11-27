@@ -34,7 +34,7 @@ describe("useRouteEditMap", () => {
       const { result } = renderHook(() =>
         useRouteEditMap({ ...route, status }),
       );
-      act(() => result.current.draft.togglePoint(extra));
+      act(() => result.current.pointsForm.togglePoint(extra));
       await act(() => result.current.save());
       expect(updatePoints).toHaveBeenCalledExactlyOnceWith({
         id: 1,
@@ -44,23 +44,23 @@ describe("useRouteEditMap", () => {
         status === "draft" ? "/routes/1/details" : "/routes/1",
       );
       expect(refresh).toHaveBeenCalledOnce();
-      expect(result.current.draft.isDirty).toBe(false);
+      expect(result.current.pointsForm.isDirty).toBe(false);
     },
   );
   it("未変更や2地点未満では送信しない", async () => {
     const { result } = renderHook(() => useRouteEditMap(route));
     await act(() => result.current.save());
-    act(() => result.current.draft.togglePoint(route.points[0] ?? extra));
+    act(() => result.current.pointsForm.togglePoint(route.points[0] ?? extra));
     await act(() => result.current.save());
     expect(updatePoints).not.toHaveBeenCalled();
   });
   it("保存失敗時は地点を保持して再試行する", async () => {
     updatePoints.mockRejectedValueOnce(new Error("failed"));
     const { result } = renderHook(() => useRouteEditMap(route));
-    act(() => result.current.draft.togglePoint(extra));
+    act(() => result.current.pointsForm.togglePoint(extra));
     await act(() => result.current.save());
-    expect(result.current.draft.points).toEqual([...route.points, extra]);
-    expect(result.current.draft.isDirty).toBe(true);
+    expect(result.current.pointsForm.points).toEqual([...route.points, extra]);
+    expect(result.current.pointsForm.isDirty).toBe(true);
     expect(push).not.toHaveBeenCalled();
     await act(() => result.current.save());
     expect(push).toHaveBeenCalledWith("/routes/1");
@@ -75,14 +75,14 @@ describe("useRouteEditMap", () => {
         }),
     );
     const { result } = renderHook(() => useRouteEditMap(route));
-    act(() => result.current.draft.togglePoint(extra));
+    act(() => result.current.pointsForm.togglePoint(extra));
     let pending: Promise<void> | undefined;
     act(() => {
       pending = result.current.save();
       void result.current.save();
     });
     await waitFor(() => expect(updatePoints).toHaveBeenCalledOnce());
-    act(() => result.current.draft.reset());
+    act(() => result.current.pointsForm.reset());
     expect(confirm).not.toHaveBeenCalled();
     await act(async () => {
       finish?.();
@@ -96,18 +96,18 @@ describe("useRouteEditMap", () => {
       ({ initial }) => useRouteEditMap(initial),
       { initialProps: { initial: route } },
     );
-    act(() => result.current.draft.togglePoint(extra));
+    act(() => result.current.pointsForm.togglePoint(extra));
     rerender({ initial: { ...route, points: [] } });
-    expect(result.current.draft.points).toEqual([...route.points, extra]);
-    expect(result.current.draft.confirmDiscard()).toBe(false);
+    expect(result.current.pointsForm.points).toEqual([...route.points, extra]);
+    expect(result.current.pointsForm.confirmDiscard()).toBe(false);
     const event = new Event("beforeunload", { cancelable: true });
     window.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
-    act(() => result.current.draft.reset());
-    expect(result.current.draft.points).toHaveLength(3);
+    act(() => result.current.pointsForm.reset());
+    expect(result.current.pointsForm.points).toHaveLength(3);
     confirm.mockReturnValue(true);
-    act(() => result.current.draft.reset());
-    expect(result.current.draft.points).toEqual(route.points);
-    expect(result.current.draft.isDirty).toBe(false);
+    act(() => result.current.pointsForm.reset());
+    expect(result.current.pointsForm.points).toEqual(route.points);
+    expect(result.current.pointsForm.isDirty).toBe(false);
   });
 });

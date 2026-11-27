@@ -27,8 +27,8 @@ type RouteEditMapProps = {
 };
 
 function RouteEditMapContent({ route }: RouteEditMapProps) {
-  const { draft, isUpdating, save } = useRouteEditMap(route);
-  const { points, togglePoint, confirmDiscard } = draft;
+  const { pointsForm, isUpdating, save } = useRouteEditMap(route);
+  const { points, togglePoint, confirmDiscard } = pointsForm;
   const { polylinePath, directions, isLoading, warningMessage } =
     useRouteEditDirection(route, points);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
@@ -75,13 +75,15 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
               onClick={() => {
                 void save();
               }}
-              disabled={!draft.canSave || draft.isSubmitting || isUpdating}
+              disabled={
+                !pointsForm.canSave || pointsForm.isSubmitting || isUpdating
+              }
             >
-              {draft.isSubmitting || isUpdating ? "更新中..." : "更新する"}
+              {pointsForm.isSubmitting || isUpdating ? "更新中..." : "更新する"}
             </Button>
             <ActionsDropdownMenu
               aria-label="ルート操作を開く"
-              disabled={draft.isSubmitting || isUpdating}
+              disabled={pointsForm.isSubmitting || isUpdating}
             >
               <DropdownMenuItem asChild>
                 <GuardedLink
@@ -91,8 +93,10 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
                 </GuardedLink>
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={!draft.isDirty || draft.isSubmitting || isUpdating}
-                onSelect={draft.reset}
+                disabled={
+                  !pointsForm.isDirty || pointsForm.isSubmitting || isUpdating
+                }
+                onSelect={pointsForm.reset}
               >
                 リセット
               </DropdownMenuItem>
@@ -102,7 +106,7 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
         warning={warningMessage}
         editing={{
           points,
-          disabled: draft.isSubmitting || isUpdating,
+          disabled: pointsForm.isSubmitting || isUpdating,
           onTogglePoint: togglePoint,
         }}
       />

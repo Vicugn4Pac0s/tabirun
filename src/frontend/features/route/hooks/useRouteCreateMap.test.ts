@@ -31,15 +31,15 @@ afterEach(() => {
 describe("useRouteCreateMap", () => {
   it("0地点から始め、2地点で下書きを保存して詳細入力に進む", async () => {
     const { result } = renderHook(() => useRouteCreateMap());
-    expect(result.current.draft.points).toEqual([]);
+    expect(result.current.pointsForm.points).toEqual([]);
     await act(() => result.current.save());
     expect(createDraft).not.toHaveBeenCalled();
     act(() => {
-      result.current.draft.togglePoint(first);
+      result.current.pointsForm.togglePoint(first);
     });
-    expect(result.current.draft.canSave).toBe(false);
-    act(() => result.current.draft.togglePoint(second));
-    await waitFor(() => expect(result.current.draft.canSave).toBe(true));
+    expect(result.current.pointsForm.canSave).toBe(false);
+    act(() => result.current.pointsForm.togglePoint(second));
+    await waitFor(() => expect(result.current.pointsForm.canSave).toBe(true));
     await act(() => result.current.save());
     expect(createDraft).toHaveBeenCalledWith({
       points: [first, second],
@@ -51,14 +51,14 @@ describe("useRouteCreateMap", () => {
     createDraft.mockRejectedValueOnce(new Error("failed"));
     const { result } = renderHook(() => useRouteCreateMap());
     act(() => {
-      result.current.draft.togglePoint(first);
-      result.current.draft.togglePoint(second);
+      result.current.pointsForm.togglePoint(first);
+      result.current.pointsForm.togglePoint(second);
     });
-    await waitFor(() => expect(result.current.draft.canSave).toBe(true));
+    await waitFor(() => expect(result.current.pointsForm.canSave).toBe(true));
     await act(() => result.current.save());
     expect(errorToast).toHaveBeenCalled();
     expect(replace).not.toHaveBeenCalled();
-    expect(result.current.draft.points).toEqual([first, second]);
+    expect(result.current.pointsForm.points).toEqual([first, second]);
     await act(() => result.current.save());
     expect(replace).toHaveBeenCalledWith("/routes/42/details");
   });
@@ -73,24 +73,26 @@ describe("useRouteCreateMap", () => {
     );
     const { result, rerender } = renderHook(() => useRouteCreateMap());
     act(() => {
-      result.current.draft.togglePoint(first);
-      result.current.draft.togglePoint(second);
+      result.current.pointsForm.togglePoint(first);
+      result.current.pointsForm.togglePoint(second);
     });
-    await waitFor(() => expect(result.current.draft.canSave).toBe(true));
+    await waitFor(() => expect(result.current.pointsForm.canSave).toBe(true));
     let pending: Promise<void> | undefined;
     act(() => {
       pending = result.current.save();
       void result.current.save();
     });
     await waitFor(() => expect(createDraft).toHaveBeenCalledOnce());
-    await waitFor(() => expect(result.current.draft.isSubmitting).toBe(true));
-    act(() => result.current.draft.reset());
+    await waitFor(() =>
+      expect(result.current.pointsForm.isSubmitting).toBe(true),
+    );
+    act(() => result.current.pointsForm.reset());
     expect(confirm).not.toHaveBeenCalled();
     await act(async () => {
       finish?.();
       await pending;
     });
-    expect(result.current.draft.isSubmitting).toBe(false);
+    expect(result.current.pointsForm.isSubmitting).toBe(false);
     status.isCreating = true;
     rerender();
     await act(() => result.current.save());
@@ -100,13 +102,13 @@ describe("useRouteCreateMap", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const { result } = renderHook(() => useRouteCreateMap());
     act(() => {
-      result.current.draft.togglePoint(first);
+      result.current.pointsForm.togglePoint(first);
     });
-    expect(result.current.draft.confirmDiscard()).toBe(false);
-    act(() => result.current.draft.reset());
+    expect(result.current.pointsForm.confirmDiscard()).toBe(false);
+    act(() => result.current.pointsForm.reset());
     confirm.mockReturnValue(true);
-    act(() => result.current.draft.reset());
-    expect(result.current.draft.points).toEqual([]);
-    expect(result.current.draft.isDirty).toBe(false);
+    act(() => result.current.pointsForm.reset());
+    expect(result.current.pointsForm.points).toEqual([]);
+    expect(result.current.pointsForm.isDirty).toBe(false);
   });
 });
