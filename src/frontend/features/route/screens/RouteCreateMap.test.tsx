@@ -1,3 +1,5 @@
+import type Link from "next/link";
+import type { ComponentPropsWithoutRef } from "react";
 import userEvent from "@testing-library/user-event";
 import {
   fireEvent,
@@ -9,15 +11,51 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteCreateMap } from "./RouteCreateMap";
 
-const { directionsQuery, createDraft, push, replace, refresh } = vi.hoisted(
-  () => ({
+const { directionsQuery, createDraft, push, replace, refresh, draftsQuery } =
+  vi.hoisted(() => ({
     directionsQuery: vi.fn(),
+    draftsQuery: vi.fn(),
     createDraft: vi.fn(),
     push: vi.fn(),
     replace: vi.fn(),
     refresh: vi.fn(),
-  }),
-);
+  }));
+vi.mock("next/link", async () => {
+  const { forwardRef } = await import("react");
+  type LinkProps = ComponentPropsWithoutRef<typeof Link>;
+  return {
+    default: forwardRef<HTMLAnchorElement, LinkProps>(function TestLink(
+      { href, onClick, onNavigate, children, ...props },
+      ref,
+    ) {
+      return (
+        <a
+          {...props}
+          ref={ref}
+          href={typeof href === "string" ? href : (href.pathname ?? undefined)}
+          onClick={(event) => {
+            onClick?.(event);
+            if (!event.defaultPrevented) {
+              let prevented = false;
+              onNavigate?.({
+                preventDefault: () => {
+                  prevented = true;
+                },
+              });
+              if (!prevented) push(href);
+            }
+            event.preventDefault();
+          }}
+        >
+          {children}
+        </a>
+      );
+    }),
+  };
+});
+vi.mock("../api/useRouteDraftsQuery", () => ({
+  useRouteDraftsQuery: draftsQuery,
+}));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace, refresh }),
 }));
@@ -119,6 +157,11 @@ vi.mock("~/frontend/features/googlemap/components/Polyline", () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   createDraft.mockResolvedValue({ id: 42 });
+  draftsQuery.mockReturnValue({
+    drafts: [{ id: 12, title: "途中のルート" }],
+    isLoading: false,
+    error: null,
+  });
   vi.stubGlobal(
     "matchMedia",
     vi.fn(() => ({ matches: false })),
@@ -220,6 +263,50 @@ describe("RouteCreateMap", () => {
     expect(
       screen.getByRole("status", { name: "ルートの地点数" }),
     ).toHaveTextContent("地点 0 / 27");
+  });
+
+  it("下書き一覧は操作メニューから開いた時に取得し、閉じると操作ボタンに戻る", async () => {
+    const user = userEvent.setup();
+    render(<RouteCreateMap defaultCenter={defaultCenter} />);
+    expect(draftsQuery).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "ルート操作を開く" }));
+    await user.click(screen.getByRole("menuitem", { name: "下書きから再開" }));
+    const dialog = screen.getByRole("dialog", { name: "下書きから再開" });
+    expect(
+      within(dialog).getByRole("link", { name: "途中のルート" }),
+    ).toHaveAttribute("href", "/routes/12/details");
+    expect(dialog).toContainElement(
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null,
+    );
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "ルート操作を開く" }),
+    ).toHaveFocus();
+  });
+
+  it("下書きを開くだけでは破棄せず、選択時に確認し、Enterで地点を追加しない", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    const user = userEvent.setup();
+    render(<RouteCreateMap defaultCenter={defaultCenter} />);
+    await user.click(screen.getByRole("button", { name: "地点を追加" }));
+    await user.click(screen.getByRole("button", { name: "ルート操作を開く" }));
+    await user.click(screen.getByRole("menuitem", { name: "下書きから再開" }));
+    expect(confirm).not.toHaveBeenCalled();
+    const link = screen.getByRole("link", { name: "途中のルート" });
+    link.focus();
+    await user.keyboard("{Enter}");
+    expect(confirm).toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+    confirm.mockReturnValue(true);
+    await user.click(link);
+    expect(push).toHaveBeenCalledWith("/routes/12/details");
+    await user.keyboard("{Escape}");
+    expect(
+      screen.getByRole("status", { name: "ルートの地点数" }),
+    ).toHaveTextContent("地点 1 / 27");
   });
 
   it("距離ボタンと閉じるボタンをEnterで操作しても地点を追加しない", async () => {

@@ -1,14 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { ActionsDropdownMenu } from "~/frontend/components/app-ui/ActionsDropdownMenu";
 import { GuardedLink } from "~/frontend/providers/GuardedLink";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "~/frontend/components/ui/dropdown-menu";
+import { DropdownMenuItem } from "~/frontend/components/ui/dropdown-menu";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
@@ -84,34 +79,24 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
             >
               {draft.isSubmitting || isUpdating ? "更新中..." : "更新する"}
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  aria-label="ルート操作を開く"
-                  disabled={draft.isSubmitting || isUpdating}
+            <ActionsDropdownMenu
+              aria-label="ルート操作を開く"
+              disabled={draft.isSubmitting || isUpdating}
+            >
+              <DropdownMenuItem asChild>
+                <GuardedLink
+                  href={`/routes/${route.id}${route.status === "draft" ? "/details" : ""}`}
                 >
-                  <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <GuardedLink
-                    href={`/routes/${route.id}${route.status === "draft" ? "/details" : ""}`}
-                  >
-                    ルート詳細に戻る
-                  </GuardedLink>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  disabled={!draft.isDirty || draft.isSubmitting || isUpdating}
-                  onSelect={draft.reset}
-                >
-                  リセット
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  ルート詳細に戻る
+                </GuardedLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={!draft.isDirty || draft.isSubmitting || isUpdating}
+                onSelect={draft.reset}
+              >
+                リセット
+              </DropdownMenuItem>
+            </ActionsDropdownMenu>
           </>
         }
         warning={warningMessage}
