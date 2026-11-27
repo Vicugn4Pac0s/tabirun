@@ -14,16 +14,6 @@ vi.mock("../hooks/useRouteDetailEditForm", () => ({
     confirmNavigation: () => true,
   }),
 }));
-vi.mock("~/frontend/features/run-metrics/hooks/useRunEstimateInputs", () => ({
-  useRunEstimateInputs: () => ({
-    pace: "5:00",
-    setPace: vi.fn(),
-    weightKg: 60,
-  }),
-}));
-vi.mock("~/frontend/features/run-metrics/components/RunMetricsPanel", () => ({
-  RunMetricsPanel: () => null,
-}));
 afterEach(cleanup);
 
 describe("RouteDetailEditの戻りリンク", () => {

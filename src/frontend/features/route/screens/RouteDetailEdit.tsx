@@ -8,8 +8,6 @@ import { FormField } from "~/frontend/components/app-ui/FormField";
 import { PrimaryButton } from "~/frontend/components/app-ui/PrimaryButton";
 import { Button } from "~/frontend/components/ui/button";
 import { Input } from "~/frontend/components/ui/input";
-import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
-import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { useRouteDetailEditForm } from "../hooks/useRouteDetailEditForm";
 
@@ -20,11 +18,10 @@ type RouteDetailEditProps = {
   >;
 };
 
-/** 保存済みの距離と名前入力を表示する。下書きは完了、完了済みは名前だけを保存する。 */
+/** ルート名の入力を表示する。下書きは完了、完了済みは名前だけを保存する。 */
 export function RouteDetailEdit({ route }: RouteDetailEditProps) {
   const { form, save, editMap, isSaving, canSave, confirmNavigation } =
     useRouteDetailEditForm(route);
-  const { pace, setPace, weightKg } = useRunEstimateInputs();
   const { errors, touchedFields, isSubmitted } = form.formState;
   const titleError =
     touchedFields.title || isSubmitted ? errors.title?.message : undefined;
@@ -48,13 +45,6 @@ export function RouteDetailEdit({ route }: RouteDetailEditProps) {
         </GuardedLink>
         <h1 className="text-2xl font-semibold">ルートの詳細を入力</h1>
         {warning && <WarningBanner>{warning}</WarningBanner>}
-        <RunMetricsPanel
-          distanceMeters={route.direction?.distanceMeters}
-          isLoading={false}
-          pace={pace}
-          onPaceChange={setPace}
-          weightKg={weightKg}
-        />
         <form
           onSubmit={(event) => {
             void save(event);
