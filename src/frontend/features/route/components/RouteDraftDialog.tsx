@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "~/frontend/components/ui/dialog";
 import { GuardedLink } from "~/frontend/providers/GuardedLink";
-import { useRouteDraftsQuery } from "../api/useRouteDraftsQuery";
+import { useDraftRoutesQuery } from "../api/useDraftRoutesQuery";
 
 type RouteDraftDialogProps = {
   open: boolean;
@@ -22,7 +22,7 @@ export function RouteDraftDialog({
   onOpenChange,
   onCloseAutoFocus,
 }: RouteDraftDialogProps) {
-  const { drafts, isLoading, error } = useRouteDraftsQuery({ enabled: open });
+  const { drafts, isLoading, error } = useDraftRoutesQuery({ enabled: open });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent

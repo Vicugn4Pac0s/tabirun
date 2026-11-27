@@ -1,9 +1,9 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { useRouteDraftsQuery } from "../api/useRouteDraftsQuery";
+import type { useDraftRoutesQuery } from "../api/useDraftRoutesQuery";
 import { RouteDraftDialog } from "./RouteDraftDialog";
 const { query } = vi.hoisted(() => ({ query: vi.fn() }));
-vi.mock("../api/useRouteDraftsQuery", () => ({ useRouteDraftsQuery: query }));
+vi.mock("../api/useDraftRoutesQuery", () => ({ useDraftRoutesQuery: query }));
 beforeEach(() => {
   query.mockReturnValue({ drafts: [], isLoading: false, error: null });
 });
@@ -27,7 +27,7 @@ describe("RouteDraftDialog", () => {
         createdAt: new Date(),
         updatedAt: null,
       },
-    ] satisfies ReturnType<typeof useRouteDraftsQuery>["drafts"];
+    ] satisfies ReturnType<typeof useDraftRoutesQuery>["drafts"];
     query.mockReturnValue({ drafts, isLoading: false, error: null });
     render(<RouteDraftDialog open onOpenChange={vi.fn()} />);
     expect(screen.getByRole("link", { name: "作成途中" })).toHaveAttribute(

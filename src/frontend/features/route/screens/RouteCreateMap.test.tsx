@@ -53,8 +53,8 @@ vi.mock("next/link", async () => {
     }),
   };
 });
-vi.mock("../api/useRouteDraftsQuery", () => ({
-  useRouteDraftsQuery: draftsQuery,
+vi.mock("../api/useDraftRoutesQuery", () => ({
+  useDraftRoutesQuery: draftsQuery,
 }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace, refresh }),
