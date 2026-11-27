@@ -47,5 +47,6 @@ export function useRouteEditMapForm(
     });
   };
 
-  return { pointsForm, isUpdating, save };
+  const isSaving = pointsForm.isSubmitting || isUpdating;
+  return { pointsForm, isSaving, save };
 }

@@ -27,7 +27,7 @@ type RouteEditMapProps = {
 };
 
 function RouteEditMapContent({ route }: RouteEditMapProps) {
-  const { pointsForm, isUpdating, save } = useRouteEditMapForm(route);
+  const { pointsForm, isSaving, save } = useRouteEditMapForm(route);
   const { points, togglePoint, confirmDiscard } = pointsForm;
   const { polylinePath, directions, isLoading, warningMessage } =
     useRouteDirection(route, points);
@@ -37,7 +37,7 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
     <RouteMapLayout
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
-      confirmNavigation={() => !isUpdating && confirmDiscard()}
+      confirmNavigation={() => !isSaving && confirmDiscard()}
       panelContent={
         <RunMetricsPanel
           distanceMeters={directions?.distanceMeters}
@@ -75,15 +75,13 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
               onClick={() => {
                 void save();
               }}
-              disabled={
-                !pointsForm.canSave || pointsForm.isSubmitting || isUpdating
-              }
+              disabled={!pointsForm.canSave || isSaving}
             >
-              {pointsForm.isSubmitting || isUpdating ? "更新中..." : "更新する"}
+              {isSaving ? "更新中..." : "更新する"}
             </Button>
             <ActionsDropdownMenu
               aria-label="ルート操作を開く"
-              disabled={pointsForm.isSubmitting || isUpdating}
+              disabled={isSaving}
             >
               <DropdownMenuItem asChild>
                 <GuardedLink
@@ -93,9 +91,7 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
                 </GuardedLink>
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={
-                  !pointsForm.isDirty || pointsForm.isSubmitting || isUpdating
-                }
+                disabled={!pointsForm.isDirty || isSaving}
                 onSelect={pointsForm.reset}
               >
                 リセット
@@ -106,7 +102,7 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
         warning={warningMessage}
         editing={{
           points,
-          disabled: pointsForm.isSubmitting || isUpdating,
+          disabled: isSaving,
           onTogglePoint: togglePoint,
         }}
       />

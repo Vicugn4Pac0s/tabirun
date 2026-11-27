@@ -22,7 +22,7 @@ import RouteMenuButton from "../components/RouteMenuButton";
 type RouteCreateMapProps = { defaultCenter: google.maps.LatLngLiteral };
 
 function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
-  const { pointsForm, isCreating, save } = useRouteCreateMapForm();
+  const { pointsForm, isSaving, save } = useRouteCreateMapForm();
   const { points, togglePoint, confirmDiscard } = pointsForm;
   const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
     points,
@@ -37,7 +37,7 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
     <RouteMapLayout
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
-      confirmNavigation={() => !isCreating && confirmDiscard()}
+      confirmNavigation={() => !isSaving && confirmDiscard()}
       panelContent={
         <RunMetricsPanel
           distanceMeters={directions?.distanceMeters}
@@ -82,18 +82,14 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
               onClick={() => {
                 void save();
               }}
-              disabled={
-                !pointsForm.canSave || pointsForm.isSubmitting || isCreating
-              }
+              disabled={!pointsForm.canSave || isSaving}
             >
-              {pointsForm.isSubmitting || isCreating
-                ? "保存中..."
-                : "詳細入力へ進む"}
+              {isSaving ? "保存中..." : "詳細入力へ進む"}
             </Button>
             {/* 下書きダイアログへフォーカスを渡せるよう、メニュー内に閉じ込めない。 */}
             <ActionsDropdownMenu
               aria-label="ルート操作を開く"
-              disabled={pointsForm.isSubmitting || isCreating}
+              disabled={isSaving}
               modal={false}
               ref={actionsTriggerRef}
               onCloseAutoFocus={(event) => {
@@ -107,9 +103,7 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
                 <GuardedLink href={"/"}>ホームへ戻る</GuardedLink>
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={
-                  !pointsForm.isDirty || pointsForm.isSubmitting || isCreating
-                }
+                disabled={!pointsForm.isDirty || isSaving}
                 onSelect={pointsForm.reset}
               >
                 リセット
@@ -120,7 +114,7 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
         warning={warningMessage}
         editing={{
           points,
-          disabled: pointsForm.isSubmitting || isCreating,
+          disabled: isSaving,
           onTogglePoint: togglePoint,
         }}
       />

@@ -86,6 +86,7 @@ describe("useRouteCreateMapForm", () => {
     await waitFor(() =>
       expect(result.current.pointsForm.isSubmitting).toBe(true),
     );
+    expect(result.current.isSaving).toBe(true);
     act(() => result.current.pointsForm.reset());
     expect(confirm).not.toHaveBeenCalled();
     await act(async () => {
@@ -93,8 +94,10 @@ describe("useRouteCreateMapForm", () => {
       await pending;
     });
     expect(result.current.pointsForm.isSubmitting).toBe(false);
+    expect(result.current.isSaving).toBe(false);
     status.isCreating = true;
     rerender();
+    expect(result.current.isSaving).toBe(true);
     await act(() => result.current.save());
     expect(createDraft).toHaveBeenCalledOnce();
   });

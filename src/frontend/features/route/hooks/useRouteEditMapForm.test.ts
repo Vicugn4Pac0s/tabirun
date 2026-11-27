@@ -82,6 +82,7 @@ describe("useRouteEditMapForm", () => {
       void result.current.save();
     });
     await waitFor(() => expect(updatePoints).toHaveBeenCalledOnce());
+    expect(result.current.isSaving).toBe(true);
     act(() => result.current.pointsForm.reset());
     expect(confirm).not.toHaveBeenCalled();
     await act(async () => {
@@ -89,6 +90,7 @@ describe("useRouteEditMapForm", () => {
       await pending;
     });
     expect(push).toHaveBeenCalledOnce();
+    expect(result.current.isSaving).toBe(false);
   });
   it("再描画で地点を上書きせず、リセットと離脱確認を行う", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);

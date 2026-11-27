@@ -41,5 +41,6 @@ export function useRouteCreateMapForm() {
       submitting.current = false;
     });
   };
-  return { pointsForm, isCreating, save };
+  const isSaving = pointsForm.isSubmitting || isCreating;
+  return { pointsForm, isSaving, save };
 }
