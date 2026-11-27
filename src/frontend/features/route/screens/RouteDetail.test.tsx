@@ -8,8 +8,8 @@ const { remove, deletionStatus, mapProvider } = vi.hoisted(() => ({
   deletionStatus: { isDeleting: false },
   mapProvider: vi.fn(),
 }));
-vi.mock("../hooks/useRouteDeletion", () => ({
-  useRouteDeletion: () => ({ remove, isDeleting: deletionStatus.isDeleting }),
+vi.mock("../hooks/useRouteDelete", () => ({
+  useRouteDelete: () => ({ remove, isDeleting: deletionStatus.isDeleting }),
 }));
 vi.mock("~/frontend/features/googlemap/providers/GoogleMapProvider", () => ({
   GoogleMapProvider: mapProvider,

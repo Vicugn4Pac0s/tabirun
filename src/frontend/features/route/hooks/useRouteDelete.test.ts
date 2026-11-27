@@ -1,6 +1,6 @@
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useRouteDeletion } from "./useRouteDeletion";
+import { useRouteDelete } from "./useRouteDelete";
 
 const { deleteRoute, replace, refresh, success, error, status } = vi.hoisted(
   () => ({
@@ -31,10 +31,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("useRouteDeletion", () => {
+describe("useRouteDelete", () => {
   it("確認をキャンセルしたら削除しない", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(false);
-    const { result } = renderHook(() => useRouteDeletion(42));
+    const { result } = renderHook(() => useRouteDelete(42));
 
     await act(() => result.current.remove());
 
@@ -44,7 +44,7 @@ describe("useRouteDeletion", () => {
 
   it("削除成功後にホームへ戻る", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
-    const { result } = renderHook(() => useRouteDeletion(42));
+    const { result } = renderHook(() => useRouteDelete(42));
 
     await act(() => result.current.remove());
 
@@ -57,7 +57,7 @@ describe("useRouteDeletion", () => {
   it("削除失敗時は画面に留まり再試行できる", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     deleteRoute.mockRejectedValueOnce(new Error("failed"));
-    const { result } = renderHook(() => useRouteDeletion(42));
+    const { result } = renderHook(() => useRouteDelete(42));
 
     await act(() => result.current.remove());
     expect(error).toHaveBeenCalled();
@@ -77,7 +77,7 @@ describe("useRouteDeletion", () => {
           finish = resolve;
         }),
     );
-    const { result, rerender } = renderHook(() => useRouteDeletion(42));
+    const { result, rerender } = renderHook(() => useRouteDelete(42));
     let pending: Promise<void> | undefined;
 
     act(() => {

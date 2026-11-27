@@ -5,7 +5,7 @@ import { Button } from "~/frontend/components/ui/button";
 import type { RouterOutputs } from "~/trpc/react";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
-import { useRouteDeletion } from "../hooks/useRouteDeletion";
+import { useRouteDelete } from "../hooks/useRouteDelete";
 
 type RouteDetailProps = {
   route: Pick<RouterOutputs["route"]["getById"], "id" | "title" | "direction">;
@@ -13,7 +13,7 @@ type RouteDetailProps = {
 
 /** 保存済みルートの情報と、下見・編集・削除への操作を表示する。 */
 export function RouteDetail({ route }: RouteDetailProps) {
-  const { remove, isDeleting } = useRouteDeletion(route.id);
+  const { remove, isDeleting } = useRouteDelete(route.id);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const { direction } = route;
   return (

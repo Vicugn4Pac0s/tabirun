@@ -1,6 +1,6 @@
 import { cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useRouteEditDirection } from "./useRouteEditDirection";
+import { useRouteDirection } from "./useRouteDirection";
 
 const { directionsQuery } = vi.hoisted(() => ({ directionsQuery: vi.fn() }));
 vi.mock("~/frontend/features/googlemap/api/useGoogleMapDirectionQuery", () => ({
@@ -19,14 +19,12 @@ const savedDirection = {
   directionCalculatedAt: new Date("2026-11-11T00:00:00Z"),
   directionPointsHash: "saved-hash",
   path: [...points, { lat: 37, lng: 137 }],
-} satisfies NonNullable<
-  Parameters<typeof useRouteEditDirection>[0]["direction"]
->;
+} satisfies NonNullable<Parameters<typeof useRouteDirection>[0]["direction"]>;
 const route = {
   points,
   direction: savedDirection,
   directionErrorCode: null,
-} satisfies Parameters<typeof useRouteEditDirection>[0];
+} satisfies Parameters<typeof useRouteDirection>[0];
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -38,10 +36,10 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-describe("useRouteEditDirection", () => {
+describe("useRouteDirection", () => {
   it("同じ座標なら別の配列でも保存済み経路を使い、計算を無効にする", () => {
     const { result } = renderHook(() =>
-      useRouteEditDirection(
+      useRouteDirection(
         route,
         points.map((point) => ({ ...point })),
       ),
@@ -69,7 +67,7 @@ describe("useRouteEditDirection", () => {
       isLoading: false,
       error: null,
     });
-    const { result } = renderHook(() => useRouteEditDirection(route, changed));
+    const { result } = renderHook(() => useRouteDirection(route, changed));
     expect(directionsQuery).toHaveBeenLastCalledWith(changed, {
       enabled: true,
     });
@@ -84,7 +82,7 @@ describe("useRouteEditDirection", () => {
       error: null,
     });
     const { result } = renderHook(() =>
-      useRouteEditDirection(route, [...points].reverse()),
+      useRouteDirection(route, [...points].reverse()),
     );
     expect(result.current.isLoading).toBe(true);
     expect(result.current.directions).toBeNull();
@@ -98,7 +96,7 @@ describe("useRouteEditDirection", () => {
       isLoading: false,
       error: { data: { code: "TOO_MANY_REQUESTS" } },
     });
-    const { result } = renderHook(() => useRouteEditDirection(route, changed));
+    const { result } = renderHook(() => useRouteDirection(route, changed));
     expect(result.current.polylinePath).toEqual(changed);
     expect(result.current.warningMessage).toContain("直線で結んで表示");
   });
@@ -110,7 +108,7 @@ describe("useRouteEditDirection", () => {
       error: { data: { code: "INTERNAL_SERVER_ERROR" } },
     });
     const { result, rerender } = renderHook(
-      ({ currentPoints }) => useRouteEditDirection(route, currentPoints),
+      ({ currentPoints }) => useRouteDirection(route, currentPoints),
       { initialProps: { currentPoints: [...points].reverse() } },
     );
     expect(result.current.polylinePath).toBeNull();
@@ -126,9 +124,7 @@ describe("useRouteEditDirection", () => {
   it.each([{ changed: [] }, { changed: points.slice(1) }])(
     "2地点未満では経路線を表示しない（%#）",
     ({ changed }) => {
-      const { result } = renderHook(() =>
-        useRouteEditDirection(route, changed),
-      );
+      const { result } = renderHook(() => useRouteDirection(route, changed));
       expect(result.current.polylinePath).toBeNull();
       expect(result.current.directions).toBeNull();
     },

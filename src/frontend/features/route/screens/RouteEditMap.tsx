@@ -7,7 +7,7 @@ import { DropdownMenuItem } from "~/frontend/components/ui/dropdown-menu";
 import { getRouteMenuLabel } from "../lib/getRouteMenuLabel";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
-import { useRouteEditDirection } from "../hooks/useRouteEditDirection";
+import { useRouteDirection } from "../hooks/useRouteDirection";
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
@@ -30,7 +30,7 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
   const { pointsForm, isUpdating, save } = useRouteEditMapForm(route);
   const { points, togglePoint, confirmDiscard } = pointsForm;
   const { polylinePath, directions, isLoading, warningMessage } =
-    useRouteEditDirection(route, points);
+    useRouteDirection(route, points);
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const [panelOpen, setPanelOpen] = useState(false);
   return (
