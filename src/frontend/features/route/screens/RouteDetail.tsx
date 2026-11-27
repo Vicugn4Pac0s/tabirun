@@ -17,62 +17,84 @@ export function RouteDetail({ route }: RouteDetailProps) {
   const { pace, setPace, weightKg } = useRunEstimateInputs();
   const { direction } = route;
   return (
-    <section className="mx-auto max-w-2xl space-y-6 px-4 py-8 md:px-6">
-      <Link href="/" className="mb-5 inline-block font-medium underline">
+    <section className="space-y-8">
+      <Link href="/" className="inline-block font-medium underline">
         ホームへ戻る
       </Link>
-      <p className="text-sm text-muted-foreground">保存済みルート</p>
-      <h1 className="mb-4 mt-2 break-words text-xl font-bold">{route.title}</h1>
-      <div className="mb-4 flex flex-wrap gap-2">
-        <Link
-          href={`/routes/${route.id}/edit`}
-          className="inline-block rounded-md border px-3 py-2 text-sm font-medium hover:bg-accent"
-          aria-disabled={isDeleting}
-          onClick={(event) => {
-            if (isDeleting) event.preventDefault();
-          }}
-        >
-          地図を編集
-        </Link>
-        <Link
-          href={`/routes/${route.id}/details`}
-          className="inline-block rounded-md border px-3 py-2 text-sm font-medium hover:bg-accent"
-          aria-disabled={isDeleting}
-          onClick={(event) => {
-            if (isDeleting) event.preventDefault();
-          }}
-        >
-          詳細を編集
-        </Link>
-        <Button
-          type="button"
-          variant="destructive"
-          disabled={isDeleting}
-          onClick={() => {
-            void remove();
-          }}
-        >
-          {isDeleting ? "削除中..." : "削除する"}
-        </Button>
+      <header className="space-y-2 border-b pb-6">
+        <p className="text-sm text-muted-foreground">保存済みルート</p>
+        <h1 className="break-words text-xl font-bold">{route.title}</h1>
+      </header>
+      <div className="grid min-w-0 gap-8 md:grid-cols-[minmax(0,1fr)_16rem] md:gap-12">
+        <div className="min-w-0">
+          <RunMetricsPanel
+            distanceMeters={direction?.distanceMeters}
+            isLoading={false}
+            pace={pace}
+            onPaceChange={setPace}
+            weightKg={weightKg}
+          />
+        </div>
+        <nav aria-label="ルート操作" className="flex min-w-0 flex-col gap-3">
+          <Button
+            asChild
+            className="h-12 rounded-lg aria-disabled:cursor-not-allowed aria-disabled:opacity-40"
+          >
+            <Link
+              href={`/routes/${route.id}/preview`}
+              aria-disabled={isDeleting}
+              onClick={(event) => {
+                if (isDeleting) event.preventDefault();
+              }}
+            >
+              Street Viewで道を見る
+            </Link>
+          </Button>
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              asChild
+              variant="outline"
+              className="h-12 rounded-lg shadow-none aria-disabled:cursor-not-allowed aria-disabled:opacity-40"
+            >
+              <Link
+                href={`/routes/${route.id}/edit`}
+                aria-disabled={isDeleting}
+                onClick={(event) => {
+                  if (isDeleting) event.preventDefault();
+                }}
+              >
+                地図を編集
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="h-12 rounded-lg shadow-none aria-disabled:cursor-not-allowed aria-disabled:opacity-40"
+            >
+              <Link
+                href={`/routes/${route.id}/details`}
+                aria-disabled={isDeleting}
+                onClick={(event) => {
+                  if (isDeleting) event.preventDefault();
+                }}
+              >
+                詳細を編集
+              </Link>
+            </Button>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-10 self-center rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
+            disabled={isDeleting}
+            onClick={() => {
+              void remove();
+            }}
+          >
+            {isDeleting ? "削除中..." : "削除する"}
+          </Button>
+        </nav>
       </div>
-      <Button asChild>
-        <Link
-          href={`/routes/${route.id}/preview`}
-          aria-disabled={isDeleting}
-          onClick={(event) => {
-            if (isDeleting) event.preventDefault();
-          }}
-        >
-          Street Viewで道を見る
-        </Link>
-      </Button>
-      <RunMetricsPanel
-        distanceMeters={direction?.distanceMeters}
-        isLoading={false}
-        pace={pace}
-        onPaceChange={setPace}
-        weightKg={weightKg}
-      />
     </section>
   );
 }

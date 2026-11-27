@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { routeIdParamSchema } from "~/shared/schemas";
 
 import { RouteDetail } from "~/frontend/features/route/screens/RouteDetail";
+import { PageContainer } from "~/frontend/components/app-ui/PageContainer";
 import { ProtectedPageFallback } from "~/app/_components/ProtectedPageFallback";
 import { getProtectedPageState } from "~/server/auth/getProtectedPageState";
 import { api } from "~/trpc/server";
@@ -35,7 +36,9 @@ export default async function RouteDetailPage({
   return (
     <SessionProvider session={state.session}>
       <main>
-        <RouteDetail key={route.id} route={route} />
+        <PageContainer className="max-w-6xl">
+          <RouteDetail key={route.id} route={route} />
+        </PageContainer>
       </main>
     </SessionProvider>
   );
