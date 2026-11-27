@@ -9,7 +9,7 @@ import { useRoutePointsForm } from "./useRoutePointsForm";
  * 既存ルートの編集状態と二重送信を防ぐ保存操作を返す。
  * 更新結果をtoastで通知し、下書きは詳細入力、完了済みは閲覧へ移動して表示を更新する。
  */
-export function useRouteEditMap(
+export function useRouteEditMapForm(
   route: Pick<RouterOutputs["route"]["getById"], "id" | "points" | "status">,
 ) {
   const router = useRouter();

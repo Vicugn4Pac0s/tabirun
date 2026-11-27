@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { RouteUpdateDetailsInput } from "~/shared/schemas";
 import { RouteDetailEdit } from "./RouteDetailEdit";
 
-vi.mock("../hooks/useRouteDetailEdit", () => ({
-  useRouteDetailEdit: (route: RouteUpdateDetailsInput) => ({
+vi.mock("../hooks/useRouteDetailEditForm", () => ({
+  useRouteDetailEditForm: (route: RouteUpdateDetailsInput) => ({
     form: useForm<RouteUpdateDetailsInput>({ defaultValues: route }),
     save: vi.fn(),
     editMap: vi.fn(),

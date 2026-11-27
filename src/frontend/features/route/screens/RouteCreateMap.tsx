@@ -12,7 +12,7 @@ import { useRoutePolylinePath } from "~/frontend/features/googlemap/hooks/useRou
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
-import { useRouteCreateMap } from "../hooks/useRouteCreateMap";
+import { useRouteCreateMapForm } from "../hooks/useRouteCreateMapForm";
 import { RouteMapLayout } from "../components/RouteMapLayout";
 import { Button } from "~/frontend/components/ui/button";
 import { RouteMap } from "../components/RouteMap";
@@ -22,7 +22,7 @@ import RouteMenuButton from "../components/RouteMenuButton";
 type RouteCreateMapProps = { defaultCenter: google.maps.LatLngLiteral };
 
 function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
-  const { pointsForm, isCreating, save } = useRouteCreateMap();
+  const { pointsForm, isCreating, save } = useRouteCreateMapForm();
   const { points, togglePoint, confirmDiscard } = pointsForm;
   const { polylinePath, directions, isLoading, error } = useRoutePolylinePath(
     points,

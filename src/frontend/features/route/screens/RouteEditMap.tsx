@@ -11,7 +11,7 @@ import { useRouteEditDirection } from "../hooks/useRouteEditDirection";
 
 import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
 import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
-import { useRouteEditMap } from "../hooks/useRouteEditMap";
+import { useRouteEditMapForm } from "../hooks/useRouteEditMapForm";
 import type { RouterOutputs } from "~/trpc/react";
 import { RouteMapLayout } from "../components/RouteMapLayout";
 import { Button } from "~/frontend/components/ui/button";
@@ -27,7 +27,7 @@ type RouteEditMapProps = {
 };
 
 function RouteEditMapContent({ route }: RouteEditMapProps) {
-  const { pointsForm, isUpdating, save } = useRouteEditMap(route);
+  const { pointsForm, isUpdating, save } = useRouteEditMapForm(route);
   const { points, togglePoint, confirmDiscard } = pointsForm;
   const { polylinePath, directions, isLoading, warningMessage } =
     useRouteEditDirection(route, points);

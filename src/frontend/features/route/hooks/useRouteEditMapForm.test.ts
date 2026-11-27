@@ -1,6 +1,6 @@
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useRouteEditMap } from "./useRouteEditMap";
+import { useRouteEditMapForm } from "./useRouteEditMapForm";
 const { updatePoints, push, refresh } = vi.hoisted(() => ({
   updatePoints: vi.fn(),
   push: vi.fn(),
@@ -18,7 +18,7 @@ const route = {
     { lat: 35, lng: 135 },
     { lat: 36, lng: 136 },
   ],
-} satisfies Parameters<typeof useRouteEditMap>[0];
+} satisfies Parameters<typeof useRouteEditMapForm>[0];
 const extra = { lat: 37, lng: 137 };
 beforeEach(() => {
   vi.resetAllMocks();
@@ -27,12 +27,12 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
 });
-describe("useRouteEditMap", () => {
+describe("useRouteEditMapForm", () => {
   it.each(["draft", "completed"] as const)(
     "%sの地点だけを更新し、状態に応じた画面へ戻る",
     async (status) => {
       const { result } = renderHook(() =>
-        useRouteEditMap({ ...route, status }),
+        useRouteEditMapForm({ ...route, status }),
       );
       act(() => result.current.pointsForm.togglePoint(extra));
       await act(() => result.current.save());
@@ -48,7 +48,7 @@ describe("useRouteEditMap", () => {
     },
   );
   it("未変更や2地点未満では送信しない", async () => {
-    const { result } = renderHook(() => useRouteEditMap(route));
+    const { result } = renderHook(() => useRouteEditMapForm(route));
     await act(() => result.current.save());
     act(() => result.current.pointsForm.togglePoint(route.points[0] ?? extra));
     await act(() => result.current.save());
@@ -56,7 +56,7 @@ describe("useRouteEditMap", () => {
   });
   it("保存失敗時は地点を保持して再試行する", async () => {
     updatePoints.mockRejectedValueOnce(new Error("failed"));
-    const { result } = renderHook(() => useRouteEditMap(route));
+    const { result } = renderHook(() => useRouteEditMapForm(route));
     act(() => result.current.pointsForm.togglePoint(extra));
     await act(() => result.current.save());
     expect(result.current.pointsForm.points).toEqual([...route.points, extra]);
@@ -74,7 +74,7 @@ describe("useRouteEditMap", () => {
           finish = resolve;
         }),
     );
-    const { result } = renderHook(() => useRouteEditMap(route));
+    const { result } = renderHook(() => useRouteEditMapForm(route));
     act(() => result.current.pointsForm.togglePoint(extra));
     let pending: Promise<void> | undefined;
     act(() => {
@@ -93,7 +93,7 @@ describe("useRouteEditMap", () => {
   it("再描画で地点を上書きせず、リセットと離脱確認を行う", () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
     const { result, rerender } = renderHook(
-      ({ initial }) => useRouteEditMap(initial),
+      ({ initial }) => useRouteEditMapForm(initial),
       { initialProps: { initial: route } },
     );
     act(() => result.current.pointsForm.togglePoint(extra));

@@ -1,7 +1,7 @@
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
-import { useRouteDetailEdit } from "./useRouteDetailEdit";
+import { useRouteDetailEditForm } from "./useRouteDetailEditForm";
 
 const { updateDetails, completeRoute, push, refresh } = vi.hoisted(() => ({
   updateDetails: vi.fn(),
@@ -21,7 +21,7 @@ const draft = {
   id: 1,
   title: "2026/11/24のルート",
   status: "draft",
-} satisfies Parameters<typeof useRouteDetailEdit>[0];
+} satisfies Parameters<typeof useRouteDetailEditForm>[0];
 beforeEach(() => {
   vi.resetAllMocks();
 });
@@ -30,9 +30,9 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("useRouteDetailEdit", () => {
+describe("useRouteDetailEditForm", () => {
   it("仮名のまま下書きを完了できる", async () => {
-    const { result } = renderHook(() => useRouteDetailEdit(draft));
+    const { result } = renderHook(() => useRouteDetailEditForm(draft));
     await waitFor(() => expect(result.current.canSave).toBe(true));
     await act(() => result.current.save());
     expect(updateDetails).not.toHaveBeenCalled();
@@ -42,7 +42,7 @@ describe("useRouteDetailEdit", () => {
   });
 
   it("名前を保存してから下書きを完了する", async () => {
-    const { result } = renderHook(() => useRouteDetailEdit(draft));
+    const { result } = renderHook(() => useRouteDetailEditForm(draft));
     act(() =>
       result.current.form.setValue("title", " 夜のルート ", {
         shouldDirty: true,
@@ -58,7 +58,7 @@ describe("useRouteDetailEdit", () => {
 
   it("完了済みなら名前だけを更新する", async () => {
     const { result } = renderHook(() =>
-      useRouteDetailEdit({ ...draft, status: "completed" }),
+      useRouteDetailEditForm({ ...draft, status: "completed" }),
     );
     expect(result.current.canSave).toBe(false);
     act(() =>
@@ -73,7 +73,7 @@ describe("useRouteDetailEdit", () => {
   });
 
   it("地図へ戻る前に名前を保存し、下書きは完了しない", async () => {
-    const { result } = renderHook(() => useRouteDetailEdit(draft));
+    const { result } = renderHook(() => useRouteDetailEditForm(draft));
     act(() =>
       result.current.form.setValue("title", "保持する名前", {
         shouldDirty: true,
@@ -92,7 +92,7 @@ describe("useRouteDetailEdit", () => {
     "名前保存失敗時は%sで遷移せず入力を保持する",
     async (operation) => {
       updateDetails.mockRejectedValue(new Error("failed"));
-      const { result } = renderHook(() => useRouteDetailEdit(draft));
+      const { result } = renderHook(() => useRouteDetailEditForm(draft));
       act(() =>
         result.current.form.setValue("title", "保持する名前", {
           shouldDirty: true,
@@ -109,7 +109,7 @@ describe("useRouteDetailEdit", () => {
 
   it("完了失敗後は保存済みの名前を保持して完了だけ再試行する", async () => {
     completeRoute.mockRejectedValueOnce(new Error("failed"));
-    const { result } = renderHook(() => useRouteDetailEdit(draft));
+    const { result } = renderHook(() => useRouteDetailEditForm(draft));
     act(() =>
       result.current.form.setValue("title", "保存済みの名前", {
         shouldDirty: true,
@@ -127,7 +127,7 @@ describe("useRouteDetailEdit", () => {
   it.each(["", "   ", "a".repeat(257)])(
     "不正な名前では保存も地図遷移もしない",
     async (title) => {
-      const { result } = renderHook(() => useRouteDetailEdit(draft));
+      const { result } = renderHook(() => useRouteDetailEditForm(draft));
       act(() =>
         result.current.form.setValue("title", title, { shouldDirty: true }),
       );
@@ -147,7 +147,7 @@ describe("useRouteDetailEdit", () => {
           finish = resolve;
         }),
     );
-    const { result } = renderHook(() => useRouteDetailEdit(draft));
+    const { result } = renderHook(() => useRouteDetailEditForm(draft));
     let pending: Promise<void> | undefined;
     act(() => {
       pending = result.current.save();
@@ -165,7 +165,7 @@ describe("useRouteDetailEdit", () => {
 
   it("名前変更中は離脱を警告し、保存後は解除する", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
-    const { result } = renderHook(() => useRouteDetailEdit(draft));
+    const { result } = renderHook(() => useRouteDetailEditForm(draft));
     act(() =>
       result.current.form.setValue("title", "変更", { shouldDirty: true }),
     );
