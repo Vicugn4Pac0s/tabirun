@@ -33,8 +33,49 @@ export function RunMetricsPanel({
     distanceMeters != null ? metersToKilometers(distanceMeters) : 0;
 
   return (
-    <section aria-label="ランニングの試算" className="mb-6">
-      <div className="mb-6">
+    <section aria-label="ランニングの試算" className="space-y-6">
+      {distanceKm > 0 ? (
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-6">
+          <div className="col-span-2 space-y-2">
+            <dt className="text-xs text-muted-foreground">距離</dt>
+            <dd>
+              <StatValue
+                value={distanceKm}
+                unit="km"
+                className="text-[2rem] italic leading-8 text-primary"
+              />
+            </dd>
+          </div>
+          <div className="min-w-0 space-y-2">
+            <dt className="text-xs text-muted-foreground">予想時間</dt>
+            <dd>
+              <StatValue
+                value={calcTimeFromDistanceAndPace(distanceKm, pace)}
+                className="text-2xl leading-8"
+              />
+            </dd>
+          </div>
+          <div className="min-w-0 space-y-2">
+            <dt className="text-xs text-muted-foreground">消費カロリー</dt>
+            <dd>
+              <StatValue
+                value={calcCaloriesFromRun(
+                  weightKg ?? DEFAULT_WEIGHT_KG,
+                  distanceKm,
+                  pace,
+                )}
+                unit="kcal"
+                className="text-2xl leading-8"
+              />
+            </dd>
+          </div>
+        </dl>
+      ) : (
+        <p role="status" className="text-sm text-muted-foreground">
+          {isLoading ? "距離を計測中..." : "距離を表示できません。"}
+        </p>
+      )}
+      <div className="border-t pt-6">
         <FormField label="ペース">
           {(fieldProps) => (
             <PaceSelect
@@ -46,47 +87,6 @@ export function RunMetricsPanel({
           )}
         </FormField>
       </div>
-      {distanceKm > 0 ? (
-        <dl className="grid grid-cols-2 gap-2 text-center">
-          <div>
-            <dt className="text-sm text-gray-500">距離</dt>
-            <dd>
-              <StatValue
-                value={distanceKm}
-                unit="KM"
-                className="text-2xl text-base-gray"
-              />
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-gray-500">予想時間</dt>
-            <dd>
-              <StatValue
-                value={calcTimeFromDistanceAndPace(distanceKm, pace)}
-                className="text-2xl text-base-gray"
-              />
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-gray-500">消費カロリー</dt>
-            <dd>
-              <StatValue
-                value={calcCaloriesFromRun(
-                  weightKg ?? DEFAULT_WEIGHT_KG,
-                  distanceKm,
-                  pace,
-                )}
-                unit="KCAL"
-                className="text-2xl text-base-gray"
-              />
-            </dd>
-          </div>
-        </dl>
-      ) : (
-        <p role="status" className="text-sm text-gray-500">
-          {isLoading ? "距離を計測中..." : "距離を表示できません。"}
-        </p>
-      )}
     </section>
   );
 }
