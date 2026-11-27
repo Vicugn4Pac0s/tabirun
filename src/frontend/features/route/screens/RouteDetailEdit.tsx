@@ -67,7 +67,6 @@ export function RouteDetailEdit({ route }: RouteDetailEditProps) {
                 {...fieldProps}
                 {...form.register("title")}
                 disabled={isSaving}
-                className="h-12 rounded-lg bg-card px-4 py-3 shadow-none aria-[invalid=true]:border-destructive"
               />
             )}
           </FormField>

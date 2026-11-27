@@ -5,7 +5,7 @@ import type { UserProfileUpdateInput } from "~/shared/schemas";
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import { Input } from "~/frontend/components/ui/input";
-import { Button } from "~/frontend/components/ui/button";
+import { PrimaryButton } from "~/frontend/components/app-ui/PrimaryButton";
 import { FormField } from "~/frontend/components/app-ui/FormField";
 import { genderOptions } from "~/frontend/features/user/constants";
 
@@ -125,9 +125,13 @@ export function UserProfileEditForm({
         </p>
       )}
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <PrimaryButton
+        type="submit"
+        className="w-full text-sm font-medium"
+        disabled={isSubmitting}
+      >
         {isSubmitting ? "更新中..." : "保存する"}
-      </Button>
+      </PrimaryButton>
     </form>
   );
 }

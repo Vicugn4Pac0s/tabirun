@@ -5,7 +5,7 @@ import type { UserInitialProfileInput } from "~/shared/schemas";
 import { Selectbox } from "~/frontend/components/app-ui/Selectbox";
 import PaceSelect from "~/frontend/features/pace/components/PaceSelect";
 import { Input } from "~/frontend/components/ui/input";
-import { Button } from "~/frontend/components/ui/button";
+import { PrimaryButton } from "~/frontend/components/app-ui/PrimaryButton";
 import { FormField } from "~/frontend/components/app-ui/FormField";
 import { genderOptions } from "~/frontend/features/user/constants";
 
@@ -116,9 +116,13 @@ export function InitialProfileForm({
         </FormField>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <PrimaryButton
+        type="submit"
+        className="w-full text-sm font-medium"
+        disabled={isSubmitting}
+      >
         {isSubmitting ? "保存中..." : "初期設定を完了"}
-      </Button>
+      </PrimaryButton>
     </form>
   );
 }
