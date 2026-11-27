@@ -11,7 +11,7 @@ export function RoutePointMarker({
   position,
   label,
   title,
-  color = "rgba(0, 0, 0, 0.6)",
+  color = "var(--map-marker-via)",
   onClick,
 }: RoutePointMarkerProps) {
   return (
@@ -22,7 +22,7 @@ export function RoutePointMarker({
       title={title}
     >
       <div
-        className="relative top-3.5 w-7 rounded-full text-center text-sm font-bold leading-7 text-white"
+        className="relative top-4 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-sm font-bold text-white shadow-sm"
         style={{ backgroundColor: color }}
       >
         {label}

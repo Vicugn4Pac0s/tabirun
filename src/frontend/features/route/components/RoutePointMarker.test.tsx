@@ -52,9 +52,9 @@ describe("RoutePointMarker", () => {
     );
     const marker = screen.getByRole("img", { name: title });
     expect(marker).toHaveTextContent(label);
-    expect(marker.firstElementChild).toHaveStyle({
-      backgroundColor: "rgba(0, 0, 0, 0.6)",
-    });
+    expect(marker.firstElementChild?.getAttribute("style")).toContain(
+      "background-color: var(--map-marker-via)",
+    );
     expect(renderMarker.mock.lastCall?.[0]).toMatchObject({ position, title });
   });
 });

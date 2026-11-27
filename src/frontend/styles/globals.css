@@ -30,6 +30,11 @@
     --radius: 0.5rem;
     --base-gray-light: 45 20% 92%;
     --base-gray: 214 8% 35%;
+    /* 地図の背景に合わせ、ライト・ダーク共通の描画色を使う。 */
+    --map-marker-via: #c24d35;
+    --map-marker-start: #2d6a4f;
+    --map-marker-goal: #b91c1c;
+    --map-marker-sg: #1b4d7e;
   }
   .dark {
     --background: 200 8% 8%;

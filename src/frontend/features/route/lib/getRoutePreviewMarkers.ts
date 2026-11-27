@@ -18,7 +18,7 @@ export function getRoutePreviewMarkers(
         position: start,
         label: "S/G",
         title: "スタート／ゴール",
-        color: "#1d4ed8",
+        color: "var(--map-marker-sg)",
       },
     ];
   }
@@ -29,14 +29,14 @@ export function getRoutePreviewMarkers(
       position: start,
       label: "S",
       title: "スタート",
-      color: "#15803d",
+      color: "var(--map-marker-start)",
     },
     {
       id: "goal",
       position: goal,
       label: "G",
       title: "ゴール",
-      color: "#b91c1c",
+      color: "var(--map-marker-goal)",
     },
   ];
 }

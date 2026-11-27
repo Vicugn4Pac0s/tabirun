@@ -161,7 +161,7 @@ function RouteMapView({
             <Polyline
               map={map}
               path={path}
-              options={{ strokeColor: "black", strokeWeight: 3 }}
+              options={{ strokeColor: "#F97360", strokeWeight: 4 }}
             />
           )}
           {!isLoading &&
