@@ -100,6 +100,24 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("RouteMapView", () => {
+  it("Street Viewなしの地図は親の高さに収まり、経路全体を表示する", () => {
+    render(
+      <GoogleMapProvider>
+        <RouteMapView
+          initialCenter={start}
+          path={savedPath}
+          markers={markers}
+          fitToRoute
+        />
+      </GoogleMapProvider>,
+    );
+    const mapRegion = screen.getByRole("region", { name: "ルートの地図" });
+    expect(mapRegion).toHaveClass("h-full");
+    expect(mapRegion).not.toHaveClass("h-screen");
+    expect(renderStreetView).not.toHaveBeenCalled();
+    expect(focusMapOnRoute).toHaveBeenCalledWith(savedPath);
+  });
+
   it("取得処理や認証Providerなしで、渡された経路とマーカーだけを表示する", () => {
     render(
       <GoogleMapProvider>
@@ -121,6 +139,9 @@ describe("RouteMapView", () => {
       "G",
     );
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "ルートの地図" })).toHaveClass(
+      "h-full",
+    );
   });
 
   it("渡されたUIは地図領域にだけ重ね、Street Viewには置かない", () => {

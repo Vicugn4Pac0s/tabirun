@@ -6,9 +6,16 @@ import type { RouterOutputs } from "~/trpc/react";
 import { RunMetricsPanel } from "~/frontend/features/run-metrics/components/RunMetricsPanel";
 import { useRunEstimateInputs } from "~/frontend/features/run-metrics/hooks/useRunEstimateInputs";
 import { useRouteDelete } from "../hooks/useRouteDelete";
+import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/GoogleMapProvider";
+import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
+import RouteMapView from "../components/RouteMapView";
+import { getRoutePreviewMarkers } from "../lib/getRoutePreviewMarkers";
 
 type RouteDetailProps = {
-  route: Pick<RouterOutputs["route"]["getById"], "id" | "title" | "direction">;
+  route: Pick<
+    RouterOutputs["route"]["getById"],
+    "id" | "title" | "direction" | "points"
+  >;
 };
 
 /** 保存済みルートの情報と、下見・編集・削除への操作を表示する。 */
@@ -25,6 +32,19 @@ export function RouteDetail({ route }: RouteDetailProps) {
         <p className="text-sm text-muted-foreground">保存済みルート</p>
         <h1 className="break-words text-xl font-bold">{route.title}</h1>
       </header>
+      <div className="h-64 overflow-hidden rounded-lg md:h-96">
+        <GoogleMapProvider>
+          <RouteMapView
+            initialCenter={route.points[0] ?? GOOGLE_MAP_DEFAULT_CENTER}
+            path={direction?.path ?? null}
+            markers={getRoutePreviewMarkers(
+              route.points[0],
+              route.points[route.points.length - 1],
+            )}
+            fitToRoute
+          />
+        </GoogleMapProvider>
+      </div>
       <div className="grid min-w-0 gap-8 md:grid-cols-[minmax(0,1fr)_16rem] md:gap-12">
         <div className="min-w-0">
           <RunMetricsPanel

@@ -27,7 +27,7 @@ type RouteMapViewProps = {
 };
 
 /**
- * GoogleMapProvider内で経路・マーカーを描画し、必要に応じてStreet Viewと連動する。
+ * GoogleMapProvider内で親の高さに収めて経路・マーカーを描画し、必要に応じてStreet Viewと連動する。
  * 全体表示は読み込み後の初回だけ行う。childrenは地図領域内に重ね、Street View側には置かない。
  */
 function RouteMapView({
@@ -76,13 +76,13 @@ function RouteMapView({
   return (
     <div
       data-street-view={showStreetView ? "visible" : "hidden"}
-      className={`peer relative grid min-w-0 flex-1 grid-cols-1 ${showStreetView ? "min-[1201px]:grid-cols-2" : ""}`}
+      className={`peer relative grid h-full min-h-0 min-w-0 flex-1 grid-cols-1 ${showStreetView ? "grid-rows-2 min-[1201px]:grid-cols-2 min-[1201px]:grid-rows-1" : "grid-rows-1"}`}
     >
       {showStreetView && (
         <div
           role="region"
           aria-label="Street Viewで下見"
-          className="relative h-[50vh] min-[1201px]:h-screen"
+          className="relative h-full min-h-0 min-w-0"
         >
           <StreetView
             map={map}
@@ -125,7 +125,7 @@ function RouteMapView({
       <div
         role="region"
         aria-label="ルートの地図"
-        className={`relative ${showStreetView ? "h-[50vh] min-[1201px]:order-first min-[1201px]:h-screen" : "h-screen"}`}
+        className={`relative h-full min-h-0 min-w-0 ${showStreetView ? "min-[1201px]:order-first" : ""}`}
       >
         <GoogleMapView
           className="h-full"

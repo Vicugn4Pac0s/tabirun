@@ -23,7 +23,7 @@ export function RouteMapLayout({
 }: RouteMapLayoutProps) {
   const content = (
     <div className="relative min-h-screen">
-      <div className="relative flex min-w-0">{children}</div>
+      <div className="relative flex h-screen min-w-0">{children}</div>
       <div
         onKeyDown={(event) => {
           // パネルのEnter操作を、地図の地点追加・削除ショートカットへ流さない。
