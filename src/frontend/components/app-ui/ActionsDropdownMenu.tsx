@@ -2,7 +2,6 @@
 
 import type { ComponentProps, ReactNode, Ref } from "react";
 import { MoreHorizontal } from "lucide-react";
-import { Button } from "~/frontend/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,16 +32,15 @@ export function ActionsDropdownMenu({
   return (
     <DropdownMenu modal={modal}>
       <DropdownMenuTrigger asChild>
-        <Button
+        <button
           ref={ref}
           type="button"
-          variant="outline"
-          size="icon"
+          className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-background text-foreground shadow-md transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={ariaLabel}
           disabled={disabled}
         >
           <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onCloseAutoFocus={onCloseAutoFocus}>
         {children}

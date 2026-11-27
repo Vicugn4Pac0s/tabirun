@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { RouteDraftDialog } from "../components/RouteDraftDialog";
+import { PrimaryButton } from "~/frontend/components/app-ui/PrimaryButton";
 import { ActionsDropdownMenu } from "~/frontend/components/app-ui/ActionsDropdownMenu";
 import { GuardedLink } from "~/frontend/providers/GuardedLink";
 import { DropdownMenuItem } from "~/frontend/components/ui/dropdown-menu";
@@ -14,7 +15,6 @@ import { GoogleMapProvider } from "~/frontend/features/googlemap/providers/Googl
 import { getRouteCalculationWarningMessage } from "../lib/getRouteCalculationWarningMessage";
 import { useRouteCreateMapForm } from "../hooks/useRouteCreateMapForm";
 import { RouteMapLayout } from "../components/RouteMapLayout";
-import { Button } from "~/frontend/components/ui/button";
 import { RouteMap } from "../components/RouteMap";
 
 import RouteMenuButton from "../components/RouteMenuButton";
@@ -77,15 +77,15 @@ function RouteCreateMapContent({ defaultCenter }: RouteCreateMapProps) {
         }
         topRight={
           <>
-            <Button
-              type="button"
+            <PrimaryButton
+              aria-label={isSaving ? "保存中..." : "詳細入力へ進む"}
               onClick={() => {
                 void save();
               }}
               disabled={!pointsForm.canSave || isSaving}
             >
-              {isSaving ? "保存中..." : "詳細入力へ進む"}
-            </Button>
+              {isSaving ? "保存中..." : "次へ"}
+            </PrimaryButton>
             {/* 下書きダイアログへフォーカスを渡せるよう、メニュー内に閉じ込めない。 */}
             <ActionsDropdownMenu
               aria-label="ルート操作を開く"

@@ -13,6 +13,13 @@ const meta = {
   parameters: { layout: "centered" },
   args: { points, currentPoint: points[0]!, onMove: fn(), onToggle: fn() },
   tags: ["autodocs"],
+  decorators: [
+    (Story) => (
+      <div className="w-80 max-w-full">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof RouteNavigation>;
 export default meta;
 type Story = StoryObj<typeof meta>;

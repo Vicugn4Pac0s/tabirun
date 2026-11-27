@@ -38,7 +38,7 @@ export function RouteNavigation({
   useEnterKey(onToggle, { enabled: !toggleDisabled });
 
   return (
-    <div className="flex h-16 w-max items-center rounded-lg border border-border bg-background px-2 md:h-20">
+    <div className="grid h-16 w-full max-w-80 grid-cols-[1fr_auto_1fr] grid-rows-1 items-center rounded-lg bg-background px-2 shadow-lg">
       <div className="grid min-w-0 grid-cols-2">
         <SubActionButton
           type="first"

@@ -11,7 +11,7 @@ const meta = {
   args: { onClick: fn() },
   decorators: [
     (Story) => (
-      <div className="relative h-80 w-80 rounded-lg border bg-gray-50">
+      <div className="relative h-80 w-80 rounded-lg border bg-muted p-4">
         <Story />
       </div>
     ),

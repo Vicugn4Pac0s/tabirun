@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PrimaryButton } from "~/frontend/components/app-ui/PrimaryButton";
 import { ActionsDropdownMenu } from "~/frontend/components/app-ui/ActionsDropdownMenu";
 import { GuardedLink } from "~/frontend/providers/GuardedLink";
 import { DropdownMenuItem } from "~/frontend/components/ui/dropdown-menu";
@@ -14,7 +15,6 @@ import { GOOGLE_MAP_DEFAULT_CENTER } from "~/frontend/config";
 import { useRouteEditMapForm } from "../hooks/useRouteEditMapForm";
 import type { RouterOutputs } from "~/trpc/react";
 import { RouteMapLayout } from "../components/RouteMapLayout";
-import { Button } from "~/frontend/components/ui/button";
 import { RouteMap } from "../components/RouteMap";
 
 import RouteMenuButton from "../components/RouteMenuButton";
@@ -70,15 +70,14 @@ function RouteEditMapContent({ route }: RouteEditMapProps) {
         }
         topRight={
           <>
-            <Button
-              type="button"
+            <PrimaryButton
               onClick={() => {
                 void save();
               }}
               disabled={!pointsForm.canSave || isSaving}
             >
               {isSaving ? "更新中..." : "更新する"}
-            </Button>
+            </PrimaryButton>
             <ActionsDropdownMenu
               aria-label="ルート操作を開く"
               disabled={isSaving}

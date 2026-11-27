@@ -5,6 +5,8 @@ import { fontFamily } from "tailwindcss/defaultTheme";
 export default {
   darkMode: ["class"],
   content: ["./src/**/*.tsx"],
+  // 実行時に付くdarkクラスのテーマ変数をビルド時に除去しない。
+  safelist: ["dark"],
   theme: {
     extend: {
       fontFamily: {

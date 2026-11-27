@@ -1,11 +1,13 @@
 "use client";
 
 import { PanelBottom, PanelRight } from "lucide-react";
-import { forwardRef } from "react";
+import { forwardRef, type ComponentPropsWithoutRef } from "react";
 import { cn } from "~/frontend/lib/utils";
-import { Button, type ButtonProps } from "~/frontend/components/ui/button";
 
-type RouteMenuButtonProps = Omit<ButtonProps, "children"> & {
+type RouteMenuButtonProps = Omit<
+  ComponentPropsWithoutRef<"button">,
+  "children"
+> & {
   label?: string;
 };
 
@@ -17,11 +19,11 @@ const RouteMenuButton = forwardRef<HTMLButtonElement, RouteMenuButtonProps>(
     const isDistanceLabel = typeof label === "string" && /\d/.test(label);
 
     return (
-      <Button
+      <button
         ref={ref}
-        variant="outline"
+        type="button"
         className={cn(
-          "h-12 gap-3 rounded-lg bg-background px-3 shadow-md",
+          "inline-flex h-12 items-center justify-center gap-3 whitespace-nowrap rounded-lg bg-background px-3 shadow-md transition-colors hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 disabled:cursor-not-allowed disabled:opacity-40",
           className,
         )}
         aria-label="メニューを開く"
@@ -32,18 +34,21 @@ const RouteMenuButton = forwardRef<HTMLButtonElement, RouteMenuButtonProps>(
             className={cn(
               "font-inter text-primary",
               isDistanceLabel
-                ? "text-2xl font-black italic"
-                : "text-sm font-bold",
+                ? "text-2xl font-black italic tabular-nums"
+                : "text-xs font-bold",
             )}
           >
             {label}
           </span>
         ) : null}
-        <span className="border-l pl-3 text-primary" aria-hidden="true">
+        <span
+          className="border-l border-border pl-3 text-primary"
+          aria-hidden="true"
+        >
           <PanelRight className="hidden h-5 w-5 md:block" />
           <PanelBottom className="h-5 w-5 md:hidden" />
         </span>
-      </Button>
+      </button>
     );
   },
 );

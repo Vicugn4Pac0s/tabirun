@@ -50,7 +50,7 @@ const SubActionButton = ({
     <motion.button
       type="button"
       className={cn(
-        "flex h-12 w-12 shrink-0 flex-col items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-transparent text-xs leading-none text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:enabled:bg-muted disabled:cursor-not-allowed disabled:opacity-40 md:w-14",
+        "flex h-12 w-full min-w-0 flex-col items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-transparent text-xs leading-none text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:enabled:bg-muted disabled:cursor-not-allowed disabled:opacity-40",
         className,
       )}
       disabled={disabled}

@@ -54,26 +54,30 @@ export function RouteMap({
       onSelectedPointChange={setSelectedPoint}
     >
       <div
-        className="pointer-events-none absolute inset-x-3 top-3 z-20 space-y-3"
+        className="pointer-events-none absolute inset-x-3 top-3 z-20 space-y-3 md:inset-x-6 md:top-6"
         onKeyDown={(event) => {
           // 上部UIのEnter操作を地点追加・削除へ流さない。
           if (event.key === "Enter") event.stopPropagation();
         }}
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex flex-col items-start gap-3">
+          <div className="flex flex-col items-start gap-2">
             {topLeft && <div className="pointer-events-auto">{topLeft}</div>}
             {editing && (
               <div
                 role="status"
                 aria-label="ルートの地点数"
-                className="rounded-md bg-background/95 px-3 py-2 text-sm text-foreground shadow"
+                className="px-1 text-xs leading-4 text-foreground"
               >
                 <p>
-                  地点 {editing.points.length} / {ROUTE_POINTS_MAX}
+                  地点{" "}
+                  <strong className="font-inter font-bold tabular-nums text-primary">
+                    {editing.points.length}
+                  </strong>{" "}
+                  / {ROUTE_POINTS_MAX}
                 </p>
                 {editing.points.length >= ROUTE_POINTS_MAX && (
-                  <p>1ルート{ROUTE_POINTS_MAX}地点までです</p>
+                  <p className="mt-2">1ルート{ROUTE_POINTS_MAX}地点までです</p>
                 )}
               </div>
             )}
@@ -91,7 +95,7 @@ export function RouteMap({
         )}
       </div>
       {editing && selectedPoint && (
-        <div className="absolute inset-x-0 bottom-3 z-10 flex justify-center">
+        <div className="absolute inset-x-3 bottom-4 z-10 flex justify-center md:inset-x-6 md:bottom-6">
           <RouteNavigation
             points={editing.points}
             currentPoint={selectedPoint}
